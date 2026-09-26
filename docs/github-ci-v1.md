@@ -20,7 +20,9 @@ Rust Clippy is intentionally **not** executed on the Linux job. The pinned `afte
 
 `.github/workflows/macos-source-gate.yml` is intentionally manual via **Actions → macOS source gate → Run workflow**.
 
-It runs the macOS/Metal source-level preflight, including mandatory Rust Clippy, and produces an unsigned-install-free `ElasticGrid.plugin` artifact plus reports.
+It runs the macOS source-level preflight, including mandatory Rust Clippy, Apple Metal shader compilation, Objective-C++ Metal backend/test compilation, and produces an unsigned-install-free `ElasticGrid.plugin` artifact plus reports.
+
+GitHub-hosted macOS ARM runners currently expose no `MTLDevice`. Therefore only the four **hardware execution** stages (Metal lifecycle, image parity, determinism and 4K/8K benchmark) switch to compile-only under the workflow-only `ELASTICGRID_METAL_COMPILE_ONLY=1` flag. The normal/local preflight never sets this flag, so a physical target Mac must still execute and pass all four stages.
 
 The first real hosted-Mac run exposed two Rust-host blockers that portable Linux validation could not see: the AE plugin trait requires a mutable `handle_command` receiver, and Rust 1.98 check-cfg requires the cfg names expanded by `after-effects 0.4.0` to be declared. Both are fixed in the validation branch and remain covered by the macOS gate.
 
