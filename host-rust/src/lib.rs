@@ -38,10 +38,6 @@ pub(crate) enum Params {
 #[derive(Default)]
 struct Plugin {}
 
-// These two style lints originate inside the pinned after-effects 0.4.0 macro
-// expansion, not in ElasticGrid source. Keep the exception scoped to this one
-// third-party macro invocation; all project code remains under -D warnings.
-#[allow(clippy::drop_non_drop, clippy::question_mark)]
 ae::define_effect!(Plugin, (), Params);
 
 #[derive(Clone, Debug, Serialize, PartialEq, PartialOrd)]
@@ -800,7 +796,6 @@ impl AdobePluginGlobal for Plugin {
                 out_data.set_return_msg("ElasticGrid FX v0.9\rfinal hardening build");
             }
             ae::Command::UserChangedParam { param_index } => {
-                let param_index = param_index;
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {
