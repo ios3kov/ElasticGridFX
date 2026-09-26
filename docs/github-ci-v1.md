@@ -6,6 +6,7 @@ Every push to `main` and every pull request runs:
 
 - GCC Release build + portable regression tests;
 - Clang Release build + portable regression tests;
+- shell syntax audit for all `.command` / `.sh` scripts;
 - portable C++ static analysis with Clang high warnings / analyzer / clang-tidy / cppcheck;
 - ASan + UBSan + leak detection;
 - GCC ThreadSanitizer for MFR and determinism.
@@ -31,3 +32,8 @@ The next Clippy pass found redundant casts/rebinding and an over-wide float-slid
 ## Release rule
 
 A green GitHub CI result means the portable/static/sanitizer checks passed. A release candidate still requires the documented target-Mac + After Effects runtime gate.
+
+
+### Gate hardening note
+
+The first hosted compile-only Metal run caught a malformed shell insertion before any plugin code was executed. The four Metal helper scripts were rebuilt with the compile-only branch after the linker command, and automatic `bash -n` coverage was added to normal CI so future shell syntax regressions fail immediately.
