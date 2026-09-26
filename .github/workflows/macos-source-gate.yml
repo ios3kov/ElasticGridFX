@@ -2,6 +2,8 @@ name: macOS source gate
 
 on:
   workflow_dispatch:
+  push:
+    branches: [chore/github-ci-v1]
 
 permissions:
   contents: read
