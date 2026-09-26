@@ -20,7 +20,9 @@ Rust Clippy is intentionally **not** executed on the Linux job. The pinned `afte
 
 `.github/workflows/macos-source-gate.yml` is intentionally manual via **Actions → macOS source gate → Run workflow**.
 
-It runs the macOS/Metal source-level preflight, including mandatory Rust Clippy, and produces an unsigned-install-free `ElasticGrid.plugin` artifact plus reports. This workflow does **not** replace the real After Effects runtime gate because GitHub-hosted runners do not have the target user's After Effects installation/project environment.
+It runs the macOS/Metal source-level preflight, including mandatory Rust Clippy, and produces an unsigned-install-free `ElasticGrid.plugin` artifact plus reports.
+
+The first real hosted-Mac run exposed two Rust-host blockers that portable Linux validation could not see: the AE plugin trait requires a mutable `handle_command` receiver, and Rust 1.98 check-cfg requires the cfg names expanded by `after-effects 0.4.0` to be declared. Both are fixed in the validation branch and remain covered by the macOS gate. This workflow does **not** replace the real After Effects runtime gate because GitHub-hosted runners do not have the target user's After Effects installation/project environment.
 
 ## Release rule
 
