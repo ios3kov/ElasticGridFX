@@ -29,10 +29,11 @@ The first real hosted-Mac run exposed two Rust-host blockers that portable Linux
 
 The next Clippy pass found redundant casts/rebinding and an over-wide float-slider helper in ElasticGrid code; those were corrected directly. The pinned `after-effects 0.4.0` macro itself emits `clippy::drop_non_drop` and `clippy::question_mark` on Rust 1.98. Item-macro attributes cannot suppress those expansion lints, so only those two known upstream style lints are allowed on the Clippy command line; every other warning remains `-D warnings`. This workflow does **not** replace the real After Effects runtime gate because GitHub-hosted runners do not have the target user's After Effects installation/project environment.
 
+The reproducible-build stage performs two fully clean, locked, offline Release builds using the same canonical `CARGO_TARGET_DIR`, deleting it completely between builds. This deliberately holds the build path constant so the gate measures deterministic rebuilding under identical settings rather than Cargo/rustc build-path variance. A mismatch prints SHA-256 values, first differing byte offsets, and Mach-O UUIDs for the dylib.
+
 ## Release rule
 
 A green GitHub CI result means the portable/static/sanitizer checks passed. A release candidate still requires the documented target-Mac + After Effects runtime gate.
-
 
 ### Gate hardening note
 
