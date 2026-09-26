@@ -22,7 +22,7 @@ jobs:
       matrix:
         compiler: [gcc, clang]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Select compiler
         shell: bash
         run: |
@@ -42,13 +42,13 @@ jobs:
         run: ctest --test-dir build --output-on-failure
 
   static-analysis:
-    name: Static analysis
+    name: Static analysis (portable C++)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install analyzers
         run: sudo apt-get update && sudo apt-get install -y clang clang-tidy cppcheck
-      - name: Run C++ analyzers and Rust Clippy
+      - name: Run portable C++ analyzers
         env:
           CXX: clang++
         run: tools/static_analysis.command
@@ -57,7 +57,7 @@ jobs:
     name: ASan + UBSan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure sanitizer build
         run: >
           cmake -S . -B build-san
@@ -80,7 +80,7 @@ jobs:
     name: ThreadSanitizer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Configure TSan build
         run: >
           cmake -S . -B build-tsan
