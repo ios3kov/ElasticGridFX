@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- GitHub-hosted macOS runner has no MTLDevice. Added a CI-only Metal compile mode: shader is compiled by Apple's `metal/metallib` tools and lifecycle/parity/determinism/benchmark binaries are built, while hardware execution remains mandatory and unskipped on the physical target Mac.
+
 - macOS Clippy cleanup: removed redundant Rust casts and reduced the float-slider helper argument count by grouping valid/slider ranges.
 - Rust 1.98 reports `clippy::drop_non_drop` and `clippy::question_mark` from inside the pinned `after-effects 0.4.0` item-macro expansion. Those two known upstream style lints are the only command-line Clippy exceptions; every other warning remains `-D warnings`.
 
