@@ -17,6 +17,7 @@ WARN=(
   -Wno-global-constructors -Wno-exit-time-destructors
   -Wno-documentation-unknown-command -Wno-reserved-identifier
   -Wno-disabled-macro-expansion -Wno-weak-vtables
+  -Wno-poison-system-directories
 )
 
 echo "[static] C++ strict syntax / high-warning audit"
