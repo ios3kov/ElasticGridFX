@@ -39,14 +39,23 @@ else
   echo "[static] NOTE: cppcheck not installed."
 fi
 
-if command -v cargo >/dev/null 2>&1; then
-  if command -v rustup >/dev/null 2>&1 && ! cargo clippy --version >/dev/null 2>&1; then
-    rustup component add clippy
+# The pinned after-effects 0.4.0 host crate is macOS/Windows-only and does not
+# compile as a Linux host crate. Keep Clippy mandatory on the actual macOS
+# target gate instead of producing a false Linux CI failure inside the dependency.
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  if command -v cargo >/dev/null 2>&1; then
+    if command -v rustup >/dev/null 2>&1 && ! cargo clippy --version >/dev/null 2>&1; then
+      rustup component add clippy
+    fi
+    echo "[static] cargo clippy -D warnings (macOS target host)"
+    cargo clippy --all-targets --manifest-path "$ROOT/host-rust/Cargo.toml" -- -D warnings
+  else
+    echo "ERROR: cargo unavailable on macOS; Rust Clippy is mandatory."
+    exit 3
   fi
-  echo "[static] cargo clippy -D warnings"
-  cargo clippy --all-targets --manifest-path "$ROOT/host-rust/Cargo.toml" -- -D warnings
 else
-  echo "[static] NOTE: cargo unavailable; Clippy remains target-Mac pending."
+  echo "[static] NOTE: Rust Clippy skipped on $(uname -s); after-effects 0.4.0 is not a Linux host crate."
+  echo "[static] NOTE: Clippy remains mandatory in the macOS source gate."
 fi
 
-echo "static analysis: PASS for all available analyzers"
+echo "static analysis: PASS for all applicable analyzers"
