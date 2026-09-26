@@ -16,6 +16,13 @@ fn generate_metal_header(root: &std::path::Path, out_dir: &std::path::Path) {
 }
 
 fn main() {
+    // The after-effects 0.4.0 macro expands these cfg names in the destination
+    // crate. Register them explicitly so modern rustc check-cfg / Clippy can
+    // validate the expansion without treating supported host cfgs as unknown.
+    for cfg_name in ["does_dialog", "with_premiere", "threaded_rendering", "catch_panics"] {
+        println!("cargo:rustc-check-cfg=cfg({cfg_name})");
+    }
+
     // Never let a Rust panic cross the After Effects C ABI in release builds.
     // The after-effects host macro wraps EffectMain in catch_unwind when this cfg is set.
     println!("cargo:rustc-cfg=catch_panics");
