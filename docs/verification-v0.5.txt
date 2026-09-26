@@ -1,0 +1,34 @@
+ElasticGrid FX v0.5 verification snapshot
+Date: 2026-09-26
+
+Development container (Linux x86-64):
+- GCC Release build (-Wall -Wextra -Wpedantic): PASS, no warnings
+- Clang 17 Release build: PASS, no warnings
+- Core tests: PASS
+- Bridge tests: PASS
+- ASan + UBSan core tests: PASS
+- ASan + UBSan bridge tests: PASS
+- Direct-guide elastic C ABI test: PASS
+- Min-spacing / no-crossing extreme drag test: PASS
+- Host-supplied guide arrays affect rendered output: PASS
+- 8/16/32-bpc bridge identity tests: PASS
+- Negative row-stride test: PASS
+- 1-thread / 4-thread deterministic output: PASS
+
+Performance snapshot (3840x2160, full C bridge + host-supplied deformed grid, bilinear):
+- 8 bpc:  ~26.3 ms/frame
+- 16 bpc: ~15.4 ms/frame
+- 32 bpc: ~7.8 ms/frame
+
+Performance snapshot (1920x1080, bicubic):
+- 8 bpc:  ~17.0 ms/frame
+- 16 bpc: ~14.1 ms/frame
+- 32 bpc: ~8.0 ms/frame
+
+Not executable in this Linux container:
+- Rust/AE host cargo build (Rust toolchain unavailable in container)
+- macOS code-signing
+- After Effects runtime/UI smoke test
+
+Those three checks are mandatory in tools/preflight_macos.command / build_macos_sdkless.command
+before a user .plugin is packaged.

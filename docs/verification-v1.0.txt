@@ -1,0 +1,44 @@
+ElasticGrid FX — v1.0 candidate portable verification
+Date: 2026-09-26
+
+SCOPE
+This record covers checks executable in the current Linux container. It does NOT certify Rust AE-host compilation, Metal, code-signing, bundle loading, or real After Effects behavior on macOS. Those remain target-Mac gates.
+
+STRICT RELEASE
+- GCC -Werror: 9/9 PASS
+- Clang -Werror: 9/9 PASS (repeat-audit fuzz/soak counts scaled)
+
+SANITIZERS
+- Clang ASan + UBSan + LeakSanitizer: 9/9 PASS
+- GCC ThreadSanitizer: MFR + determinism 2/2 PASS
+
+HOT PATH
+- allocation audit: PASS
+- steady-state CPU render/plan/ROI heap allocations after warm-up: 0
+- blocking mutex primitive audit in core/bridge/Metal render hot-path sources: PASS
+
+ROBUSTNESS
+- deterministic fuzzing: PASS
+- soak: PASS
+- deterministic CPU/MFR output: PASS
+- final-quality reference: PASS
+- CPU/GPU sampling-plan parity: PASS
+- shell-script bash syntax: PASS
+
+PERFORMANCE VS CLEAN v0.9 (same host, alternating runs, median of 5)
+- 4K32 Bicubic + poll: old 19.3981 ms, current 19.5169 ms, +0.6%
+- 4K16 Bicubic + poll: old 23.5255 ms, current 23.6343 ms, +0.5%
+- 4K8 Bicubic + poll: old 28.5773 ms, current 28.1166 ms, -1.6%
+- 4K32 Bilinear + poll: old 8.64123 ms, current 8.63999 ms, ~0.0%
+- 8K32 Bicubic + poll: old 76.7373 ms, current 77.2526 ms, +0.7%
+Conclusion: no meaningful CPU performance regression; differences are within normal run-to-run noise in this environment.
+
+PENDING TARGET-MAC GATES
+- Rust AE host Release compile/tests and cargo --locked check
+- Metal lifecycle/soak
+- CPU <-> Metal image parity
+- Metal determinism
+- Metal production-path 4K/8K benchmarks
+- .plugin assembly, PiPL/entrypoint/signature/dependency verification
+- After Effects load + 32-bpc Final Bicubic smoke
+- project save/reopen + keyframes + undo/redo + viewer/ROI/downsample validation

@@ -1,0 +1,33 @@
+ElasticGrid FX v0.8 verification status
+Date: 2026-09-26
+
+Development-container gates completed:
+- CMake Release configure/build: PASS
+- Portable CTest: 5/5 PASS
+  - elasticgrid_core
+  - elasticgrid_bridge
+  - elasticgrid_gpu_plan
+  - elasticgrid_quality
+  - elasticgrid_mfr
+- Strict C++ Release compile with -Werror: PASS
+- ASan + UBSan final-quality test: PASS
+- ASan + UBSan MFR stress: PASS
+- ThreadSanitizer MFR stress (GCC): PASS
+- Shell syntax for all .command scripts: PASS
+
+Hardening findings fixed in v0.8:
+- Metal benchmark now measures the production eg_metal_render path.
+- Added 8K Metal performance gate.
+- Added missing PiPL Support URL build-time metadata required by the Rust host.
+- Added dynamic NON_PARAM_VARY handling so procedural Wave time-dependence cannot be incorrectly cached by AE while static warps retain caching.
+- Added bundle/PiPL/entrypoint/signature verification and post-launch AE log checker.
+
+Mac-only gates still intentionally pending until run on the target Mac:
+- Rust/AE host macOS compile (Rust toolchain is not installed in the development container).
+- Metal shader compile/pipeline creation.
+- Real CPU <-> Metal image parity.
+- Real 4K/8K Metal production-path benchmarks.
+- .plugin code-sign/bundle verification under macOS.
+- After Effects load/runtime smoke.
+
+The one-click BUILD_AND_INSTALL_MAC.command blocks packaging/install if any mandatory preflight gate fails.

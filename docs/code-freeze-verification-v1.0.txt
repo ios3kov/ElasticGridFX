@@ -1,0 +1,95 @@
+ElasticGrid FX v1.0 code-freeze regression
+UTC: 2026-09-26T22:37:09Z
+
+== gcc-strict ==
+Internal ctest changing into directory: /tmp/eg-gcc-strict-final
+Test project /tmp/eg-gcc-strict-final
+    Start 1: elasticgrid_core
+1/9 Test #1: elasticgrid_core .................   Passed    0.01 sec
+    Start 2: elasticgrid_bridge
+2/9 Test #2: elasticgrid_bridge ...............   Passed    0.30 sec
+    Start 3: elasticgrid_gpu_plan
+3/9 Test #3: elasticgrid_gpu_plan .............   Passed    0.01 sec
+    Start 4: elasticgrid_quality
+4/9 Test #4: elasticgrid_quality ..............   Passed    0.01 sec
+    Start 5: elasticgrid_mfr
+5/9 Test #5: elasticgrid_mfr ..................   Passed    0.03 sec
+    Start 6: elasticgrid_fuzz_smoke
+6/9 Test #6: elasticgrid_fuzz_smoke ...........   Passed    2.42 sec
+    Start 7: elasticgrid_soak
+7/9 Test #7: elasticgrid_soak .................   Passed    0.27 sec
+    Start 8: elasticgrid_determinism
+8/9 Test #8: elasticgrid_determinism ..........   Passed    0.27 sec
+    Start 9: elasticgrid_allocation_audit
+9/9 Test #9: elasticgrid_allocation_audit .....   Passed    0.95 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =   4.30 sec
+
+== clang-strict ==
+== resume clang-strict ==
+Internal ctest changing into directory: /tmp/eg-clang-strict-final
+Test project /tmp/eg-clang-strict-final
+    Start 1: elasticgrid_core
+1/9 Test #1: elasticgrid_core .................   Passed    0.02 sec
+    Start 2: elasticgrid_bridge
+2/9 Test #2: elasticgrid_bridge ...............   Passed    0.32 sec
+    Start 3: elasticgrid_gpu_plan
+3/9 Test #3: elasticgrid_gpu_plan .............   Passed    0.02 sec
+    Start 4: elasticgrid_quality
+4/9 Test #4: elasticgrid_quality ..............   Passed    0.01 sec
+    Start 5: elasticgrid_mfr
+5/9 Test #5: elasticgrid_mfr ..................   Passed    0.03 sec
+    Start 6: elasticgrid_fuzz_smoke
+6/9 Test #6: elasticgrid_fuzz_smoke ...........   Passed    2.41 sec
+    Start 7: elasticgrid_soak
+7/9 Test #7: elasticgrid_soak .................   Passed    0.19 sec
+    Start 8: elasticgrid_determinism
+8/9 Test #8: elasticgrid_determinism ..........   Passed    0.26 sec
+    Start 9: elasticgrid_allocation_audit
+9/9 Test #9: elasticgrid_allocation_audit .....   Passed    0.70 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =   3.98 sec
+
+== clang ASan+UBSan+LSan ==
+== clang ASan+UBSan+LSan (Debug compile, full 9 tests) ==
+Internal ctest changing into directory: /tmp/eg-asan-fast
+Test project /tmp/eg-asan-fast
+    Start 1: elasticgrid_core
+1/9 Test #1: elasticgrid_core .................   Passed    0.10 sec
+    Start 2: elasticgrid_bridge
+2/9 Test #2: elasticgrid_bridge ...............   Passed    0.64 sec
+    Start 3: elasticgrid_gpu_plan
+3/9 Test #3: elasticgrid_gpu_plan .............   Passed    0.11 sec
+    Start 4: elasticgrid_quality
+4/9 Test #4: elasticgrid_quality ..............   Passed    0.12 sec
+    Start 5: elasticgrid_mfr
+5/9 Test #5: elasticgrid_mfr ..................   Passed    0.40 sec
+    Start 6: elasticgrid_fuzz_smoke
+6/9 Test #6: elasticgrid_fuzz_smoke ...........   Passed    4.07 sec
+    Start 7: elasticgrid_soak
+7/9 Test #7: elasticgrid_soak .................   Passed    0.88 sec
+    Start 8: elasticgrid_determinism
+8/9 Test #8: elasticgrid_determinism ..........   Passed    2.16 sec
+    Start 9: elasticgrid_allocation_audit
+== resume ASan allocation audit ==
+Internal ctest changing into directory: /tmp/eg-asan-fast
+Test project /tmp/eg-asan-fast
+    Start 9: elasticgrid_allocation_audit
+1/1 Test #9: elasticgrid_allocation_audit .....   Passed    3.75 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   3.76 sec
+ASan+UBSan+LSan full suite: PASS
+
+== GCC ThreadSanitizer MFR + determinism ==
+elasticgrid_mfr_tests: OK
+determinism PASS: plans=256 repeats, CPU 8/16/32 exact across 1/2/4 threads, MFR=384 renders
+TSan MFR + determinism: PASS
+
+== Static analysis ==
+[static] C++ strict syntax / high-warning audit
