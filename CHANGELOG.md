@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Added GitHub CI for GCC/Clang regression, portable C++ static analysis, ASan/UBSan/leak checks, and GCC TSan. Rust Clippy is target-correctly kept in the mandatory macOS source gate because the pinned after-effects host crate is not a Linux host crate.
+
 - Code-freeze step 4 reproducible-build gate added: clean temporary source snapshot, isolated Cargo registry, locked fetch, two independent offline Release builds, byte-for-byte comparison of dylib/PiPL/PkgInfo/plist, plus offline locked tests. Portable C++ static core reproduces byte-for-byte here; macOS host result remains target-Mac pending.
 - Code-freeze step 3 dependency/license policy complete in source: exact-pinned direct Rust dependencies, explicit Rust 1.85 MSRV, automated target-Mac Cargo.lock generation, RustSec vulnerability gate, CycloneDX 1.5 SBOM, dependency/license inventory and compliance hashes.
 - Documented `RUSTSEC-2025-0141` for `bincode` as an informational/unmaintained advisory; it remains visible in release compliance output and is not silently ignored. Full target-Mac lock/audit/SBOM remains pending until Cargo runs there.
