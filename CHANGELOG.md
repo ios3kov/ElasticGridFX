@@ -2,6 +2,9 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- macOS Clippy cleanup: removed redundant Rust casts and reduced the float-slider helper argument count by grouping valid/slider ranges.
+- Scoped `clippy::drop_non_drop` and `clippy::question_mark` exceptions only to the pinned third-party `ae::define_effect!` expansion; project code remains under `-D warnings`.
+
 - First real macOS Rust-host compile found and fixed a plugin-trait ABI/API mismatch: `handle_command` now uses the required mutable receiver (`&mut self`).
 - Registered the cfg names expanded by `after-effects 0.4.0` (`does_dialog`, `with_premiere`, `threaded_rendering`, `catch_panics`) with rustc check-cfg so mandatory Clippy can remain at `-D warnings` on modern Rust.
 
