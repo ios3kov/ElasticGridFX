@@ -36,11 +36,11 @@ mkdir -p "$BUILD"
   "$ROOT/src/gpu/metal_backend.mm" \
   "$ROOT/tests/test_metal_parity.mm" \
   -framework Foundation -framework Metal \
-  -o if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
+  -o "$BUILD/test_metal_parity"
+
+if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
   echo "Metal parity: COMPILE PASS — runtime skipped because this macOS host exposes no Metal device"
   exit 0
 fi
-
-"$BUILD/test_metal_parity"
 
 "$BUILD/test_metal_parity"
