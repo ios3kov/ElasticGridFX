@@ -17,6 +17,11 @@ jobs:
     name: macOS / Metal source validation
     runs-on: macos-14
     timeout-minutes: 90
+    # GitHub-hosted macOS ARM runners currently expose no MTLDevice. This flag
+    # makes only the four hardware-execution stages compile-only. Physical-Mac
+    # preflight does not set it and remains strict.
+    env:
+      ELASTICGRID_METAL_COMPILE_ONLY: "1"
     steps:
       - uses: actions/checkout@v5
       - name: Toolchain
@@ -27,6 +32,10 @@ jobs:
           cargo --version
       - name: Generate Cargo.lock if this frozen source snapshot does not contain one yet
         run: cargo generate-lockfile --manifest-path host-rust/Cargo.toml
+      - name: Compile Metal shader with Apple toolchain
+        run: |
+          xcrun -sdk macosx metal -c src/gpu/warp.metal -o "$RUNNER_TEMP/elasticgrid-warp.air"
+          xcrun -sdk macosx metallib "$RUNNER_TEMP/elasticgrid-warp.air" -o "$RUNNER_TEMP/elasticgrid-warp.metallib"
       - name: Full macOS preflight
         run: tools/preflight_macos.command
       - name: Build unsigned-install-free plugin bundle
