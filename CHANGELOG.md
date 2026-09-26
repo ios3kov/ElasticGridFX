@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Fixed malformed compile-only insertion in the Metal helper scripts and added a mandatory CI `bash -n` audit for every `.command`/`.sh` script.
+
 - GitHub-hosted macOS runner has no MTLDevice. Added a CI-only Metal compile mode: shader is compiled by Apple's `metal/metallib` tools and lifecycle/parity/determinism/benchmark binaries are built, while hardware execution remains mandatory and unskipped on the physical target Mac.
 
 - macOS Clippy cleanup: removed redundant Rust casts and reduced the float-slider helper argument count by grouping valid/slider ranges.
