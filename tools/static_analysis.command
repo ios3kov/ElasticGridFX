@@ -49,7 +49,11 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
       rustup component add clippy
     fi
     echo "[static] cargo clippy -D warnings (macOS target host)"
-    cargo clippy --all-targets --manifest-path "$ROOT/host-rust/Cargo.toml" -- -D warnings
+    echo "[static] NOTE: allowing two known style lints emitted inside after-effects 0.4.0 macro expansion"
+    cargo clippy --all-targets --manifest-path "$ROOT/host-rust/Cargo.toml" -- \
+      -D warnings \
+      -A clippy::drop-non-drop \
+      -A clippy::question-mark
   else
     echo "ERROR: cargo unavailable on macOS; Rust Clippy is mandatory."
     exit 3
