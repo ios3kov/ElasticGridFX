@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- macOS hosted-runner static analysis: excluded Apple Clang's environment-only `-Wpoison-system-directories` diagnostic while retaining `-Werror` for source diagnostics.
+
 - Added GitHub CI for GCC/Clang regression, portable C++ static analysis, ASan/UBSan/leak checks, and GCC TSan. Rust Clippy is target-correctly kept in the mandatory macOS source gate because the pinned after-effects host crate is not a Linux host crate.
 
 - Code-freeze step 4 reproducible-build gate added: clean temporary source snapshot, isolated Cargo registry, locked fetch, two independent offline Release builds, byte-for-byte comparison of dylib/PiPL/PkgInfo/plist, plus offline locked tests. Portable C++ static core reproduces byte-for-byte here; macOS host result remains target-Mac pending.
