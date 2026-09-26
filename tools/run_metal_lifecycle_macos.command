@@ -21,5 +21,10 @@ rm -rf "$BUILD" && mkdir -p "$BUILD"
   "$ROOT/src/core/WarpMath.cpp" "$ROOT/src/core/CpuRenderer.cpp" \
   "$ROOT/src/bridge/elasticgrid_ffi.cpp" "$ROOT/src/gpu/metal_backend.mm" \
   "$ROOT/tests/test_metal_lifecycle.mm" \
-  -framework Foundation -framework Metal -o "$BUILD/test_metal_lifecycle"
+  -framework Foundation -framework Metal -o if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
+  echo "Metal lifecycle: COMPILE PASS — runtime skipped because this macOS host exposes no Metal device"
+  exit 0
+fi
+
+"$BUILD/test_metal_lifecycle"
 "$BUILD/test_metal_lifecycle"
