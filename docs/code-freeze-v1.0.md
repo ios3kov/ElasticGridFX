@@ -29,3 +29,7 @@ Post-hardening portable regression is green: 9/9 Release tests, ASan/UBSan/LeakS
 ## Step 6 — Code freeze
 
 Functional source is frozen with aggregate hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`. No functional code changes are allowed before the target-Mac/After Effects gate unless that gate reveals a blocker. The exact per-file hashes are in `code-freeze-manifest-v1.0.txt`. Shipping metadata remains at 0.9.0 until the target-Mac gate passes; a release-only version bump is allowed after PASS. `Cargo.lock` is intentionally generated/frozen by the target-Mac dependency gate because Cargo is unavailable in the Linux validation container.
+
+## Target-Mac validation amendments
+
+Code freeze permits only changes required by a failed target-Mac gate. First hosted-Mac Rust compile exposed two such blockers: the AE host trait requires `handle_command(&mut self, ...)`, and modern rustc check-cfg requires explicit registration of cfg names emitted by the pinned `after-effects 0.4.0` macro. These are compatibility/build fixes only; render algorithms and quality paths are unchanged.
