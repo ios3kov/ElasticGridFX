@@ -1,0 +1,40 @@
+name: macOS source gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-source-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-source-gate:
+    name: macOS / Metal source validation
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          clang++ --version
+          rustc --version
+          cargo --version
+      - name: Generate Cargo.lock if this frozen source snapshot does not contain one yet
+        run: cargo generate-lockfile --manifest-path host-rust/Cargo.toml
+      - name: Full macOS preflight
+        run: tools/preflight_macos.command
+      - name: Build unsigned-install-free plugin bundle
+        run: tools/build_macos_sdkless.command
+      - name: Upload plugin and reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-mac-source-gate
+          if-no-files-found: error
+          path: |
+            dist/mac/ElasticGrid.plugin
+            dist/mac/preflight-report.txt
+            dist/compliance/**
