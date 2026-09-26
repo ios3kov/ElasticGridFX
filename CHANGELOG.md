@@ -2,6 +2,9 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- First real macOS Rust-host compile found and fixed a plugin-trait ABI/API mismatch: `handle_command` now uses the required mutable receiver (`&mut self`).
+- Registered the cfg names expanded by `after-effects 0.4.0` (`does_dialog`, `with_premiere`, `threaded_rendering`, `catch_panics`) with rustc check-cfg so mandatory Clippy can remain at `-D warnings` on modern Rust.
+
 - macOS hosted-runner static analysis: excluded Apple Clang's environment-only `-Wpoison-system-directories` diagnostic while retaining `-Werror` for source diagnostics.
 
 - Added GitHub CI for GCC/Clang regression, portable C++ static analysis, ASan/UBSan/leak checks, and GCC TSan. Rust Clippy is target-correctly kept in the mandatory macOS source gate because the pinned after-effects host crate is not a Linux host crate.
