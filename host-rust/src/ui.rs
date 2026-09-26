@@ -266,7 +266,7 @@ pub fn drag(
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
-    let axis = event.continue_refcon(0) as isize;
+    let axis = event.continue_refcon(0);
     let index = event.continue_refcon(1) as usize;
     if axis == DRAG_NONE || (axis != DRAG_COLUMNS && axis != DRAG_ROWS) {
         return Ok(());
