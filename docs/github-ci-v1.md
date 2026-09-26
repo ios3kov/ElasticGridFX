@@ -24,7 +24,7 @@ It runs the macOS/Metal source-level preflight, including mandatory Rust Clippy,
 
 The first real hosted-Mac run exposed two Rust-host blockers that portable Linux validation could not see: the AE plugin trait requires a mutable `handle_command` receiver, and Rust 1.98 check-cfg requires the cfg names expanded by `after-effects 0.4.0` to be declared. Both are fixed in the validation branch and remain covered by the macOS gate.
 
-The next Clippy pass found two redundant casts and an over-wide float-slider helper in ElasticGrid code; those were corrected directly. Two style lints are emitted inside the pinned third-party `ae::define_effect!` macro itself, so their allows are scoped only to that macro invocation rather than weakening project-wide Clippy. This workflow does **not** replace the real After Effects runtime gate because GitHub-hosted runners do not have the target user's After Effects installation/project environment.
+The next Clippy pass found redundant casts/rebinding and an over-wide float-slider helper in ElasticGrid code; those were corrected directly. The pinned `after-effects 0.4.0` macro itself emits `clippy::drop_non_drop` and `clippy::question_mark` on Rust 1.98. Item-macro attributes cannot suppress those expansion lints, so only those two known upstream style lints are allowed on the Clippy command line; every other warning remains `-D warnings`. This workflow does **not** replace the real After Effects runtime gate because GitHub-hosted runners do not have the target user's After Effects installation/project environment.
 
 ## Release rule
 
