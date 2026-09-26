@@ -12,6 +12,8 @@ Every push to `main` and every pull request runs:
 
 The fuzz and soak tests use reduced CI iteration counts; full validation remains available through the project scripts.
 
+On Apple Clang, the static-analysis script suppresses only `-Wpoison-system-directories`, an SDK/Homebrew search-path diagnostic emitted by hosted runners; source warnings remain `-Werror`.
+
 Rust Clippy is intentionally **not** executed on the Linux job. The pinned `after-effects 0.4.0` host crate is macOS/Windows-only and does not compile as a Linux host crate. Clippy remains mandatory in the real macOS source gate, so this is a platform-correct split rather than a skipped release check.
 
 ## macOS source gate
