@@ -9,6 +9,8 @@ on:
       - "tools/build_macos_sdkless.command"
       - "tools/verify_bundle_macos.command"
       - "tools/stage_hot_reload_macos.command"
+      - "tools/install_hot_loader_package.command"
+      - "tools/stage_packaged_hot_reload.command"
   workflow_dispatch:
 
 concurrency:
@@ -29,6 +31,8 @@ jobs:
         run: |
           set -euo pipefail
           zsh -n tools/stage_hot_reload_macos.command
+          zsh -n tools/install_hot_loader_package.command
+          zsh -n tools/stage_packaged_hot_reload.command
           bash -n tools/build_macos_sdkless.command
           bash -n tools/verify_bundle_macos.command
           xcrun clang++ -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -Werror \
@@ -36,8 +40,17 @@ jobs:
 
       - name: Build implementation
         env:
-          CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot
-          AE_HOT_LOADER_IMPL_LABEL: elasticgrid-ci
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot-default
+          AE_HOT_LOADER_IMPL_LABEL: elasticgrid-default
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          set -euo pipefail
+          cargo build --release --locked --manifest-path host-rust/Cargo.toml --target aarch64-apple-darwin
+
+      - name: Build candidate implementation
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot-candidate
+          AE_HOT_LOADER_IMPL_LABEL: elasticgrid-candidate-v2
           MACOSX_DEPLOYMENT_TARGET: "11.0"
         run: |
           set -euo pipefail
@@ -46,7 +59,8 @@ jobs:
       - name: Build shell and assemble bundle
         run: |
           set -euo pipefail
-          ROOT="target-hot/aarch64-apple-darwin/release"
+          ROOT="target-hot-default/aarch64-apple-darwin/release"
+          CANDIDATE_ROOT="target-hot-candidate/aarch64-apple-darwin/release"
           BUNDLE="dist/mac/ElasticGrid.plugin"
 
           rm -rf "$BUNDLE"
@@ -71,7 +85,8 @@ jobs:
           codesign --force --deep --sign - "$BUNDLE"
           tools/verify_bundle_macos.command "$BUNDLE"
 
-          strings "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" | grep 'elasticgrid-ci'
+          strings "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" | grep 'elasticgrid-default'
+          strings "$CANDIDATE_ROOT/libelasticgrid_ae.dylib" | grep 'elasticgrid-candidate-v2'
 
       - name: Smoke shell reload
         shell: bash
@@ -80,7 +95,7 @@ jobs:
           FAKE_HOME="$RUNNER_TEMP/elasticgrid-home"
           IMPL_DIR="$FAKE_HOME/Library/Application Support/AE Hot Loader/implementations/elasticgrid"
           mkdir -p "$IMPL_DIR"
-          cp dist/mac/ElasticGrid.plugin/Contents/Frameworks/libelasticgrid_impl.dylib "$IMPL_DIR/current.dylib"
+          cp target-hot-candidate/aarch64-apple-darwin/release/libelasticgrid_ae.dylib "$IMPL_DIR/current.dylib"
 
           cat > "$RUNNER_TEMP/elasticgrid_reload_smoke.cpp" <<'CPP'
           #include <cstdio>
@@ -106,8 +121,21 @@ jobs:
           xcrun clang++ -std=c++17 -arch arm64 "$RUNNER_TEMP/elasticgrid_reload_smoke.cpp" -o "$RUNNER_TEMP/elasticgrid_reload_smoke"
           HOME="$FAKE_HOME" "$RUNNER_TEMP/elasticgrid_reload_smoke" "$(pwd)/dist/mac/ElasticGrid.plugin/Contents/MacOS/ElasticGrid"
 
+      - name: Package hot-loader test kit
+        run: |
+          set -euo pipefail
+          rm -rf package ElasticGridFX-hot-loader-shell.zip
+          mkdir -p package
+          cp -R dist/mac/ElasticGrid.plugin package/
+          cp target-hot-candidate/aarch64-apple-darwin/release/libelasticgrid_ae.dylib package/ElasticGridImpl-candidate.dylib
+          cp tools/install_hot_loader_package.command package/INSTALL_HOT_LOADER.command
+          cp tools/stage_packaged_hot_reload.command package/STAGE_CANDIDATE.command
+          chmod +x package/INSTALL_HOT_LOADER.command package/STAGE_CANDIDATE.command
+          codesign --force --sign - package/ElasticGridImpl-candidate.dylib
+          ditto -c -k --sequesterRsrc --keepParent package ElasticGridFX-hot-loader-shell.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: ElasticGridFX-hot-loader-shell
-          path: dist/mac/ElasticGrid.plugin
+          path: ElasticGridFX-hot-loader-shell.zip
           if-no-files-found: error
