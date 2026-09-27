@@ -263,6 +263,7 @@ bool prepare_mesh_map(
         for (int row = 1; row < rows; ++row) {
             for (int column = 1; column < columns; ++column) {
                 const int i = row * stride + column;
+                const auto ii = static_cast<std::size_t>(i);
                 const bool pinned =
                     (p->column_pins && p->column_pins[i] != 0) ||
                     (p->row_pins && p->row_pins[i] != 0);
@@ -272,7 +273,7 @@ bool prepare_mesh_map(
                         static_cast<double>(frequency) * static_cast<double>(p->column_lines[i]) +
                         static_cast<double>(phase) +
                         static_cast<double>(speed) * static_cast<double>(time);
-                    out.evaluated_x[i] += amplitude * static_cast<float>(
+                    out.evaluated_x[ii] += amplitude * static_cast<float>(
                         std::sin(kTwoPi * std::remainder(cycles, 1.0)));
                 }
                 if (move_y) {
@@ -280,7 +281,7 @@ bool prepare_mesh_map(
                         static_cast<double>(frequency) * static_cast<double>(p->row_lines[i]) +
                         static_cast<double>(phase) +
                         static_cast<double>(speed) * static_cast<double>(time);
-                    out.evaluated_y[i] += amplitude * static_cast<float>(
+                    out.evaluated_y[ii] += amplitude * static_cast<float>(
                         std::sin(kTwoPi * std::remainder(cycles, 1.0)));
                 }
             }
@@ -293,21 +294,33 @@ bool prepare_mesh_map(
             for (int row = 0; row <= rows; ++row) {
                 for (int column = 1; column < columns; ++column) {
                     const int i = row * stride + column;
-                    out.evaluated_x[i] = std::max(out.evaluated_x[i], out.evaluated_x[i - 1] + sx);
+                    const auto ii = static_cast<std::size_t>(i);
+                    out.evaluated_x[ii] = std::max(
+                        out.evaluated_x[ii],
+                        out.evaluated_x[static_cast<std::size_t>(i - 1)] + sx);
                 }
                 for (int column = columns - 1; column >= 1; --column) {
                     const int i = row * stride + column;
-                    out.evaluated_x[i] = std::min(out.evaluated_x[i], out.evaluated_x[i + 1] - sx);
+                    const auto ii = static_cast<std::size_t>(i);
+                    out.evaluated_x[ii] = std::min(
+                        out.evaluated_x[ii],
+                        out.evaluated_x[static_cast<std::size_t>(i + 1)] - sx);
                 }
             }
             for (int column = 0; column <= columns; ++column) {
                 for (int row = 1; row < rows; ++row) {
                     const int i = row * stride + column;
-                    out.evaluated_y[i] = std::max(out.evaluated_y[i], out.evaluated_y[i - stride] + sy);
+                    const auto ii = static_cast<std::size_t>(i);
+                    out.evaluated_y[ii] = std::max(
+                        out.evaluated_y[ii],
+                        out.evaluated_y[static_cast<std::size_t>(i - stride)] + sy);
                 }
                 for (int row = rows - 1; row >= 1; --row) {
                     const int i = row * stride + column;
-                    out.evaluated_y[i] = std::min(out.evaluated_y[i], out.evaluated_y[i + stride] - sy);
+                    const auto ii = static_cast<std::size_t>(i);
+                    out.evaluated_y[ii] = std::min(
+                        out.evaluated_y[ii],
+                        out.evaluated_y[static_cast<std::size_t>(i + stride)] - sy);
                 }
             }
         }
@@ -317,9 +330,10 @@ bool prepare_mesh_map(
     const float canvas_y = static_cast<float>(std::max(1, canvas_height - 1));
     auto dst = [&](int column, int row) -> MeshVec2 {
         const int i = row * stride + column;
+        const auto ii = static_cast<std::size_t>(i);
         return {
-            out.evaluated_x[i] * canvas_x - static_cast<float>(p->output_origin_x),
-            out.evaluated_y[i] * canvas_y - static_cast<float>(p->output_origin_y),
+            out.evaluated_x[ii] * canvas_x - static_cast<float>(p->output_origin_x),
+            out.evaluated_y[ii] * canvas_y - static_cast<float>(p->output_origin_y),
         };
     };
     auto src = [&](int column, int row) -> MeshVec2 {
