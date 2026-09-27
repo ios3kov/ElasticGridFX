@@ -9,6 +9,7 @@ DEST_DIR="$HOME/Library/Application Support/AE Hot Loader/implementations/elasti
 DEST="$DEST_DIR/current.dylib"
 LABEL="${1:-elasticgrid-dev}"
 
+export MACOSX_DEPLOYMENT_TARGET="11.0"
 export AE_HOT_LOADER_IMPL_LABEL="$LABEL"
 
 echo "Building ElasticGrid implementation: $LABEL"
