@@ -727,6 +727,26 @@ fn render_metal(
     }
 }
 
+fn checkout_smart_render_dependencies(
+    in_data: ae::InData,
+    params: &ae::Parameters<Params>,
+) -> Result<(), ae::Error> {
+    const DEPS: &[Params] = &[
+        Params::Columns, Params::Rows, Params::GridState, Params::MinSpacing,
+        Params::StretchEasing, Params::EasingDistance, Params::WaveAmplitude,
+        Params::WaveFrequency, Params::WavePhase, Params::WaveSpeed,
+        Params::WaveAxis, Params::EdgeMode, Params::Quality,
+    ];
+    let interact = in_data.interact();
+    let mut checked = Vec::with_capacity(DEPS.len());
+    for &param in DEPS {
+        let index = params.index(param).ok_or(ae::Error::InvalidIndex)? as i32;
+        checked.push(interact.checkout_param(index, in_data.current_time(), in_data.time_step(), in_data.time_scale())?);
+    }
+    drop(checked);
+    Ok(())
+}
+
 impl AdobePluginGlobal for Plugin {
     fn params_setup(
         &self,
@@ -884,6 +904,7 @@ impl AdobePluginGlobal for Plugin {
                 render(&in_layer, &mut out_layer, &p)?;
             }
             ae::Command::SmartPreRender { mut extra } => {
+                checkout_smart_render_dependencies(in_data, params)?;
                 let output_request = extra.output_request();
                 let output_rect = EgRectI32 {
                     left: output_request.rect.left,
