@@ -2,7 +2,7 @@ use after_effects as ae;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::{SeqAccess, Visitor};
 use std::fmt;
-use std::ffi::c_void;
+use std::ffi::{c_char, c_void};
 
 mod ui;
 
@@ -11,6 +11,8 @@ const MAX_CELLS: usize = 128;
 
 const GRID_WIRE_VERSION: u16 = 1;
 const GRID_WIRE_MARKER: u16 = 0x8000;
+
+const HOT_RELOAD_LABEL: &str = "ElasticGrid FX v0.9.0";
 
 // IMPORTANT: parameter IDs in the Rust AE host are derived from these Debug
 // names. Existing variants must never be renamed once a project can be saved.
@@ -1085,4 +1087,22 @@ mod tests {
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
         assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
     }
+}
+
+
+#[unsafe(no_mangle)]
+pub extern "C" fn AEHotLoader_ImplementationLabel(
+    output: *mut c_char,
+    output_capacity: usize,
+) -> i32 {
+    if output.is_null() || output_capacity == 0 {
+        return -1;
+    }
+    let bytes = HOT_RELOAD_LABEL.as_bytes();
+    let count = bytes.len().min(output_capacity.saturating_sub(1));
+    unsafe {
+        std::ptr::copy_nonoverlapping(bytes.as_ptr(), output.cast::<u8>(), count);
+        *output.add(count) = 0;
+    }
+    0
 }
