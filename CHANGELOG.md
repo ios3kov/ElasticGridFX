@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Fixed the macOS bundle-metadata gap exposed by the hosted gate: pinned `pipl 0.1.1` emits the PiPL `.rsrc` but not the `*_PkgInfo` / `*_Info.plist` files expected by the bundle script. The project build script now deterministically generates those two metadata files locally without changing the pinned dependency.
+
 - Reproducible-build gate hardening: the two clean offline Release builds now reuse the same canonical `CARGO_TARGET_DIR` after a full target wipe. This keeps build settings identical instead of accidentally testing Cargo/rustc path variance between `target-a` and `target-b`. On a real mismatch the gate now prints hashes, first differing byte offsets, and Mach-O UUIDs for the plugin dylib.
 
 - Fixed malformed compile-only insertion in the Metal helper scripts and added a mandatory CI `bash -n` audit for every `.command`/`.sh` script.

@@ -31,6 +31,8 @@ The next Clippy pass found redundant casts/rebinding and an over-wide float-slid
 
 The reproducible-build stage performs two fully clean, locked, offline Release builds using the same canonical `CARGO_TARGET_DIR`, deleting it completely between builds. This deliberately holds the build path constant so the gate measures deterministic rebuilding under identical settings rather than Cargo/rustc build-path variance. A mismatch prints SHA-256 values, first differing byte offsets, and Mach-O UUIDs for the dylib.
 
+The hosted gate also verifies packaging metadata produced by the pinned toolchain. `pipl 0.1.1` generates the macOS PiPL resource but does not generate the `PkgInfo` and `Info.plist` files expected by the project's bundle step; ElasticGrid now creates those deterministic metadata files in its own build script while keeping the dependency pin unchanged.
+
 ## Release rule
 
 A green GitHub CI result means the portable/static/sanitizer checks passed. A release candidate still requires the documented target-Mac + After Effects runtime gate.
