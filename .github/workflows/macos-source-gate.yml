@@ -33,8 +33,10 @@ jobs:
           clang++ --version
           rustc --version
           cargo --version
-      - name: Generate Cargo.lock if this frozen source snapshot does not contain one yet
-        run: cargo generate-lockfile --manifest-path host-rust/Cargo.toml
+      - name: Verify committed Cargo.lock
+        run: |
+          test -f host-rust/Cargo.lock
+          cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml >/dev/null
       - name: Compile Metal shader with Apple toolchain
         run: |
           xcrun -sdk macosx metal -c src/gpu/warp.metal -o "$RUNNER_TEMP/elasticgrid-warp.air"
