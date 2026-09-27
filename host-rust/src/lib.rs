@@ -432,14 +432,6 @@ struct EgRectI32 {
 }
 
 unsafe extern "C" {
-    fn eg_required_source_rect(
-        canvas_width: i32,
-        canvas_height: i32,
-        output_rect: EgRectI32,
-        params: *const EgRenderParams,
-        source_rect: *mut EgRectI32,
-    ) -> i32;
-
     fn eg_render_frame(
         input_data: *const c_void,
         input_row_bytes: isize,
@@ -913,15 +905,6 @@ impl AdobePluginGlobal for Plugin {
                     bottom: output_request.rect.bottom,
                 };
                 let (cw, ch) = rendered_canvas(in_data);
-                let grid = grid_snapshot(params)?;
-                let mut p = evaluated_params(params, in_data, &grid)?;
-                p.canvas_width = cw;
-                p.canvas_height = ch;
-                p.input_origin_x = 0;
-                p.input_origin_y = 0;
-                p.output_origin_x = output_rect.left;
-                p.output_origin_y = output_rect.top;
-
                 // Correctness-first SmartFX checkout: a guide warp can pull
                 // pixels across cell boundaries, and bicubic filtering needs
                 // neighboring taps. Always checkout the complete source canvas
