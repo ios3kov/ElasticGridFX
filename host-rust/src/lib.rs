@@ -160,6 +160,9 @@ impl<'de> Deserialize<'de> for GridArb {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where D: Deserializer<'de> {
         let wire = GridArbWire::deserialize(deserializer)?;
+        // Preserve/read the legacy wire fields so old project blobs keep the
+        // same six-field layout; original GridWarp itself has no internal pins.
+        let _legacy_pin_fields = (&wire.column_pins, &wire.row_pins);
         let columns = wire.columns as usize;
         let rows = wire.rows as usize;
 
