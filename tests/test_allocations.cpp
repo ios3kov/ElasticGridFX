@@ -43,7 +43,7 @@ struct CountWindow {
 
 EgRenderParams make_params(const float* x,const std::uint8_t* xp,const float* y,const std::uint8_t* yp) {
     EgRenderParams p{};
-    p.columns=4;p.rows=3;p.column_lines=x;p.column_line_count=5;p.column_pins=xp;
+    p.columns=3;p.rows=2;p.column_lines=x;p.column_line_count=5;p.column_pins=xp;
     p.row_lines=y;p.row_line_count=4;p.row_pins=yp;
     p.tension_radius=3;p.falloff=2;p.elasticity_strength=1;p.min_spacing=.002f;
     p.stretch_easing=.55f;p.easing_distance=.2f;
