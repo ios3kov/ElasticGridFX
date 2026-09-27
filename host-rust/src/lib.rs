@@ -9,8 +9,9 @@ mod ui;
 const GRID_REFCON: u64 = 0x4547_4658_4752_4944; // "EGFXGRID"
 const MAX_GUIDES: usize = 50;
 const MAX_AXIS_POINTS: usize = MAX_GUIDES + 2;
+const MAX_LEGACY_MESH_POINTS: usize = (128 + 1) * (128 + 1);
 
-const GRID_WIRE_VERSION: u16 = 2;
+const GRID_WIRE_VERSION: u16 = 3;
 const GRID_WIRE_MARKER: u16 = 0x8000;
 
 // IMPORTANT: parameter IDs in the Rust AE host are derived from these Debug
@@ -34,7 +35,6 @@ pub(crate) enum Params {
     WaveAxis,
     EdgeMode,
     Quality,
-    ResetGrid,
 }
 
 #[derive(Default)]
@@ -79,7 +79,7 @@ where
     }
     let version = (wire >> 8) & 0x7f;
     let guides = wire & 0xff;
-    if version != 1 && version != GRID_WIRE_VERSION {
+    if version != 1 && version != 2 && version != GRID_WIRE_VERSION {
         return Err(serde::de::Error::custom("unsupported ElasticGrid grid-state version"));
     }
     if !(1..=MAX_GUIDES as u16).contains(&guides) {
@@ -96,12 +96,12 @@ impl<'de> Visitor<'de> for BoundedF32VecVisitor {
     }
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
     where A: SeqAccess<'de> {
-        if seq.size_hint().is_some_and(|n| n > MAX_AXIS_POINTS) {
+        if seq.size_hint().is_some_and(|n| n > MAX_LEGACY_MESH_POINTS) {
             return Err(serde::de::Error::custom("ElasticGrid vector exceeds topology limit"));
         }
-        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_AXIS_POINTS));
+        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_LEGACY_MESH_POINTS));
         while let Some(value) = seq.next_element::<f32>()? {
-            if out.len() >= MAX_AXIS_POINTS {
+            if out.len() >= MAX_LEGACY_MESH_POINTS {
                 return Err(serde::de::Error::custom("ElasticGrid vector exceeds topology limit"));
             }
             out.push(value);
@@ -118,12 +118,12 @@ impl<'de> Visitor<'de> for BoundedU8VecVisitor {
     }
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
     where A: SeqAccess<'de> {
-        if seq.size_hint().is_some_and(|n| n > MAX_AXIS_POINTS) {
+        if seq.size_hint().is_some_and(|n| n > MAX_LEGACY_MESH_POINTS) {
             return Err(serde::de::Error::custom("ElasticGrid pin vector exceeds topology limit"));
         }
-        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_AXIS_POINTS));
+        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_LEGACY_MESH_POINTS));
         while let Some(value) = seq.next_element::<u8>()? {
-            if out.len() >= MAX_AXIS_POINTS {
+            if out.len() >= MAX_LEGACY_MESH_POINTS {
                 return Err(serde::de::Error::custom("ElasticGrid pin vector exceeds topology limit"));
             }
             out.push(value);
@@ -167,17 +167,38 @@ impl<'de> Deserialize<'de> for GridArb {
         let columns = wire.columns as usize;
         let rows = wire.rows as usize;
 
-        // v1 interpreted the same numeric value as cell count and stored N+1
-        // points. v2 stores N internal guides + two boundaries = N+2 points.
-        let column_lines = if wire.column_lines.len() == columns + 1 {
-            GridArb::resample_axis_raw(&wire.column_lines, columns)
+        // Compatibility:
+        // - v0/v1 axis state stored N+1 values (N cells + boundaries);
+        // - abandoned 2D-mesh v2 stored (columns+1)*(rows+1) X/Y points;
+        // - parity v3 stores N internal guides + two boundaries = N+2 values.
+        //
+        // A 2D mesh cannot be represented losslessly by the original GridWarp
+        // separable guide model. Migrate it safely to a fresh uniform grid
+        // instead of returning an AE InternalStructDamaged error.
+        let legacy_mesh_count = (columns + 1).saturating_mul(rows + 1);
+        let looks_like_legacy_mesh =
+            wire.column_lines.len() == legacy_mesh_count &&
+            wire.row_lines.len() == legacy_mesh_count &&
+            legacy_mesh_count > columns + 2 &&
+            legacy_mesh_count > rows + 2;
+
+        let (column_lines, row_lines) = if looks_like_legacy_mesh {
+            (
+                GridArb::axis_uniform(columns).0,
+                GridArb::axis_uniform(rows).0,
+            )
         } else {
-            wire.column_lines
-        };
-        let row_lines = if wire.row_lines.len() == rows + 1 {
-            GridArb::resample_axis_raw(&wire.row_lines, rows)
-        } else {
-            wire.row_lines
+            let x = if wire.column_lines.len() == columns + 1 {
+                GridArb::resample_axis_raw(&wire.column_lines, columns)
+            } else {
+                wire.column_lines
+            };
+            let y = if wire.row_lines.len() == rows + 1 {
+                GridArb::resample_axis_raw(&wire.row_lines, rows)
+            } else {
+                wire.row_lines
+            };
+            (x, y)
         };
 
         let mut out = Self {
@@ -809,10 +830,6 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
 
-        params.add(Params::ResetGrid, "Reset Grid", ae::ButtonDef::setup(|f| {
-            f.set_label("Reset Grid");
-        }))?;
-
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(
                 ae::CustomEventFlags::COMP |
@@ -840,12 +857,7 @@ impl AdobePluginGlobal for Plugin {
                     || params.index(Params::Rows) == Some(param_index)
                 {
                     sync_grid_topology(params)?;
-                } else if params.index(Params::ResetGrid) == Some(param_index) {
-                    let (columns, rows) = topology(params)?;
-                    params
-                        .get_mut(Params::GridState)?
-                        .as_arbitrary_mut()?
-                        .set_value(GridArb::uniform(columns, rows))?;
+
                 }
             }
             ae::Command::QueryDynamicFlags => {
@@ -1054,10 +1066,38 @@ mod tests {
     fn grid_wire_rejects_unknown_version() {
         let g = GridArb::uniform(4, 4);
         let mut legacy = legacy_from(&g);
-        legacy.columns = GRID_WIRE_MARKER | (3u16 << 8) | 4u16;
+        legacy.columns = GRID_WIRE_MARKER | (4u16 << 8) | 4u16;
         let bytes = bincode::serde::encode_to_vec(&legacy, bincode::config::legacy()).unwrap();
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
         assert!(decoded.is_err());
+    }
+
+    #[test]
+    fn abandoned_2d_mesh_state_migrates_without_host_error() {
+        let columns = 4u16;
+        let rows = 4u16;
+        let side_x = columns as usize + 1;
+        let side_y = rows as usize + 1;
+        let mut legacy = LegacyGridArb {
+            columns: GRID_WIRE_MARKER | (2u16 << 8) | columns,
+            rows,
+            column_lines: Vec::with_capacity(side_x * side_y),
+            row_lines: Vec::with_capacity(side_x * side_y),
+            column_pins: vec![0; side_x * side_y],
+            row_pins: vec![0; side_x * side_y],
+        };
+        for r in 0..side_y {
+            for c in 0..side_x {
+                legacy.column_lines.push(c as f32 / columns as f32);
+                legacy.row_lines.push(r as f32 / rows as f32);
+            }
+        }
+        let bytes = bincode::serde::encode_to_vec(&legacy, bincode::config::legacy()).unwrap();
+        let migrated: GridArb =
+            bincode::serde::decode_from_slice(&bytes, bincode::config::legacy()).unwrap().0;
+        assert!(migrated.is_valid());
+        assert_eq!(migrated.column_lines.len(), columns as usize + 2);
+        assert_eq!(migrated.row_lines.len(), rows as usize + 2);
     }
 
     #[test]
