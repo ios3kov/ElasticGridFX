@@ -1,0 +1,78 @@
+name: Hot Loader Shell
+
+on:
+  push:
+    branches: ["feature/hot-loader-shell"]
+    paths:
+      - "host-rust/**"
+      - "tools/build_macos_sdkless.command"
+      - "tools/verify_bundle_macos.command"
+      - "tools/stage_hot_reload_macos.command"
+      - ".github/workflows/hot-loader-shell.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: elasticgrid-hot-loader-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shell:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+          targets: aarch64-apple-darwin
+
+      - name: Static checks
+        run: |
+          set -euo pipefail
+          cargo fmt --manifest-path host-rust/Cargo.toml -- --check
+          bash -n tools/build_macos_sdkless.command
+          zsh -n tools/stage_hot_reload_macos.command
+          xcrun clang++ -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -Werror \
+            -fsyntax-only host-rust/shell/ElasticGridShell.cpp
+
+      - name: Build implementation
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          set -euo pipefail
+          cargo build --release --locked --manifest-path host-rust/Cargo.toml
+
+      - name: Build shell and bundle
+        run: |
+          set -euo pipefail
+          TARGET="host-rust/target/release"
+          BUNDLE="dist/mac/ElasticGrid.plugin"
+
+          xcrun clang++ -std=c++17 -O2 -arch arm64 -dynamiclib -fvisibility=hidden \
+            host-rust/shell/ElasticGridShell.cpp \
+            -o "$TARGET/ElasticGridShell"
+
+          rm -rf "$BUNDLE"
+          mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Frameworks" "$BUNDLE/Contents/Resources"
+          cp "$TARGET/ElasticGridShell" "$BUNDLE/Contents/MacOS/ElasticGrid"
+          cp "$TARGET/libelasticgrid_ae.dylib" "$BUNDLE/Contents/Frameworks/ElasticGridImpl.dylib"
+          cp "$TARGET/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
+          cp "$TARGET/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
+          cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
+
+          /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.elasticgrid.fx' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string ElasticGrid' "$BUNDLE/Contents/Info.plist" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable ElasticGrid' "$BUNDLE/Contents/Info.plist"
+
+          codesign --force --sign - "$BUNDLE/Contents/Frameworks/ElasticGridImpl.dylib"
+          codesign --force --deep --sign - "$BUNDLE"
+
+          tools/verify_bundle_macos.command "$BUNDLE"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-hot-loader-shell
+          path: |
+            dist/mac/ElasticGrid.plugin
+            host-rust/target/release/libelasticgrid_ae.dylib
+          if-no-files-found: error
