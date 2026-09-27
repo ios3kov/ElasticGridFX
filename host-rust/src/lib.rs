@@ -571,7 +571,7 @@ fn sync_grid_topology(params: &mut ae::Parameters<Params>) -> Result<(), ae::Err
 
 pub(crate) fn elastic_params(params: &ae::Parameters<Params>) -> Result<EgElasticParams, ae::Error> {
     Ok(EgElasticParams {
-        tension_radius: params.get(Params::TensionRadius)?.as_slider()?.value() as f32,
+        tension_radius: params.get(Params::TensionRadius)?.as_float_slider()?.value() as f32,
         falloff: params.get(Params::Falloff)?.as_popup()?.value(),
         elasticity_strength: params.get(Params::ElasticityStrength)?.as_float_slider()?.value() as f32 / 100.0,
         min_spacing: params.get(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0,
@@ -598,7 +598,7 @@ fn evaluated_params(
         row_lines: grid.row_lines.as_ptr(),
         row_line_count: grid.row_lines.len() as i32,
         row_pins: grid.row_pins.as_ptr(),
-        tension_radius: params.get(Params::TensionRadius)?.as_slider()?.value() as f32,
+        tension_radius: params.get(Params::TensionRadius)?.as_float_slider()?.value() as f32,
         falloff: params.get(Params::Falloff)?.as_popup()?.value(),
         elasticity_strength: params.get(Params::ElasticityStrength)?.as_float_slider()?.value() as f32 / 100.0,
         min_spacing: params.get(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0,
@@ -734,19 +734,19 @@ impl AdobePluginGlobal for Plugin {
         in_data: ae::InData,
         _: ae::OutData,
     ) -> Result<(), ae::Error> {
-        params.add_with_flags(Params::Columns, "Num Columns", ae::SliderDef::setup(|f| {
+        params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(50);
+            f.set_valid_max(MAX_CELLS as i32);
             f.set_slider_min(1);
-            f.set_slider_max(50);
+            f.set_slider_max(32);
             f.set_default(4);
             f.set_value(f.default());
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
-        params.add_with_flags(Params::Rows, "Num Rows", ae::SliderDef::setup(|f| {
+        params.add_with_flags(Params::Rows, "Rows", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(50);
+            f.set_valid_max(MAX_CELLS as i32);
             f.set_slider_min(1);
-            f.set_slider_max(50);
+            f.set_slider_max(32);
             f.set_default(4);
             f.set_value(f.default());
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
@@ -761,56 +761,43 @@ impl AdobePluginGlobal for Plugin {
             -1
         })?;
 
-        params.add(Params::TensionRadius, "Tension Radius", ae::SliderDef::setup(|f| {
-            f.set_valid_min(0);
-            f.set_valid_max(20);
-            f.set_slider_min(0);
-            f.set_slider_max(20);
-            f.set_default(3);
-            f.set_value(f.default());
+        params.add(Params::TensionRadius, "Tension Radius", ae::FloatSliderDef::setup(|f| {
+            setup_float(f, (0.0, 32.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
-        params.add(Params::Falloff, "Falloff Profile", ae::PopupDef::setup(|f| {
-            f.set_options(&["Smoothstep", "Gaussian", "Linear"]);
-            f.set_default(1);
+        params.add(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
+            f.set_options(&["Linear", "Smoothstep", "Gaussian", "Cosine"]);
+            f.set_default(2);
             f.set_value(f.default());
         }))?;
         params.add(Params::ElasticityStrength, "Elasticity Strength", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
         }))?;
         params.add(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 25.0), (0.0, 25.0), 0.5, 2, true);
+            setup_float(f, (0.0, 25.0), (0.0, 5.0), 0.5, 2, true);
         }))?;
         params.add(Params::StretchEasing, "Stretch Easing", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 100.0), (0.0, 100.0), 50.0, 1, true);
-        }))?;
-        params.add(Params::EasingDistance, "Easing Distance", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 100.0), (0.0, 100.0), 25.0, 1, true);
-        }))?;
-
-        // Keep the legacy parameter ID for our saved projects, but hide it:
-        // the original "Wave Animation" is a group header, not an enable switch.
-        params.add_with_flags(
-            Params::WaveEnabled,
-            "Wave Animation (legacy)",
-            ae::CheckBoxDef::setup(|f| {
-                f.set_label("Enable");
-                f.set_default(true);
-                f.set_value(f.default());
-            }),
-            ae::ParamFlag::CANNOT_TIME_VARY,
-            ae::ParamUIFlags::INVISIBLE,
-        )?;
-        params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
         }))?;
+        params.add(Params::EasingDistance, "Easing Distance", ae::FloatSliderDef::setup(|f| {
+            setup_float(f, (1.0, 50.0), (1.0, 50.0), 25.0, 1, true);
+        }))?;
+
+        params.add(Params::WaveEnabled, "Wave Animation", ae::CheckBoxDef::setup(|f| {
+            f.set_label("Enable");
+            f.set_default(false);
+            f.set_value(f.default());
+        }))?;
+        params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
+            setup_float(f, (0.0, 25.0), (0.0, 10.0), 0.0, 2, true);
+        }))?;
         params.add(Params::WaveFrequency, "Wave Frequency", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 10.0), (0.0, 10.0), 1.0, 2, false);
+            setup_float(f, (0.0, 20.0), (0.0, 10.0), 1.0, 2, false);
         }))?;
         params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-360.0, 360.0), (-360.0, 360.0), 0.0, 1, false);
+            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-10.0, 10.0), (-10.0, 10.0), 0.0, 2, false);
+            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
             f.set_options(&["Both", "Columns Only", "Rows Only"]);
@@ -824,8 +811,8 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
         params.add(Params::Quality, "Render Quality", ae::PopupDef::setup(|f| {
-            f.set_options(&["Draft (Bilinear)", "Better (Bicubic)"]);
-            f.set_default(1);
+            f.set_options(&["Preview (Bilinear)", "Final (Bicubic)"]);
+            f.set_default(2);
             f.set_value(f.default());
         }))?;
 
