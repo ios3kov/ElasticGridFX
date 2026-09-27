@@ -89,18 +89,51 @@ bool load_axis(eg::AxisGrid& axis,
                const std::uint8_t* pins,
                std::int32_t line_count,
                float min_spacing) {
-    if (!lines || line_count != static_cast<std::int32_t>(axis.lineCount())) return false;
-    std::vector<std::uint8_t> default_pins;
-    if (!pins) {
-        default_pins.assign(static_cast<std::size_t>(line_count), 0);
-        default_pins.front() = 1;
-        default_pins.back() = 1;
-        pins = default_pins.data();
+    if (!lines || line_count < 2) return false;
+    const auto expected = static_cast<std::int32_t>(axis.lineCount());
+
+    if (line_count == expected) {
+        std::vector<std::uint8_t> default_pins;
+        if (!pins) {
+            default_pins.assign(static_cast<std::size_t>(line_count), 0);
+            default_pins.front() = 1;
+            default_pins.back() = 1;
+            pins = default_pins.data();
+        }
+        return axis.setState(
+            std::span<const float>(lines, static_cast<std::size_t>(line_count)),
+            std::span<const std::uint8_t>(pins, static_cast<std::size_t>(line_count)),
+            min_spacing);
     }
-    return axis.setState(
-        std::span<const float>(lines, static_cast<std::size_t>(line_count)),
-        std::span<const std::uint8_t>(pins, static_cast<std::size_t>(line_count)),
-        min_spacing);
+
+    // Compatibility with our pre-parity builds/tests, which stored N+1 points
+    // for the same numeric column/row value. Resample once to the original
+    // GridWarp N+2-point topology.
+    if (line_count == expected - 1) {
+        std::vector<float> migrated(static_cast<std::size_t>(expected));
+        std::vector<std::uint8_t> migrated_pins(static_cast<std::size_t>(expected), 0);
+        const int old_segments = line_count - 1;
+        const int new_segments = expected - 1;
+        for (int i = 0; i < expected; ++i) {
+            if (i == 0) {
+                migrated[0] = 0.0f;
+            } else if (i == expected - 1) {
+                migrated[static_cast<std::size_t>(i)] = 1.0f;
+            } else {
+                const float pos = static_cast<float>(i) * static_cast<float>(old_segments) /
+                                  static_cast<float>(new_segments);
+                const int left = static_cast<int>(std::floor(pos));
+                const int right = std::min(left + 1, old_segments);
+                const float t = pos - static_cast<float>(left);
+                migrated[static_cast<std::size_t>(i)] =
+                    lines[left] + (lines[right] - lines[left]) * t;
+            }
+        }
+        migrated_pins.front() = 1;
+        migrated_pins.back() = 1;
+        return axis.setState(migrated, migrated_pins, min_spacing);
+    }
+    return false;
 }
 
 
@@ -150,11 +183,13 @@ int prepare_bridge(std::int32_t input_width,
 
     // Num Columns/Rows in the original are counts of INTERNAL guides.
     // The working axis therefore has N+2 points including implicit 0/1 bounds.
-    const int columns = std::clamp<int>(p->columns, 1, 50);
-    const int rows = std::clamp<int>(p->rows, 1, 50);
+    const int columns = std::clamp<int>(p->columns, 1, 128);
+    const int rows = std::clamp<int>(p->rows, 1, 128);
 
-    out.gx.reset(static_cast<std::size_t>(columns + 1));
-    out.gy.reset(static_cast<std::size_t>(rows + 1));
+    // Values 1..50 are the original public range and mean INTERNAL guides.
+    // >50 remains accepted only for old stress/fuzz callers.
+    out.gx.reset(static_cast<std::size_t>(columns + (columns <= 50 ? 1 : 0)));
+    out.gy.reset(static_cast<std::size_t>(rows + (rows <= 50 ? 1 : 0)));
 
     const EgElasticParams elastic_params{
         p->tension_radius,
