@@ -25,17 +25,76 @@ if ! xcode-select -p >/dev/null 2>&1; then
   exit 3
 fi
 
-if ! command -v cargo >/dev/null 2>&1; then
-  echo "Rust is not installed. Installing the official minimal toolchain..."
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+command -v python3 >/dev/null 2>&1 || {
+  echo "ERROR: python3 is required for toolchain version checks."
+  exit 4
+}
+
+rust_meets_minimum() {
+  local version="$1"
+  python3 - "$version" <<'PYVER'
+import re, sys
+m = re.match(r"^(\d+)\.(\d+)\.(\d+)", sys.argv[1])
+if not m:
+    raise SystemExit(1)
+v = tuple(map(int, m.groups()))
+raise SystemExit(0 if v >= (1, 85, 0) else 1)
+PYVER
+}
+
+install_user_rust() {
+  echo "Installing/updating user-local stable Rust (>=1.85 required)..."
+  command -v curl >/dev/null 2>&1 || {
+    echo "ERROR: curl is required to install Rust."
+    exit 4
+  }
+  if ! command -v rustup >/dev/null 2>&1; then
+    RUSTUP_INIT_SKIP_PATH_CHECK=yes curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+      RUSTUP_INIT_SKIP_PATH_CHECK=yes sh -s -- -y --profile minimal --default-toolchain stable
+  fi
+  export PATH="$HOME/.cargo/bin:$PATH"
   # shellcheck disable=SC1090
-  source "$HOME/.cargo/env"
+  [[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+  rustup toolchain install stable --profile minimal >/dev/null
+  rustup default stable >/dev/null
+  rustup component add clippy --toolchain stable >/dev/null
+  hash -r
+}
+
+NEED_USER_RUST=0
+if ! command -v cargo >/dev/null 2>&1 || ! command -v rustc >/dev/null 2>&1; then
+  NEED_USER_RUST=1
+else
+  RUST_VERSION="$(rustc --version | awk '{print $2}')"
+  if ! rust_meets_minimum "$RUST_VERSION"; then
+    echo "Existing Rust $RUST_VERSION is too old; need >=1.85."
+    NEED_USER_RUST=1
+  elif ! cargo clippy --version >/dev/null 2>&1; then
+    echo "Existing Rust is missing Clippy."
+    NEED_USER_RUST=1
+  fi
 fi
 
-if command -v rustup >/dev/null 2>&1 && ! cargo clippy --version >/dev/null 2>&1; then
-  echo "Installing Rust Clippy component for the mandatory static-analysis gate..."
-  rustup component add clippy
+if [[ "$NEED_USER_RUST" == "1" ]]; then
+  install_user_rust
 fi
+
+export PATH="$HOME/.cargo/bin:$PATH"
+# shellcheck disable=SC1090
+[[ -f "$HOME/.cargo/env" ]] && source "$HOME/.cargo/env"
+
+RUST_VERSION="$(rustc --version | awk '{print $2}')"
+rust_meets_minimum "$RUST_VERSION" || {
+  echo "ERROR: Rust >=1.85 required, active rustc is $RUST_VERSION"
+  exit 4
+}
+cargo clippy --version >/dev/null 2>&1 || {
+  echo "ERROR: Clippy unavailable after Rust bootstrap."
+  exit 4
+}
+
+cargo --version
+rustc --version
 
 export MACOSX_DEPLOYMENT_TARGET="11.0"
 mkdir -p "$DIST"

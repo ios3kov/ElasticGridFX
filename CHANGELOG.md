@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Target-Mac bootstrap hardening: the one-click build now detects Rust older than 1.85 or missing Clippy and installs/activates a user-local stable toolchain automatically. Dependency audit now fails if the committed `Cargo.lock` is missing instead of silently regenerating the graph.
+
 - Tightened the hosted macOS gate after freezing dependencies: CI now verifies and consumes the committed `host-rust/Cargo.lock` with `--locked` instead of regenerating it.
 
 - Froze the exact Cargo dependency graph validated by hosted macOS gate #34: committed `host-rust/Cargo.lock` from the green artifact, SHA-256 `5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e`.

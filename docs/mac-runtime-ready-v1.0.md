@@ -5,7 +5,7 @@ Date: 2026-09-27
 
 ## Automated gate
 
-1. Run `BUILD_AND_INSTALL_MAC.command`.
+1. Run `BUILD_AND_INSTALL_MAC.command`. It validates Xcode tools, ensures Rust >=1.85 + Clippy (auto-installing/updating user-local stable Rust when needed), runs the full physical-Mac preflight, builds/signs and installs the plugin.
 2. Fully quit and reopen After Effects into a new empty unsaved project.
 3. Run `tools/ae_runtime_check_macos.command --full`.
 
@@ -17,7 +17,7 @@ The automated path validates:
 - CPU ↔ Metal image parity
 - Metal determinism under sequential and concurrent render
 - production-path 4K and 8K Metal benchmarks
-- dependency/RustSec/SBOM gate and locked dependency graph
+- dependency/RustSec/SBOM gate using the committed locked dependency graph
 - two clean offline reproducible Release builds
 - plugin bundle structure and code signature
 - After Effects plugin discovery/application by match name

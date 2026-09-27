@@ -4,7 +4,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"; HOST="$ROOT/host-rust"; MANIFEST="$HOS
 mkdir -p "$OUT"
 [[ "$(uname -s)" == Darwin ]] || { echo "ERROR: dependency freeze must run on target macOS."; exit 2; }
 command -v cargo >/dev/null || { echo "ERROR: cargo required"; exit 3; }; command -v python3 >/dev/null || { echo "ERROR: python3 required"; exit 4; }
-if [[ ! -f "$LOCK" ]]; then cargo generate-lockfile --manifest-path "$MANIFEST"; fi
+[[ -f "$LOCK" ]] || { echo "ERROR: committed Cargo.lock missing: $LOCK"; exit 5; }
 cargo metadata --locked --format-version 1 --manifest-path "$MANIFEST" > "$OUT/cargo-metadata.json"
 cargo tree --locked --manifest-path "$MANIFEST" > "$OUT/cargo-tree.txt"
 python3 "$ROOT/tools/generate_sbom.py" "$OUT/cargo-metadata.json" "$OUT"
