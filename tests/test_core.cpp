@@ -57,6 +57,20 @@ int main() {
         }
     }
     {
+        // Original Elasticity Strength also scales the grabbed guide itself.
+        AxisGrid g(8);
+        ElasticSettings e;
+        e.radius_lines = 3.0f;
+        e.strength = 0.5f;
+        e.min_spacing = 0.001f;
+        const float before = g.lines()[4];
+        const float target = 0.65f;
+        expect(g.dragElastic(4, target, e), "half-strength drag accepted");
+        const float expected = before + (target - before) * 0.5f;
+        expect(std::abs(g.lines()[4] - expected) < 1e-6f,
+               "grabbed guide is scaled by elasticity strength");
+    }
+    {
         // Original min spacing is capped at half uniform segment spacing.
         AxisGrid g(4);
         ElasticSettings e;
