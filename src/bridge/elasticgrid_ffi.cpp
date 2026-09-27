@@ -26,10 +26,10 @@ static_assert(sizeof(EgGpuCubicSample) == 32, "EgGpuCubicSample ABI drift");
 
 namespace {
 eg::FalloffProfile falloff_from_i32(std::int32_t v) noexcept {
+    // Original popup order: Smoothstep | Gaussian | Linear.
     switch (v) {
-        case 1: return eg::FalloffProfile::Linear;
-        case 3: return eg::FalloffProfile::Gaussian;
-        case 4: return eg::FalloffProfile::Cosine;
+        case 2: return eg::FalloffProfile::Gaussian;
+        case 3: return eg::FalloffProfile::Linear;
         default: return eg::FalloffProfile::Smoothstep;
     }
 }
@@ -77,7 +77,7 @@ bool valid_row_bytes(std::ptrdiff_t row_bytes, std::int32_t width, std::size_t b
 
 eg::ElasticSettings elastic_from_params(const EgElasticParams& p) noexcept {
     eg::ElasticSettings out;
-    out.radius_lines = std::clamp(finite_or(p.tension_radius, 3.0f), 0.0f, 32.0f);
+    out.radius_lines = std::clamp(finite_or(p.tension_radius, 3.0f), 0.0f, 20.0f);
     out.strength = std::clamp(finite_or(p.elasticity_strength, 1.0f), 0.0f, 2.0f);
     out.min_spacing = std::clamp(finite_or(p.min_spacing, 0.005f), 0.0f, 0.25f);
     out.falloff = falloff_from_i32(p.falloff);
@@ -148,11 +148,13 @@ int prepare_bridge(std::int32_t input_width,
         return 1;
     }
 
-    const int columns = std::clamp<int>(p->columns, 1, 128);
-    const int rows = std::clamp<int>(p->rows, 1, 128);
+    // Num Columns/Rows in the original are counts of INTERNAL guides.
+    // The working axis therefore has N+2 points including implicit 0/1 bounds.
+    const int columns = std::clamp<int>(p->columns, 1, 50);
+    const int rows = std::clamp<int>(p->rows, 1, 50);
 
-    out.gx.reset(static_cast<std::size_t>(columns));
-    out.gy.reset(static_cast<std::size_t>(rows));
+    out.gx.reset(static_cast<std::size_t>(columns + 1));
+    out.gy.reset(static_cast<std::size_t>(rows + 1));
 
     const EgElasticParams elastic_params{
         p->tension_radius,
@@ -172,9 +174,9 @@ int prepare_bridge(std::int32_t input_width,
 
     eg::WaveSettings wave;
     wave.enabled = p->wave_enabled != 0;
-    wave.amplitude = std::clamp(finite_or(p->wave_amplitude, 0.0f), 0.0f, 0.25f);
-    wave.frequency = std::max(0.0f, finite_or(p->wave_frequency, 1.0f));
-    wave.phase_cycles = finite_or(p->wave_phase, 0.0f);
+    wave.amplitude = std::clamp(finite_or(p->wave_amplitude, 0.0f), 0.0f, 1.0f);
+    wave.frequency = std::clamp(finite_or(p->wave_frequency, 1.0f), 0.0f, 10.0f);
+    wave.phase_degrees = std::clamp(finite_or(p->wave_phase, 0.0f), -360.0f, 360.0f);
     wave.speed_cycles_per_second = finite_or(p->wave_speed, 0.0f);
     wave.axis = wave_axis_from_i32(p->wave_axis);
 
