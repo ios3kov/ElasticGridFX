@@ -104,6 +104,42 @@ int main() {
     }
 
     {
+        // True 2D mesh regression: move one interior intersection in both X
+        // and Y. This must locally deform the image; a separable guide-only
+        // implementation cannot satisfy this state representation.
+        std::vector<std::uint8_t> src(w * h * 4), dst(src.size(), 0);
+        fill_pattern(src, w, h, static_cast<std::uint8_t>(255));
+        auto p = defaults();
+        constexpr int columns = 4, rows = 4, stride = columns + 1;
+        std::vector<float> px((columns + 1) * (rows + 1));
+        std::vector<float> py(px.size());
+        std::vector<std::uint8_t> pins(px.size(), 0);
+        for (int row = 0; row <= rows; ++row) {
+            for (int column = 0; column <= columns; ++column) {
+                const int i = row * stride + column;
+                px[static_cast<std::size_t>(i)] = static_cast<float>(column) / columns;
+                py[static_cast<std::size_t>(i)] = static_cast<float>(row) / rows;
+                pins[static_cast<std::size_t>(i)] =
+                    static_cast<std::uint8_t>(column == 0 || column == columns || row == 0 || row == rows);
+            }
+        }
+        const int center = 2 * stride + 2;
+        px[static_cast<std::size_t>(center)] = 0.62f;
+        py[static_cast<std::size_t>(center)] = 0.38f;
+        p.column_lines = px.data(); p.column_line_count = static_cast<std::int32_t>(px.size()); p.column_pins = pins.data();
+        p.row_lines = py.data(); p.row_line_count = static_cast<std::int32_t>(py.size()); p.row_pins = pins.data();
+        p.canvas_width = w; p.canvas_height = h;
+        assert(eg_render_frame(src.data(), w * 4, w, h, dst.data(), w * 4, w, h, 8, &p) == 0);
+        assert(src != dst);
+
+        const EgRectI32 roi{8, 4, 40, 24};
+        EgRectI32 required{};
+        assert(eg_required_source_rect(w, h, roi, &p, &required) == 0);
+        assert(required.left == 0 && required.top == 0 && required.right == w && required.bottom == h);
+        assert(eg_prepare_gpu_plan(w, h, w, h, &p, nullptr, nullptr, nullptr, nullptr) == 6);
+    }
+
+    {
         std::vector<std::uint16_t> src(w * h * 4), dst(src.size(), 0);
         fill_pattern(src, w, h, static_cast<std::uint16_t>(32768));
         auto p = defaults();
