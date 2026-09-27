@@ -18,10 +18,10 @@ int main(int argc, char** argv) {
     p.wave_enabled = 1; p.wave_amplitude = 0.04f; p.wave_frequency = 2.0f;
     p.wave_speed = 0.2f; p.wave_axis = 1; p.edge_mode = 1; p.quality = quality;
 
-    std::vector<float> x(static_cast<std::size_t>(p.columns)+1), y(static_cast<std::size_t>(p.rows)+1);
+    std::vector<float> x(static_cast<std::size_t>(p.columns)+2), y(static_cast<std::size_t>(p.rows)+2);
     std::vector<std::uint8_t> xp(x.size(),0), yp(y.size(),0);
-    for (std::size_t i=0;i<x.size();++i) x[i]=float(i)/float(p.columns);
-    for (std::size_t i=0;i<y.size();++i) y[i]=float(i)/float(p.rows);
+    for (std::size_t i=0;i<x.size();++i) x[i]=float(i)/float(p.columns+1);
+    for (std::size_t i=0;i<y.size();++i) y[i]=float(i)/float(p.rows+1);
     xp.front()=xp.back()=1; yp.front()=yp.back()=1;
     EgElasticParams ep{p.tension_radius,p.falloff,p.elasticity_strength,p.min_spacing};
     if (eg_drag_axis(x.data(),xp.data(),static_cast<int>(x.size()),6,0.58f,&ep)!=0) return 2;
