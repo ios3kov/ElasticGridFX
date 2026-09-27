@@ -100,6 +100,20 @@ void AxisGrid::enforceMonotonic(std::vector<float>& values,
         }
     }
 
+    // Final defensive projection for legacy/internal-pin states. Canonical
+    // GridWarp parity states have no internal pins, so this is normally a no-op.
+    for (std::size_t i = 1; i + 1 < n; ++i) values[i] = clamp01(values[i]);
+    values.front() = 0.0f;
+    values.back() = 1.0f;
+    for (std::size_t i = 1; i < n; ++i) {
+        const float lo = values[i - 1] + min_spacing;
+        if (values[i] < lo) values[i] = lo;
+    }
+    values.back() = 1.0f;
+    for (std::size_t i = n - 1; i-- > 0;) {
+        const float hi = values[i + 1] - min_spacing;
+        if (values[i] > hi) values[i] = hi;
+    }
     values.front() = 0.0f;
     values.back() = 1.0f;
 }
