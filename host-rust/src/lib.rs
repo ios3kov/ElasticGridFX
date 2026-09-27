@@ -736,7 +736,7 @@ impl AdobePluginGlobal for Plugin {
     ) -> Result<(), ae::Error> {
         params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(MAX_CELLS as i32);
+            f.set_valid_max(128);
             f.set_slider_min(1);
             f.set_slider_max(32);
             f.set_default(4);
@@ -744,7 +744,7 @@ impl AdobePluginGlobal for Plugin {
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
         params.add_with_flags(Params::Rows, "Rows", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(MAX_CELLS as i32);
+            f.set_valid_max(128);
             f.set_slider_min(1);
             f.set_slider_max(32);
             f.set_default(4);
