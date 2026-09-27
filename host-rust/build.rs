@@ -42,6 +42,7 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=AE_HOT_LOADER_IMPL_LABEL");
     // The after-effects 0.4.0 macro expands these cfg names in the destination
     // crate. Register them explicitly so modern rustc check-cfg / Clippy can
     // validate the expansion without treating supported host cfgs as unknown.
