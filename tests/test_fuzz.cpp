@@ -165,7 +165,7 @@ void fuzz_axis(std::mt19937_64& rng, int iters) {
         w.enabled = (rng() & 1u) != 0;
         w.amplitude = weird_float(rng);
         w.frequency = weird_float(rng);
-        w.phase_cycles = weird_float(rng);
+        w.phase_degrees = weird_float(rng);
         w.speed_cycles_per_second = weird_float(rng);
         w.axis = static_cast<WaveAxis>(rng() & 0xffu);
         auto eval = g.evaluated(w, weird_float(rng), weird_float(rng), (rng() & 1u) != 0);
