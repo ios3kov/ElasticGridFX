@@ -110,8 +110,10 @@ bool load_axis(eg::AxisGrid& axis,
     // for the same numeric column/row value. Resample once to the original
     // GridWarp N+2-point topology.
     if (line_count == expected - 1) {
-        std::vector<float> migrated(static_cast<std::size_t>(expected));
-        std::vector<std::uint8_t> migrated_pins(static_cast<std::size_t>(expected), 0);
+        thread_local std::vector<float> migrated;
+        thread_local std::vector<std::uint8_t> migrated_pins;
+        migrated.resize(static_cast<std::size_t>(expected));
+        migrated_pins.assign(static_cast<std::size_t>(expected), 0);
         const int old_segments = line_count - 1;
         const int new_segments = expected - 1;
         for (int i = 0; i < expected; ++i) {
