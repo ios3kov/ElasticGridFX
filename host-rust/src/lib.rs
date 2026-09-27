@@ -933,7 +933,7 @@ impl AdobePluginGlobal for Plugin {
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
                 #[cfg(target_os = "macos")]
-                extra.set_gpu_render_possible(extra.what_gpu() == ae::GpuFramework::Metal && extra.bit_depth() == 32);
+                // True 2D mesh currently uses the CPU SmartFX path. Re-enable Metal only after\n                // the GPU backend consumes a per-pixel 2D sampling map instead of separable X/Y plans.\n                extra.set_gpu_render_possible(false);
             }
             ae::Command::SmartRender { extra } => {
                 let cb = extra.callbacks();
@@ -1060,7 +1060,7 @@ mod tests {
     fn grid_wire_rejects_unknown_version() {
         let g = GridArb::uniform(4, 4);
         let mut legacy = legacy_from(&g);
-        legacy.columns = GRID_WIRE_MARKER | (2u16 << 8) | 4u16;
+        legacy.columns = GRID_WIRE_MARKER | (3u16 << 8) | 4u16;
         let bytes = bincode::serde::encode_to_vec(&legacy, bincode::config::legacy()).unwrap();
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
         assert!(decoded.is_err());
@@ -1073,12 +1073,17 @@ mod tests {
         g.column_lines[2] = 0.62;
         g.column_lines[3] = 0.84;
         let r = g.resized(9, 7);
-        assert_eq!(r.column_lines.len(), 10);
-        assert_eq!(r.row_lines.len(), 8);
-        assert!(r.column_lines.windows(2).all(|w| w[1] > w[0]));
-        assert!(r.row_lines.windows(2).all(|w| w[1] > w[0]));
-        assert_eq!(r.column_lines[0], 0.0);
-        assert_eq!(*r.column_lines.last().unwrap(), 1.0);
+        assert_eq!(r.column_lines.len(), GridArb::node_count_for(9, 7));
+        assert_eq!(r.row_lines.len(), GridArb::node_count_for(9, 7));
+        assert!(r.is_valid());
+        for row in 0..=7 {
+            assert_eq!(r.point(0, row).0, 0.0);
+            assert_eq!(r.point(9, row).0, 1.0);
+        }
+        for column in 0..=9 {
+            assert_eq!(r.point(column, 0).1, 0.0);
+            assert_eq!(r.point(column, 7).1, 1.0);
+        }
     }
 
     #[test]
