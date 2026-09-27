@@ -4,15 +4,15 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
 clear
-echo "ElasticGrid FX v0.9 — final Mac preflight build"
+echo "ElasticGrid FX v1.0 candidate — final Mac/After Effects gate"
 echo "Runs sanitizers, quality parity, real Metal 4K/8K benchmarks, builds, signs and installs."
 echo
 
 if "$ROOT/tools/build_macos_sdkless.command" --install; then
   echo
   echo "SUCCESS: ElasticGrid.plugin installed."
-  echo "Restart After Effects and apply: Effect > ElasticGrid FX > ElasticGrid FX"
-  echo "Final runtime gate: fully quit/reopen AE into a NEW EMPTY project, then run:"
+  echo "Fully quit/reopen After Effects into a NEW EMPTY project."
+  echo "Then run the automated runtime gate:"
   echo "  tools/ae_runtime_check_macos.command --full"
   status=0
 else
