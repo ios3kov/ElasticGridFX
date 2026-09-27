@@ -151,7 +151,10 @@ bool AxisGrid::dragElastic(std::size_t line, float target, const ElasticSettings
     if (line == 0 || line + 1 >= lines_.size() || pins_[line] || !std::isfinite(target)) return false;
 
     auto candidate = lines_;
-    const float delta = clamp01(target) - lines_[line];
+    // Original uses the raw normalized pointer coordinate. Values outside
+    // 0..1 still influence neighboring guides before the spacing projection
+    // constrains the final grid back inside the image.
+    const float delta = target - lines_[line];
     const float radius = std::max(0.0f, std::isfinite(settings.radius_lines) ? settings.radius_lines : 3.0f);
     const float strength = std::clamp(std::isfinite(settings.strength) ? settings.strength : 1.0f, 0.0f, 2.0f);
 
