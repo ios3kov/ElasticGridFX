@@ -1,9 +1,8 @@
 use super::*;
 
-const HIT_SLOP: f32 = 9.0;
+const HIT_SLOP: f32 = 10.0;
 const DRAG_NONE: isize = 0;
-const DRAG_COLUMNS: isize = 1;
-const DRAG_ROWS: isize = 2;
+const DRAG_POINT: isize = 1;
 
 fn overlay_color(in_data: &ae::InData) -> ae::drawbot::ColorRgba {
     let fallback = ae::drawbot::ColorRgba {
@@ -59,19 +58,13 @@ fn frame_to_layer(
     ))
 }
 
-fn point_segment_distance(px: f32, py: f32, a: ae::drawbot::PointF32, b: ae::drawbot::PointF32) -> f32 {
-    let vx = b.x - a.x;
-    let vy = b.y - a.y;
-    let wx = px - a.x;
-    let wy = py - a.y;
-    let vv = vx * vx + vy * vy;
-    if vv <= 1.0e-6 {
-        return ((px - a.x).powi(2) + (py - a.y).powi(2)).sqrt();
-    }
-    let t = ((wx * vx + wy * vy) / vv).clamp(0.0, 1.0);
-    let qx = a.x + t * vx;
-    let qy = a.y + t * vy;
-    ((px - qx).powi(2) + (py - qy).powi(2)).sqrt()
+fn point_distance(px: f32, py: f32, p: ae::drawbot::PointF32) -> f32 {
+    ((px - p.x).powi(2) + (py - p.y).powi(2)).sqrt()
+}
+
+fn node_pinned(grid: &GridArb, index: usize) -> bool {
+    grid.column_pins.get(index).copied().unwrap_or(1) != 0
+        || grid.row_pins.get(index).copied().unwrap_or(1) != 0
 }
 
 fn hit_test(
@@ -79,39 +72,31 @@ fn hit_test(
     grid: &GridArb,
     event: &ae::EventExtra,
     mouse: ae::Point,
-) -> Result<Option<(isize, usize)>, ae::Error> {
+) -> Result<Option<usize>, ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(None);
     }
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
-    let mut best: Option<(f32, isize, usize)> = None;
+    let columns = grid.columns as usize;
+    let rows = grid.rows as usize;
+    let mut best: Option<(f32, usize)> = None;
 
-    for i in 1..grid.column_lines.len().saturating_sub(1) {
-        if grid.column_pins.get(i).copied().unwrap_or(0) != 0 {
-            continue;
-        }
-        let x = grid.column_lines[i] * width;
-        let a = layer_to_frame(in_data, event, x, 0.0)?;
-        let b = layer_to_frame(in_data, event, x, height)?;
-        let d = point_segment_distance(mouse.h as f32, mouse.v as f32, a, b);
-        if d <= HIT_SLOP && best.map(|v| d < v.0).unwrap_or(true) {
-            best = Some((d, DRAG_COLUMNS, i));
-        }
-    }
-    for i in 1..grid.row_lines.len().saturating_sub(1) {
-        if grid.row_pins.get(i).copied().unwrap_or(0) != 0 {
-            continue;
-        }
-        let y = grid.row_lines[i] * height;
-        let a = layer_to_frame(in_data, event, 0.0, y)?;
-        let b = layer_to_frame(in_data, event, width, y)?;
-        let d = point_segment_distance(mouse.h as f32, mouse.v as f32, a, b);
-        if d <= HIT_SLOP && best.map(|v| d < v.0).unwrap_or(true) {
-            best = Some((d, DRAG_ROWS, i));
+    for row in 1..rows {
+        for column in 1..columns {
+            let index = grid.node_index(column, row);
+            if node_pinned(grid, index) {
+                continue;
+            }
+            let (x, y) = grid.point(column, row);
+            let p = layer_to_frame(in_data, event, x * width, y * height)?;
+            let d = point_distance(mouse.h as f32, mouse.v as f32, p);
+            if d <= HIT_SLOP && best.map(|v| d < v.0).unwrap_or(true) {
+                best = Some((d, index));
+            }
         }
     }
-    Ok(best.map(|(_, axis, index)| (axis, index)))
+    Ok(best.map(|(_, index)| index))
 }
 
 fn draw_segment(
@@ -144,47 +129,53 @@ fn draw_viewer(
     let pen = supplier.new_pen(&color, 1.0)?;
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
+    let columns = grid.columns as usize;
+    let rows = grid.rows as usize;
 
-    // Border keeps the overlay visually tied to the source layer even when the
-    // layer itself is scaled/rotated in a Comp viewer.
-    let p00 = layer_to_frame(in_data, event, 0.0, 0.0)?;
-    let p10 = layer_to_frame(in_data, event, width, 0.0)?;
-    let p11 = layer_to_frame(in_data, event, width, height)?;
-    let p01 = layer_to_frame(in_data, event, 0.0, height)?;
-    draw_segment(&supplier, &surface, &pen, p00, p10)?;
-    draw_segment(&supplier, &surface, &pen, p10, p11)?;
-    draw_segment(&supplier, &surface, &pen, p11, p01)?;
-    draw_segment(&supplier, &surface, &pen, p01, p00)?;
+    let frame_point = |column: usize, row: usize| -> Result<ae::drawbot::PointF32, ae::Error> {
+        let (x, y) = grid.point(column, row);
+        layer_to_frame(in_data, event, x * width, y * height)
+    };
 
-    let draw_handles = grid.column_lines.len().max(grid.row_lines.len()) <= 34;
-    for i in 1..grid.column_lines.len().saturating_sub(1) {
-        let x = grid.column_lines[i] * width;
-        let a = layer_to_frame(in_data, event, x, 0.0)?;
-        let b = layer_to_frame(in_data, event, x, height)?;
-        draw_segment(&supplier, &surface, &pen, a, b)?;
-        if draw_handles {
-            let mid = ae::drawbot::RectF32 {
-                left: (a.x + b.x) * 0.5 - 2.5,
-                top: (a.y + b.y) * 0.5 - 2.5,
-                width: 5.0,
-                height: 5.0,
-            };
-            surface.paint_rect(&color, &mid)?;
+    for row in 0..=rows {
+        for column in 0..columns {
+            draw_segment(
+                &supplier,
+                &surface,
+                &pen,
+                frame_point(column, row)?,
+                frame_point(column + 1, row)?,
+            )?;
         }
     }
-    for i in 1..grid.row_lines.len().saturating_sub(1) {
-        let y = grid.row_lines[i] * height;
-        let a = layer_to_frame(in_data, event, 0.0, y)?;
-        let b = layer_to_frame(in_data, event, width, y)?;
-        draw_segment(&supplier, &surface, &pen, a, b)?;
-        if draw_handles {
-            let mid = ae::drawbot::RectF32 {
-                left: (a.x + b.x) * 0.5 - 2.5,
-                top: (a.y + b.y) * 0.5 - 2.5,
-                width: 5.0,
-                height: 5.0,
-            };
-            surface.paint_rect(&color, &mid)?;
+    for column in 0..=columns {
+        for row in 0..rows {
+            draw_segment(
+                &supplier,
+                &surface,
+                &pen,
+                frame_point(column, row)?,
+                frame_point(column, row + 1)?,
+            )?;
+        }
+    }
+
+    if columns.max(rows) <= 32 {
+        for row in 1..rows {
+            for column in 1..columns {
+                let index = grid.node_index(column, row);
+                if node_pinned(&grid, index) {
+                    continue;
+                }
+                let p = frame_point(column, row)?;
+                let handle = ae::drawbot::RectF32 {
+                    left: p.x - 3.0,
+                    top: p.y - 3.0,
+                    width: 6.0,
+                    height: 6.0,
+                };
+                surface.paint_rect(&color, &handle)?;
+            }
         }
     }
 
@@ -214,7 +205,7 @@ fn draw_effect_control(
         blue: 0.85,
         alpha: 1.0,
     })?;
-    let label = format!("{} × {} — drag guides in Viewer", grid.columns, grid.rows);
+    let label = format!("{} × {} — drag mesh points in Viewer", grid.columns, grid.rows);
     let origin = ae::drawbot::PointF32 {
         x: frame.left as f32 + 5.0,
         y: frame.top as f32 + 4.0,
@@ -230,6 +221,109 @@ fn draw_effect_control(
     )?;
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
+}
+
+fn falloff_weight(profile: i32, t: f32) -> f32 {
+    let x = t.clamp(0.0, 1.0);
+    match profile {
+        1 => 1.0 - x,
+        3 => (-4.5 * x * x).exp(),
+        4 => (x * std::f32::consts::FRAC_PI_2).cos().max(0.0),
+        _ => {
+            let s = x * x * (3.0 - 2.0 * x);
+            1.0 - s
+        }
+    }
+}
+
+fn move_mesh_point(
+    grid: &mut GridArb,
+    index: usize,
+    target_x: f32,
+    target_y: f32,
+    elastic: &EgElasticParams,
+) -> bool {
+    if !grid.is_valid() || index >= grid.column_lines.len() || node_pinned(grid, index) {
+        return false;
+    }
+
+    let original = grid.clone();
+    let columns = grid.columns as usize;
+    let rows = grid.rows as usize;
+    let stride = columns + 1;
+    let selected_row = index / stride;
+    let selected_column = index % stride;
+    if selected_column == 0 || selected_column >= columns || selected_row == 0 || selected_row >= rows {
+        return false;
+    }
+
+    let old_x = original.column_lines[index];
+    let old_y = original.row_lines[index];
+    let dx = target_x.clamp(0.0, 1.0) - old_x;
+    let dy = target_y.clamp(0.0, 1.0) - old_y;
+    let radius = elastic.tension_radius.max(0.0);
+    let strength = elastic.elasticity_strength.clamp(0.0, 2.0);
+
+    for row in 1..rows {
+        for column in 1..columns {
+            let i = row * stride + column;
+            if node_pinned(&original, i) {
+                continue;
+            }
+            let dc = column as f32 - selected_column as f32;
+            let dr = row as f32 - selected_row as f32;
+            let distance = (dc * dc + dr * dr).sqrt();
+            let weight = if i == index {
+                1.0
+            } else if radius <= 0.0 || distance > radius {
+                0.0
+            } else {
+                falloff_weight(elastic.falloff, distance / radius) * strength
+            };
+            grid.column_lines[i] = original.column_lines[i] + dx * weight;
+            grid.row_lines[i] = original.row_lines[i] + dy * weight;
+        }
+    }
+
+    // Keep the mesh non-folding: each row must remain left-to-right and each
+    // column top-to-bottom. This preserves a stable inverse warp under drag.
+    let spacing_x = elastic.min_spacing.clamp(0.0, 0.45 / columns.max(1) as f32);
+    let spacing_y = elastic.min_spacing.clamp(0.0, 0.45 / rows.max(1) as f32);
+    for _ in 0..4 {
+        for row in 1..rows {
+            for column in 1..columns {
+                let i = row * stride + column;
+                if node_pinned(grid, i) { continue; }
+                let left = row * stride + column - 1;
+                let right = row * stride + column + 1;
+                let lo = grid.column_lines[left] + spacing_x;
+                let hi = grid.column_lines[right] - spacing_x;
+                if lo <= hi {
+                    grid.column_lines[i] = grid.column_lines[i].clamp(lo, hi);
+                }
+            }
+        }
+        for column in 1..columns {
+            for row in 1..rows {
+                let i = row * stride + column;
+                if node_pinned(grid, i) { continue; }
+                let up = (row - 1) * stride + column;
+                let down = (row + 1) * stride + column;
+                let lo = grid.row_lines[up] + spacing_y;
+                let hi = grid.row_lines[down] - spacing_y;
+                if lo <= hi {
+                    grid.row_lines[i] = grid.row_lines[i].clamp(lo, hi);
+                }
+            }
+        }
+    }
+
+    if grid.is_valid() {
+        true
+    } else {
+        *grid = original;
+        false
+    }
 }
 
 pub fn draw(
@@ -252,8 +346,8 @@ pub fn click(
         return Ok(());
     }
     let grid = grid_snapshot(params)?;
-    if let Some((axis, index)) = hit_test(in_data, &grid, event, event.screen_point())? {
-        event.set_continue_refcon(0, axis as _);
+    if let Some(index) = hit_test(in_data, &grid, event, event.screen_point())? {
+        event.set_continue_refcon(0, DRAG_POINT as _);
         event.set_continue_refcon(1, index as _);
         event.set_send_drag(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
@@ -266,51 +360,23 @@ pub fn drag(
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
-    let axis = event.continue_refcon(0);
-    let index = event.continue_refcon(1) as usize;
-    if axis == DRAG_NONE || (axis != DRAG_COLUMNS && axis != DRAG_ROWS) {
+    if event.continue_refcon(0) != DRAG_POINT {
         return Ok(());
     }
-
+    let index = event.continue_refcon(1) as usize;
     let (layer_x, layer_y) = frame_to_layer(in_data, event, event.screen_point())?;
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
     let mut grid = grid_snapshot(params)?;
     let elastic = elastic_params(params)?;
 
-    let rc = if axis == DRAG_COLUMNS {
-        if index == 0 || index + 1 >= grid.column_lines.len() {
-            return Ok(());
-        }
-        let target = (layer_x / width).clamp(0.0, 1.0);
-        unsafe {
-            eg_drag_axis(
-                grid.column_lines.as_mut_ptr(),
-                grid.column_pins.as_mut_ptr(),
-                grid.column_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
-    } else {
-        if index == 0 || index + 1 >= grid.row_lines.len() {
-            return Ok(());
-        }
-        let target = (layer_y / height).clamp(0.0, 1.0);
-        unsafe {
-            eg_drag_axis(
-                grid.row_lines.as_mut_ptr(),
-                grid.row_pins.as_mut_ptr(),
-                grid.row_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
-    };
-
-    if rc == 0 {
+    if move_mesh_point(
+        &mut grid,
+        index,
+        layer_x / width,
+        layer_y / height,
+        &elastic,
+    ) {
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
         event.set_event_out_flags(
             ae::EventOutFlags::HANDLED_EVENT
