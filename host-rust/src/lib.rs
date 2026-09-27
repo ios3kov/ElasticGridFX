@@ -924,9 +924,11 @@ impl AdobePluginGlobal for Plugin {
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
                 #[cfg(target_os = "macos")]
-                // True 2D mesh currently uses the CPU SmartFX path. Re-enable Metal only after
-                // the GPU backend consumes a per-pixel 2D sampling map instead of separable X/Y plans.
-                extra.set_gpu_render_possible(false);
+                {
+                    // True 2D mesh currently uses the CPU SmartFX path. Re-enable Metal only after
+                    // the GPU backend consumes a per-pixel 2D sampling map instead of separable X/Y plans.
+                    extra.set_gpu_render_possible(false);
+                }
             }
             ae::Command::SmartRender { extra } => {
                 let cb = extra.callbacks();
