@@ -26,7 +26,7 @@ std::uint64_t fnv1a64(const void* data, std::size_t n) {
 EgRenderParams params(const float* x, const std::uint8_t* xp,
                       const float* y, const std::uint8_t* yp) {
     EgRenderParams p{};
-    p.columns = 5; p.rows = 4;
+    p.columns = 4; p.rows = 3;
     p.column_lines = x; p.column_line_count = 6; p.column_pins = xp;
     p.row_lines = y; p.row_line_count = 5; p.row_pins = yp;
     p.tension_radius = 3.7f; p.falloff = 3; p.elasticity_strength = 1.13f;
