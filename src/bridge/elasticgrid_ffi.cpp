@@ -167,6 +167,8 @@ struct PreparedMesh {
     std::vector<float> source_u;
     std::vector<float> source_v;
     std::vector<std::uint8_t> covered;
+    std::vector<float> evaluated_x;
+    std::vector<float> evaluated_y;
 };
 
 PreparedMesh& reusable_mesh_state() {
@@ -238,17 +240,86 @@ bool prepare_mesh_map(
 
     const std::size_t pixel_count =
         static_cast<std::size_t>(output_width) * static_cast<std::size_t>(output_height);
+    const std::size_t node_count =
+        static_cast<std::size_t>(columns + 1) * static_cast<std::size_t>(rows + 1);
     out.source_u.resize(pixel_count);
     out.source_v.resize(pixel_count);
     out.covered.assign(pixel_count, 0);
+    out.evaluated_x.assign(p->column_lines, p->column_lines + node_count);
+    out.evaluated_y.assign(p->row_lines, p->row_lines + node_count);
+
+    // Preserve the old Wave semantics on the new mesh: X and Y coordinates
+    // are evaluated independently, but now every intersection remains a real
+    // 2D control point.
+    if (p->wave_enabled != 0) {
+        constexpr double kTwoPi = 6.283185307179586476925286766559;
+        const float amplitude = std::clamp(finite_or(p->wave_amplitude, 0.0f), 0.0f, 0.25f);
+        const float frequency = std::max(0.0f, finite_or(p->wave_frequency, 1.0f));
+        const float phase = finite_or(p->wave_phase, 0.0f);
+        const float speed = finite_or(p->wave_speed, 0.0f);
+        const float time = finite_or(p->time_seconds, 0.0f);
+        const bool move_x = p->wave_axis != 3;
+        const bool move_y = p->wave_axis != 2;
+        for (int row = 1; row < rows; ++row) {
+            for (int column = 1; column < columns; ++column) {
+                const int i = row * stride + column;
+                const bool pinned =
+                    (p->column_pins && p->column_pins[i] != 0) ||
+                    (p->row_pins && p->row_pins[i] != 0);
+                if (pinned) continue;
+                if (move_x) {
+                    const double cycles =
+                        static_cast<double>(frequency) * static_cast<double>(p->column_lines[i]) +
+                        static_cast<double>(phase) +
+                        static_cast<double>(speed) * static_cast<double>(time);
+                    out.evaluated_x[i] += amplitude * static_cast<float>(
+                        std::sin(kTwoPi * std::remainder(cycles, 1.0)));
+                }
+                if (move_y) {
+                    const double cycles =
+                        static_cast<double>(frequency) * static_cast<double>(p->row_lines[i]) +
+                        static_cast<double>(phase) +
+                        static_cast<double>(speed) * static_cast<double>(time);
+                    out.evaluated_y[i] += amplitude * static_cast<float>(
+                        std::sin(kTwoPi * std::remainder(cycles, 1.0)));
+                }
+            }
+        }
+
+        const float min_spacing = std::clamp(finite_or(p->min_spacing, 0.005f), 0.0f, 0.25f);
+        const float sx = std::min(min_spacing, 0.45f / static_cast<float>(columns));
+        const float sy = std::min(min_spacing, 0.45f / static_cast<float>(rows));
+        for (int pass = 0; pass < 2; ++pass) {
+            for (int row = 0; row <= rows; ++row) {
+                for (int column = 1; column < columns; ++column) {
+                    const int i = row * stride + column;
+                    out.evaluated_x[i] = std::max(out.evaluated_x[i], out.evaluated_x[i - 1] + sx);
+                }
+                for (int column = columns - 1; column >= 1; --column) {
+                    const int i = row * stride + column;
+                    out.evaluated_x[i] = std::min(out.evaluated_x[i], out.evaluated_x[i + 1] - sx);
+                }
+            }
+            for (int column = 0; column <= columns; ++column) {
+                for (int row = 1; row < rows; ++row) {
+                    const int i = row * stride + column;
+                    out.evaluated_y[i] = std::max(out.evaluated_y[i], out.evaluated_y[i - stride] + sy);
+                }
+                for (int row = rows - 1; row >= 1; --row) {
+                    const int i = row * stride + column;
+                    out.evaluated_y[i] = std::min(out.evaluated_y[i], out.evaluated_y[i + stride] - sy);
+                }
+            }
+        }
+    }
 
     const float canvas_x = static_cast<float>(std::max(1, canvas_width - 1));
     const float canvas_y = static_cast<float>(std::max(1, canvas_height - 1));
     auto dst = [&](int column, int row) -> MeshVec2 {
         const int i = row * stride + column;
         return {
-            p->column_lines[i] * canvas_x - static_cast<float>(p->output_origin_x),
-            p->row_lines[i] * canvas_y - static_cast<float>(p->output_origin_y),
+            out.evaluated_x[i] * canvas_x - static_cast<float>(p->output_origin_x),
+            out.evaluated_y[i] * canvas_y - static_cast<float>(p->output_origin_y),
         };
     };
     auto src = [&](int column, int row) -> MeshVec2 {
