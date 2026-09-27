@@ -1,0 +1,113 @@
+name: Hot Loader Shell CI
+
+on:
+  push:
+    branches: ["feature/ae-hot-loader-shell"]
+    paths:
+      - ".github/workflows/hot-loader-shell-ci.yml"
+      - "host-rust/**"
+      - "tools/build_macos_sdkless.command"
+      - "tools/verify_bundle_macos.command"
+      - "tools/stage_hot_reload_macos.command"
+  workflow_dispatch:
+
+concurrency:
+  group: elasticgrid-hot-loader-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  shell:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Static shell checks
+        run: |
+          set -euo pipefail
+          zsh -n tools/stage_hot_reload_macos.command
+          bash -n tools/build_macos_sdkless.command
+          bash -n tools/verify_bundle_macos.command
+          xcrun clang++ -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -Werror \
+            -fsyntax-only host-rust/shell/ElasticGridShell.cpp
+
+      - name: Build implementation
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot
+          AE_HOT_LOADER_IMPL_LABEL: elasticgrid-ci
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          set -euo pipefail
+          cargo build --release --locked --manifest-path host-rust/Cargo.toml --target aarch64-apple-darwin
+
+      - name: Build shell and assemble bundle
+        run: |
+          set -euo pipefail
+          ROOT="target-hot/aarch64-apple-darwin/release"
+          BUNDLE="dist/mac/ElasticGrid.plugin"
+
+          rm -rf "$BUNDLE"
+          mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Frameworks" "$BUNDLE/Contents/Resources"
+
+          xcrun clang++ -std=c++17 -O2 -arch arm64 -dynamiclib -fvisibility=hidden \
+            host-rust/shell/ElasticGridShell.cpp \
+            -o "$BUNDLE/Contents/MacOS/ElasticGrid"
+
+          cp "$ROOT/libelasticgrid_ae.dylib" "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib"
+          cp "$ROOT/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
+          cp "$ROOT/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
+          cp "$ROOT/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
+
+          /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.elasticgrid.fx' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string ElasticGrid' "$BUNDLE/Contents/Info.plist" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable ElasticGrid' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleName string "ElasticGrid FX"' "$BUNDLE/Contents/Info.plist" 2>/dev/null || \
+            /usr/libexec/PlistBuddy -c 'Set :CFBundleName "ElasticGrid FX"' "$BUNDLE/Contents/Info.plist"
+
+          codesign --force --sign - "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib"
+          codesign --force --deep --sign - "$BUNDLE"
+          tools/verify_bundle_macos.command "$BUNDLE"
+
+          strings "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" | grep 'elasticgrid-ci'
+
+      - name: Smoke shell reload
+        shell: bash
+        run: |
+          set -euo pipefail
+          FAKE_HOME="$RUNNER_TEMP/elasticgrid-home"
+          IMPL_DIR="$FAKE_HOME/Library/Application Support/AE Hot Loader/implementations/elasticgrid"
+          mkdir -p "$IMPL_DIR"
+          cp dist/mac/ElasticGrid.plugin/Contents/Frameworks/libelasticgrid_impl.dylib "$IMPL_DIR/current.dylib"
+
+          cat > "$RUNNER_TEMP/elasticgrid_reload_smoke.cpp" <<'CPP'
+          #include <cstdio>
+          #include <dlfcn.h>
+          using ReloadFn = int (*)(char*, std::size_t);
+          int main(int argc, char** argv) {
+              if (argc != 2) return 10;
+              void* handle = dlopen(argv[1], RTLD_NOW | RTLD_LOCAL);
+              if (!handle) { std::fprintf(stderr, "%s\n", dlerror()); return 11; }
+              auto reload = reinterpret_cast<ReloadFn>(dlsym(handle, "AEHotLoader_ShellReload"));
+              if (!reload) return 12;
+              char first_msg[2048]{};
+              const int first = reload(first_msg, sizeof(first_msg));
+              std::printf("first=%d %s\n", first, first_msg);
+              if (first != 0) return 13;
+              char second_msg[2048]{};
+              const int second = reload(second_msg, sizeof(second_msg));
+              std::printf("second=%d %s\n", second, second_msg);
+              return second == 1 ? 0 : 14;
+          }
+          CPP
+
+          xcrun clang++ -std=c++17 -arch arm64 "$RUNNER_TEMP/elasticgrid_reload_smoke.cpp" -o "$RUNNER_TEMP/elasticgrid_reload_smoke"
+          HOME="$FAKE_HOME" "$RUNNER_TEMP/elasticgrid_reload_smoke" "$(pwd)/dist/mac/ElasticGrid.plugin/Contents/MacOS/ElasticGrid"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-hot-loader-shell
+          path: dist/mac/ElasticGrid.plugin
+          if-no-files-found: error
