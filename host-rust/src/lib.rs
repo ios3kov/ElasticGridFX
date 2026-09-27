@@ -901,12 +901,11 @@ impl AdobePluginGlobal for Plugin {
                 p.output_origin_x = output_rect.left;
                 p.output_origin_y = output_rect.top;
 
-                let mut source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
-                let rc = unsafe { eg_required_source_rect(cw, ch, output_rect, &p, &mut source_rect) };
-                if rc != 0 {
-                    // Conservative fallback: correctness first.
-                    source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
-                }
+                // Correctness-first SmartFX checkout: a guide warp can pull
+                // pixels across cell boundaries, and bicubic filtering needs
+                // neighboring taps. Always checkout the complete source canvas
+                // until the ROI implementation is proven seam-free in AE.
+                let source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
                 let mut request = output_request;
                 request.rect.left = source_rect.left;
                 request.rect.top = source_rect.top;
@@ -927,7 +926,7 @@ impl AdobePluginGlobal for Plugin {
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
                 #[cfg(target_os = "macos")]
-                extra.set_gpu_render_possible(extra.what_gpu() == ae::GpuFramework::Metal && extra.bit_depth() == 32);
+                extra.set_gpu_render_possible(false);
             }
             ae::Command::SmartRender { extra } => {
                 let cb = extra.callbacks();
