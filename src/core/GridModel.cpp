@@ -156,14 +156,12 @@ bool AxisGrid::dragElastic(std::size_t line, float target, const ElasticSettings
     const float strength = std::clamp(std::isfinite(settings.strength) ? settings.strength : 1.0f, 0.0f, 2.0f);
 
     for (std::size_t i = 1; i + 1 < candidate.size(); ++i) {
-        if (i == line) {
-            candidate[i] = clamp01(target);
-            continue;
-        }
         // Kept only for compatibility with our older saved states. Original
         // GridWarp never sets internal pins, so canonical parity behavior is unchanged.
-        if (pins_[i]) continue;
+        if (pins_[i] && i != line) continue;
         const float d = std::abs(static_cast<float>(i) - static_cast<float>(line));
+        // The original applies Elasticity Strength to every moved guide,
+        // including the grabbed guide itself (weight=1 at distance zero).
         const float w = falloffWeight(d, radius, settings.falloff);
         candidate[i] += delta * w * strength;
     }
