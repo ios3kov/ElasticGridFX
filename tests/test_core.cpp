@@ -118,7 +118,7 @@ int main() {
         w.enabled = true;
         w.amplitude = 0.25f;
         w.frequency = 1.0e30f;
-        w.phase_cycles = -1.0e30f;
+        w.phase_degrees = -1.0e30f;
         w.speed_cycles_per_second = 1.0e20f;
         auto e = g.evaluated(w, -1.0e20f, 0.25f, true);
         expect(e.size() == 129, "extreme wave keeps topology");
