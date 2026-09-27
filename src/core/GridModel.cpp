@@ -20,13 +20,9 @@ float falloffWeight(float distance, float radius, FalloffProfile p) {
             const float s = t * t * (3.0f - 2.0f * t);
             return 1.0f - s;
         }
-        case FalloffProfile::Gaussian: {
-            // Chosen so the edge of the radius is already nearly zero.
-            constexpr float sigma = 0.38f;
-            return std::exp(-(t * t) / (2.0f * sigma * sigma));
-        }
-        case FalloffProfile::Cosine:
-            return 0.5f * (1.0f + std::cos(kPi * t));
+        case FalloffProfile::Gaussian:
+            // Original GridWarp: exp(-4*t^2).
+            return std::exp(-4.0f * t * t);
         default:
             return 0.0f;
     }
@@ -62,9 +58,11 @@ void AxisGrid::enforceMonotonic(std::vector<float>& values,
                                 const std::vector<std::uint8_t>* pins) {
     if (values.size() < 2) return;
     const std::size_t n = values.size();
-    const float max_feasible = 1.0f / static_cast<float>(n - 1);
+    // Original GridWarp caps requested minimum spacing at half the uniform
+    // segment spacing and never lets it reach zero.
+    const float max_feasible = 0.5f / static_cast<float>(n - 1);
     if (!std::isfinite(min_spacing)) min_spacing = 0.0f;
-    min_spacing = std::clamp(min_spacing, 0.0f, max_feasible);
+    min_spacing = std::max(1.0e-6f, std::min(min_spacing, max_feasible));
 
     values.front() = 0.0f;
     values.back() = 1.0f;
@@ -140,17 +138,18 @@ bool AxisGrid::dragElastic(std::size_t line, float target, const ElasticSettings
 
     auto candidate = lines_;
     const float delta = clamp01(target) - lines_[line];
-    const float radius = std::max(0.001f, std::isfinite(settings.radius_lines) ? settings.radius_lines : 3.0f);
+    const float radius = std::max(0.0f, std::isfinite(settings.radius_lines) ? settings.radius_lines : 3.0f);
     const float strength = std::clamp(std::isfinite(settings.strength) ? settings.strength : 1.0f, 0.0f, 2.0f);
 
     for (std::size_t i = 1; i + 1 < candidate.size(); ++i) {
-        if (pins_[i] && i != line) continue;
+        if (i == line) {
+            candidate[i] = clamp01(target);
+            continue;
+        }
         const float d = std::abs(static_cast<float>(i) - static_cast<float>(line));
-        const float w = (i == line) ? 1.0f : falloffWeight(d, radius, settings.falloff);
+        const float w = falloffWeight(d, radius, settings.falloff);
         candidate[i] += delta * w * strength;
     }
-    // The grabbed guide follows the pointer exactly; strength controls neighbors.
-    candidate[line] = clamp01(target);
 
     enforceMonotonic(candidate, settings.min_spacing, &pins_);
     lines_.swap(candidate);
@@ -164,7 +163,7 @@ void AxisGrid::evaluatedInto(std::vector<float>& out,
                              bool apply_wave) const {
     out.assign(lines_.begin(), lines_.end());
     if (!wave.enabled || !apply_wave || !std::isfinite(wave.amplitude) ||
-        !std::isfinite(wave.frequency) || !std::isfinite(wave.phase_cycles) ||
+        !std::isfinite(wave.frequency) || !std::isfinite(wave.phase_degrees) ||
         !std::isfinite(wave.speed_cycles_per_second) || !std::isfinite(time_seconds) ||
         std::abs(wave.amplitude) < 1e-8f) {
         return;
@@ -174,12 +173,14 @@ void AxisGrid::evaluatedInto(std::vector<float>& out,
         if (pins_[i]) continue;
         // Evaluate cycles in double and wrap before sin(). This remains stable
         // for very large finite times/frequencies and avoids float overflow.
-        const double cycles =
-            static_cast<double>(wave.frequency) * static_cast<double>(lines_[i]) +
-            static_cast<double>(wave.phase_cycles) +
-            static_cast<double>(wave.speed_cycles_per_second) * static_cast<double>(time_seconds);
-        const double wrapped = std::remainder(cycles, 1.0);
-        out[i] += wave.amplitude * static_cast<float>(std::sin(2.0 * static_cast<double>(kPi) * wrapped));
+        const double phase =
+            2.0 * static_cast<double>(kPi) *
+                (static_cast<double>(wave.frequency) * static_cast<double>(lines_[i]) +
+                 static_cast<double>(wave.speed_cycles_per_second) * static_cast<double>(time_seconds)) +
+            static_cast<double>(wave.phase_degrees) * (static_cast<double>(kPi) / 180.0);
+        const float uniform_spacing = 1.0f / static_cast<float>(lines_.size() - 1);
+        const float displacement = wave.amplitude * 0.4f * uniform_spacing;
+        out[i] += displacement * static_cast<float>(std::sin(phase));
     }
     enforceMonotonic(out, min_spacing, &pins_);
 }
