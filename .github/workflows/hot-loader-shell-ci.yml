@@ -8,6 +8,7 @@ on:
       - "host-rust/**"
       - "tools/build_macos_sdkless.command"
       - "tools/verify_bundle_macos.command"
+      - "tools/verify_shell_metadata.py"
       - "tools/stage_hot_reload_macos.command"
       - "tools/install_hot_loader_package.command"
       - "tools/stage_packaged_hot_reload.command"
