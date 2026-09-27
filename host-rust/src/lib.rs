@@ -8,7 +8,6 @@ mod ui;
 
 const GRID_REFCON: u64 = 0x4547_4658_4752_4944; // "EGFXGRID"
 const MAX_GUIDES: usize = 50;
-const MAX_AXIS_POINTS: usize = MAX_GUIDES + 2;
 const MAX_LEGACY_MESH_POINTS: usize = (128 + 1) * (128 + 1);
 
 const GRID_WIRE_VERSION: u16 = 3;
