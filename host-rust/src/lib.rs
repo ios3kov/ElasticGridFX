@@ -775,7 +775,7 @@ impl AdobePluginGlobal for Plugin {
             setup_float(f, (-360.0, 360.0), (-360.0, 360.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
+            setup_float(f, (-10.0, 10.0), (-10.0, 10.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
             f.set_options(&["Both", "Columns Only", "Rows Only"]);
@@ -1015,8 +1015,6 @@ mod tests {
         let mut g = GridArb::uniform(7, 5);
         g.column_lines[3] = 0.39;
         g.row_lines[2] = 0.31;
-        g.column_pins[2] = 1;
-
         let encoded = bincode::serde::encode_to_vec(&g, bincode::config::legacy()).unwrap();
         let decoded: GridArb = bincode::serde::decode_from_slice(&encoded, bincode::config::legacy()).unwrap().0;
         assert_eq!(decoded, g);
@@ -1032,7 +1030,7 @@ mod tests {
     fn grid_wire_rejects_unknown_version() {
         let g = GridArb::uniform(4, 4);
         let mut legacy = legacy_from(&g);
-        legacy.columns = GRID_WIRE_MARKER | (2u16 << 8) | 4u16;
+        legacy.columns = GRID_WIRE_MARKER | (3u16 << 8) | 4u16;
         let bytes = bincode::serde::encode_to_vec(&legacy, bincode::config::legacy()).unwrap();
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
         assert!(decoded.is_err());
@@ -1045,8 +1043,8 @@ mod tests {
         g.column_lines[2] = 0.62;
         g.column_lines[3] = 0.84;
         let r = g.resized(9, 7);
-        assert_eq!(r.column_lines.len(), 10);
-        assert_eq!(r.row_lines.len(), 8);
+        assert_eq!(r.column_lines.len(), 11);
+        assert_eq!(r.row_lines.len(), 9);
         assert!(r.column_lines.windows(2).all(|w| w[1] > w[0]));
         assert!(r.row_lines.windows(2).all(|w| w[1] > w[0]));
         assert_eq!(r.column_lines[0], 0.0);
@@ -1090,11 +1088,13 @@ mod tests {
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
         assert!(decoded.is_err());
 
-        let mut bad_pin = legacy_from(&g);
-        bad_pin.column_pins[1] = 2;
-        let bytes = bincode::serde::encode_to_vec(&bad_pin, bincode::config::legacy()).unwrap();
-        let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
-        assert!(decoded.is_err());
+        // Pin bytes from our old wire format are deliberately ignored during
+        // migration because original GridWarp has no internal pin concept.
+        let mut old_pin = legacy_from(&g);
+        old_pin.column_pins[1] = 1;
+        let bytes = bincode::serde::encode_to_vec(&old_pin, bincode::config::legacy()).unwrap();
+        let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy()).unwrap().0;
+        assert_eq!(decoded.column_pins[1], 0);
     }
 
     #[test]
