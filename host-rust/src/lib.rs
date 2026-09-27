@@ -460,15 +460,6 @@ unsafe extern "C" {
         params: *const EgRenderParams,
     ) -> i32;
 
-    pub(crate) fn eg_drag_axis(
-        lines: *mut f32,
-        pins: *mut u8,
-        line_count: i32,
-        line_index: i32,
-        target: f32,
-        params: *const EgElasticParams,
-    ) -> i32;
-
     #[cfg(target_os = "macos")]
     fn eg_metal_create(device: *mut c_void, command_queue: *mut c_void) -> *mut c_void;
     #[cfg(target_os = "macos")]
