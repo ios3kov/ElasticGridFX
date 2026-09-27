@@ -66,7 +66,7 @@ jobs:
           rm -rf "$BUNDLE"
           mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Frameworks" "$BUNDLE/Contents/Resources"
 
-          xcrun clang++ -std=c++17 -O2 -arch arm64 -dynamiclib -fvisibility=hidden \
+          xcrun clang++ -std=c++17 -O2 -arch arm64 -mmacosx-version-min=11.0 -dynamiclib -fvisibility=hidden \
             host-rust/shell/ElasticGridShell.cpp \
             -o "$BUNDLE/Contents/MacOS/ElasticGrid"
 
