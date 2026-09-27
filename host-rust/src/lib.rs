@@ -302,15 +302,17 @@ impl GridArb {
             return self.clone();
         }
 
+        // Original GridWarp does not preserve/resample deformation when
+        // Num Columns/Rows changes. Only the changed axis is reset uniformly.
         let column_lines = if self.columns as usize == columns {
             self.column_lines.clone()
         } else {
-            Self::resample_axis_raw(&self.column_lines, columns)
+            Self::axis_uniform(columns).0
         };
         let row_lines = if self.rows as usize == rows {
             self.row_lines.clone()
         } else {
-            Self::resample_axis_raw(&self.row_lines, rows)
+            Self::axis_uniform(rows).0
         };
 
         let mut out = Self {
@@ -581,7 +583,8 @@ fn evaluated_params(
         min_spacing: params.get(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0,
         stretch_easing: params.get(Params::StretchEasing)?.as_float_slider()?.value() as f32 / 100.0,
         easing_distance: params.get(Params::EasingDistance)?.as_float_slider()?.value() as f32 / 100.0,
-        wave_enabled: params.get(Params::WaveEnabled)?.as_checkbox()?.value() as i32,
+        // Original GridWarp has no Wave Enable switch; amplitude=0 disables it.
+        wave_enabled: 1,
         wave_amplitude: params.get(Params::WaveAmplitude)?.as_float_slider()?.value() as f32 / 100.0,
         wave_frequency: params.get(Params::WaveFrequency)?.as_float_slider()?.value() as f32,
         wave_phase: params.get(Params::WavePhase)?.as_float_slider()?.value() as f32,
@@ -763,11 +766,19 @@ impl AdobePluginGlobal for Plugin {
             setup_float(f, (0.0, 100.0), (0.0, 100.0), 25.0, 1, true);
         }))?;
 
-        params.add(Params::WaveEnabled, "Wave Animation", ae::CheckBoxDef::setup(|f| {
-            f.set_label("Enable");
-            f.set_default(false);
-            f.set_value(f.default());
-        }))?;
+        // Keep the legacy parameter ID for our saved projects, but hide it:
+        // the original "Wave Animation" is a group header, not an enable switch.
+        params.add_with_flags(
+            Params::WaveEnabled,
+            "Wave Animation (legacy)",
+            ae::CheckBoxDef::setup(|f| {
+                f.set_label("Enable");
+                f.set_default(true);
+                f.set_value(f.default());
+            }),
+            ae::ParamFlag::CANNOT_TIME_VARY,
+            ae::ParamUIFlags::INVISIBLE,
+        )?;
         params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
         }))?;
@@ -832,12 +843,11 @@ impl AdobePluginGlobal for Plugin {
                 // so caching stays correct without disabling useful cache hits
                 // for static warps. The PiPL/global setup advertises the flag
                 // because AE requires dynamically-cleared flags to start set.
-                let enabled = params.checkout(Params::WaveEnabled)?.as_checkbox()?.value();
                 let amplitude = params.checkout(Params::WaveAmplitude)?.as_float_slider()?.value();
                 let speed = params.checkout(Params::WaveSpeed)?.as_float_slider()?.value();
                 out_data.set_out_flag(
                     ae::OutFlags::NonParamVary,
-                    wave_is_time_varying(enabled, amplitude, speed),
+                    wave_is_time_varying(true, amplitude, speed),
                 );
             }
             ae::Command::ArbitraryCallback { mut extra } => {
@@ -1040,29 +1050,30 @@ mod tests {
     }
 
     #[test]
-    fn grid_resize_preserves_monotonic_shape() {
+    fn grid_resize_resets_changed_axes_like_original() {
         let mut g = GridArb::uniform(4, 4);
         g.column_lines[1] = 0.18;
-        g.column_lines[2] = 0.62;
-        g.column_lines[3] = 0.84;
-        let r = g.resized(9, 7);
+        g.row_lines[1] = 0.16;
+        let r = g.resized(9, 4);
         assert_eq!(r.column_lines.len(), 11);
-        assert_eq!(r.row_lines.len(), 9);
-        assert!(r.column_lines.windows(2).all(|w| w[1] > w[0]));
-        assert!(r.row_lines.windows(2).all(|w| w[1] > w[0]));
-        assert_eq!(r.column_lines[0], 0.0);
-        assert_eq!(*r.column_lines.last().unwrap(), 1.0);
+        assert_eq!(r.row_lines.len(), 6);
+        // Changed X topology resets to uniform positions.
+        for (i, value) in r.column_lines.iter().enumerate() {
+            assert!((*value - i as f32 / 10.0).abs() < 1.0e-6);
+        }
+        // Unchanged Y topology preserves its deformation.
+        assert!((r.row_lines[1] - 0.16).abs() < 1.0e-6);
     }
 
     #[test]
     fn arbitrary_interpolation_blends_same_topology() {
         let a = GridArb::uniform(4, 4);
         let mut b = a.clone();
-        b.column_lines[2] = 0.7;
+        b.column_lines[2] = 0.5;
         let m = a.interpolate(&b, 0.5);
         // Four internal guides are uniformly 0.2/0.4/0.6/0.8.
-        // Blending guide #2 from 0.4 to 0.7 at t=0.5 yields 0.55.
-        assert!((m.column_lines[2] - 0.55).abs() < 1.0e-6);
+        // Blend a valid guide #2 position from 0.4 to 0.5.
+        assert!((m.column_lines[2] - 0.45).abs() < 1.0e-6);
         assert!(m.column_lines.windows(2).all(|w| w[1] > w[0]));
     }
 
