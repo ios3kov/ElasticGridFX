@@ -4,6 +4,8 @@
 #include "core/CpuRenderer.h"
 
 #include <algorithm>
+#include <array>
+#include <cstring>
 #include <bit>
 #include <cmath>
 #include <cstddef>
@@ -11,6 +13,7 @@
 #include <limits>
 #include <span>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 namespace eg = elasticgrid;
@@ -116,6 +119,412 @@ bool axis_uniform_exact(const std::vector<float>& lines) noexcept {
         if (!float_bits_equal(lines[i], expected)) return false;
     }
     return true;
+}
+
+
+bool is_mesh_params(const EgRenderParams* p) noexcept {
+    if (!p || p->columns < 1 || p->columns > 128 || p->rows < 1 || p->rows > 128) return false;
+    const std::int64_t count =
+        (static_cast<std::int64_t>(p->columns) + 1) *
+        (static_cast<std::int64_t>(p->rows) + 1);
+    if (count <= 0 || count > 16641) return false;
+    return p->column_lines && p->row_lines &&
+        p->column_line_count == count &&
+        p->row_line_count == count;
+}
+
+bool validate_mesh(const EgRenderParams* p) noexcept {
+    if (!is_mesh_params(p)) return false;
+    const int columns = p->columns;
+    const int rows = p->rows;
+    const int stride = columns + 1;
+    for (int row = 0; row <= rows; ++row) {
+        for (int column = 0; column <= columns; ++column) {
+            const int i = row * stride + column;
+            const float x = p->column_lines[i];
+            const float y = p->row_lines[i];
+            if (!std::isfinite(x) || !std::isfinite(y) ||
+                x < 0.0f || x > 1.0f || y < 0.0f || y > 1.0f) {
+                return false;
+            }
+            if (column == 0 && x != 0.0f) return false;
+            if (column == columns && x != 1.0f) return false;
+            if (row == 0 && y != 0.0f) return false;
+            if (row == rows && y != 1.0f) return false;
+            if (column > 0 && x <= p->column_lines[i - 1]) return false;
+            if (row > 0 && y <= p->row_lines[i - stride]) return false;
+        }
+    }
+    return true;
+}
+
+struct MeshVec2 {
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
+struct PreparedMesh {
+    std::vector<float> source_u;
+    std::vector<float> source_v;
+    std::vector<std::uint8_t> covered;
+};
+
+PreparedMesh& reusable_mesh_state() {
+    thread_local PreparedMesh state;
+    return state;
+}
+
+float triangle_edge(const MeshVec2& a, const MeshVec2& b, const MeshVec2& p) noexcept {
+    return (p.x - a.x) * (b.y - a.y) - (p.y - a.y) * (b.x - a.x);
+}
+
+void raster_mesh_triangle(
+    PreparedMesh& out,
+    int output_width,
+    int output_height,
+    MeshVec2 a,
+    MeshVec2 b,
+    MeshVec2 c,
+    MeshVec2 sa,
+    MeshVec2 sb,
+    MeshVec2 sc) {
+
+    const float area = triangle_edge(a, b, c);
+    if (!std::isfinite(area) || std::abs(area) < 1.0e-8f) return;
+
+    const float min_xf = std::min({a.x, b.x, c.x});
+    const float max_xf = std::max({a.x, b.x, c.x});
+    const float min_yf = std::min({a.y, b.y, c.y});
+    const float max_yf = std::max({a.y, b.y, c.y});
+    const int x0 = std::clamp(static_cast<int>(std::floor(min_xf)) - 1, 0, output_width - 1);
+    const int x1 = std::clamp(static_cast<int>(std::ceil(max_xf)) + 1, 0, output_width - 1);
+    const int y0 = std::clamp(static_cast<int>(std::floor(min_yf)) - 1, 0, output_height - 1);
+    const int y1 = std::clamp(static_cast<int>(std::ceil(max_yf)) + 1, 0, output_height - 1);
+
+    constexpr float epsilon = 2.0e-4f;
+    for (int y = y0; y <= y1; ++y) {
+        for (int x = x0; x <= x1; ++x) {
+            const MeshVec2 p{static_cast<float>(x), static_cast<float>(y)};
+            const float w0 = triangle_edge(b, c, p) / area;
+            const float w1 = triangle_edge(c, a, p) / area;
+            const float w2 = triangle_edge(a, b, p) / area;
+            if (w0 < -epsilon || w1 < -epsilon || w2 < -epsilon ||
+                w0 > 1.0f + epsilon || w1 > 1.0f + epsilon || w2 > 1.0f + epsilon) {
+                continue;
+            }
+            const std::size_t i =
+                static_cast<std::size_t>(y) * static_cast<std::size_t>(output_width) +
+                static_cast<std::size_t>(x);
+            out.source_u[i] = sa.x * w0 + sb.x * w1 + sc.x * w2;
+            out.source_v[i] = sa.y * w0 + sb.y * w1 + sc.y * w2;
+            out.covered[i] = 1;
+        }
+    }
+}
+
+bool prepare_mesh_map(
+    const EgRenderParams* p,
+    int output_width,
+    int output_height,
+    PreparedMesh& out) {
+
+    if (!validate_mesh(p) || output_width <= 0 || output_height <= 0) return false;
+    const int columns = p->columns;
+    const int rows = p->rows;
+    const int stride = columns + 1;
+    const int canvas_width = p->canvas_width > 0 ? p->canvas_width : output_width;
+    const int canvas_height = p->canvas_height > 0 ? p->canvas_height : output_height;
+    if (canvas_width <= 0 || canvas_height <= 0) return false;
+
+    const std::size_t pixel_count =
+        static_cast<std::size_t>(output_width) * static_cast<std::size_t>(output_height);
+    out.source_u.resize(pixel_count);
+    out.source_v.resize(pixel_count);
+    out.covered.assign(pixel_count, 0);
+
+    const float canvas_x = static_cast<float>(std::max(1, canvas_width - 1));
+    const float canvas_y = static_cast<float>(std::max(1, canvas_height - 1));
+    auto dst = [&](int column, int row) -> MeshVec2 {
+        const int i = row * stride + column;
+        return {
+            p->column_lines[i] * canvas_x - static_cast<float>(p->output_origin_x),
+            p->row_lines[i] * canvas_y - static_cast<float>(p->output_origin_y),
+        };
+    };
+    auto src = [&](int column, int row) -> MeshVec2 {
+        return {
+            static_cast<float>(column) / static_cast<float>(columns),
+            static_cast<float>(row) / static_cast<float>(rows),
+        };
+    };
+
+    for (int row = 0; row < rows; ++row) {
+        for (int column = 0; column < columns; ++column) {
+            const MeshVec2 d00 = dst(column, row);
+            const MeshVec2 d10 = dst(column + 1, row);
+            const MeshVec2 d01 = dst(column, row + 1);
+            const MeshVec2 d11 = dst(column + 1, row + 1);
+            const MeshVec2 s00 = src(column, row);
+            const MeshVec2 s10 = src(column + 1, row);
+            const MeshVec2 s01 = src(column, row + 1);
+            const MeshVec2 s11 = src(column + 1, row + 1);
+
+            // Fixed diagonal gives a deterministic piecewise-affine 2D mesh.
+            raster_mesh_triangle(out, output_width, output_height, d00, d10, d11, s00, s10, s11);
+            raster_mesh_triangle(out, output_width, output_height, d00, d11, d01, s00, s11, s01);
+        }
+    }
+
+    // Shared triangle edges can miss a pixel under extreme floating-point
+    // positions. Fill only those rare gaps with the undeformed full-canvas map
+    // instead of emitting uninitialized pixels.
+    const float full_x_denom = static_cast<float>(std::max(1, canvas_width - 1));
+    const float full_y_denom = static_cast<float>(std::max(1, canvas_height - 1));
+    for (int y = 0; y < output_height; ++y) {
+        for (int x = 0; x < output_width; ++x) {
+            const std::size_t i =
+                static_cast<std::size_t>(y) * static_cast<std::size_t>(output_width) +
+                static_cast<std::size_t>(x);
+            if (out.covered[i]) continue;
+            out.source_u[i] = std::clamp(
+                static_cast<float>(p->output_origin_x + x) / full_x_denom, 0.0f, 1.0f);
+            out.source_v[i] = std::clamp(
+                static_cast<float>(p->output_origin_y + y) / full_y_denom, 0.0f, 1.0f);
+        }
+    }
+    return true;
+}
+
+int wrap_mesh_index(int i, int n) noexcept {
+    if (n <= 1) return 0;
+    i %= n;
+    if (i < 0) i += n;
+    return i;
+}
+
+int mirror_mesh_index(int i, int n) noexcept {
+    if (n <= 1) return 0;
+    const int period = 2 * n - 2;
+    const int x = wrap_mesh_index(i, period);
+    return x < n ? x : period - x;
+}
+
+int resolve_mesh_index(int i, int n, int edge_mode) noexcept {
+    if (edge_mode == 2) return wrap_mesh_index(i, n);
+    if (edge_mode == 3) return mirror_mesh_index(i, n);
+    return std::clamp(i, 0, n - 1);
+}
+
+float mesh_cubic_weight(float x) noexcept {
+    constexpr float a = -0.5f;
+    x = std::abs(x);
+    if (x < 1.0f) return (a + 2.0f) * x*x*x - (a + 3.0f) * x*x + 1.0f;
+    if (x < 2.0f) return a * x*x*x - 5.0f*a*x*x + 8.0f*a*x - 4.0f*a;
+    return 0.0f;
+}
+
+template <typename T>
+const T* mesh_pixel(
+    const void* data,
+    std::ptrdiff_t row_bytes,
+    int x,
+    int y) noexcept {
+    const auto* row =
+        static_cast<const std::byte*>(data) +
+        static_cast<std::ptrdiff_t>(y) * row_bytes;
+    return reinterpret_cast<const T*>(row) + static_cast<std::ptrdiff_t>(x) * 4;
+}
+
+template <typename T>
+T* mesh_pixel_mut(
+    void* data,
+    std::ptrdiff_t row_bytes,
+    int x,
+    int y) noexcept {
+    auto* row =
+        static_cast<std::byte*>(data) +
+        static_cast<std::ptrdiff_t>(y) * row_bytes;
+    return reinterpret_cast<T*>(row) + static_cast<std::ptrdiff_t>(x) * 4;
+}
+
+template <typename T>
+T mesh_store(float value, float channel_max) noexcept {
+    if constexpr (std::is_same_v<T, float>) {
+        return value;
+    } else {
+        value = std::clamp(value, 0.0f, channel_max);
+        return static_cast<T>(std::lround(value));
+    }
+}
+
+template <typename T>
+void sample_mesh_bilinear(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    int input_width,
+    int input_height,
+    float x,
+    float y,
+    int edge_mode,
+    float channel_max,
+    T* dst) noexcept {
+
+    const int x0_raw = static_cast<int>(std::floor(x));
+    const int y0_raw = static_cast<int>(std::floor(y));
+    const float tx = x - static_cast<float>(x0_raw);
+    const float ty = y - static_cast<float>(y0_raw);
+    const int x0 = resolve_mesh_index(x0_raw, input_width, edge_mode);
+    const int x1 = resolve_mesh_index(x0_raw + 1, input_width, edge_mode);
+    const int y0 = resolve_mesh_index(y0_raw, input_height, edge_mode);
+    const int y1 = resolve_mesh_index(y0_raw + 1, input_height, edge_mode);
+    const T* p00 = mesh_pixel<T>(input_data, input_row_bytes, x0, y0);
+    const T* p10 = mesh_pixel<T>(input_data, input_row_bytes, x1, y0);
+    const T* p01 = mesh_pixel<T>(input_data, input_row_bytes, x0, y1);
+    const T* p11 = mesh_pixel<T>(input_data, input_row_bytes, x1, y1);
+
+    for (int c = 0; c < 4; ++c) {
+        const float a = static_cast<float>(p00[c]) +
+            (static_cast<float>(p10[c]) - static_cast<float>(p00[c])) * tx;
+        const float b = static_cast<float>(p01[c]) +
+            (static_cast<float>(p11[c]) - static_cast<float>(p01[c])) * tx;
+        dst[c] = mesh_store<T>(a + (b - a) * ty, channel_max);
+    }
+}
+
+template <typename T>
+void sample_mesh_bicubic(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    int input_width,
+    int input_height,
+    float x,
+    float y,
+    int edge_mode,
+    float channel_max,
+    T* dst) noexcept {
+
+    const int bx = static_cast<int>(std::floor(x));
+    const int by = static_cast<int>(std::floor(y));
+    float acc[4] = {0, 0, 0, 0};
+    float sum = 0.0f;
+    for (int ky = -1; ky <= 2; ++ky) {
+        const int sy = resolve_mesh_index(by + ky, input_height, edge_mode);
+        const float wy = mesh_cubic_weight(y - static_cast<float>(by + ky));
+        for (int kx = -1; kx <= 2; ++kx) {
+            const int sx = resolve_mesh_index(bx + kx, input_width, edge_mode);
+            const float wx = mesh_cubic_weight(x - static_cast<float>(bx + kx));
+            const float w = wx * wy;
+            const T* q = mesh_pixel<T>(input_data, input_row_bytes, sx, sy);
+            for (int c = 0; c < 4; ++c) acc[c] += static_cast<float>(q[c]) * w;
+            sum += w;
+        }
+    }
+    if (std::abs(sum) > 1.0e-8f) {
+        for (float& v : acc) v /= sum;
+    }
+    for (int c = 0; c < 4; ++c) dst[c] = mesh_store<T>(acc[c], channel_max);
+}
+
+template <typename T>
+int render_mesh_typed(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    int input_width,
+    int input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    int output_width,
+    int output_height,
+    const EgRenderParams* p,
+    float channel_max) {
+
+    PreparedMesh& map = reusable_mesh_state();
+    if (!prepare_mesh_map(p, output_width, output_height, map)) return 4;
+
+    if (p->abort_fn && p->abort_fn(p->abort_refcon) != 0) return 5;
+
+    const int canvas_width = p->canvas_width > 0 ? p->canvas_width : output_width;
+    const int canvas_height = p->canvas_height > 0 ? p->canvas_height : output_height;
+    const float canvas_x = static_cast<float>(std::max(1, canvas_width - 1));
+    const float canvas_y = static_cast<float>(std::max(1, canvas_height - 1));
+    const bool cubic = p->quality == 2;
+
+    auto render_rows = [&](int y0, int y1) {
+        for (int y = y0; y < y1; ++y) {
+            for (int x = 0; x < output_width; ++x) {
+                const std::size_t i =
+                    static_cast<std::size_t>(y) * static_cast<std::size_t>(output_width) +
+                    static_cast<std::size_t>(x);
+                const float source_x =
+                    map.source_u[i] * canvas_x - static_cast<float>(p->input_origin_x);
+                const float source_y =
+                    map.source_v[i] * canvas_y - static_cast<float>(p->input_origin_y);
+                T* dst = mesh_pixel_mut<T>(output_data, output_row_bytes, x, y);
+                if (cubic) {
+                    sample_mesh_bicubic<T>(
+                        input_data, input_row_bytes, input_width, input_height,
+                        source_x, source_y, p->edge_mode, channel_max, dst);
+                } else {
+                    sample_mesh_bilinear<T>(
+                        input_data, input_row_bytes, input_width, input_height,
+                        source_x, source_y, p->edge_mode, channel_max, dst);
+                }
+            }
+        }
+    };
+
+    const unsigned count =
+        std::max(1u, std::min<unsigned>(
+            effective_threads(p->threads),
+            static_cast<unsigned>(std::max(1, output_height))));
+    if (count == 1 || output_height < 64) {
+        render_rows(0, output_height);
+    } else {
+        std::vector<std::thread> workers;
+        workers.reserve(count);
+        const int rows_per =
+            (output_height + static_cast<int>(count) - 1) / static_cast<int>(count);
+        for (unsigned t = 0; t < count; ++t) {
+            const int y0 = static_cast<int>(t) * rows_per;
+            const int y1 = std::min(output_height, y0 + rows_per);
+            if (y0 >= y1) break;
+            workers.emplace_back(render_rows, y0, y1);
+        }
+        for (auto& worker : workers) worker.join();
+    }
+
+    if (p->abort_fn && p->abort_fn(p->abort_refcon) != 0) return 5;
+    return 0;
+}
+
+int render_mesh_frame(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    int input_width,
+    int input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    int output_width,
+    int output_height,
+    int bit_depth,
+    const EgRenderParams* p) {
+
+    if (bit_depth == 8) {
+        return render_mesh_typed<std::uint8_t>(
+            input_data, input_row_bytes, input_width, input_height,
+            output_data, output_row_bytes, output_width, output_height, p, 255.0f);
+    }
+    if (bit_depth == 16) {
+        return render_mesh_typed<std::uint16_t>(
+            input_data, input_row_bytes, input_width, input_height,
+            output_data, output_row_bytes, output_width, output_height, p, 32768.0f);
+    }
+    if (bit_depth == 32) {
+        return render_mesh_typed<float>(
+            input_data, input_row_bytes, input_width, input_height,
+            output_data, output_row_bytes, output_width, output_height, p, 1.0f);
+    }
+    return 2;
 }
 
 struct PreparedBridge {
@@ -282,6 +691,7 @@ int eg_prepare_gpu_plan(
     EgGpuCubicSample* x_cubic,
     EgGpuCubicSample* y_cubic) noexcept {
     try {
+        if (is_mesh_params(p)) return 6; // true 2D mesh currently uses the CPU path
         PreparedBridge& prepared = reusable_bridge_state();
         const int rc = prepare_bridge(input_width, input_height, output_width, output_height, p, prepared, true);
         if (rc != 0) return rc;
@@ -328,6 +738,18 @@ int eg_required_source_rect(
         return 1;
     }
     try {
+        if (is_mesh_params(p)) {
+            if (!validate_mesh(p)) return 4;
+            // A moved 2D node can pull source pixels from any neighboring cell.
+            // Request the full canvas for correctness until a mesh-aware ROI
+            // hull is introduced.
+            source_rect->left = 0;
+            source_rect->top = 0;
+            source_rect->right = canvas_width;
+            source_rect->bottom = canvas_height;
+            return 0;
+        }
+
         EgRenderParams local = *p;
         local.canvas_width = canvas_width;
         local.canvas_height = canvas_height;
@@ -394,6 +816,13 @@ int eg_render_frame(
     }
 
     try {
+        if (is_mesh_params(p)) {
+            return render_mesh_frame(
+                input_data, input_row_bytes, input_width, input_height,
+                output_data, output_row_bytes, output_width, output_height,
+                bit_depth, p);
+        }
+
         PreparedBridge& prepared = reusable_bridge_state();
         const int prep_rc = prepare_bridge(
             input_width, input_height, output_width, output_height, p, prepared);
