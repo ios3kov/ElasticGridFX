@@ -30,6 +30,7 @@ jobs:
       - name: Static shell checks
         run: |
           set -euo pipefail
+          python3 tools/verify_shell_metadata.py host-rust/build.rs host-rust/shell/ElasticGridShell.cpp
           zsh -n tools/stage_hot_reload_macos.command
           zsh -n tools/install_hot_loader_package.command
           zsh -n tools/stage_packaged_hot_reload.command
