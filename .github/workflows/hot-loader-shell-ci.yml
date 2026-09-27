@@ -93,6 +93,13 @@ jobs:
               exit 6
             fi
           done
+          for bin in             "$BUNDLE/Contents/MacOS/ElasticGrid"             "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib"             "$CANDIDATE_ROOT/libelasticgrid_ae.dylib"; do
+            xcrun vtool -show-build "$bin" | grep -Eq 'minos[[:space:]]+11\.0' || {
+              echo "ERROR: unexpected macOS deployment target: $bin"
+              xcrun vtool -show-build "$bin"
+              exit 7
+            }
+          done
 
       - name: Smoke shell reload
         shell: bash
