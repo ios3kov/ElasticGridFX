@@ -9,7 +9,9 @@ mod ui;
 const GRID_REFCON: u64 = 0x4547_4658_4752_4944; // "EGFXGRID"
 const MAX_CELLS: usize = 128;
 
-const GRID_WIRE_VERSION: u16 = 1;
+const MAX_GRID_POINTS: usize = (MAX_CELLS + 1) * (MAX_CELLS + 1);
+
+const GRID_WIRE_VERSION: u16 = 2;
 const GRID_WIRE_MARKER: u16 = 0x8000;
 
 // IMPORTANT: parameter IDs in the Rust AE host are derived from these Debug
@@ -45,6 +47,9 @@ pub(crate) struct GridArb {
     #[serde(serialize_with = "serialize_grid_columns")]
     pub(crate) columns: u16,
     pub(crate) rows: u16,
+    // Wire-field names are preserved for project compatibility. In v2 these
+    // arrays hold a flattened row-major 2D mesh: column_lines = point X,
+    // row_lines = point Y. There are (columns+1)*(rows+1) entries.
     pub(crate) column_lines: Vec<f32>,
     pub(crate) row_lines: Vec<f32>,
     pub(crate) column_pins: Vec<u8>,
@@ -55,10 +60,9 @@ fn serialize_grid_columns<S>(columns: &u16, serializer: S) -> Result<S::Ok, S::E
 where
     S: Serializer,
 {
-    // Keep the exact historical six-field struct layout. The high bit marks
-    // versioned data; bits 8..14 carry the schema version; low 8 bits carry
-    // the real column count (1..128). v0.8 projects stored plain 1..128 here
-    // and therefore remain readable without a second format parser.
+    // Keep the historical six-field struct layout. Only the vector semantics
+    // changed in v2, so old v0.8/v1 projects can be detected by vector lengths
+    // and migrated without changing the arbitrary-parameter identity.
     let cols = (*columns).clamp(1, MAX_CELLS as u16);
     let wire = GRID_WIRE_MARKER | ((GRID_WIRE_VERSION & 0x7f) << 8) | (cols & 0xff);
     serializer.serialize_u16(wire)
@@ -78,7 +82,7 @@ where
     }
     let version = (wire >> 8) & 0x7f;
     let columns = wire & 0xff;
-    if version != GRID_WIRE_VERSION {
+    if version != 1 && version != GRID_WIRE_VERSION {
         return Err(serde::de::Error::custom("unsupported ElasticGrid grid-state version"));
     }
     if !(1..=MAX_CELLS as u16).contains(&columns) {
@@ -87,22 +91,20 @@ where
     Ok(columns)
 }
 
-
 struct BoundedF32VecVisitor;
 impl<'de> Visitor<'de> for BoundedF32VecVisitor {
     type Value = Vec<f32>;
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("an ElasticGrid float vector no longer than MAX_CELLS + 1")
+        formatter.write_str("an ElasticGrid mesh vector within the topology limit")
     }
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
     where A: SeqAccess<'de> {
-        let limit = MAX_CELLS + 1;
-        if seq.size_hint().is_some_and(|n| n > limit) {
+        if seq.size_hint().is_some_and(|n| n > MAX_GRID_POINTS) {
             return Err(serde::de::Error::custom("ElasticGrid vector exceeds topology limit"));
         }
-        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(limit));
+        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_GRID_POINTS));
         while let Some(value) = seq.next_element::<f32>()? {
-            if out.len() >= limit {
+            if out.len() >= MAX_GRID_POINTS {
                 return Err(serde::de::Error::custom("ElasticGrid vector exceeds topology limit"));
             }
             out.push(value);
@@ -115,17 +117,16 @@ struct BoundedU8VecVisitor;
 impl<'de> Visitor<'de> for BoundedU8VecVisitor {
     type Value = Vec<u8>;
     fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        formatter.write_str("an ElasticGrid pin vector no longer than MAX_CELLS + 1")
+        formatter.write_str("an ElasticGrid pin vector within the topology limit")
     }
     fn visit_seq<A>(self, mut seq: A) -> Result<Self::Value, A::Error>
     where A: SeqAccess<'de> {
-        let limit = MAX_CELLS + 1;
-        if seq.size_hint().is_some_and(|n| n > limit) {
+        if seq.size_hint().is_some_and(|n| n > MAX_GRID_POINTS) {
             return Err(serde::de::Error::custom("ElasticGrid pin vector exceeds topology limit"));
         }
-        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(limit));
+        let mut out = Vec::with_capacity(seq.size_hint().unwrap_or(0).min(MAX_GRID_POINTS));
         while let Some(value) = seq.next_element::<u8>()? {
-            if out.len() >= limit {
+            if out.len() >= MAX_GRID_POINTS {
                 return Err(serde::de::Error::custom("ElasticGrid pin vector exceeds topology limit"));
             }
             out.push(value);
@@ -163,14 +164,35 @@ impl<'de> Deserialize<'de> for GridArb {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where D: Deserializer<'de> {
         let wire = GridArbWire::deserialize(deserializer)?;
-        let out = Self {
-            columns: wire.columns,
-            rows: wire.rows,
-            column_lines: wire.column_lines,
-            row_lines: wire.row_lines,
-            column_pins: wire.column_pins,
-            row_pins: wire.row_pins,
+        let columns = wire.columns as usize;
+        let rows = wire.rows as usize;
+        if columns == 0 || rows == 0 || columns > MAX_CELLS || rows > MAX_CELLS {
+            return Err(serde::de::Error::custom("invalid ElasticGrid topology"));
+        }
+
+        let legacy_shape =
+            wire.column_lines.len() == columns + 1 &&
+            wire.row_lines.len() == rows + 1 &&
+            wire.column_pins.len() == columns + 1 &&
+            wire.row_pins.len() == rows + 1;
+
+        let out = if legacy_shape {
+            Self::from_legacy_axes(
+                columns, rows,
+                &wire.column_lines, &wire.row_lines,
+                &wire.column_pins, &wire.row_pins,
+            )
+        } else {
+            Self {
+                columns: wire.columns,
+                rows: wire.rows,
+                column_lines: wire.column_lines,
+                row_lines: wire.row_lines,
+                column_pins: wire.column_pins,
+                row_pins: wire.row_pins,
+            }
         };
+
         if out.is_valid() {
             Ok(out)
         } else {
@@ -186,90 +208,128 @@ impl Default for GridArb {
 }
 
 impl GridArb {
-    fn uniform(columns: usize, rows: usize) -> Self {
-        fn axis(cells: usize) -> (Vec<f32>, Vec<u8>) {
-            let cells = cells.clamp(1, MAX_CELLS);
-            let mut lines = Vec::with_capacity(cells + 1);
-            for i in 0..=cells {
-                lines.push(i as f32 / cells as f32);
-            }
-            let mut pins = vec![0u8; cells + 1];
-            pins[0] = 1;
-            pins[cells] = 1;
-            (lines, pins)
-        }
+    pub(crate) fn node_count_for(columns: usize, rows: usize) -> usize {
+        (columns + 1) * (rows + 1)
+    }
 
+    pub(crate) fn node_index(&self, column: usize, row: usize) -> usize {
+        row * (self.columns as usize + 1) + column
+    }
+
+    pub(crate) fn point(&self, column: usize, row: usize) -> (f32, f32) {
+        let i = self.node_index(column, row);
+        (self.column_lines[i], self.row_lines[i])
+    }
+
+    fn from_legacy_axes(
+        columns: usize,
+        rows: usize,
+        xs: &[f32],
+        ys: &[f32],
+        x_pins: &[u8],
+        y_pins: &[u8],
+    ) -> Self {
+        let mut out = Self::uniform(columns, rows);
+        for row in 0..=rows {
+            for column in 0..=columns {
+                let i = out.node_index(column, row);
+                out.column_lines[i] = xs[column];
+                out.row_lines[i] = ys[row];
+                let pinned = column == 0 || column == columns || row == 0 || row == rows ||
+                    x_pins[column] != 0 || y_pins[row] != 0;
+                out.column_pins[i] = u8::from(pinned);
+                out.row_pins[i] = u8::from(pinned);
+            }
+        }
+        out
+    }
+
+    fn uniform(columns: usize, rows: usize) -> Self {
         let columns = columns.clamp(1, MAX_CELLS);
         let rows = rows.clamp(1, MAX_CELLS);
-        let (column_lines, column_pins) = axis(columns);
-        let (row_lines, row_pins) = axis(rows);
+        let count = Self::node_count_for(columns, rows);
+        let mut point_x = Vec::with_capacity(count);
+        let mut point_y = Vec::with_capacity(count);
+        let mut pins = Vec::with_capacity(count);
+        for row in 0..=rows {
+            for column in 0..=columns {
+                point_x.push(column as f32 / columns as f32);
+                point_y.push(row as f32 / rows as f32);
+                pins.push(u8::from(column == 0 || column == columns || row == 0 || row == rows));
+            }
+        }
         Self {
             columns: columns as u16,
             rows: rows as u16,
-            column_lines,
-            row_lines,
-            column_pins,
-            row_pins,
+            column_lines: point_x,
+            row_lines: point_y,
+            column_pins: pins.clone(),
+            row_pins: pins,
         }
-    }
-
-    fn valid_axis(lines: &[f32], pins: &[u8], cells: usize) -> bool {
-        if lines.len() != cells + 1 || pins.len() != cells + 1 || cells == 0 || cells > MAX_CELLS {
-            return false;
-        }
-        if !lines.iter().all(|v| v.is_finite()) || lines.first().copied() != Some(0.0) || lines.last().copied() != Some(1.0) {
-            return false;
-        }
-        if pins.first().copied() != Some(1) || pins.last().copied() != Some(1) || !pins.iter().all(|p| *p <= 1) {
-            return false;
-        }
-        lines.windows(2).all(|w| w[1] > w[0])
     }
 
     fn is_valid(&self) -> bool {
         let columns = self.columns as usize;
         let rows = self.rows as usize;
-        Self::valid_axis(&self.column_lines, &self.column_pins, columns)
-            && Self::valid_axis(&self.row_lines, &self.row_pins, rows)
+        if columns == 0 || rows == 0 || columns > MAX_CELLS || rows > MAX_CELLS {
+            return false;
+        }
+        let count = Self::node_count_for(columns, rows);
+        if self.column_lines.len() != count || self.row_lines.len() != count ||
+            self.column_pins.len() != count || self.row_pins.len() != count {
+            return false;
+        }
+        if !self.column_lines.iter().chain(self.row_lines.iter()).all(|v| v.is_finite() && (0.0..=1.0).contains(v)) {
+            return false;
+        }
+        if !self.column_pins.iter().chain(self.row_pins.iter()).all(|p| *p <= 1) {
+            return false;
+        }
+
+        for row in 0..=rows {
+            for column in 0..=columns {
+                let i = self.node_index(column, row);
+                let boundary = column == 0 || column == columns || row == 0 || row == rows;
+                if boundary && (self.column_pins[i] == 0 || self.row_pins[i] == 0) {
+                    return false;
+                }
+                if column == 0 && self.column_lines[i] != 0.0 { return false; }
+                if column == columns && self.column_lines[i] != 1.0 { return false; }
+                if row == 0 && self.row_lines[i] != 0.0 { return false; }
+                if row == rows && self.row_lines[i] != 1.0 { return false; }
+                if column > 0 {
+                    let left = self.node_index(column - 1, row);
+                    if self.column_lines[i] <= self.column_lines[left] { return false; }
+                }
+                if row > 0 {
+                    let up = self.node_index(column, row - 1);
+                    if self.row_lines[i] <= self.row_lines[up] { return false; }
+                }
+            }
+        }
+        true
     }
 
-    fn resample_axis(lines: &[f32], pins: &[u8], new_cells: usize) -> (Vec<f32>, Vec<u8>) {
-        let new_cells = new_cells.clamp(1, MAX_CELLS);
-        let old_cells = lines.len().saturating_sub(1);
-        if old_cells == 0 || pins.len() != lines.len() || !lines.iter().all(|v| v.is_finite()) {
-            let fallback = Self::uniform(new_cells, 1);
-            return (fallback.column_lines, fallback.column_pins);
-        }
-
-        let mut out = Vec::with_capacity(new_cells + 1);
-        for i in 0..=new_cells {
-            if i == 0 {
-                out.push(0.0);
-                continue;
-            }
-            if i == new_cells {
-                out.push(1.0);
-                continue;
-            }
-            let old_pos = i as f32 * old_cells as f32 / new_cells as f32;
-            let left = old_pos.floor() as usize;
-            let right = (left + 1).min(old_cells);
-            let t = old_pos - left as f32;
-            out.push(lines[left] + (lines[right] - lines[left]) * t);
-        }
-
-        let mut out_pins = vec![0u8; new_cells + 1];
-        out_pins[0] = 1;
-        out_pins[new_cells] = 1;
-        for (i, pin) in pins.iter().enumerate().take(old_cells).skip(1) {
-            if *pin == 0 || new_cells <= 1 {
-                continue;
-            }
-            let mapped = ((i as f32 / old_cells as f32) * new_cells as f32).round() as usize;
-            let mapped = mapped.clamp(1, new_cells - 1);
-            out_pins[mapped] = 1;
-        }
-        (out, out_pins)
+    fn bilinear_point(&self, u: f32, v: f32) -> (f32, f32) {
+        let columns = self.columns as usize;
+        let rows = self.rows as usize;
+        let gx = u.clamp(0.0, 1.0) * columns as f32;
+        let gy = v.clamp(0.0, 1.0) * rows as f32;
+        let c0 = (gx.floor() as usize).min(columns);
+        let r0 = (gy.floor() as usize).min(rows);
+        let c1 = (c0 + 1).min(columns);
+        let r1 = (r0 + 1).min(rows);
+        let tx = if c0 == c1 { 0.0 } else { gx - c0 as f32 };
+        let ty = if r0 == r1 { 0.0 } else { gy - r0 as f32 };
+        let p00 = self.point(c0, r0);
+        let p10 = self.point(c1, r0);
+        let p01 = self.point(c0, r1);
+        let p11 = self.point(c1, r1);
+        let lerp = |a: f32, b: f32, t: f32| a + (b - a) * t;
+        (
+            lerp(lerp(p00.0, p10.0, tx), lerp(p01.0, p11.0, tx), ty),
+            lerp(lerp(p00.1, p10.1, tx), lerp(p01.1, p11.1, tx), ty),
+        )
     }
 
     fn resized(&self, columns: usize, rows: usize) -> Self {
@@ -282,25 +342,18 @@ impl GridArb {
             return self.clone();
         }
 
-        let (column_lines, column_pins) = if self.columns as usize == columns {
-            (self.column_lines.clone(), self.column_pins.clone())
-        } else {
-            Self::resample_axis(&self.column_lines, &self.column_pins, columns)
-        };
-        let (row_lines, row_pins) = if self.rows as usize == rows {
-            (self.row_lines.clone(), self.row_pins.clone())
-        } else {
-            Self::resample_axis(&self.row_lines, &self.row_pins, rows)
-        };
-
-        Self {
-            columns: columns as u16,
-            rows: rows as u16,
-            column_lines,
-            row_lines,
-            column_pins,
-            row_pins,
+        let mut out = Self::uniform(columns, rows);
+        for row in 0..=rows {
+            for column in 0..=columns {
+                let i = out.node_index(column, row);
+                let u = column as f32 / columns as f32;
+                let v = row as f32 / rows as f32;
+                let p = self.bilinear_point(u, v);
+                out.column_lines[i] = if column == 0 { 0.0 } else if column == columns { 1.0 } else { p.0.clamp(0.0, 1.0) };
+                out.row_lines[i] = if row == 0 { 0.0 } else if row == rows { 1.0 } else { p.1.clamp(0.0, 1.0) };
+            }
         }
+        if out.is_valid() { out } else { Self::uniform(columns, rows) }
     }
 }
 
@@ -328,11 +381,7 @@ impl ae::ArbitraryData<GridArb> for GridArb {
             out.column_pins.clone_from(&other.column_pins);
             out.row_pins.clone_from(&other.row_pins);
         }
-        out.column_lines[0] = 0.0;
-        *out.column_lines.last_mut().unwrap() = 1.0;
-        out.row_lines[0] = 0.0;
-        *out.row_lines.last_mut().unwrap() = 1.0;
-        out
+        if out.is_valid() { out } else if t < 0.5 { self.clone() } else { other.clone() }
     }
 }
 
