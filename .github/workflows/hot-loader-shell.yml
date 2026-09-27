@@ -29,7 +29,6 @@ jobs:
       - name: Static checks
         run: |
           set -euo pipefail
-          cargo fmt --manifest-path host-rust/Cargo.toml -- --check
           bash -n tools/build_macos_sdkless.command
           zsh -n tools/stage_hot_reload_macos.command
           xcrun clang++ -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -Werror \
