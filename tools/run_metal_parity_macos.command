@@ -38,4 +38,9 @@ mkdir -p "$BUILD"
   -framework Foundation -framework Metal \
   -o "$BUILD/test_metal_parity"
 
+if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
+  echo "Metal parity: COMPILE PASS — runtime skipped because this macOS host exposes no Metal device"
+  exit 0
+fi
+
 "$BUILD/test_metal_parity"

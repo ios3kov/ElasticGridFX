@@ -19,4 +19,10 @@ rm -rf "$BUILD"; mkdir -p "$BUILD"
   "$ROOT/src/core/GridModel.cpp" "$ROOT/src/core/GridCodec.cpp" "$ROOT/src/core/WarpMath.cpp" "$ROOT/src/core/CpuRenderer.cpp" \
   "$ROOT/src/bridge/elasticgrid_ffi.cpp" "$ROOT/src/gpu/metal_backend.mm" "$ROOT/tests/test_metal_determinism.mm" \
   -framework Foundation -framework Metal -o "$BUILD/test_metal_determinism"
+
+if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
+  echo "Metal determinism: COMPILE PASS — runtime skipped because this macOS host exposes no Metal device"
+  exit 0
+fi
+
 "$BUILD/test_metal_determinism"

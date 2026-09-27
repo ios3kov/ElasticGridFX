@@ -2,6 +2,30 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Tightened the hosted macOS gate after freezing dependencies: CI now verifies and consumes the committed `host-rust/Cargo.lock` with `--locked` instead of regenerating it.
+
+- Froze the exact Cargo dependency graph validated by hosted macOS gate #34: committed `host-rust/Cargo.lock` from the green artifact, SHA-256 `5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e`.
+
+- Hosted macOS source gate #33 passed at `f3bca10`: all 20 preflight stages completed, including Clippy, sanitizers, TSan, dependency/license/RustSec/SBOM checks, locked Rust tests, two clean reproducible Release builds, bundle verification/signing, and artifact upload. Hardware Metal execution and real After Effects runtime remain physical-Mac gates.
+
+- Fixed the macOS bundle-metadata gap exposed by the hosted gate: pinned `pipl 0.1.1` emits the PiPL `.rsrc` but not the `*_PkgInfo` / `*_Info.plist` files expected by the bundle script. The project build script now deterministically generates those two metadata files locally without changing the pinned dependency.
+
+- Reproducible-build gate hardening: the two clean offline Release builds now reuse the same canonical `CARGO_TARGET_DIR` after a full target wipe. This keeps build settings identical instead of accidentally testing Cargo/rustc path variance between `target-a` and `target-b`. On a real mismatch the gate now prints hashes, first differing byte offsets, and Mach-O UUIDs for the plugin dylib.
+
+- Fixed malformed compile-only insertion in the Metal helper scripts and added a mandatory CI `bash -n` audit for every `.command`/`.sh` script.
+
+- GitHub-hosted macOS runner has no MTLDevice. Added a CI-only Metal compile mode: shader is compiled by Apple's `metal/metallib` tools and lifecycle/parity/determinism/benchmark binaries are built, while hardware execution remains mandatory and unskipped on the physical target Mac.
+
+- macOS Clippy cleanup: removed redundant Rust casts and reduced the float-slider helper argument count by grouping valid/slider ranges.
+- Rust 1.98 reports `clippy::drop_non_drop` and `clippy::question_mark` from inside the pinned `after-effects 0.4.0` item-macro expansion. Those two known upstream style lints are the only command-line Clippy exceptions; every other warning remains `-D warnings`.
+
+- First real macOS Rust-host compile found and fixed a plugin-trait ABI/API mismatch: `handle_command` now uses the required mutable receiver (`&mut self`).
+- Registered the cfg names expanded by `after-effects 0.4.0` (`does_dialog`, `with_premiere`, `threaded_rendering`, `catch_panics`) with rustc check-cfg so mandatory Clippy can remain at `-D warnings` on modern Rust.
+
+- macOS hosted-runner static analysis: excluded Apple Clang's environment-only `-Wpoison-system-directories` diagnostic while retaining `-Werror` for source diagnostics.
+
+- Added GitHub CI for GCC/Clang regression, portable C++ static analysis, ASan/UBSan/leak checks, and GCC TSan. Rust Clippy is target-correctly kept in the mandatory macOS source gate because the pinned after-effects host crate is not a Linux host crate.
+
 - Code-freeze step 4 reproducible-build gate added: clean temporary source snapshot, isolated Cargo registry, locked fetch, two independent offline Release builds, byte-for-byte comparison of dylib/PiPL/PkgInfo/plist, plus offline locked tests. Portable C++ static core reproduces byte-for-byte here; macOS host result remains target-Mac pending.
 - Code-freeze step 3 dependency/license policy complete in source: exact-pinned direct Rust dependencies, explicit Rust 1.85 MSRV, automated target-Mac Cargo.lock generation, RustSec vulnerability gate, CycloneDX 1.5 SBOM, dependency/license inventory and compliance hashes.
 - Documented `RUSTSEC-2025-0141` for `bincode` as an informational/unmaintained advisory; it remains visible in release compliance output and is not silently ignored. Full target-Mac lock/audit/SBOM remains pending until Cargo runs there.

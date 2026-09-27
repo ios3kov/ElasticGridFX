@@ -121,3 +121,9 @@ Functional code is now frozen. Aggregate frozen-source hash: `e8d043c7bbab6d7674
 ### Target-Mac runtime gate ready
 
 All runtime/build scripts pass shell syntax validation and the full gate is documented in `docs/mac-runtime-ready-v1.0.md`. Actual Metal and After Effects results remain intentionally pending until run on the target Mac.
+
+## GitHub CI
+
+Portable regression, static analysis and sanitizers run automatically on pushes to `main` and pull requests. The expensive macOS/Metal source gate is a manual GitHub Actions workflow and does not replace the final real-After-Effects runtime gate.
+
+See `docs/github-ci-v1.md`.

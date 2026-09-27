@@ -15,7 +15,40 @@ fn generate_metal_header(root: &std::path::Path, out_dir: &std::path::Path) {
     std::fs::write(out_dir.join("elasticgrid_metal_source.h"), header).expect("write Metal shader header");
 }
 
+fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
+    let target_profile_dir = out_dir.join("../../..");
+    let package_name = std::env::var("CARGO_PKG_NAME").expect("CARGO_PKG_NAME");
+    let pkginfo_path = target_profile_dir.join(format!("{package_name}_PkgInfo"));
+    let plist_path = target_profile_dir.join(format!("{package_name}_Info.plist"));
+
+    // pipl 0.1.1 only emits the .rsrc on macOS. Keep the dependency pinned and
+    // generate the two bundle metadata files expected by the packaging step.
+    std::fs::write(&pkginfo_path, b"eFKTFXTC").expect("write macOS PkgInfo");
+
+    let plist = r#"<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.elasticgrid.fx</string>
+    <key>CFBundlePackageType</key>
+    <string>eFKT</string>
+    <key>CFBundleSignature</key>
+    <string>FXTC</string>
+</dict>
+</plist>
+"#;
+    std::fs::write(&plist_path, plist).expect("write macOS Info.plist");
+}
+
 fn main() {
+    // The after-effects 0.4.0 macro expands these cfg names in the destination
+    // crate. Register them explicitly so modern rustc check-cfg / Clippy can
+    // validate the expansion without treating supported host cfgs as unknown.
+    for cfg_name in ["does_dialog", "with_premiere", "threaded_rendering", "catch_panics"] {
+        println!("cargo:rustc-check-cfg=cfg({cfg_name})");
+    }
+
     // Never let a Rust panic cross the After Effects C ABI in release builds.
     // The after-effects host macro wraps EffectMain in catch_unwind when this cfg is set.
     println!("cargo:rustc-cfg=catch_panics");
@@ -46,6 +79,7 @@ fn main() {
         .compile("elasticgrid_core");
 
     if target_os == "macos" {
+        generate_macos_bundle_metadata(&out_dir);
         generate_metal_header(&root, &out_dir);
         let mut metal = cc::Build::new();
         metal.cpp(true)

@@ -1,6 +1,6 @@
-ElasticGrid FX v1.0 candidate — CODE FREEZE MANIFEST
+ElasticGrid FX v1.0 candidate — BASELINE CODE FREEZE MANIFEST
 Frozen: 2026-09-27
-Policy: no functional code changes until target-Mac/After Effects runtime gate reports a blocker.
+Policy: this file records the original frozen functional baseline. Gate-required host/build/CI amendments after this snapshot are tracked in docs/code-freeze-v1.0.md and are not represented by the hashes below.
 Note: shipping/plugin metadata remains 0.9.0 until the target-Mac gate passes; a release-only version bump is permitted after PASS.
 Note: host-rust/Cargo.lock is generated and frozen by the target-Mac dependency gate because Cargo is unavailable in this validation container.
 
@@ -65,3 +65,7 @@ d693b131d498f997794dbd3751d19f59187f1f32ed204b3f0841225e9d13db0d  /mnt/data/Elas
 ff6fedae6ddc9d60f85cd256657b66a99f55db4ee7ed360998bdb0a217be317e  /mnt/data/ElasticGridFX-v1.0-final-validation-mac-source/BUILD_AND_INSTALL_MAC.command
 
 AGGREGATE_CODE_HASH  e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3
+
+
+GATE AMENDMENT ARTIFACTS
+5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e  host-rust/Cargo.lock

@@ -479,18 +479,16 @@ impl Drop for MetalGpuData {
 
 fn setup_float(
     f: &mut ae::FloatSliderDef,
-    valid_min: f32,
-    valid_max: f32,
-    slider_min: f32,
-    slider_max: f32,
+    valid_range: (f32, f32),
+    slider_range: (f32, f32),
     default: f64,
     precision: i16,
     percent: bool,
 ) {
-    f.set_valid_min(valid_min);
-    f.set_valid_max(valid_max);
-    f.set_slider_min(slider_min);
-    f.set_slider_max(slider_max);
+    f.set_valid_min(valid_range.0);
+    f.set_valid_max(valid_range.1);
+    f.set_slider_min(slider_range.0);
+    f.set_slider_max(slider_range.1);
     f.set_default(default);
     f.set_precision(precision);
     if percent {
@@ -721,7 +719,7 @@ impl AdobePluginGlobal for Plugin {
         })?;
 
         params.add(Params::TensionRadius, "Tension Radius", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 32.0, 0.0, 8.0, 3.0, 1, false);
+            setup_float(f, (0.0, 32.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
         params.add(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
             f.set_options(&["Linear", "Smoothstep", "Gaussian", "Cosine"]);
@@ -729,16 +727,16 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
         params.add(Params::ElasticityStrength, "Elasticity Strength", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 200.0, 0.0, 200.0, 100.0, 1, true);
+            setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
         }))?;
         params.add(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 25.0, 0.0, 5.0, 0.5, 2, true);
+            setup_float(f, (0.0, 25.0), (0.0, 5.0), 0.5, 2, true);
         }))?;
         params.add(Params::StretchEasing, "Stretch Easing", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 100.0, 0.0, 100.0, 0.0, 1, true);
+            setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
         }))?;
         params.add(Params::EasingDistance, "Easing Distance", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 1.0, 50.0, 1.0, 50.0, 25.0, 1, true);
+            setup_float(f, (1.0, 50.0), (1.0, 50.0), 25.0, 1, true);
         }))?;
 
         params.add(Params::WaveEnabled, "Wave Animation", ae::CheckBoxDef::setup(|f| {
@@ -747,16 +745,16 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
         params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 25.0, 0.0, 10.0, 0.0, 2, true);
+            setup_float(f, (0.0, 25.0), (0.0, 10.0), 0.0, 2, true);
         }))?;
         params.add(Params::WaveFrequency, "Wave Frequency", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, 0.0, 20.0, 0.0, 10.0, 1.0, 2, false);
+            setup_float(f, (0.0, 20.0), (0.0, 10.0), 1.0, 2, false);
         }))?;
         params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, -10.0, 10.0, -2.0, 2.0, 0.0, 2, false);
+            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, -10.0, 10.0, -2.0, 2.0, 0.0, 2, false);
+            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
             f.set_options(&["Both", "Columns Only", "Rows Only"]);
@@ -787,7 +785,7 @@ impl AdobePluginGlobal for Plugin {
     }
 
     fn handle_command(
-        &self,
+        &mut self,
         cmd: ae::Command,
         in_data: ae::InData,
         mut out_data: ae::OutData,
@@ -798,7 +796,6 @@ impl AdobePluginGlobal for Plugin {
                 out_data.set_return_msg("ElasticGrid FX v0.9\rfinal hardening build");
             }
             ae::Command::UserChangedParam { param_index } => {
-                let param_index = param_index as usize;
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {

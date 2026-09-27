@@ -38,6 +38,11 @@ mkdir -p "$BUILD"
   -framework Foundation -framework Metal \
   -o "$BUILD/bench_metal"
 
+if [[ "${ELASTICGRID_METAL_COMPILE_ONLY:-0}" == "1" ]]; then
+  echo "Metal benchmark: COMPILE PASS — runtime skipped because this macOS host exposes no Metal device"
+  exit 0
+fi
+
 echo "[Metal benchmark] 4K production path"
 "$BUILD/bench_metal" 3840 2160 12
 

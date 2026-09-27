@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable:
+    name: Portable C++ (${{ matrix.compiler }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, clang]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Select compiler
+        shell: bash
+        run: |
+          if [[ "${{ matrix.compiler }}" == "clang" ]]; then
+            echo "CXX=clang++" >> "$GITHUB_ENV"
+          else
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF -DCMAKE_CXX_COMPILER="$CXX"
+      - name: Build
+        run: cmake --build build --parallel 2
+      - name: Test
+        env:
+          EG_FUZZ_SCALE: "0.1"
+          EG_SOAK_CYCLES: "5000"
+        run: ctest --test-dir build --output-on-failure
+
+  static-analysis:
+    name: Static analysis (portable C++)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Shell syntax audit
+        run: |
+          find . -type f \( -name '*.command' -o -name '*.sh' \) -print0 | xargs -0 -n1 bash -n
+      - name: Install analyzers
+        run: sudo apt-get update && sudo apt-get install -y clang clang-tidy cppcheck
+      - name: Run portable C++ analyzers
+        env:
+          CXX: clang++
+        run: tools/static_analysis.command
+
+  asan-ubsan:
+    name: ASan + UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configure sanitizer build
+        run: >
+          cmake -S . -B build-san
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DELASTICGRID_BUILD_BENCH=OFF
+          -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_CXX_FLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=address,undefined"
+      - name: Build
+        run: cmake --build build-san --parallel 2
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: halt_on_error=1
+          EG_FUZZ_SCALE: "0.1"
+          EG_SOAK_CYCLES: "3000"
+        run: ctest --test-dir build-san --output-on-failure
+
+  tsan:
+    name: ThreadSanitizer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Configure TSan build
+        run: >
+          cmake -S . -B build-tsan
+          -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          -DELASTICGRID_BUILD_BENCH=OFF
+          -DCMAKE_CXX_COMPILER=g++
+          -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer"
+          -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread"
+      - name: Build concurrency tests
+        run: cmake --build build-tsan --parallel 2 --target elasticgrid_mfr_tests elasticgrid_determinism_tests
+      - name: MFR TSan
+        env:
+          TSAN_OPTIONS: halt_on_error=1
+        run: ./build-tsan/elasticgrid_mfr_tests
+      - name: Determinism TSan
+        env:
+          TSAN_OPTIONS: halt_on_error=1
+        run: ./build-tsan/elasticgrid_determinism_tests
