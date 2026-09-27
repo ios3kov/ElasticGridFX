@@ -3,7 +3,7 @@ name: macOS source gate
 on:
   workflow_dispatch:
   push:
-    branches: [chore/github-ci-v1, "feature/**"]
+    branches: [chore/github-ci-v1]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
