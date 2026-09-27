@@ -34,6 +34,7 @@ pub(crate) enum Params {
     WaveAxis,
     EdgeMode,
     Quality,
+    ResetGrid,
 }
 
 #[derive(Default)]
@@ -786,7 +787,7 @@ impl AdobePluginGlobal for Plugin {
             setup_float(f, (0.0, 10.0), (0.0, 10.0), 1.0, 2, false);
         }))?;
         params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-360.0, 360.0), (-360.0, 360.0), 0.0, 2, false);
+            setup_float(f, (-360.0, 360.0), (-360.0, 360.0), 0.0, 1, false);
         }))?;
         params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (-10.0, 10.0), (-10.0, 10.0), 0.0, 2, false);
@@ -806,6 +807,10 @@ impl AdobePluginGlobal for Plugin {
             f.set_options(&["Draft (Bilinear)", "Better (Bicubic)"]);
             f.set_default(1);
             f.set_value(f.default());
+        }))?;
+
+        params.add(Params::ResetGrid, "Reset Grid", ae::ButtonDef::setup(|f| {
+            f.set_label("Reset Grid");
         }))?;
 
         in_data.interact().register_ui(
@@ -835,6 +840,12 @@ impl AdobePluginGlobal for Plugin {
                     || params.index(Params::Rows) == Some(param_index)
                 {
                     sync_grid_topology(params)?;
+                } else if params.index(Params::ResetGrid) == Some(param_index) {
+                    let (columns, rows) = topology(params)?;
+                    params
+                        .get_mut(Params::GridState)?
+                        .as_arbitrary_mut()?
+                        .set_value(GridArb::uniform(columns, rows))?;
                 }
             }
             ae::Command::QueryDynamicFlags => {
