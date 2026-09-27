@@ -65,3 +65,7 @@ d693b131d498f997794dbd3751d19f59187f1f32ed204b3f0841225e9d13db0d  /mnt/data/Elas
 ff6fedae6ddc9d60f85cd256657b66a99f55db4ee7ed360998bdb0a217be317e  /mnt/data/ElasticGridFX-v1.0-final-validation-mac-source/BUILD_AND_INSTALL_MAC.command
 
 AGGREGATE_CODE_HASH  e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3
+
+
+GATE AMENDMENT ARTIFACTS
+5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e  host-rust/Cargo.lock

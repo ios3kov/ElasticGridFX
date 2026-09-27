@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Froze the exact Cargo dependency graph validated by hosted macOS gate #34: committed `host-rust/Cargo.lock` from the green artifact, SHA-256 `5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e`.
+
 - Hosted macOS source gate #33 passed at `f3bca10`: all 20 preflight stages completed, including Clippy, sanitizers, TSan, dependency/license/RustSec/SBOM checks, locked Rust tests, two clean reproducible Release builds, bundle verification/signing, and artifact upload. Hardware Metal execution and real After Effects runtime remain physical-Mac gates.
 
 - Fixed the macOS bundle-metadata gap exposed by the hosted gate: pinned `pipl 0.1.1` emits the PiPL `.rsrc` but not the `*_PkgInfo` / `*_Info.plist` files expected by the bundle script. The project build script now deterministically generates those two metadata files locally without changing the pinned dependency.
