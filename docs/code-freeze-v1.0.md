@@ -2,12 +2,12 @@
 
 | Step | Gate | Status | Evidence |
 |---|---|---|---|
-| 1 | Static analysis | **C++ PASS / RUST CLIPPY TARGET-MAC PENDING** | Clang high-warning + Static Analyzer clean after fixes; Mac preflight mandates Clippy. |
-| 2 | Manual unsafe / FFI audit | **CODE PASS / RUST TARGET-MAC COMPILE PENDING** | ABI layouts frozen; hostile GridState allocation bounded; ROI arithmetic hardened; panic/error paths reviewed. |
-| 3 | Dependencies / licenses / SBOM | **SOURCE/POLICY PASS / TARGET-MAC LOCK+AUDIT+SBOM PENDING** | Direct versions pinned; Cargo.lock/RustSec/CycloneDX gate added. |
-| 4 | Clean reproducible build | **PORTABLE CLEAN BUILD PASS / HOSTED-MAC REPRO RERUN PENDING** | Portable static core reproduced byte-for-byte; Mac verifier now performs two clean offline builds at one canonical target path and reports binary-level mismatch diagnostics. |
-| 5 | Final regression after fixes | **PORTABLE PASS / TARGET-MAC METAL+RUST PENDING** | Release 9/9; ASan/UBSan/LSan PASS; GCC TSan MFR+determinism PASS; final performance smoke recorded. |
-| 6 | Code freeze | **FROZEN** | Aggregate code hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`; see `code-freeze-manifest-v1.0.txt`. |
+| 1 | Static analysis | **C++ PASS / RUST CLIPPY HOSTED-MAC PASS** | Clang high-warning + Static Analyzer clean; hosted macOS gate ran mandatory Clippy successfully. |
+| 2 | Manual unsafe / FFI audit | **CODE PASS / RUST HOST COMPILE PASS** | ABI layouts frozen; hostile GridState allocation bounded; ROI arithmetic hardened; hosted macOS Rust host compile/tests pass. |
+| 3 | Dependencies / licenses / SBOM | **HOSTED-MAC AUDIT+SBOM PASS / REPO LOCK FREEZE PENDING** | Hosted gate generated and audited the lock graph, RustSec reported 0 vulnerabilities, and CycloneDX/license evidence passed. The generated `Cargo.lock` is not yet committed. |
+| 4 | Clean reproducible build | **PORTABLE + HOSTED-MAC REPRO PASS** | Portable core and hosted macOS plugin outputs reproduced byte-for-byte under the hardened two-clean-build verifier. |
+| 5 | Final regression after fixes | **PORTABLE PASS / HOSTED-MAC SOURCE PASS / PHYSICAL METAL PENDING** | Release 9/9; sanitizers/TSan/fuzz/soak pass; hosted macOS compiled all Metal paths, but real MTLDevice execution remains pending. |
+| 6 | Code freeze | **BASELINE FROZEN / GATE AMENDMENTS RECORDED** | Original aggregate hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`; required build/host/CI amendments are documented below. |
 | 7 | Mac/AE runtime gate | **TARGET-MAC PENDING** | Metal/Rust/plugin/AE integration must run on the user's Mac. |
 
 ## Step 1 — Static analysis
@@ -28,7 +28,7 @@ Post-hardening portable regression is green: 9/9 Release tests, ASan/UBSan/LeakS
 
 ## Step 6 — Code freeze
 
-Functional source is frozen with aggregate hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`. No functional code changes are allowed before the target-Mac/After Effects gate unless that gate reveals a blocker. The exact per-file hashes are in `code-freeze-manifest-v1.0.txt`. Shipping metadata remains at 0.9.0 until the target-Mac gate passes; a release-only version bump is allowed after PASS. `Cargo.lock` is intentionally generated/frozen by the target-Mac dependency gate because Cargo is unavailable in the Linux validation container.
+The original functional baseline was frozen with aggregate hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`. Gate-discovered compatibility/build amendments are allowed only when required to make that frozen candidate build and validate; render algorithms remain unchanged. The exact per-file hashes are in `code-freeze-manifest-v1.0.txt`. Shipping metadata remains at 0.9.0 until the target-Mac gate passes; a release-only version bump is allowed after PASS. `Cargo.lock` is intentionally generated/frozen by the target-Mac dependency gate because Cargo is unavailable in the Linux validation container.
 
 ## Target-Mac validation amendments
 
@@ -37,3 +37,10 @@ Code freeze permits only changes required by a failed target-Mac gate. First hos
 The hosted-Mac reproducibility run later reached step 20/20 and found that the verifier itself compared artifacts produced under two different `CARGO_TARGET_DIR` paths. Because Cargo/rustc build metadata can be path-sensitive, the verifier was hardened to do two fully clean builds at the same target path. This changes only validation methodology, not plugin rendering or runtime behavior.
 
 The next hosted-Mac run exposed a packaging assumption rather than a renderer defect: pinned `pipl 0.1.1` produced the PiPL `.rsrc` but not the `*_PkgInfo` and `*_Info.plist` files that the packaging script expected. The project build script now writes those deterministic macOS bundle metadata files directly, preserving the exact dependency pin and leaving render behavior unchanged.
+
+
+## Hosted macOS evidence — 2026-09-27
+
+GitHub Actions macOS source gate #33 passed on head `f3bca10`. The 20-stage preflight passed Clippy, ASan/UBSan, TSan, fuzz, soak, strict Release, dependency/license/RustSec/SBOM, locked Rust tests and the clean two-build reproducibility gate. The generated lockfile hash was `5d77f2ce76302850bd390de5f44d34e772b3d451b706fab257e08fff998d957e`.
+
+The built `ElasticGrid.plugin` passed plist, exported entrypoint, dependency and ad-hoc signature verification. GitHub-hosted macOS exposes no MTLDevice here, so Metal lifecycle/parity/determinism/4K-8K stages were compile-only. Real Metal execution plus After Effects runtime/project tests remain mandatory on the physical target Mac.

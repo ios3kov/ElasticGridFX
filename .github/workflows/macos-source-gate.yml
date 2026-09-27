@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [chore/github-ci-v1]
+    paths-ignore:
+      - "**/*.md"
+      - ".gitignore"
 
 permissions:
   contents: read
@@ -49,3 +52,4 @@ jobs:
             dist/mac/ElasticGrid.plugin
             dist/mac/preflight-report.txt
             dist/compliance/**
+            host-rust/Cargo.lock

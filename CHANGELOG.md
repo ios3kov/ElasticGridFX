@@ -2,6 +2,8 @@
 
 ## v1.0.0-dev — final validation cycle
 
+- Hosted macOS source gate #33 passed at `f3bca10`: all 20 preflight stages completed, including Clippy, sanitizers, TSan, dependency/license/RustSec/SBOM checks, locked Rust tests, two clean reproducible Release builds, bundle verification/signing, and artifact upload. Hardware Metal execution and real After Effects runtime remain physical-Mac gates.
+
 - Fixed the macOS bundle-metadata gap exposed by the hosted gate: pinned `pipl 0.1.1` emits the PiPL `.rsrc` but not the `*_PkgInfo` / `*_Info.plist` files expected by the bundle script. The project build script now deterministically generates those two metadata files locally without changing the pinned dependency.
 
 - Reproducible-build gate hardening: the two clean offline Release builds now reuse the same canonical `CARGO_TARGET_DIR` after a full target wipe. This keeps build settings identical instead of accidentally testing Cargo/rustc path variance between `target-a` and `target-b`. On a real mismatch the gate now prints hashes, first differing byte offsets, and Mach-O UUIDs for the plugin dylib.
@@ -116,30 +118,48 @@
 
 ## v0.8.0 — final Mac preflight candidate
 
-- Metal benchmark now measures the exact production `eg_metal_render` path used by the AE plugin, not a synthetic GPU kernel.
-- Added 4K and 8K measured output with cold/warm GPU initialization split.
-- Performance targets are now expressed as CPU-relative parity targets rather than unrealistic fixed millisecond budgets.
-- Added production-path Metal/CPU image parity test with byte-exact 8-bit identity coverage and tolerance-bounded warped coverage.
-- Added row-by-row diff metrics and finite-output validation.
-- Mac preflight now runs real Metal lifecycle, parity and 4K/8K performance as mandatory gates.
-- Added `docs/macos-final-preflight-v0.8.md`.
+- Metal benchmark now measures the exact production `eg_metal_render` path used by the AE host.
+- Added required 8K Metal benchmark alongside 4K.
+- Added strict Metal compile warnings (`-Werror`).
+- Expanded Mac preflight to 12 gated steps with machine/toolchain capture.
+- Added locked Cargo dependency verification.
+- Fixed missing PiPL Support URL build-time metadata required by the Rust AE entrypoint.
+- Fixed AE frame caching for procedural Wave animation with dynamic `NON_PARAM_VARY`; static warps can still cache normally.
+- Added bundle validation: plist, AE entrypoints, PiPL strings, dylib dependencies, code signature and hashes.
+- Added post-launch AE runtime/log checker.
+- Build writes `dist/mac/preflight-report.txt` for reproducible diagnostics.
+- Kept Final Catmull-Rom Bicubic and CPU/Metal parity thresholds unchanged.
 
-## v0.7.0 — production Metal renderer
+## v0.7.0 — performance hardening
 
-- Replaced the previous CPU-fallback GPU callback with a real Metal compute renderer.
-- `metal_backend.mm` now owns an `MTLDevice`, command queue, runtime-compiled `warp.metal` pipeline, and reusable buffer pools.
-- Added Bilinear/Bicubic sampling, Clamp/Wrap/Mirror edges, 8/16/32-bpc conversions and exact identity path in Metal.
-- Added CPU-side sampling-plan ABI so Metal uses the same warped source-coordinate plan as the CPU path.
-- Added real `GpuDeviceSetup` / `GpuDeviceSetdown` handling and passes AE GPU device context into the backend.
-- Added `tools/test_metal_lifecycle.command` and `tools/bench_metal.command` to the Mac preflight.
-- Added source-level Metal lifecycle and allocation audits; real device execution remains a macOS gate.
-- Added `docs/performance-v0.9.md` placeholder for measured GPU results.
+- Zero-copy AE GPU image path for Metal.
+- MFR-safe Metal plan-buffer pool.
+- Guaranteed SmartFX input check-in on error paths.
+- MFR concurrency stress + sanitizers.
+- CPU bicubic hot-path optimization without sampling-quality reduction.
 
-## v0.6.0 — performance + stress validation
+## v1.0 final regression — 2026-09-27
 
-- Added AVX2/NEON SIMD bulk pixel conversion helpers with scalar fallback and runtime CPU detection.
-- Added 4K/8K randomized high-resolution stress tests with ROI equivalence checks.
-- Added stronger MFR determinism tests: 256 concurrent same-frame renders + 120 mixed-state concurrent renders.
-- Added 4K/8K benchmark executable and `tools/benchmark.command`.
-- Added `tools/profile.command` for Linux perf profiling.
-- Added `docs/performance-audit-v0.6.md`, `docs/performance-targets.md`, and `docs/verification-v0.6.txt`.
+- Re-ran the complete 9-target portable Release regression: PASS.
+- Re-ran all targets under ASan/UBSan/LeakSanitizer: PASS with no leak report.
+- Re-ran MFR and determinism under GCC ThreadSanitizer: PASS.
+- Documented the container-specific Clang/Swift TSan libdispatch linker limitation; this is not a source failure.
+- Re-ran a final 4K/8K CPU performance smoke after all hardening changes. The shared validation host is noisy, so target-Mac Metal measurements remain authoritative.
+- Added `docs/final-regression-v1.0.md`.
+
+
+## v1.0 code freeze — 2026-09-27
+
+- Completed final portable regression after all hardening work.
+- Froze functional source with aggregate hash `e8d043c7bbab6d7674887558c8c80d6afb55d02ba1e3e9a3cf087236074ddeb3`.
+- Added `docs/code-freeze-manifest-v1.0.txt` with per-file SHA-256 hashes.
+- Functional changes are blocked until target-Mac/After Effects runtime validation reveals a blocker.
+- `Cargo.lock` remains a target-Mac generated/frozen artifact because Cargo is unavailable in the Linux validation container.
+
+
+## v1.0 target-Mac gate ready — 2026-09-27
+
+- Revalidated shell syntax for all build/install/runtime `.command` scripts.
+- Reviewed the full runtime orchestration: build/install → Metal lifecycle/parity/determinism/bench → bundle verification → AE 32-bpc Final render → project save/reopen/keyframe persistence.
+- Added `docs/mac-runtime-ready-v1.0.md`.
+- Actual Rust/Metal/After Effects execution remains target-Mac pending.
