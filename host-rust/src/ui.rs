@@ -214,7 +214,7 @@ fn draw_effect_control(
         blue: 0.85,
         alpha: 1.0,
     })?;
-    let label = format!("{} × {} — drag guides in Viewer", grid.columns, grid.rows);
+    let label = format!("{} × {} — CACHEFIX cd7adfc", grid.columns, grid.rows);
     let origin = ae::drawbot::PointF32 {
         x: frame.left as f32 + 5.0,
         y: frame.top as f32 + 4.0,
