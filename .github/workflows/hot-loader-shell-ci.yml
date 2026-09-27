@@ -87,6 +87,12 @@ jobs:
 
           strings "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" | grep 'elasticgrid-default'
           strings "$CANDIDATE_ROOT/libelasticgrid_ae.dylib" | grep 'elasticgrid-candidate-v2'
+          for impl in "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" "$CANDIDATE_ROOT/libelasticgrid_ae.dylib"; do
+            if otool -L "$impl" | tail -n +2 | grep -E '@(rpath|loader_path|executable_path)'; then
+              echo "ERROR: hot-reload implementation has relative/private dylib dependencies: $impl"
+              exit 6
+            fi
+          done
 
       - name: Smoke shell reload
         shell: bash
