@@ -42,9 +42,33 @@ jobs:
           xcrun -sdk macosx metal -c src/gpu/warp.metal -o "$RUNNER_TEMP/elasticgrid-warp.air"
           xcrun -sdk macosx metallib "$RUNNER_TEMP/elasticgrid-warp.air" -o "$RUNNER_TEMP/elasticgrid-warp.metallib"
       - name: Full macOS preflight
+        if: github.ref != 'refs/heads/fix/true-2d-gridwarp'
         run: tools/preflight_macos.command
       - name: Build unsigned-install-free plugin bundle
+        if: github.ref != 'refs/heads/fix/true-2d-gridwarp'
         run: tools/build_macos_sdkless.command
+      - name: Build 2D mesh test plugin bundle
+        if: github.ref == 'refs/heads/fix/true-2d-gridwarp'
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          cargo build --release --locked --manifest-path host-rust/Cargo.toml
+          BUNDLE="dist/mac/ElasticGrid.plugin"
+          TARGET="host-rust/target/release"
+          rm -rf "$BUNDLE"
+          mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
+          cp "$TARGET/libelasticgrid_ae.dylib" "$BUNDLE/Contents/MacOS/ElasticGrid"
+          cp "$TARGET/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
+          cp "$TARGET/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
+          cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.elasticgrid.fx' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string ElasticGrid' "$BUNDLE/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable ElasticGrid' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleName string ElasticGrid FX' "$BUNDLE/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Set :CFBundleName ElasticGrid FX' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.9.0' "$BUNDLE/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString 0.9.0' "$BUNDLE/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 9' "$BUNDLE/Contents/Info.plist" 2>/dev/null || /usr/libexec/PlistBuddy -c 'Set :CFBundleVersion 9' "$BUNDLE/Contents/Info.plist"
+          xattr -cr "$BUNDLE" || true
+          codesign --force --deep --sign - "$BUNDLE"
+          tools/verify_bundle_macos.command "$BUNDLE"
       - name: Upload plugin and reports
         uses: actions/upload-artifact@v4
         with:
