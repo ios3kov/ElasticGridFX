@@ -107,11 +107,17 @@ set -o pipefail
 echo "[2/6] Building ElasticGrid FX v0.9 (native $(uname -m))..." | tee -a "$REPORT"
 cargo build --release --locked --manifest-path "$MANIFEST" 2>&1 | tee -a "$REPORT"
 
-echo "[3/6] Creating After Effects .plugin bundle..." | tee -a "$REPORT"
-rm -rf "$BUNDLE"
-mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Resources"
+echo "[3/6] Creating hot-reload shell bundle..." | tee -a "$REPORT"
+SHELL_BIN="$TARGET/ElasticGridShell"
+xcrun clang++ -std=c++17 -O2 -arch arm64 -dynamiclib -fvisibility=hidden \
+  "$ROOT/host-rust/shell/ElasticGridShell.cpp" \
+  -o "$SHELL_BIN"
 
-cp "$TARGET/libelasticgrid_ae.dylib" "$BUNDLE/Contents/MacOS/ElasticGrid"
+rm -rf "$BUNDLE"
+mkdir -p "$BUNDLE/Contents/MacOS" "$BUNDLE/Contents/Frameworks" "$BUNDLE/Contents/Resources"
+
+cp "$SHELL_BIN" "$BUNDLE/Contents/MacOS/ElasticGrid"
+cp "$TARGET/libelasticgrid_ae.dylib" "$BUNDLE/Contents/Frameworks/ElasticGridImpl.dylib"
 cp "$TARGET/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
 cp "$TARGET/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
 cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
@@ -127,13 +133,17 @@ cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
   /usr/libexec/PlistBuddy -c 'Set :CFBundleVersion 9' "$BUNDLE/Contents/Info.plist" >/dev/null
 
 xattr -cr "$BUNDLE" || true
+codesign --force --sign - "$BUNDLE/Contents/Frameworks/ElasticGridImpl.dylib"
 codesign --force --deep --sign - "$BUNDLE"
 
 echo "[4/6] Verifying bundle/entrypoints/signature..." | tee -a "$REPORT"
 "$ROOT/tools/verify_bundle_macos.command" "$BUNDLE" 2>&1 | tee -a "$REPORT"
 
 printf '[artifact] sha256\n' | tee -a "$REPORT"
-shasum -a 256 "$BUNDLE/Contents/MacOS/ElasticGrid" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
+shasum -a 256 \
+  "$BUNDLE/Contents/MacOS/ElasticGrid" \
+  "$BUNDLE/Contents/Frameworks/ElasticGridImpl.dylib" \
+  "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
 
 if [[ "$INSTALL" == "1" ]]; then
   echo "[5/6] Installing into Adobe MediaCore..." | tee -a "$REPORT"
