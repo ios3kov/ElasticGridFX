@@ -146,6 +146,9 @@ bool AxisGrid::dragElastic(std::size_t line, float target, const ElasticSettings
             candidate[i] = clamp01(target);
             continue;
         }
+        // Kept only for compatibility with our older saved states. Original
+        // GridWarp never sets internal pins, so canonical parity behavior is unchanged.
+        if (pins_[i]) continue;
         const float d = std::abs(static_cast<float>(i) - static_cast<float>(line));
         const float w = falloffWeight(d, radius, settings.falloff);
         candidate[i] += delta * w * strength;
