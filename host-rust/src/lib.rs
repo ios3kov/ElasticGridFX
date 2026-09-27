@@ -1060,7 +1060,9 @@ mod tests {
         let mut b = a.clone();
         b.column_lines[2] = 0.7;
         let m = a.interpolate(&b, 0.5);
-        assert!((m.column_lines[2] - 0.6).abs() < 1.0e-6);
+        // Four internal guides are uniformly 0.2/0.4/0.6/0.8.
+        // Blending guide #2 from 0.4 to 0.7 at t=0.5 yields 0.55.
+        assert!((m.column_lines[2] - 0.55).abs() < 1.0e-6);
         assert!(m.column_lines.windows(2).all(|w| w[1] > w[0]));
     }
 
