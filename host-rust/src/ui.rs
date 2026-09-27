@@ -282,7 +282,7 @@ pub fn drag(
         if index == 0 || index + 1 >= grid.column_lines.len() {
             return Ok(());
         }
-        let target = (layer_x / width).clamp(0.0, 1.0);
+        let target = layer_x / width;
         unsafe {
             eg_drag_axis(
                 grid.column_lines.as_mut_ptr(),
@@ -297,7 +297,7 @@ pub fn drag(
         if index == 0 || index + 1 >= grid.row_lines.len() {
             return Ok(());
         }
-        let target = (layer_y / height).clamp(0.0, 1.0);
+        let target = layer_y / height;
         unsafe {
             eg_drag_axis(
                 grid.row_lines.as_mut_ptr(),
