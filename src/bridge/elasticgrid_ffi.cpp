@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <thread>
@@ -271,6 +272,7 @@ int prepare_bridge(std::int32_t input_width,
         out.plan.dst_height = output_height;
         out.plan.quality = out.settings.quality;
         out.plan.identity = true;
+        out.plan.transparent_taps = false;
         return 0;
     }
 
@@ -291,6 +293,52 @@ int prepare_bridge(std::int32_t input_width,
             p->input_origin_y, p->output_origin_y, output_height);
     }
     return 0;
+}
+
+// Called only by the explicit sparse CPU entry. GPU and legacy ROI callers keep
+// their existing nonnegative local-plan contract.
+int prepare_sparse_bridge(int iw, int ih, int ow, int oh,
+                          const EgRenderParams* p, PreparedBridge& out) {
+    EgRenderParams logical = *p;
+    logical.input_origin_x = logical.input_origin_y = 0;
+    const int rc = prepare_bridge(p->canvas_width, p->canvas_height, ow, oh,
+                                  &logical, out, true);
+    if (rc != 0) return rc;
+    auto map_axis = [&](auto& linear, auto& cubic, int origin, int extent,
+                        int canvas, int output_origin, int output_extent) {
+        for (int i = 0; i < output_extent; ++i) {
+            const auto pixel = static_cast<std::int64_t>(output_origin) + i;
+            const bool outside = pixel < 0 || pixel >= canvas;
+            auto map = [&](int& index) {
+                const auto local = static_cast<std::int64_t>(index) - origin;
+                if (outside || local < 0 || local >= extent) {
+                    index = -1;
+                    out.plan.transparent_taps = true;
+                } else index = static_cast<int>(local);
+            };
+            if (out.settings.quality == eg::SampleQuality::Bilinear) {
+                map(linear[static_cast<std::size_t>(i)].i0);
+                map(linear[static_cast<std::size_t>(i)].i1);
+            } else {
+                for (auto& index : cubic[static_cast<std::size_t>(i)].index) map(index);
+            }
+        }
+    };
+    map_axis(out.plan.x_linear, out.plan.x_cubic, p->input_origin_x, iw,
+             p->canvas_width, p->output_origin_x, ow);
+    map_axis(out.plan.y_linear, out.plan.y_cubic, p->input_origin_y, ih,
+             p->canvas_height, p->output_origin_y, oh);
+    out.plan.src_width = iw; out.plan.src_height = ih;
+    out.plan.identity = false;
+    return 0;
+}
+
+bool valid_sparse_span(std::ptrdiff_t stride, int width, int height, std::size_t channel_bytes) {
+    if (!valid_row_bytes(stride, width, channel_bytes) || height <= 0) return false;
+    const auto magnitude = static_cast<std::size_t>(stride < 0 ? -stride : stride);
+    const auto limit = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max());
+    const auto row = static_cast<std::size_t>(width) * 4 * channel_bytes;
+    return magnitude <= (limit - row) / static_cast<std::size_t>(std::max(1, height - 1));
 }
 
 } // namespace
@@ -421,7 +469,7 @@ int eg_required_source_rect(
     }
 }
 
-int eg_render_frame(
+static int render_frame_impl(
     const void* input_data,
     std::ptrdiff_t input_row_bytes,
     std::int32_t input_width,
@@ -431,25 +479,44 @@ int eg_render_frame(
     std::int32_t output_width,
     std::int32_t output_height,
     std::int32_t bit_depth,
-    const EgRenderParams* p) noexcept {
+    const EgRenderParams* p, bool sparse) noexcept {
 
-    if (!input_data || !output_data || !p ||
-        input_width <= 0 || input_height <= 0 ||
-        output_width <= 0 || output_height <= 0) {
+    if (!output_data || !p || output_width <= 0 || output_height <= 0 ||
+        input_width < 0 || input_height < 0 ||
+        (!sparse && (!input_data || input_width == 0 || input_height == 0)) ||
+        (sparse && (p->canvas_width <= 0 || p->canvas_height <= 0)) ||
+        (input_width > 0 && input_height > 0 && !input_data)) {
         return 1;
     }
 
     const std::size_t bytes_per_channel = bit_depth == 8 ? 1u : bit_depth == 16 ? 2u : bit_depth == 32 ? 4u : 0u;
     if (bytes_per_channel == 0) return 2;
-    if (!valid_row_bytes(input_row_bytes, input_width, bytes_per_channel) ||
-        !valid_row_bytes(output_row_bytes, output_width, bytes_per_channel)) {
+    const bool empty_input = input_width == 0 || input_height == 0;
+    if ((!empty_input && !valid_row_bytes(input_row_bytes, input_width, bytes_per_channel)) ||
+        !valid_row_bytes(output_row_bytes, output_width, bytes_per_channel) ||
+        (sparse && ((!empty_input && !valid_sparse_span(input_row_bytes, input_width, input_height, bytes_per_channel)) ||
+                    !valid_sparse_span(output_row_bytes, output_width, output_height, bytes_per_channel)))) {
         return 1;
     }
 
     try {
+        if (sparse && empty_input) {
+            for (int y = 0; y < output_height; ++y) {
+                if (y % 2048 == 0 && p->abort_fn && p->abort_fn(p->abort_refcon) != 0) return 5;
+                std::memset(static_cast<std::uint8_t*>(output_data) + static_cast<std::ptrdiff_t>(y) * output_row_bytes,
+                            0, static_cast<std::size_t>(output_width) * 4 * bytes_per_channel);
+            }
+            return p->abort_fn && p->abort_fn(p->abort_refcon) != 0 ? 5 : 0;
+        }
+        const bool full_source = input_width == p->canvas_width && input_height == p->canvas_height &&
+            p->input_origin_x == 0 && p->input_origin_y == 0;
+        const bool output_inside = p->output_origin_x >= 0 && p->output_origin_y >= 0 &&
+            static_cast<std::int64_t>(p->output_origin_x) + output_width <= p->canvas_width &&
+            static_cast<std::int64_t>(p->output_origin_y) + output_height <= p->canvas_height;
         PreparedBridge& prepared = reusable_bridge_state();
-        const int prep_rc = prepare_bridge(
-            input_width, input_height, output_width, output_height, p, prepared);
+        const int prep_rc = sparse && !(full_source && output_inside)
+            ? prepare_sparse_bridge(input_width, input_height, output_width, output_height, p, prepared)
+            : prepare_bridge(input_width, input_height, output_width, output_height, p, prepared);
         if (prep_rc != 0) return prep_rc;
 
         if (bit_depth == 32) {
@@ -488,4 +555,36 @@ int eg_render_frame(
     } catch (...) {
         return 3;
     }
+}
+
+int eg_render_frame(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* p) noexcept {
+    return render_frame_impl(input_data, input_row_bytes, input_width, input_height,
+                             output_data, output_row_bytes, output_width, output_height,
+                             bit_depth, p, false);
+}
+
+int eg_render_frame_sparse(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* p) noexcept {
+    return render_frame_impl(input_data, input_row_bytes, input_width, input_height,
+                             output_data, output_row_bytes, output_width, output_height,
+                             bit_depth, p, true);
 }

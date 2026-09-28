@@ -1,53 +1,51 @@
 # Architecture
 
-## Host boundary
+## Implemented boundary
 
-1. `host-rust/` — thin After Effects ABI/PiPL/Smart Render shim using permissively licensed
-   `after-effects` + `pipl` crates with built-in bindings.
-2. `src/bridge/` — stable C ABI boundary with validation/sanitization.
-3. `src/core/` — clean-room C++ grid solver, inverse mapping, sampling-plan builder and CPU renderer.
-4. `src/gpu/` — Metal backend consuming the same sampling plan as CPU.
+host-rust uses pinned after-effects/pipl bindings for AE ABI, parameters, UI and
+SmartFX snapshots. src/bridge is the validated C ABI boundary; src/core owns
+portable grid evaluation, inverse mapping and CPU sampling; src/gpu contains
+Metal code. The current host uses eg_render_frame and full-source checkout.
+Its SmartPreRender currently disables GPU dispatch. GPU code and advertised
+capabilities alone do not establish a working AE Metal path.
 
-This separation keeps host plumbing out of image math and makes the core testable without AE.
+## Existing fast path and quality
 
-## Fast path
+The grid is separable: vertical guides map X, horizontal guides map Y. Evaluated
+monotonic axes feed inverse LUTs and prepared Bilinear/Catmull-Rom Bicubic taps.
+Exact uniform identity copies rows rather than interpolating. Final remains
+Bicubic. CPU channel operations support 8/16/32 bpc; 16-bpc uses AE's 32768 range.
+macOS scheduling uses GCD; independent frame threads own reusable plan/row caches.
+Actual AE MFR, cancellation and throughput still require host acceptance.
 
-The warp is separable: vertical guides define X remapping and horizontal guides define Y remapping.
+## Staged sparse CPU path (not host-connected)
 
-1. Evaluate guide positions and optional wave.
-2. Enforce monotonic spacing.
-3. Build inverse X/Y LUTs with a monotonic linear segment walk.
-4. Precompute bilinear or bicubic indices and weights.
-5. Render pixels without guide searches/easing math in the hot pixel loop.
+eg_render_frame_sparse requires explicit positive logical canvas dimensions.
+The caller must establish that pixels absent from the returned compact world
+are zero, rather than merely unrequested. Build taps on that full coordinate
+system, map them into storage, and substitute zero for missing/outside taps.
+No padded full-canvas image is allocated. Empty source clears output without
+reading input; padding is preserved and cancellation is propagated.
 
-An exact identity grid bypasses sampling entirely and copies rows.
+The internal CPU-only plan flag chooses dense or transparent-aware template
+kernels once per render. Transparent taps use -1 internally; the row cache uses
+-2 as its unused key. Existing eg_prepare_gpu_plan keeps nonnegative indices and
+unchanged layout; these sentinels MUST NOT be sent to current Metal kernels.
+The frozen 160-byte EgRenderParams and saved AE parameter schema are unchanged.
+See sparse-render-stage-plan.md and sparse-render-results-2026-09-28.md.
 
-## CPU execution
+## Planned perspective plane
 
-- 32-bpc float path is vectorization-friendly.
-- 8/16-bpc use 4-channel SIMD on Apple Silicon NEON and x86-64 SSE.
-- Non-SIMD bilinear fallback uses fixed-point weights.
-- macOS row scheduling uses Grand Central Dispatch; other platforms use bounded worker threads.
-- AE Multi-Frame Rendering remains enabled.
+Four-corner placement and camera/layer-driven 3D perspective are approved product
+requirements, not active code. Proposed composition maps output to plane-local
+coordinates, applies inverse grid deformation, maps back and samples once.
+Overlay and hit testing must use that same transform. The general projected
+mapping is not screen-separable; retain the existing separable fast path when
+projection is off. See perspective-plane-plan.md for decisions and acceptance.
 
-## Metal execution
+## Acceptance
 
-- AE owns input/output GPU worlds; the plugin does not round-trip 4K images through CPU memory.
-- GPU rendering is advertised only for Metal 32-bpc Smart Render.
-- CPU creates the exact sampling plan; Metal consumes the same indices/weights.
-- plan arrays live in reusable shared MTLBuffers; Apple Silicon can access them without a separate staging copy.
-- per-render-thread Rust scratch and an MFR-safe Metal buffer pool remove steady-state plan allocations.
-- one compute dispatch performs the image warp.
-
-## Quality policy
-
-- `Preview (Bilinear)` is explicitly a preview choice.
-- `Final (Bicubic)` is the default.
-- CPU and Metal Final use the same Catmull-Rom sample indices/weights.
-- timing targets never authorize lowering Final quality.
-
-## Release gate
-
-A user `.plugin` is packaged only after sanitizer, strict-warning, sampling-plan parity, real Metal image parity,
-real 4K Metal benchmark and macOS Rust host compilation all pass. After packaging, After Effects load/runtime
-smoke remains the final external-host gate.
+Quality and equal-condition profiling are governed by performance-quality-contract.md.
+Portable tests, native compilation and install receipts have separate scopes;
+none replaces actual loaded-identity, AE effect-chain, render/preview, hardware
+Metal and project-lifecycle evidence. No current source build is release approval.

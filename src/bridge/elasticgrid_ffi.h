@@ -125,6 +125,24 @@ int eg_render_frame(
     std::int32_t bit_depth,
     const EgRenderParams* params) noexcept;
 
+// CPU SmartFX sparse-canvas entry. The host must have requested the complete
+// logical canvas: pixels absent from its returned compact world are zero.
+// Requires positive canvas dimensions; output outside that canvas is zero.
+// Edge modes apply to the logical canvas, NOT the compact storage rectangle.
+// An empty input (width==0 or height==0) clears output without reading input.
+// Existing eg_render_frame and GPU-plan semantics/ABI remain unchanged.
+int eg_render_frame_sparse(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* params) noexcept;
+
 #ifdef __APPLE__
 // Metal backend. AE passes id<MTLDevice>, id<MTLCommandQueue>, and id<MTLBuffer>
 // as opaque pointers; keeping them opaque here avoids leaking Objective-C types

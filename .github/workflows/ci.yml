@@ -93,7 +93,7 @@ jobs:
           -DCMAKE_CXX_FLAGS="-fsanitize=thread -fno-omit-frame-pointer"
           -DCMAKE_EXE_LINKER_FLAGS="-fsanitize=thread"
       - name: Build concurrency tests
-        run: cmake --build build-tsan --parallel 2 --target elasticgrid_mfr_tests elasticgrid_determinism_tests
+        run: cmake --build build-tsan --parallel 2 --target elasticgrid_mfr_tests elasticgrid_determinism_tests elasticgrid_sparse_tests
       - name: MFR TSan
         env:
           TSAN_OPTIONS: halt_on_error=1
@@ -102,3 +102,7 @@ jobs:
         env:
           TSAN_OPTIONS: halt_on_error=1
         run: ./build-tsan/elasticgrid_determinism_tests
+      - name: Sparse render concurrency TSan
+        env:
+          TSAN_OPTIONS: halt_on_error=1
+        run: ./build-tsan/elasticgrid_sparse_tests

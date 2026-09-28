@@ -52,23 +52,28 @@ EgRenderParams make_params(const float* x,const std::uint8_t* xp,const float* y,
     return p;
 }
 
-void audit_render(int depth,int quality,EgRenderParams p) {
+void audit_render(int depth,int quality,EgRenderParams p,bool sparse=false) {
     constexpr int W=384,H=216;
     const std::size_t bpc=depth==8?1u:depth==16?2u:4u;
     const std::ptrdiff_t stride=static_cast<std::ptrdiff_t>(W*4*bpc);
     std::vector<std::uint8_t> src(static_cast<std::size_t>(stride)*H,0x3d);
     std::vector<std::uint8_t> dst(static_cast<std::size_t>(stride)*H,0);
     p.quality=quality;p.threads=1;
+    if (sparse) {
+        p.canvas_width=W+100;p.canvas_height=H+100;
+        p.input_origin_x=37;p.input_origin_y=29;
+    }
+    auto entry = sparse ? eg_render_frame_sparse : eg_render_frame;
     // Warm TLS buffers/capacities for this quality/width before counting.
     for(int i=0;i<3;++i) {
-        if(eg_render_frame(src.data(),stride,W,H,dst.data(),stride,W,H,depth,&p)!=0) std::abort();
+        if(entry(src.data(),stride,W,H,dst.data(),stride,W,H,depth,&p)!=0) std::abort();
     }
     CountWindow w;
     for(int i=0;i<200;++i) {
-        if(eg_render_frame(src.data(),stride,W,H,dst.data(),stride,W,H,depth,&p)!=0) std::abort();
+        if(entry(src.data(),stride,W,H,dst.data(),stride,W,H,depth,&p)!=0) std::abort();
     }
     auto [a,b]=w.stop();
-    if(a!=0) fail("steady-state eg_render_frame",a,b);
+    if(a!=0) fail(sparse ? "steady-state eg_render_frame_sparse" : "steady-state eg_render_frame",a,b);
 }
 }
 
@@ -85,7 +90,10 @@ int main() {
     const std::uint8_t xp[]={1,0,0,0,1},yp[]={1,0,0,1};
     auto p=make_params(x,xp,y,yp);
 
-    for(int depth:{8,16,32}) for(int quality:{1,2}) audit_render(depth,quality,p);
+    for(int depth:{8,16,32}) for(int quality:{1,2}) {
+        audit_render(depth,quality,p);
+        audit_render(depth,quality,p,true);
+    }
 
     // GPU plan preparation should also be allocation-free after TLS warm-up.
     constexpr int W=384,H=216;
@@ -105,6 +113,6 @@ int main() {
     auto [ra,rb]=roi_window.stop();
     if(ra!=0) fail("steady-state eg_required_source_rect",ra,rb);
 
-    std::cout << "allocation audit PASS: steady-state CPU render/plan/ROI = 0 heap allocations after warm-up\n";
+    std::cout << "allocation audit PASS: steady-state CPU dense/sparse render/plan/ROI = 0 heap allocations after warm-up\n";
     return 0;
 }
