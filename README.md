@@ -1,55 +1,63 @@
 # ElasticGrid FX
 
-After Effects separable grid-warp effect: editable column/row guides, not a freeform 2D mesh. The implementation uses a C++ render core and a Rust AE host.
+Native After Effects separable column/row grid warp, with C++ rendering and a
+Rust AE host. Not a freeform 2D mesh. Metadata remains **0.9.0 development**.
 
 ## Current status — 2026-09-28
 
-**Development / final validation, NOT approved for release or user binary delivery.** Plugin metadata remains 0.9.0. Historical v1.0 freeze reports below describe earlier source states, not certification of the current branch.
+**NOT approved for release or user binary delivery.** Work stays on
+`fix/final-validation` / draft PR #5; `main` is unchanged.
 
-Work continues on `fix/final-validation`, based on the latest SmartFX parameter-snapshot source `b51b95407a022172fe739996fc4a65254418d38b`; `main` is not changed by this work.
+Latest stage: read-only installation inspection, explicit create-only test
+installation, and a seven-frame patterned smoke with five decoded-pixel checks.
+Local verification: Python 53/53, smoke control-flow 14/14, prior roundtrip
+control-flow 11/11, strict C++ Release 10/10. Synthetic/mocked tests are not AE
+integration tests. Exact-head Linux/macOS CI results are recorded in PR checkpoints.
 
-- Render fix `53c2a299265caf3e653a766eaf0f6e03b728a621`: exact uniform-grid pixels for all easing values; precise cropped/GPU sampling plans; overflow-safe ROI origin addition. [Details and local results](docs/identity-fix-2026-09-28.md).
-- Test-safety fix `0882cdf0fc7ff64a273232f1d6b7097a1d995db6`: refusing a roundtrip test no longer unconditionally closes a user project; ownership-guarded cleanup, fresh workspace and bounded AppleScript wait. [Scope and limitations](docs/project-test-safety-2026-09-28.md).
-- Confirmed local source checks: GCC and Clang Release 10/10 each; ASan/UBSan/LSan 10/10; TSan 2/2; 11 script control-flow tests. These are not real AE/Metal integration results.
+Earlier fixes preserve uniform-grid pixels, guard roundtrip project ownership,
+correct host parameter metadata without changing saved IDs, and generate
+commit/source/target-aware Build ID plus signed-payload/ZIP manifests. Baseline
+37bc8bc passed its macOS source/package gate; this is historical evidence only,
+not verification of a later package or actual AE loading.
 
-[Current release blockers and next steps](docs/current-status.md) are authoritative for this branch. Use actual commit-specific Actions results; do not infer PASS from the presence of a test script or an old artifact.
+[Current blockers](docs/current-status.md) and
+[runtime tooling details](docs/runtime-acceptance-2026-09-28.md) distinguish
+implemented behavior, verified scope and missing host acceptance.
 
-## Latest hardening stage
-
-Host labels/ranges now match the parity renderer without reassigning saved
-parameter IDs or popup ordinals. Deterministic Build ID generation and
-signed-payload/ZIP manifests are implemented. The existing custom control shows
-a short build ID; About reports the full identity.
-
-Portable tooling checks: 24 Python cases and 11 Node control-flow cases pass.
-The exact-head macOS package/Rust results and actual AE runtime acceptance must
-be evaluated separately. See [stage report](docs/host-identity-2026-09-28.md).
-This does not approve the plugin for installation or release.
-
-## Architecture and quality
-
-The existing source implements guide editing/keyframes, elasticity/falloff/spacing, waves, CPU 8/16/32-bpc rendering, Clamp/Wrap/Mirror and a Metal 32-bpc path. Supported-host claims require the corresponding runtime evidence. Final quality remains Catmull-Rom Bicubic; it is not replaced by Bilinear for speed. Real Metal parity thresholds remain max absolute error 2.5e-5 and RMS 3.0e-6.
-
-See [architecture](docs/architecture.md), [project compatibility](docs/project-compatibility-v0.9.md), [GPU planning](docs/gpu-plan.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
-
-## Developer verification
-
-Portable core:
+## Verification and installation
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
 cmake --build build --parallel 2
 ctest --test-dir build --output-on-failure
-node tests/test_ae_project_safety.js
 python3 -m unittest discover -s tests -p 'test_*.py' -v
+node tests/test_ae_project_safety.js
+node tests/test_smoke_safety.js
 ```
 
-The Node test mocks host calls and cannot replace AE testing. macOS development builds use `tools/build_macos_sdkless.command`; hosted macOS CI compiles Metal but has no hardware/runtime approval. Do not install test candidates into a working AE environment before the release requirements are satisfied.
+`tools/build_macos_sdkless.command` performs the macOS preflight and creates the
+signed candidate, ZIP and manifest. It **does not install**. The legacy
+BUILD_AND_INSTALL_MAC launcher is now build-only; --install is rejected.
 
-Final-validation CI stores a Git source bundle, commit identity and JUnit/log artifacts. It does not publish a release. Source and test artifacts have finite retention; promote required release evidence to durable storage before expiration.
+`tools/install_macos.command` defaults to read-only inspection. --help documents
+explicit test installation into an authorized existing scope. Different existing
+builds are preserved/refused; no automatic upgrade, removal, sudo or process kill.
 
-## Development rules and historical records
+`tools/ae_smoke_test_macos.command` defaults to preparation only (NOT RUN).
+Execution requires explicit test authorization, an exact AE app and installed
+bundle. It captures bypass/identity/static-wave/animation/reset images. Missing,
+stale, blank, pass-through or frozen-animation results cannot pass its checks.
+Image PASS does not establish loaded identity, HDR/GPU correctness or release
+readiness; the runner keeps the full gate BLOCKED pending those observations.
 
-Read [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md) before each significant stage. The user's authoritative rules apply in full.
+## Quality and engineering records
 
-Earlier reports remain available in `docs/final-validation-v1.0.md`, `docs/code-freeze-v1.0.md`, `docs/final-regression-v1.0.md`, and `CHANGELOG.md`. Their hashes/results are historical and must not be represented as verification of a later build.
+Final quality remains Catmull-Rom Bicubic, not a lower-quality speed substitute.
+CPU paths cover 8/16/32 bpc; real Metal parity thresholds remain max absolute
+2.5e-5 and RMS 3.0e-6. Current SmartFX uses full-source checkout and disables GPU
+dispatch pending real target-host verification; compiling Metal does not test it.
+
+Read [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md) before significant stages.
+Architecture, compatibility, third-party notices and dated reports remain in
+`docs/` and `THIRD_PARTY_NOTICES.md`. Historical freeze/PASS records do not certify
+new artifacts. CI evidence has finite retention and must be preserved for release.

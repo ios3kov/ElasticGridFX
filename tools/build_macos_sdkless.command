@@ -7,10 +7,10 @@ TARGET="$ROOT/host-rust/target/release"
 DIST="$ROOT/dist/mac"
 BUNDLE="$DIST/ElasticGrid.plugin"
 REPORT="$DIST/preflight-report.txt"
-INSTALL=0
-
-if [[ "${1:-}" == "--install" ]]; then
-  INSTALL=1
+if [[ "$#" -ne 0 ]]; then
+  echo "ERROR: build-only command; implicit installation has been removed." >&2
+  echo "Inspect the exact package with tools/install_macos.command --help." >&2
+  exit 2
 fi
 
 if [[ "$(uname -s)" != "Darwin" ]]; then
@@ -145,26 +145,10 @@ shasum -a 256 "$DIST/ElasticGrid.plugin.zip" "$DIST/ElasticGrid.artifact.json" |
 printf '[artifact] sha256\n' | tee -a "$REPORT"
 shasum -a 256 "$BUNDLE/Contents/MacOS/ElasticGrid" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
 
-if [[ "$INSTALL" == "1" ]]; then
-  echo "[5/6] Installing into Adobe MediaCore..." | tee -a "$REPORT"
-  DEST="/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore"
-  sudo mkdir -p "$DEST"
-  sudo rm -rf "$DEST/ElasticGrid.plugin"
-  sudo cp -R "$BUNDLE" "$DEST/ElasticGrid.plugin"
-  sudo xattr -cr "$DEST/ElasticGrid.plugin" || true
-  codesign --verify --deep --strict "$DEST/ElasticGrid.plugin"
-  echo "Installed: $DEST/ElasticGrid.plugin" | tee -a "$REPORT"
-else
-  echo "[5/6] Install skipped." | tee -a "$REPORT"
-  echo "Build ready: $BUNDLE" | tee -a "$REPORT"
-fi
+echo "[5/6] No installation performed. Candidate requires separate test authorization." | tee -a "$REPORT"
 
 echo "[6/6] Final report" | tee -a "$REPORT"
 echo "preflight: PASS" | tee -a "$REPORT"
 echo "bundle: PASS" | tee -a "$REPORT"
 echo "report: $REPORT" | tee -a "$REPORT"
-if [[ "$INSTALL" == "1" ]]; then
-  echo "Next: fully quit/reopen After Effects into a NEW EMPTY project, then run tools/ae_runtime_check_macos.command --smoke." | tee -a "$REPORT"
-else
-  echo "To build + install: $0 --install" | tee -a "$REPORT"
-fi
+echo "Inspect candidate: tools/install_macos.command (read-only). AE runtime remains NOT RUN." | tee -a "$REPORT"

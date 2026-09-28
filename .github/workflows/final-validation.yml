@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node tests/test_ae_project_safety.js 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
+          { node tests/test_ae_project_safety.js; node tests/test_smoke_safety.js; } 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
       - name: Source contracts and build identity regression
         shell: bash
         run: |
