@@ -58,6 +58,23 @@ is_inside_search_root() {
 typeset -a matches
 typeset -A match_seen
 
+MATCH_NAME="com.elasticgrid.fx.warp"
+
+bundle_contains_match_name() {
+  local bundle="$1"
+  local payload
+
+  [[ -d "$bundle/Contents" ]] || return 1
+
+  while IFS= read -r -d '' payload; do
+    if LC_ALL=C grep -a -F -q -- "$MATCH_NAME" "$payload" 2>/dev/null; then
+      return 0
+    fi
+  done < <(find "$bundle/Contents" -type f -print0 2>/dev/null)
+
+  return 1
+}
+
 record_match() {
   local found="$1"
   [[ -n "$found" ]] || return
@@ -85,7 +102,7 @@ scan_elasticgrid_copies() {
       plist="$found/Contents/Info.plist"
       [[ -f "$plist" ]] || continue
       found_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist" 2>/dev/null || true)"
-      if [[ "$found_id" == "com.elasticgrid.fx" ]]; then
+      if [[ "$found_id" == "com.elasticgrid.fx" ]] || bundle_contains_match_name "$found"; then
         record_match "$found"
       fi
     done < <(find "$root" -type d -name "*.plugin" -prune -print 2>/dev/null)
@@ -229,7 +246,8 @@ installed_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$TARGET/
   exit 8
 }
 
-# Post-install verification: exactly one host-visible ElasticGrid copy must remain.
+# Post-install verification: exactly one host-visible ElasticGrid copy must remain,
+# including differently named bundles that claim the same AE match name.
 matches=()
 match_seen=()
 scan_elasticgrid_copies

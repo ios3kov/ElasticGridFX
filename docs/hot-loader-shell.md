@@ -79,3 +79,13 @@ Guide drag now mirrors the original event contract:
 - the previous extra `ALWAYS_UPDATE` and App-suite invalidate call were removed.
 
 The hot-reload generation token remains as an intentional shell-only extension in pre-render data.
+
+
+## Clean-run match-name hardening — 2026-09-28
+
+The clean installer now detects duplicates by all three identities:
+- bundle filename;
+- `CFBundleIdentifier = com.elasticgrid.fx`;
+- embedded AE match name `com.elasticgrid.fx.warp`.
+
+This closes the remaining case where an old/test bundle was renamed but would still register the same effect in AE. The match name is stored as a literal in the PiPL/resource payload, so the installer scans files inside every candidate `.plugin` bundle in known Adobe load roots and archives conflicts before installation.
