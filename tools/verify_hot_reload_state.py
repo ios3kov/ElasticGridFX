@@ -206,12 +206,7 @@ for evidence in [
         raise SystemExit(f"missing hot-reload state/layout evidence: {evidence}")
 
 
-global_flags_match = re.search(
-    r'Property::AE_Effect_Global_OutFlags\((.*?)\),\s*Property::AE_Effect_Global_OutFlags_2',
-    pathlib.Path(sys.argv[1]).with_name("build.rs").read_text() if pathlib.Path(sys.argv[1]).name == "lib.rs" else "",
-    re.DOTALL,
-)
-# build.rs is next to src/, not src/lib.rs.
+# build.rs is one directory above src/lib.rs.
 build_rs = pathlib.Path(sys.argv[1]).parent.parent / "build.rs"
 build_text = build_rs.read_text()
 global_flags = require(
@@ -226,12 +221,7 @@ if normalized_global != expected_global:
         f"PiPL Global OutFlags changed; reinstall/restart required: expected={expected_global} actual={normalized_global}"
     )
 
-flags2_region = require(
-    r'let\s+mut\s+out_flags2\s*=\s*(.*?);\s*if\s+target_os\s*==\s*"macos"\s*\{(.*?)\}\s*pipl::plugin_build',
-    build_text,
-    "PiPL OutFlags2 setup",
-)
-# require() returns only group 1; inspect the complete host registration region instead.
+# Inspect the complete host registration region.
 region_match = re.search(
     r'let\s+mut\s+out_flags2\s*=\s*(.*?);\s*if\s+target_os\s*==\s*"macos"\s*\{(.*?)\}\s*pipl::plugin_build',
     build_text,
