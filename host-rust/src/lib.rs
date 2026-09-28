@@ -3,6 +3,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::{SeqAccess, Visitor};
 use std::fmt;
 use std::ffi::{c_char, c_void};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 mod ui;
 
@@ -452,10 +453,14 @@ unsafe extern "C" fn ae_abort_trampoline(refcon: *mut c_void) -> i32 {
 }
 
 #[cfg(target_os = "macos")]
+type MetalDestroyFn = unsafe extern "C" fn(*mut c_void);
+
+#[cfg(target_os = "macos")]
 #[repr(C)]
 struct MetalGpuData {
     state: *mut c_void,
     generation: u64,
+    destroy_fn: MetalDestroyFn,
 }
 
 #[cfg(target_os = "macos")]
@@ -473,7 +478,7 @@ unsafe impl Sync for MetalGpuData {}
 impl Drop for MetalGpuData {
     fn drop(&mut self) {
         if !self.state.is_null() {
-            unsafe { eg_metal_destroy(self.state) };
+            unsafe { (self.destroy_fn)(self.state) };
             self.state = std::ptr::null_mut();
         }
     }
@@ -498,13 +503,10 @@ fn setup_float(
     }
 }
 
+static HOT_RELOAD_GENERATION: AtomicU64 = AtomicU64::new(0);
+
 fn hot_reload_generation() -> u64 {
-    let mut hash = 1469598103934665603u64;
-    for byte in HOT_RELOAD_IMPL_LABEL.as_bytes() {
-        hash ^= u64::from(*byte);
-        hash = hash.wrapping_mul(1099511628211u64);
-    }
-    hash
+    HOT_RELOAD_GENERATION.load(Ordering::Acquire)
 }
 
 fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
@@ -947,6 +949,7 @@ impl AdobePluginGlobal for Plugin {
                         extra.set_gpu_data(MetalGpuData {
                             state,
                             generation: hot_reload_generation(),
+                            destroy_fn: eg_metal_destroy,
                         });
                         out_data.set_out_flag2(ae::OutFlags2::SupportsGpuRenderF32, true);
                     }
@@ -1000,7 +1003,7 @@ impl AdobePluginGlobal for Plugin {
     }
 }
 
-const HOT_RELOAD_STATE_ABI: u64 = 2;
+const HOT_RELOAD_STATE_ABI: u64 = 3;
 
 const HOT_RELOAD_IMPL_LABEL: &str = match option_env!("AE_HOT_LOADER_IMPL_LABEL") {
     Some(value) => value,
@@ -1009,7 +1012,7 @@ const HOT_RELOAD_IMPL_LABEL: &str = match option_env!("AE_HOT_LOADER_IMPL_LABEL"
 
 #[unsafe(no_mangle)]
 pub extern "C" fn AEHotLoader_ImplementationABI() -> u32 {
-    1
+    2
 }
 
 #[unsafe(no_mangle)]
@@ -1057,6 +1060,11 @@ pub extern "C" fn AEHotLoader_ImplementationRuntimeABI(
     output_capacity: usize,
 ) -> i32 {
     write_hot_reload_string(HOT_RELOAD_RUNTIME_ABI, output, output_capacity)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn AEHotLoader_SetGeneration(generation: u64) {
+    HOT_RELOAD_GENERATION.store(generation, Ordering::Release);
 }
 
 #[cfg(test)]
@@ -1181,10 +1189,11 @@ mod tests {
         assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
         #[cfg(target_os = "macos")]
         {
-            assert_eq!(std::mem::size_of::<MetalGpuData>(), 16);
+            assert_eq!(std::mem::size_of::<MetalGpuData>(), 24);
             assert_eq!(std::mem::align_of::<MetalGpuData>(), 8);
             assert_eq!(std::mem::offset_of!(MetalGpuData, state), 0);
             assert_eq!(std::mem::offset_of!(MetalGpuData, generation), 8);
+            assert_eq!(std::mem::offset_of!(MetalGpuData, destroy_fn), 16);
         }
     }
 }
