@@ -1,3 +1,4 @@
+# Hot-loader adapter gate
 name: Hot Loader Shell CI
 
 on:
