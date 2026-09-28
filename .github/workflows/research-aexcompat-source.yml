@@ -1,0 +1,40 @@
+name: Research AEXCompat Source Snapshot
+
+on:
+  push:
+    branches: ["feature/ae-hot-loader-shell"]
+    paths:
+      - ".github/workflows/research-aexcompat-source.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout AEXCompat research source
+        uses: actions/checkout@v5
+        with:
+          repository: onmokoworks/AEXCompat
+          ref: ee86f33f3867e952a5c55d953259d59e712f820b
+          path: AEXCompat
+          persist-credentials: false
+
+      - name: Record source identity
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'source_repo=onmokoworks/AEXCompat' > AEXCompat/source-identity.txt
+          printf '%s\n' 'source_commit=ee86f33f3867e952a5c55d953259d59e712f820b' >> AEXCompat/source-identity.txt
+
+      - name: Package worker research source
+        uses: actions/upload-artifact@v4
+        with:
+          name: AEXCompat-guest-source-ee86f33f
+          path: |
+            AEXCompat/guest/**
+            AEXCompat/docs/aex-porting-dossier.md
+            AEXCompat/source-identity.txt
+          if-no-files-found: error
+          retention-days: 1
