@@ -168,3 +168,62 @@ The axis evaluator at `0x18000f310` and spacing projector at `0x18000f1b0` confi
 The current ElasticGrid implementation exposes Visualization parameters and checks them out, but does **not yet composite those guide lines into rendered pixels**. Therefore it cannot be called exact GridWarp behavioral parity yet.
 
 This gap must be closed and regression-tested automatically before another user live test.
+
+
+## 2026-09-28 — exact defaults, SmartPreRender and drag-event contract
+
+Further static decomposition closed three remaining host-contract uncertainties.
+
+### Visualization defaults
+
+The two color parameter initializers in ParamsSetup write the literal PF color bytes:
+
+`FF 00 30 FF`
+
+With the confirmed PF byte order A,R,G,B this is exactly:
+
+- Alpha = 255
+- Red = 0
+- Green = 48
+- Blue = 255
+
+So both **Column Stroke Color** and **Row Stroke Color** default to `#0030FF` at full alpha. The existing ElasticGrid defaults are correct and are no longer inferred.
+
+The same ParamsSetup region reconfirms:
+- Stroke Width: min 0.5, max 100, default 2.0
+- Opacity: min 0, max 100, default 100
+
+### SmartPreRender request
+
+The original SmartPreRender at `0x18000ed01` copies the host output request and then overrides only the source checkout geometry/zero-alpha policy:
+
+- request.left = 0
+- request.top = 0
+- request.right = `PF_InData.width`
+- request.bottom = `PF_InData.height`
+- `preserve_rgb_of_zero_alpha = TRUE`
+
+It leaves the request field/channel mask inherited from the host. It then checks out input layer 0 at the current render time.
+
+The returned checkout rectangles are folded into the pre-render output:
+- result rect unions the checkout result, then is intersected with the original output request;
+- max-result rect unions the checkout max-result and the full source rect.
+
+This matches Adobe distortion-effect guidance: a spatial sampler that can pull pixels from elsewhere requests the complete source frame and preserves RGB under zero alpha.
+
+Important correction: `PF_InData.width/height` are full source-layer dimensions and are **not downsampled**. The previous ElasticGrid pre-render path multiplied them by downsample factors, which does not match the original or Adobe's contract.
+
+### Custom drag event
+
+The original event dispatcher confirms:
+- click with `send_drag` transitions to the drag handler;
+- drag mutation writes the updated arbitrary Grid Positions state back to the parameter;
+- the returned event flags are exactly `0x9`.
+
+From Adobe's event constants, `0x9` is:
+
+`PF_EO_HANDLED_EVENT | PF_EO_UPDATE_NOW`
+
+It does **not** include `PF_EO_ALWAYS_UPDATE`.
+
+The original drag handler does not acquire the App suite or call `PF_InvalidateRect` in this path. Its render invalidation is driven by changing the arbitrary parameter value plus the event flags. ElasticGrid should mirror that contract instead of keeping extra update behavior unless a separately measured host workaround proves necessary.
