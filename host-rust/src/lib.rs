@@ -1046,12 +1046,6 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::SmartPreRender { mut extra } => {
                 let output_request = extra.output_request();
-                let output_rect = EgRectI32 {
-                    left: output_request.rect.left,
-                    top: output_request.rect.top,
-                    right: output_request.rect.right,
-                    bottom: output_request.rect.bottom,
-                };
                 let (cw, ch) = rendered_canvas(in_data);
                 // Correctness-first SmartFX checkout: a guide warp can pull
                 // pixels across cell boundaries, and bicubic filtering needs
