@@ -20,7 +20,7 @@ shell_abi = int(require(r'kImplementationStateAbi\s*=\s*(\d+)\s*;', shell, "shel
 if impl_abi != shell_abi:
     raise SystemExit(f"StateABI drift: implementation={impl_abi} shell={shell_abi}")
 
-if impl_abi != 2:
+if impl_abi != 3:
     raise SystemExit(f"unexpected ElasticGrid StateABI {impl_abi}; update verifier intentionally when schema changes")
 
 if "ae::define_effect!(Plugin, (), Params);" not in lib:
@@ -58,7 +58,11 @@ gpu_fields = {
     name: typ.strip()
     for name, typ in re.findall(r'([A-Za-z_][A-Za-z0-9_]*)\s*:\s*([^,]+),', gpu_body)
 }
-expected_gpu = {"state": "*mut c_void", "generation": "u64"}
+expected_gpu = {
+    "state": "*mut c_void",
+    "generation": "u64",
+    "destroy_fn": "MetalDestroyFn",
+}
 if gpu_fields != expected_gpu:
     raise SystemExit(
         "ElasticGrid GPU state schema changed; bump StateABI and update verifier intentionally:\n"
@@ -68,7 +72,9 @@ if gpu_fields != expected_gpu:
 for evidence in [
     "size_of::<MetalGpuData>()",
     "offset_of!(MetalGpuData, generation)",
+    "offset_of!(MetalGpuData, destroy_fn)",
     "AEHotLoader_ImplementationRuntimeABI",
+    "AEHotLoader_SetGeneration",
 ]:
     if evidence not in lib:
         raise SystemExit(f"missing hot-reload state/layout evidence: {evidence}")
