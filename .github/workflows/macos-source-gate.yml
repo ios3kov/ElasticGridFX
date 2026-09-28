@@ -67,6 +67,75 @@ jobs:
           xattr -cr "$BUNDLE" || true
           codesign --force --deep --sign - "$BUNDLE"
           tools/verify_bundle_macos.command "$BUNDLE"
+
+          PACKAGE="dist/mac/ElasticGridFX-SMARTFX-SNAPSHOT"
+          rm -rf "$PACKAGE"
+          mkdir -p "$PACKAGE"
+          cp -R "$BUNDLE" "$PACKAGE/ElasticGrid.plugin"
+          printf '%s\n' "$GITHUB_SHA" > "$PACKAGE/BUILD_COMMIT.txt"
+          shasum -a 256 "$PACKAGE/ElasticGrid.plugin/Contents/MacOS/ElasticGrid" | awk '{print $1}' > "$PACKAGE/ELASTICGRID_BINARY_SHA256.txt"
+          cat > "$PACKAGE/INSTALL_CLEAN_MAC.command" <<'INSTALLER'
+          #!/bin/bash
+          set -euo pipefail
+
+          HERE="$(cd "$(dirname "$0")" && pwd)"
+          SOURCE="$HERE/ElasticGrid.plugin"
+          EXPECTED_SHA="$(tr -d '[:space:]' < "$HERE/ELASTICGRID_BINARY_SHA256.txt")"
+          SYSTEM_ROOT="/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore"
+          USER_ROOT="$HOME/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore"
+          DEST_ROOT="$SYSTEM_ROOT/FSTR FX"
+          DEST="$DEST_ROOT/ElasticGrid.plugin"
+
+          if pgrep -if 'Adobe After Effects|After Effects' >/dev/null 2>&1; then
+            echo "ERROR: fully quit After Effects before clean install."
+            exit 2
+          fi
+          test -d "$SOURCE" || { echo "ERROR: test plugin is missing next to installer."; exit 3; }
+
+          echo "[1/5] Removing old ElasticGrid.plugin copies..."
+          for root in "$SYSTEM_ROOT" "$USER_ROOT"; do
+            [[ -d "$root" ]] || continue
+            while IFS= read -r -d '' old; do
+              echo "remove: $old"
+              sudo rm -rf "$old"
+            done < <(find "$root" -type d -name 'ElasticGrid.plugin' -print0 2>/dev/null)
+          done
+
+          echo "[2/5] Removing After Effects plugin-cache files..."
+          for root in "$HOME/Library/Preferences/Adobe/After Effects" "$HOME/Library/Caches/Adobe/After Effects"; do
+            [[ -d "$root" ]] || continue
+            find "$root" -type f \( -iname '*PluginCache*' -o -iname '*plugin*cache*' \) -delete 2>/dev/null || true
+          done
+
+          echo "[3/5] Installing fresh build..."
+          sudo mkdir -p "$DEST_ROOT"
+          sudo cp -R "$SOURCE" "$DEST"
+          sudo xattr -cr "$DEST" || true
+          codesign --verify --deep --strict "$DEST"
+
+          echo "[4/5] Verifying SHA-256..."
+          ACTUAL_SHA="$(shasum -a 256 "$DEST/Contents/MacOS/ElasticGrid" | awk '{print $1}')"
+          [[ "$ACTUAL_SHA" == "$EXPECTED_SHA" ]] || {
+            echo "ERROR: installed binary SHA mismatch."
+            echo "expected: $EXPECTED_SHA"
+            echo "actual:   $ACTUAL_SHA"
+            exit 4
+          }
+
+          echo "[5/5] Verifying exactly one installed copy..."
+          COUNT=0
+          for root in "$SYSTEM_ROOT" "$USER_ROOT"; do
+            [[ -d "$root" ]] || continue
+            while IFS= read -r _; do COUNT=$((COUNT + 1)); done < <(find "$root" -type d -name 'ElasticGrid.plugin' -print 2>/dev/null)
+          done
+          [[ "$COUNT" -eq 1 ]] || { echo "ERROR: expected exactly one ElasticGrid.plugin, found $COUNT."; exit 5; }
+
+          echo "PASS: clean test build installed"
+          echo "path: $DEST"
+          echo "sha256: $ACTUAL_SHA"
+          echo "Next: launch After Effects into a NEW EMPTY project and verify the Effect Controls marker says SMARTFX-SNAPSHOT."
+          INSTALLER
+          chmod +x "$PACKAGE/INSTALL_CLEAN_MAC.command"
       - name: Upload plugin and reports
         uses: actions/upload-artifact@v4
         with:
@@ -74,6 +143,7 @@ jobs:
           if-no-files-found: error
           path: |
             dist/mac/ElasticGrid.plugin
+            dist/mac/ElasticGridFX-SMARTFX-SNAPSHOT/**
             dist/mac/preflight-report.txt
             dist/compliance/**
             host-rust/Cargo.lock
