@@ -8,15 +8,26 @@ This is the next live gate after the AE Hot Loader Control Shell gate, which is 
 
 Manual **Edit → Purge** is not part of the intended product workflow. During validation, if AE reuses an old cached frame, force a fresh evaluation by changing any visible ElasticGrid parameter slightly (and change it back afterward). AE Hot Loader itself still has an open product requirement to invalidate stale cached output automatically after a successful reload.
 
-## 1. Install the stable ElasticGrid shell
+## 1. Clean install the stable ElasticGrid shell
 
 1. Fully quit After Effects.
 2. Run `INSTALL_HOT_LOADER.command`.
-3. Enter the macOS password only if the existing ElasticGrid is installed system-wide.
-4. The installer backs up the existing ElasticGrid bundle, installs the hot-reload shell in the same location, clears any stale staged candidate, and verifies the signed arm64 bundle.
+3. Enter the macOS password only if old ElasticGrid copies exist in system-wide Adobe plug-in folders.
+4. Wait for `CLEAN ELASTICGRID INSTALL COMPLETE`.
 5. Start After Effects once.
 
-Do not install a second ElasticGrid copy. The installer refuses ambiguous duplicates.
+The installer performs a clean migration:
+
+- scans system/user MediaCore, Adobe Plug-Ins/CC, and AE application plug-in roots;
+- finds every `ElasticGrid.plugin` and every bundle using `com.elasticgrid.fx`;
+- refuses to modify a copy inside the signed Adobe application bundle;
+- moves all other old/test/duplicate ElasticGrid copies to timestamped backups;
+- clears stale ElasticGrid candidate dylibs, ElasticGrid runtime images, and relevant Loader logs;
+- installs exactly one fresh shell at the canonical user path:
+  `~/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin`;
+- verifies signature, arm64 architecture, bundle ID, and that exactly one active ElasticGrid copy remains.
+
+Nothing outside ElasticGrid / its Hot Loader test state is removed. Existing files are backed up rather than deleted.
 
 ## 2. Verify bundled default
 

@@ -113,7 +113,7 @@ The CI artifact contains:
 - `INSTALL_HOT_LOADER.command`
 - `STAGE_CANDIDATE.command`
 
-The installer refuses ambiguous duplicate copies, backs up the existing bundle, verifies signature/arm64, and restores the previous installation if replacement fails.
+The packaged installer now performs a clean ElasticGrid migration. It backs up and removes old/test/duplicate ElasticGrid copies from active Adobe plug-in roots, clears only ElasticGrid hot-reload state/runtime files plus the relevant Loader logs, installs exactly one canonical user copy, verifies signature/arm64/bundle ID, and restores previous copies if installation fails. It never modifies the signed After Effects application bundle.
 
 Then use:
 

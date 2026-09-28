@@ -4,20 +4,34 @@ setopt null_glob
 
 HERE="${0:A:h}"
 BUNDLE="$HERE/ElasticGrid.plugin"
+
 SYSTEM_ROOT="/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore"
 USER_ROOT="$HOME/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore"
+TARGET="$USER_ROOT/FSTR FX/ElasticGrid.plugin"
 STAGED_DIR="$HOME/Library/Application Support/AE Hot Loader/implementations/elasticgrid"
+
+STAMP="$(date +%Y%m%dT%H%M%S)-$$"
+USER_BACKUP_ROOT="$HOME/Library/Application Support/AE Hot Loader/backups/elasticgrid-clean/$STAMP"
+SYSTEM_BACKUP_ROOT="/Library/Application Support/AE Hot Loader Legacy Backup/elasticgrid/$STAMP"
 
 [[ -d "$BUNDLE" ]] || { echo "ERROR: missing $BUNDLE"; exit 2; }
 
-codesign --verify --deep --strict "$BUNDLE"
-bundle_archs="$(lipo -archs "$BUNDLE/Contents/MacOS/ElasticGrid" 2>/dev/null || true)"
-[[ "$bundle_archs" == *arm64* ]] || { echo "ERROR: ElasticGrid shell is not arm64."; exit 2; }
-
 if pgrep -x "After Effects" >/dev/null 2>&1; then
-  echo "ERROR: After Effects is running. Fully quit AE before installing."
+  echo "ERROR: After Effects is running."
+  echo "Fully quit AE before installing the ElasticGrid hot-reload shell."
   exit 3
 fi
+
+echo "Validating packaged ElasticGrid build..."
+codesign --verify --deep --strict "$BUNDLE"
+bundle_archs="$(lipo -archs "$BUNDLE/Contents/MacOS/ElasticGrid" 2>/dev/null || true)"
+[[ "$bundle_archs" == *arm64* ]] || { echo "ERROR: packaged ElasticGrid shell is not arm64."; exit 4; }
+
+bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$BUNDLE/Contents/Info.plist" 2>/dev/null || true)"
+[[ "$bundle_id" == "com.elasticgrid.fx" ]] || {
+  echo "ERROR: unexpected packaged ElasticGrid bundle id: $bundle_id"
+  exit 4
+}
 
 typeset -a search_roots
 search_roots=(
@@ -30,111 +44,225 @@ for app_plugins in /Applications/Adobe\ After\ Effects*.app/Contents/Plug-ins; d
   [[ -d "$app_plugins" ]] && search_roots+=("$app_plugins")
 done
 
+is_inside_search_root() {
+  local candidate="$1"
+  local root
+  for root in "${search_roots[@]}"; do
+    case "$candidate" in
+      "$root"|"$root"/*) return 0 ;;
+    esac
+  done
+  return 1
+}
+
 typeset -a matches
 typeset -A match_seen
 
 record_match() {
   local found="$1"
+  [[ -n "$found" ]] || return
+  is_inside_search_root "$found" || {
+    echo "ERROR: refusing to touch path outside known Adobe plug-in roots:"
+    echo "  $found"
+    exit 5
+  }
   if [[ -z "${match_seen[$found]-}" ]]; then
     match_seen[$found]=1
     matches+=("$found")
   fi
 }
 
-for root in "${search_roots[@]}"; do
-  [[ -d "$root" ]] || continue
+scan_elasticgrid_copies() {
+  local root found plist found_id
+  for root in "${search_roots[@]}"; do
+    [[ -d "$root" ]] || continue
 
-  while IFS= read -r found; do
-    record_match "$found"
-  done < <(find "$root" -type d -name "ElasticGrid.plugin" -prune -print 2>/dev/null)
-
-  while IFS= read -r found; do
-    plist="$found/Contents/Info.plist"
-    [[ -f "$plist" ]] || continue
-    found_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist" 2>/dev/null || true)"
-    if [[ "$found_id" == "com.elasticgrid.fx" ]]; then
+    while IFS= read -r found; do
       record_match "$found"
-    fi
-  done < <(find "$root" -type d -name "*.plugin" -prune -print 2>/dev/null)
+    done < <(find "$root" -type d -name "ElasticGrid.plugin" -prune -print 2>/dev/null)
+
+    while IFS= read -r found; do
+      plist="$found/Contents/Info.plist"
+      [[ -f "$plist" ]] || continue
+      found_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist" 2>/dev/null || true)"
+      if [[ "$found_id" == "com.elasticgrid.fx" ]]; then
+        record_match "$found"
+      fi
+    done < <(find "$root" -type d -name "*.plugin" -prune -print 2>/dev/null)
+  done
+}
+
+scan_elasticgrid_copies
+
+typeset -a app_bundle_matches
+for found in "${matches[@]}"; do
+  case "$found" in
+    /Applications/*.app/Contents/Plug-ins/*)
+      app_bundle_matches+=("$found")
+      ;;
+  esac
 done
 
-if (( ${#matches[@]} > 1 )); then
-  echo "ERROR: multiple ElasticGrid.plugin copies found:"
-  for found in "${matches[@]}"; do echo "  $found"; done
-  echo "Resolve duplicates first; installer will not guess which copy AE should load."
-  exit 4
+if (( ${#app_bundle_matches[@]} > 0 )); then
+  echo "ERROR: ElasticGrid copy found inside a signed After Effects application bundle:"
+  for found in "${app_bundle_matches[@]}"; do
+    echo "  $found"
+  done
+  echo "The clean installer will not modify the Adobe app bundle."
+  exit 6
 fi
 
-if (( ${#matches[@]} == 1 )); then
-  TARGET="${matches[1]}"
-else
-  TARGET="$USER_ROOT/ElasticGrid.plugin"
+mkdir -p "$USER_BACKUP_ROOT/legacy" "$USER_BACKUP_ROOT/state"
+
+needs_sudo=0
+for found in "${matches[@]}"; do
+  case "$found" in
+    /Library/*) needs_sudo=1 ;;
+  esac
+done
+
+if (( needs_sudo == 1 )); then
+  echo
+  echo "macOS may ask for your password once to move old system-wide ElasticGrid copies to backup."
+  sudo -v
+  sudo mkdir -p "$SYSTEM_BACKUP_ROOT"
 fi
 
-if [[ "$TARGET" == /Applications/*.app/Contents/Plug-ins/* ]]; then
-  echo "ERROR: existing ElasticGrid copy is inside the signed After Effects application bundle:"
-  echo "  $TARGET"
-  echo "Do not modify the Adobe app bundle. Remove/relocate that custom copy first."
-  exit 5
-fi
-
-BACKUP_ROOT="$HOME/Library/Application Support/AE Hot Loader/backups/elasticgrid"
-mkdir -p "$BACKUP_ROOT"
-BACKUP="$BACKUP_ROOT/ElasticGrid-$(date +%Y%m%dT%H%M%S)-$$.plugin"
-USE_SUDO=0
-[[ "$TARGET" == /Library/* ]] && USE_SUDO=1
-BACKUP_MADE=0
+typeset -a moved_originals
+typeset -a moved_backups
+typeset -a moved_modes
 
 restore_on_error() {
   local rc=$?
   if (( rc != 0 )); then
-    echo "Install failed; cleaning partial ElasticGrid.plugin..."
-    if (( USE_SUDO )); then
-      sudo rm -rf "$TARGET"
-      if (( BACKUP_MADE == 1 )); then
-        sudo cp -R "$BACKUP" "$TARGET"
-        sudo xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
+    echo
+    echo "Install failed; restoring previous ElasticGrid copies..."
+
+    rm -rf "$TARGET" 2>/dev/null || true
+
+    local i original backup mode
+    for (( i=${#moved_originals[@]}; i>=1; i-- )); do
+      original="${moved_originals[$i]}"
+      backup="${moved_backups[$i]}"
+      mode="${moved_modes[$i]}"
+
+      if [[ "$mode" == "sudo" ]]; then
+        sudo mkdir -p "${original:h}"
+        [[ -e "$backup" ]] && sudo mv "$backup" "$original"
+      else
+        mkdir -p "${original:h}"
+        [[ -e "$backup" ]] && mv "$backup" "$original"
       fi
-    else
-      rm -rf "$TARGET"
-      if (( BACKUP_MADE == 1 )); then
-        cp -R "$BACKUP" "$TARGET"
-        xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
-      fi
-    fi
+    done
   fi
   exit $rc
 }
 trap restore_on_error EXIT
 
-if (( USE_SUDO )); then
-  sudo mkdir -p "${TARGET:h}"
-  if [[ -d "$TARGET" ]]; then
-    cp -R "$TARGET" "$BACKUP"
-    BACKUP_MADE=1
-    sudo rm -rf "$TARGET"
-  fi
-  sudo cp -R "$BUNDLE" "$TARGET"
-  sudo xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
-else
-  mkdir -p "${TARGET:h}"
-  if [[ -d "$TARGET" ]]; then
-    cp -R "$TARGET" "$BACKUP"
-    BACKUP_MADE=1
-    rm -rf "$TARGET"
-  fi
-  cp -R "$BUNDLE" "$TARGET"
-  xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
+if (( ${#matches[@]} > 0 )); then
+  echo
+  echo "Moving old ElasticGrid copies out of Adobe plug-in folders:"
 fi
 
+legacy_index=0
+for found in "${matches[@]}"; do
+  is_inside_search_root "$found" || {
+    echo "ERROR: cleanup safety check failed: $found"
+    exit 7
+  }
+
+  legacy_index=$((legacy_index + 1))
+  base="${found:t}"
+
+  case "$found" in
+    /Library/*)
+      backup="$SYSTEM_BACKUP_ROOT/${legacy_index}-$base"
+      echo "  $found"
+      sudo mv "$found" "$backup"
+      moved_originals+=("$found")
+      moved_backups+=("$backup")
+      moved_modes+=("sudo")
+      ;;
+    *)
+      backup="$USER_BACKUP_ROOT/legacy/${legacy_index}-$base"
+      echo "  $found"
+      mv "$found" "$backup"
+      moved_originals+=("$found")
+      moved_backups+=("$backup")
+      moved_modes+=("user")
+      ;;
+  esac
+done
+
+# Clear only ElasticGrid hot-reload state. Preserve it in the install backup.
+state_index=0
+for stale in   "$STAGED_DIR/current.dylib"   "$STAGED_DIR/current.tmp.dylib"   /tmp/ae-hot-loader-elasticgrid-shell.log   /tmp/ae-hot-loader-shell-reloader.log   /tmp/ae-hot-loader-agent.log; do
+  if [[ -e "$stale" ]]; then
+    state_index=$((state_index + 1))
+    mv "$stale" "$USER_BACKUP_ROOT/state/${state_index}-${stale:t}"
+  fi
+done
+
+# Remove stale ElasticGrid runtime images only; do not touch other shells.
+runtime_root="${TMPDIR:-/tmp}/AEHotLoaderShell"
+if [[ -d "$runtime_root" ]]; then
+  while IFS= read -r stale_runtime; do
+    state_index=$((state_index + 1))
+    mv "$stale_runtime" "$USER_BACKUP_ROOT/state/${state_index}-${stale_runtime:t}"
+  done < <(find "$runtime_root" -type f -name 'elasticgrid-*.dylib' -print 2>/dev/null)
+fi
+
+echo
+echo "Installing one fresh ElasticGrid shell:"
+echo "  $TARGET"
+mkdir -p "${TARGET:h}"
+cp -R "$BUNDLE" "$TARGET"
+xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
+
 codesign --verify --deep --strict "$TARGET"
-rm -f "$STAGED_DIR/current.dylib" "$STAGED_DIR/current.tmp.dylib" 2>/dev/null || true
-rm -f /tmp/ae-hot-loader-elasticgrid-shell.log 2>/dev/null || true
+installed_archs="$(lipo -archs "$TARGET/Contents/MacOS/ElasticGrid" 2>/dev/null || true)"
+[[ "$installed_archs" == *arm64* ]] || { echo "ERROR: installed ElasticGrid shell is not arm64."; exit 8; }
+
+installed_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$TARGET/Contents/Info.plist" 2>/dev/null || true)"
+[[ "$installed_id" == "com.elasticgrid.fx" ]] || {
+  echo "ERROR: installed ElasticGrid bundle id mismatch: $installed_id"
+  exit 8
+}
+
+# Post-install verification: exactly one host-visible ElasticGrid copy must remain.
+matches=()
+match_seen=()
+scan_elasticgrid_copies
+
+if (( ${#matches[@]} != 1 )) || [[ "${matches[1]-}" != "$TARGET" ]]; then
+  echo
+  echo "ERROR: clean-install verification failed. Expected exactly:"
+  echo "  $TARGET"
+  echo "Found:"
+  for found in "${matches[@]}"; do
+    echo "  $found"
+  done
+  exit 9
+fi
 
 trap - EXIT
 
 echo
-echo "Installed hot-reload ElasticGrid shell:"
+echo "CLEAN ELASTICGRID INSTALL COMPLETE"
+echo
+echo "Installed exactly one active copy:"
 echo "  $TARGET"
-if (( BACKUP_MADE )); then echo "Backup: $BACKUP"; fi
-echo "Open After Effects once. Future implementation updates do not require restart."
+echo
+echo "Previous/test ElasticGrid copies were moved to backup, not deleted."
+echo "User backup:"
+echo "  $USER_BACKUP_ROOT"
+if (( needs_sudo == 1 )); then
+  echo "System backup:"
+  echo "  $SYSTEM_BACKUP_ROOT"
+fi
+echo
+echo "Next:"
+echo "  1. Start After Effects once."
+echo "  2. Verify ElasticGrid FX is present and deforms the image."
+echo "  3. Keep AE open for STAGE_CANDIDATE.command and Reload Plugins."
+echo "See ELASTICGRID_LIVE_TEST.md in this package."
