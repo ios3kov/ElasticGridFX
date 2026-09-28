@@ -70,3 +70,24 @@ This changes fixture coverage, not production acceptance. A new unit case keeps
 that observed redaction from being accidentally accepted. Neither historical
 failed run is retroactively counted as successful; no diagnostic is delivered
 until the positive native fixture and packaging checks pass.
+
+## Independent mapped-path observation
+
+Run36466002735 showed /Users/Shared was also masked, so moving the fixture did
+not solve the diagnostic. The unchanged exact-path requirement is now satisfied
+by independent native observations: proc_pidpath verifies the executable when
+the sampler masks its header, and proc_regionfilename queries the mapped file
+at the load address of each masked candidate image. PID/start-time checks still
+bracket sampling; UUID comes from the live image table and is matched to the
+hashed signed payload. A wildcard alone still proves nothing; native paths must
+also agree with the visible sampler prefix/suffix, and contradictions fail.
+Reports keep reported_path and path_source so native restoration is not hidden.
+
+These libproc signatures are from Apple's xnu libproc.h, which labels the
+interfaces private and subject to change. Their availability/behavior is gated
+by real owned-child tests, now required at both private-temp and Shared paths.
+Missing permission, missing symbol or invalid output must block rather than
+request elevation or weaken matching. The native plugin and its artifact stay
+unchanged. The diagnostic still does not read literal Build ID bytes from memory,
+verify image deformation or approve release. User runtime remains NOT RUN.
+Reference: https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/libsyscall/wrappers/libproc/libproc.h

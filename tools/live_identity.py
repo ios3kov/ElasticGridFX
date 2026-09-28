@@ -2,6 +2,8 @@
 """Read-only target-Mac identity diagnostic. No installation, JSX or project edits."""
 from __future__ import annotations
 import argparse
+import ctypes
+import os
 import json
 from pathlib import Path
 import platform
@@ -89,15 +91,64 @@ def macho_uuids(data: bytes) -> set[str]:
     return set(found)
 
 
-def parse_sample(text: str, pid: int, executable: str) -> list[dict]:
+def system_path(pid: int, address: int | None = None) -> str:
+    """Read path via Apple's libproc; permission denial blocks, never escalates."""
+    if not 0 < pid < 2**31 or (address is not None and not 0 <= address < 2**64):
+        raise Blocked('Invalid native process/address')
+    # Exported signatures from Apple's xnu/libsyscall/wrappers/libproc/libproc.h.
+    # These private interfaces may change; the native fixture gates support.
+    try:
+        library = ctypes.CDLL('/usr/lib/libproc.dylib', use_errno=True)
+        function = getattr(library, 'proc_pidpath' if address is None else 'proc_regionfilename')
+    except (OSError, AttributeError) as error:
+        raise Blocked('Native path interface unavailable; no permissions changed') from error
+    buffer = ctypes.create_string_buffer(4096)
+    if address is None:
+        function.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_uint32]
+        function.restype = ctypes.c_int
+        size = function(pid, buffer, len(buffer))
+    else:
+        function.argtypes = [ctypes.c_int, ctypes.c_uint64, ctypes.c_void_p, ctypes.c_uint32]
+        function.restype = ctypes.c_int
+        size = function(pid, address, buffer, len(buffer))
+    if not 0 < size < len(buffer):
+        raise Blocked('Native process/image path unavailable; no permissions changed')
+    value = os.fsdecode(buffer.raw[:size].rstrip(b'\0'))
+    if not value.startswith('/') or '*' in value or any(ord(c) < 32 for c in value):
+        raise Blocked('Invalid native path observation')
+    return value
+
+
+def masked_path_consistent(reported: str, observed: str) -> bool:
+    """A mask only constrains an independent observation; it never proves a path."""
+    def aliases(value):
+        # Apple's sample uses /var while libproc may return its /private/var path.
+        for prefix in ('/var/', '/tmp/'):
+            if value.startswith(prefix):
+                return '/private' + value
+        return value
+    if reported.count('*') != 1 or '*' in observed:
+        return False
+    prefix, suffix = aliases(reported).split('*')
+    value = aliases(observed)
+    return (prefix.startswith('/') and prefix.endswith('/') and suffix.startswith('/')
+            and value.startswith(prefix) and value.endswith(suffix)
+            and len(value) >= len(prefix) + len(suffix))
+
+
+def parse_sample(text: str, pid: int, executable: str, *, path_lookup=None) -> list[dict]:
     """Use live sample header/image table, never scrape arbitrary stack text."""
     if len(text) > LIMIT or text.count('Binary Images:') != 1:
         raise Blocked('Missing/ambiguous live image table')
     header, table = text.split('Binary Images:', 1)
     pids = re.findall(r'^Process:\s+.*\[(\d+)\]\s*$', header, re.M)
     paths = re.findall(r'^Path:\s+(.+?)\s*$', header, re.M)
-    if pids != [str(pid)] or paths != [executable]:
+    if pids != [str(pid)] or len(paths) != 1:
         raise Blocked('Sample belongs to a different process')
+    if paths != [executable]:
+        if (path_lookup is None or not masked_path_consistent(paths[0], executable)
+                or path_lookup(None) != executable):
+            raise Blocked('Sample belongs to a different process')
     result = []
     for line in table.splitlines():
         match = re.fullmatch(r'\s*(0x[\da-fA-F]+)\s*-\s*(0x[\da-fA-F]+)\s+(.+?)\s+<([\da-fA-F-]+)>\s+(/[^\r\n]+)\s*', line)
@@ -112,7 +163,17 @@ def parse_sample(text: str, pid: int, executable: str) -> list[dict]:
             raise Blocked('Malformed image UUID') from error
         if int(high, 16) <= int(low, 16):
             raise Blocked('Invalid image address range')
-        result.append(dict(uuid=image_id, path=path.rstrip(), label=name))
+        reported_path = path.rstrip()
+        observed_path = reported_path
+        source = 'sample'
+        if '*' in reported_path and ('elasticgrid' in reported_path.lower() or 'com.elasticgrid.fx' in name.lower()):
+            if path_lookup is not None:
+                observed_path = path_lookup(int(low, 16))
+                if not masked_path_consistent(reported_path, observed_path):
+                    raise Blocked('Native path contradicts reported image')
+                source = 'libproc region at sampled load address'
+        result.append(dict(uuid=image_id, path=observed_path, label=name,
+                           reported_path=reported_path, path_source=source))
     if not result:
         raise Blocked('Empty live image table')
     return result
@@ -148,10 +209,10 @@ def capture(pid: int, executable: Path, folder: Path) -> tuple[list[dict], dict]
     if not stat.S_ISREG(info.st_mode) or info.st_size > LIMIT or info.st_size == 0 or info.st_mtime_ns < started - 2_000_000_000:
         raise Blocked('Invalid/stale sample file')
     text = output.read_text(encoding='utf-8-sig')
-    images = parse_sample(text, pid, str(executable))
+    images = parse_sample(text, pid, str(executable), path_lookup=lambda address: system_path(pid, address))
     observation = dict(pid=pid, process_key_sha256=bi.digest(before.encode()),
                        private_sample_sha256=bi.digest(output.read_bytes()),
-                       method='Apple sample live Binary Images + Mach-O LC_UUID',
+                       method='Apple sample image UUID + libproc for redacted paths + Mach-O LC_UUID',
                        duration_seconds=1, interval_milliseconds=10)
     return images, observation
 

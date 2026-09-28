@@ -16,15 +16,13 @@ import live_identity as li
 @unittest.skipUnless(platform.system()=='Darwin','Apple sampler requires macOS; not AE evidence')
 class NativeImageObservation(unittest.TestCase):
     def test_real_sampler_reads_owned_child_image(self):
-        # Private /var/folders paths are redacted even with -fullPaths on the
-        # observed macOS runner. Use an owned non-private fixture for positive
-        # exact-path acceptance; private-path refusal remains a separate test.
+        # Require the same actual sample + kernel-path behavior at both locations.
         self.exercise(Path('/Users/Shared'), False)
 
-    def test_private_path_redaction_is_not_accepted_as_exact(self):
+    def test_private_path_requires_independent_native_observation(self):
         self.exercise(None, True)
 
-    def exercise(self, parent, allow_redaction):
+    def exercise(self, parent, expect_private):
         with tempfile.TemporaryDirectory(prefix='egfx-native-probe-', dir=parent) as tmp:
             folder=Path(tmp).resolve()
             library=folder/'ElasticGrid-fixture.dylib'
@@ -46,13 +44,13 @@ class NativeImageObservation(unittest.TestCase):
                     text=sample.read_text() if sample.exists() else ''
                     print('FIXTURE SAMPLE HEADER:', text[:2500])
                     print('FIXTURE IMAGE:', '\n'.join(line for line in text.splitlines() if 'ElasticGrid-fixture' in line))
-                    if allow_redaction and isinstance(error, li.Blocked) and str(error) == 'Sample belongs to a different process':
-                        headers=[line for line in text.splitlines() if line.startswith('Path:')]
-                        self.assertEqual(len(headers), 1)
-                        self.assertIn('*', headers[0], 'Only evidenced redaction is expected; other failures must fail')
-                        print('PASS: private-path redaction correctly BLOCKED; not exact identity acceptance')
-                        return
                     raise
+                text=(folder/'sample-private.txt').read_text()
+                if expect_private:
+                    # A redacted sample alone remains insufficient evidence.
+                    if any('*' in line for line in text.splitlines() if line.startswith('Path:')):
+                        with self.assertRaises(li.Blocked):
+                            li.parse_sample(text, child.pid, str(host))
                 uuidset=li.macho_uuids(library.read_bytes())
                 observed=li.select_image(images,library,uuidset)
                 self.assertIn(observed['uuid'],uuidset)
