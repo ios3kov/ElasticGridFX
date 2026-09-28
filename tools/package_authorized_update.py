@@ -28,7 +28,7 @@ def package(candidate: Path, output: Path) -> dict:
     content={name:(ROOT/name).read_bytes() for name in FILES}
     content['payload/ElasticGrid.plugin.zip']=payload
     content['InstallToolIdentity.json']=json.dumps(identity,indent=2,sort_keys=True).encode()+b'\n'
-    prefix='ElasticGridFX-Test-Update/'
+    prefix='ElasticGridFX-Test-Update-ProcessFix/'
     with zipfile.ZipFile(output,'x',compression=zipfile.ZIP_DEFLATED) as z:
         for name,data in content.items():
             info=zipfile.ZipInfo(prefix+name,date_time=(2026,9,28,0,0,0))

@@ -99,7 +99,7 @@ class InstallerSafety(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.apply(check_hosts=running)
         self.assertFalse(self.destination.exists())
-        with patch.object(ic.subprocess, 'check_output', return_value='/Applications/Adobe After Effects.app/Contents/MacOS/After Effects\n'):
+        with patch.object(ic.subprocess, 'check_output', return_value='123 /Applications/Adobe After Effects.app/Contents/MacOS/After Effects\n'):
             with self.assertRaises(ValueError):
                 ic.adobe_hosts_stopped()
 

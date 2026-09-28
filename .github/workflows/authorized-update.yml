@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/update-evidence"
-          { python3 -m unittest discover -s tests -p 'test_authorized_update.py' -v; python3 -m unittest discover -s tests -p 'test_xattr_reader.py' -v; } 2>&1 | tee "$RUNNER_TEMP/update-evidence/tests.log"
+          { python3 -m unittest discover -s tests -p 'test_adobe_process_guard.py' -v; python3 -m unittest discover -s tests -p 'test_update_start.py' -v; python3 -m unittest discover -s tests -p 'test_authorized_update.py' -v; python3 -m unittest discover -s tests -p 'test_xattr_reader.py' -v; } 2>&1 | tee "$RUNNER_TEMP/update-evidence/tests.log"
           bash -n UPDATE_ELASTICGRID_MAC.command ROLLBACK_ELASTICGRID_MAC.command
           git diff --exit-code
       - name: Retrieve previously verified immutable candidate (never rebuild)

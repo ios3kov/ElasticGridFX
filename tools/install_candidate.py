@@ -85,11 +85,42 @@ def discover(roots: list[Path]) -> list[Path]:
     return sorted(found)
 
 
-def adobe_hosts_stopped() -> None:
-    text = subprocess.check_output(['/bin/ps', '-axo', 'comm='], text=True, timeout=10)
+def adobe_host_processes(text: str) -> list[dict]:
+    """Conservative guard; the exact crash reporter is not a rendering host.
+
+    This intentionally leaves other Adobe helpers blocked until reviewed.
+    Paths come from ps comm, never argv, so a project/file argument cannot match.
+    """
     needles = ('after effects', 'aerender', 'premiere pro', 'adobe media encoder', 'dynamiclinkmanager')
-    if any(any(needle in line.lower() for needle in needles) for line in text.splitlines()):
-        raise ValueError('Adobe host/render process is running; nothing installed or terminated')
+    found, seen = [], set()
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        pair = line.strip().split(None, 1)
+        if (len(pair) != 2 or not pair[0].isdigit() or int(pair[0]) < 0
+                or int(pair[0]) in seen or any(ord(c) < 32 for c in pair[1])):
+            raise ValueError('Process list is incomplete or invalid; nothing installed')
+        pid, executable = int(pair[0]), pair[1]
+        seen.add(pid)
+        # Do not infer that every child of the After Effects app is AE itself.
+        # Exact leaf only: do NOT exclude dynamiclinkmanager or unknown helpers.
+        if Path(executable).name.casefold() == 'crashpad_handler':
+            continue
+        if any(word in executable.casefold() for word in needles):
+            found.append({'pid': pid, 'executable': executable})
+    if not seen:
+        raise ValueError('Empty process list; host shutdown could not be checked')
+    return found
+
+
+def adobe_hosts_stopped() -> None:
+    text = subprocess.check_output(['/bin/ps', '-axww', '-o', 'pid=,comm='], text=True, timeout=10)
+    processes = adobe_host_processes(text)
+    if processes:
+        details = '\n'.join('  PID {pid}: {executable}'.format(**item) for item in processes)
+        raise ValueError('Проверку блокируют процессы Adobe (это может быть фоновая служба, а не окно AE):\n'
+                         + details + '\nПлагин не заменялся этой проверкой. Процессы не завершались. '
+                         'Не завершай их принудительно; пришли этот вывод.')
 
 
 def signature(bundle: Path) -> None:

@@ -109,13 +109,36 @@ def locate(roots, limit=400):
     return found, errors
 
 
-def hosts(text):
-    result = []
+def adobe_host_processes(text: str) -> list[dict]:
+    """Conservative guard; the exact crash reporter is not a rendering host.
+
+    This intentionally leaves other Adobe helpers blocked until reviewed.
+    Paths come from ps comm, never argv, so a project/file argument cannot match.
+    """
+    needles = ('after effects', 'aerender', 'premiere pro', 'adobe media encoder', 'dynamiclinkmanager')
+    found, seen = [], set()
     for line in text.splitlines():
+        if not line.strip():
+            continue
         pair = line.strip().split(None, 1)
-        if len(pair) == 2 and pair[0].isdigit() and any(n in pair[1].lower() for n in NEEDLES):
-            result.append({'pid': int(pair[0]), 'executable': pair[1]})
-    return result
+        if (len(pair) != 2 or not pair[0].isdigit() or int(pair[0]) < 0
+                or int(pair[0]) in seen or any(ord(c) < 32 for c in pair[1])):
+            raise ValueError('Process list is incomplete or invalid; nothing installed')
+        pid, executable = int(pair[0]), pair[1]
+        seen.add(pid)
+        # Do not infer that every child of the After Effects app is AE itself.
+        # Exact leaf only: do NOT exclude dynamiclinkmanager or unknown helpers.
+        if Path(executable).name.casefold() == 'crashpad_handler':
+            continue
+        if any(word in executable.casefold() for word in needles):
+            found.append({'pid': pid, 'executable': executable})
+    if not seen:
+        raise ValueError('Empty process list; host shutdown could not be checked')
+    return found
+
+
+def hosts(text):
+    return adobe_host_processes(text)
 
 
 def run(self_path, explicit=None):
@@ -134,11 +157,11 @@ def run(self_path, explicit=None):
     if os.geteuid() == 0:
         result['blockers'].append('DO_NOT_RUN_INSTALLER_WITH_SUDO')
     try:
-        text = subprocess.check_output(['/bin/ps', '-axo', 'pid=,comm='], text=True, timeout=5)
+        text = subprocess.check_output(['/bin/ps', '-axww', '-o', 'pid=,comm='], text=True, timeout=5)
         result['adobe_processes'] = hosts(text)
         if result['adobe_processes']:
             result['blockers'].append('ADOBE_HOST_OR_RENDER_HELPER_IS_STILL_RUNNING')
-    except (OSError, subprocess.SubprocessError) as error:
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
         result['blockers'].append('PROCESS_CHECK_FAILED: ' + type(error).__name__)
     binary = home / TARGET / 'Contents/MacOS/ElasticGrid'
     try:
