@@ -703,6 +703,48 @@ fn render_metal(
     }
 }
 
+fn checkout_smart_render_dependencies(
+    in_data: ae::InData,
+    params: &ae::Parameters<Params>,
+) -> Result<(), ae::Error> {
+    // SmartFX cache invalidation is dependency-driven. Custom viewer drags update
+    // GridState, but AE will reuse the previous rendered frame unless the render
+    // parameters are explicitly checked out during SmartPreRender.
+    const DEPS: &[Params] = &[
+        Params::Columns,
+        Params::Rows,
+        Params::GridState,
+        Params::TensionRadius,
+        Params::Falloff,
+        Params::ElasticityStrength,
+        Params::MinSpacing,
+        Params::StretchEasing,
+        Params::EasingDistance,
+        Params::WaveEnabled,
+        Params::WaveAmplitude,
+        Params::WaveFrequency,
+        Params::WavePhase,
+        Params::WaveSpeed,
+        Params::WaveAxis,
+        Params::EdgeMode,
+        Params::Quality,
+    ];
+
+    let interact = in_data.interact();
+    let mut checked = Vec::with_capacity(DEPS.len());
+    for &param in DEPS {
+        let index = params.index(param).ok_or(ae::Error::InvalidIndex)? as i32;
+        checked.push(interact.checkout_param(
+            index,
+            in_data.current_time(),
+            in_data.time_step(),
+            in_data.time_scale(),
+        )?);
+    }
+    drop(checked);
+    Ok(())
+}
+
 impl AdobePluginGlobal for Plugin {
     fn params_setup(
         &self,
@@ -860,69 +902,58 @@ impl AdobePluginGlobal for Plugin {
                 render(&in_layer, &mut out_layer, &p)?;
             }
             ae::Command::SmartPreRender { mut extra } => {
-                let output_request = extra.output_request();
-                let output_rect = EgRectI32 {
-                    left: output_request.rect.left,
-                    top: output_request.rect.top,
-                    right: output_request.rect.right,
-                    bottom: output_request.rect.bottom,
-                };
-                let (cw, ch) = rendered_canvas(in_data);
-                let grid = grid_snapshot(params)?;
-                let mut p = evaluated_params(params, in_data, &grid)?;
-                p.canvas_width = cw;
-                p.canvas_height = ch;
-                p.input_origin_x = 0;
-                p.input_origin_y = 0;
-                p.output_origin_x = output_rect.left;
-                p.output_origin_y = output_rect.top;
+                checkout_smart_render_dependencies(in_data, params)?;
 
-                let mut source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
-                let rc = unsafe { eg_required_source_rect(cw, ch, output_rect, &p, &mut source_rect) };
-                if rc != 0 {
-                    // Conservative fallback: correctness first.
-                    source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
-                }
+                let output_request = extra.output_request();
+                let (cw, ch) = rendered_canvas(in_data);
+
+                // Correctness-first live gate: a grid warp can pull pixels across
+                // cell/ROI boundaries. Checkout the complete source canvas so AE
+                // cannot reuse a partial SmartFX source region that leaves the
+                // viewer overlay moving while the image stays visually unchanged
+                // or develops ROI seams.
+                let source_rect = EgRectI32 {
+                    left: 0,
+                    top: 0,
+                    right: cw,
+                    bottom: ch,
+                };
                 let mut request = output_request;
                 request.rect.left = source_rect.left;
                 request.rect.top = source_rect.top;
                 request.rect.right = source_rect.right;
                 request.rect.bottom = source_rect.bottom;
                 let input = extra.callbacks().checkout_layer(
-                    0, 0, &request,
-                    in_data.current_time(), in_data.time_step(), in_data.time_scale(),
+                    0,
+                    0,
+                    &request,
+                    in_data.current_time(),
+                    in_data.time_step(),
+                    in_data.time_scale(),
                 )?;
 
-                // A grid warp can redistribute content anywhere inside the fixed
-                // layer canvas, so result bounds must not be inherited from the
-                // smaller input alpha bounds. Keep current result conservative and
-                // max bounds stable across render requests.
                 extra.set_result_rect(output_request.rect.into());
-                let mut max_rect = ae::Rect { left: 0, top: 0, right: cw, bottom: ch };
+                let mut max_rect = ae::Rect {
+                    left: 0,
+                    top: 0,
+                    right: cw,
+                    bottom: ch,
+                };
                 let input_max: ae::Rect = input.max_result_rect.into();
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
+
+                // Keep the hot-reload generation contract intact across
+                // SmartPreRender -> SmartRender.
                 extra.set_pre_render_data(HotReloadPreRenderState {
                     generation: hot_reload_generation(),
                 });
+
                 #[cfg(target_os = "macos")]
                 {
-                    let mut gpu_possible = false;
-                    if extra.what_gpu() == ae::GpuFramework::Metal && extra.bit_depth() == 32 {
-                        unsafe {
-                            let raw = extra.as_ptr();
-                            if !raw.is_null()
-                                && !(*raw).input.is_null()
-                                && !(*(*raw).input).gpu_data.is_null()
-                            {
-                                let gpu_data =
-                                    &*((*(*raw).input).gpu_data as *const MetalGpuData);
-                                gpu_possible =
-                                    gpu_data.generation == hot_reload_generation();
-                            }
-                        }
-                    }
-                    extra.set_gpu_render_possible(gpu_possible);
+                    // Isolate CPU SmartFX correctness for this live gate. Metal is
+                    // re-enabled only after CPU deformation/cache behavior passes.
+                    extra.set_gpu_render_possible(false);
                 }
             }
             ae::Command::SmartRender { extra } => {

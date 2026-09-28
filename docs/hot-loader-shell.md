@@ -159,7 +159,9 @@ Coverage includes:
 
 The generic AE Hot Loader Control Shell gate is fully passed in real AE 25.6. ElasticGrid is now the first real adapter live gate.
 
-Use the packaged `ELASTICGRID_LIVE_TEST.md`. Manual cache Purge is not considered product UX; a parameter change may be used only to force evaluation during validation while automatic post-reload cache invalidation remains a loader release requirement.
+The first clean ElasticGrid run exposed a real host integration defect: the custom viewer grid moved but the rendered pixels could remain unchanged. The adapter now explicitly checks out every render-affecting parameter in SmartPreRender, checks out the full source canvas, and temporarily forces the CPU SmartFX path for the correctness gate. This isolates cache/ROI behavior before Metal is re-enabled.
+
+Use the packaged `ELASTICGRID_LIVE_TEST.md`. Manual cache Purge is not considered product UX.
 
 ## Remaining live AE gate
 

@@ -34,10 +34,13 @@ Nothing outside ElasticGrid / its Hot Loader test state is removed. Existing fil
 1. Open an existing project that already uses ElasticGrid if available; otherwise apply **ElasticGrid FX** to a test layer.
 2. Confirm the effect resolves under the existing match name `com.elasticgrid.fx.warp`.
 3. Confirm the existing/custom viewer UI is present and interactive.
-4. Confirm the image really deforms when ElasticGrid controls are changed.
-5. Preview several frames.
+4. Drag an internal grid guide clearly away from its default position.
+5. Confirm the **pixels deform immediately with the guide**; moving only the overlay is a FAIL.
+6. Preview several frames.
 
-Expected: no missing effect, no reset parameter IDs, no crash, no parasitic render artifacts.
+This package explicitly checks all render-affecting parameters during SmartPreRender and uses a full-source CPU SmartFX checkout for the first correctness gate. This prevents stale SmartFX cache reuse and ROI seams from masking the actual deformation.
+
+Expected: no missing effect, no reset parameter IDs, image deformation follows the guide, no crash, no parasitic render artifacts.
 
 ## 3. Hot reload default → candidate
 
@@ -81,4 +84,4 @@ Run `COLLECT_LOGS.command` and send the output together with:
 - whether deformation was correct before and after reload;
 - whether CPU/GPU preview showed any visual difference or artifacts.
 
-The later live pass will add focused MFR, SmartPreRender/SmartRender generation, Metal setup/render/setdown, save/reopen, and repeated A→B→C stress once this basic adapter gate is clean.
+The later live pass will re-enable and validate Metal, then add focused MFR, SmartPreRender/SmartRender generation, save/reopen, and repeated A→B→C stress once CPU deformation/cache correctness is clean.

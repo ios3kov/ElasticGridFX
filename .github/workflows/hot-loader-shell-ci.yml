@@ -38,6 +38,9 @@ jobs:
           set -euo pipefail
           python3 tools/verify_shell_metadata.py host-rust/build.rs host-rust/shell/ElasticGridShell.cpp
           python3 tools/verify_hot_reload_state.py host-rust/src/lib.rs host-rust/shell/ElasticGridShell.cpp
+          grep -q "checkout_smart_render_dependencies(in_data, params)" host-rust/src/lib.rs
+          grep -q "Params::GridState" host-rust/src/lib.rs
+          grep -q "extra.set_gpu_render_possible(false)" host-rust/src/lib.rs
           zsh -n tools/stage_hot_reload_macos.command
           zsh -n tools/install_hot_loader_package.command
           grep -q "CLEAN ELASTICGRID INSTALL COMPLETE" tools/install_hot_loader_package.command
