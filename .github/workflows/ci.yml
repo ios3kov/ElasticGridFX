@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/ae-hot-loader-shell"]
   pull_request:
   workflow_dispatch:
 
