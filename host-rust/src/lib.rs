@@ -535,15 +535,6 @@ pub(crate) struct EgElasticParams {
     pub(crate) min_spacing: f32,
 }
 
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
-struct EgRectI32 {
-    left: i32,
-    top: i32,
-    right: i32,
-    bottom: i32,
-}
-
 unsafe extern "C" {
     fn eg_render_frame(
         input_data: *const c_void,
