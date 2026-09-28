@@ -12,6 +12,7 @@ on:
       - "tools/verify_shell_metadata.py"
       - "tools/verify_hot_reload_state.py"
       - "tools/verify_smartfx_contract.py"
+      - "tools/verify_visualization_contract.py"
       - "tools/stage_hot_reload_macos.command"
       - "tools/install_hot_loader_package.command"
       - "tools/stage_packaged_hot_reload.command"
@@ -41,6 +42,7 @@ jobs:
           python3 tools/verify_shell_metadata.py host-rust/build.rs host-rust/shell/ElasticGridShell.cpp
           python3 tools/verify_hot_reload_state.py host-rust/src/lib.rs host-rust/shell/ElasticGridShell.cpp
           python3 tools/verify_smartfx_contract.py host-rust/src/lib.rs host-rust/src/ui.rs
+          python3 tools/verify_visualization_contract.py host-rust/src/lib.rs src/bridge/elasticgrid_ffi.h src/bridge/elasticgrid_ffi.cpp
           grep -q "checkout_smart_render_state(params)" host-rust/src/lib.rs
           grep -q "MAX_GUIDES: usize = 50" host-rust/src/lib.rs
           grep -q '"Num Columns"' host-rust/src/lib.rs
