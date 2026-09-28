@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
     int w = 3840, h = 2160, frames = 10, depth = 8, quality = 1;
     bool identity = false;
     bool poll_abort = false;
+    bool visualization = false;
     unsigned threads = 0;
     if (argc > 1) w = std::stoi(argv[1]);
     if (argc > 2) h = std::stoi(argv[2]);
@@ -22,6 +23,7 @@ int main(int argc, char** argv) {
     if (argc > 6) identity = std::string(argv[6]) == "identity";
     if (argc > 7) threads = static_cast<unsigned>(std::stoul(argv[7]));
     if (argc > 8) poll_abort = std::string(argv[8]) == "poll";
+    if (argc > 9) visualization = std::string(argv[9]) == "viz";
 
     const std::size_t bpc = depth == 8 ? 1u : depth == 16 ? 2u : depth == 32 ? 4u : 0u;
     if (!bpc) return 2;
@@ -35,6 +37,21 @@ int main(int argc, char** argv) {
     p.wave_enabled = 1; p.wave_amplitude = 0.04f; p.wave_frequency = 2.0f;
     p.wave_speed = 0.2f; p.wave_axis = 1; p.edge_mode = 1; p.quality = quality;
     p.threads = threads;
+    if (visualization) {
+        p.visualization_enabled = 1;
+        p.column_stroke_argb[0] = 255;
+        p.column_stroke_argb[1] = 0;
+        p.column_stroke_argb[2] = 96;
+        p.column_stroke_argb[3] = 255;
+        p.row_stroke_argb[0] = 255;
+        p.row_stroke_argb[1] = 0;
+        p.row_stroke_argb[2] = 96;
+        p.row_stroke_argb[3] = 255;
+        p.visualization_stroke_width = 2.0f;
+        p.visualization_opacity = 1.0f;
+        p.visualization_canvas_width = w;
+        p.visualization_canvas_height = h;
+    }
     if (poll_abort) {
         p.abort_fn = &never_abort;
         p.abort_refcon = nullptr;
@@ -84,6 +101,7 @@ int main(int argc, char** argv) {
     std::cout << w << 'x' << h << " bridge " << depth << "bpc "
               << (quality == 2 ? "bicubic" : "bilinear")
               << (identity ? " identity" : " deformed")
+              << (visualization ? " visualization" : "")
               << (poll_abort ? " abort-poll" : "") << ": " << ms
               << " ms/frame, " << mpix / (ms / 1000.0) << " MPix/s, threads=" << threads << "\n";
 }
