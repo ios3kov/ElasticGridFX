@@ -115,6 +115,7 @@ cp "$TARGET/libelasticgrid_ae.dylib" "$BUNDLE/Contents/MacOS/ElasticGrid"
 cp "$TARGET/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
 cp "$TARGET/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
 cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
+cp "$TARGET/elasticgrid_ae_BuildIdentity.txt" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
 
 /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.elasticgrid.fx' "$BUNDLE/Contents/Info.plist" >/dev/null
 /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string ElasticGrid' "$BUNDLE/Contents/Info.plist" >/dev/null 2>&1 || \
@@ -133,7 +134,13 @@ echo "[4/6] Verifying bundle/entrypoints/signature..." | tee -a "$REPORT"
 "$ROOT/tools/verify_bundle_macos.command" "$BUNDLE" 2>&1 | tee -a "$REPORT"
 
 printf '[artifact] sha256\n' | tee -a "$REPORT"
-shasum -a 256 "$BUNDLE/Contents/MacOS/ElasticGrid" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
+shasum -a 256 \
+  "$BUNDLE/Contents/MacOS/ElasticGrid" \
+  "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" \
+  "$BUNDLE/Contents/Resources/BuildIdentity.txt" \
+  "$BUNDLE/Contents/Info.plist" | tee -a "$REPORT"
+printf '[artifact] build identity\n' | tee -a "$REPORT"
+cat "$BUNDLE/Contents/Resources/BuildIdentity.txt" | tee -a "$REPORT"
 
 if [[ "$INSTALL" == "1" ]]; then
   echo "[5/6] Installing into Adobe MediaCore..." | tee -a "$REPORT"

@@ -22,6 +22,8 @@ on:
       - "tools/collect_hot_loader_logs.command"
       - "docs/hot-loader-live-test.md"
       - "docs/original-gridwarp-binary-audit.md"
+      - "docs/build-identity.md"
+      - ".gitignore"
   workflow_dispatch:
 
 concurrency:
