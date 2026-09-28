@@ -941,7 +941,7 @@ impl AdobePluginGlobal for Plugin {
     ) -> Result<(), ae::Error> {
         match cmd {
             ae::Command::About => {
-                out_data.set_return_msg("ElasticGrid FX v0.9\rfinal hardening build");
+                out_data.set_return_msg("ElasticGrid FX v0.9\rSMARTFX-SNAPSHOT test build");
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::Columns) == Some(param_index)
