@@ -571,6 +571,8 @@ const BUILD_GIT_COMMIT: &str = env!("ELASTICGRID_GIT_COMMIT");
 const BUILD_GIT_STATE: &str = env!("ELASTICGRID_GIT_STATE");
 const BUILD_ID: &str = env!("ELASTICGRID_BUILD_ID");
 const BUILD_ARTIFACT_TYPE: &str = env!("ELASTICGRID_ARTIFACT_TYPE");
+const BUILD_TARGET: &str = env!("ELASTICGRID_TARGET");
+const BUILD_TOOLCHAIN: &str = env!("ELASTICGRID_TOOLCHAIN");
 static BUILD_LOG_ONCE: Once = Once::new();
 
 fn log_build_identity_once() {
@@ -584,12 +586,14 @@ fn log_build_identity_once() {
         {
             let _ = writeln!(
                 file,
-                "build_id={} commit={} git_state={} version={} artifact_type={} impl_label={}",
+                "build_id={} commit={} git_state={} version={} artifact_type={} target={} toolchain={} impl_label={}",
                 BUILD_ID,
                 BUILD_GIT_COMMIT,
                 BUILD_GIT_STATE,
                 BUILD_VERSION,
                 BUILD_ARTIFACT_TYPE,
+                BUILD_TARGET,
+                BUILD_TOOLCHAIN,
                 HOT_RELOAD_IMPL_LABEL,
             );
         }
@@ -1069,11 +1073,12 @@ impl AdobePluginGlobal for Plugin {
         match cmd {
             ae::Command::About => {
                 out_data.set_return_msg(&format!(
-                    "ElasticGrid FX v{}\rBuild ID: {}\rCommit: {}\rGit: {}",
+                    "ElasticGrid FX v{}\rBuild ID: {}\rCommit: {}\rGit: {}\rTarget: {}",
                     BUILD_VERSION,
                     BUILD_ID,
                     BUILD_GIT_COMMIT,
                     BUILD_GIT_STATE,
+                    BUILD_TARGET,
                 ));
             }
             ae::Command::UserChangedParam { param_index } => {

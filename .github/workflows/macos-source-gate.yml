@@ -25,8 +25,17 @@ jobs:
     # preflight does not set it and remains strict.
     env:
       ELASTICGRID_METAL_COMPILE_ONLY: "1"
+      ELASTICGRID_BUILD_COMMIT: ${{ github.sha }}
+      ELASTICGRID_BUILD_GIT_STATE: clean
     steps:
       - uses: actions/checkout@v5
+      - name: Verify clean source identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+          test -z "$(git ls-files --others --exclude-standard)"
       - name: Toolchain
         run: |
           xcodebuild -version

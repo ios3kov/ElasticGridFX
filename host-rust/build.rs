@@ -12,6 +12,8 @@ struct BuildIdentity {
     git_state: String,
     build_id: String,
     artifact_type: String,
+    target: String,
+    toolchain: String,
 }
 
 fn git_stdout(root: &std::path::Path, args: &[&str]) -> Option<String> {
@@ -25,21 +27,58 @@ fn git_stdout(root: &std::path::Path, args: &[&str]) -> Option<String> {
         .map(|s| s.trim().to_string())
 }
 
-fn detect_build_identity(root: &std::path::Path) -> BuildIdentity {
+fn detect_build_identity(
+    root: &std::path::Path,
+    target: &str,
+    toolchain: &str,
+) -> BuildIdentity {
     let version = std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0.0.0".to_string());
-    let git_commit = git_stdout(root, &["rev-parse", "HEAD"])
+
+    let detected_commit = git_stdout(root, &["rev-parse", "HEAD"])
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "unknown".to_string());
-    let status = git_stdout(root, &["status", "--porcelain", "--untracked-files=normal"]);
-    let git_state = match status {
+    let git_commit = match std::env::var("ELASTICGRID_BUILD_COMMIT") {
+        Ok(value) if !value.is_empty() => {
+            if detected_commit != "unknown" && value != detected_commit {
+                panic!(
+                    "ELASTICGRID_BUILD_COMMIT={} does not match Git HEAD={}",
+                    value, detected_commit
+                );
+            }
+            value
+        }
+        _ => detected_commit,
+    };
+
+    let detected_status = git_stdout(root, &["status", "--porcelain", "--untracked-files=all"]);
+    let detected_state = match detected_status {
         Some(s) if s.is_empty() => "clean",
         Some(_) => "dirty",
         None => "unknown",
-    }.to_string();
+    };
+
+    let git_state = match std::env::var("ELASTICGRID_BUILD_GIT_STATE") {
+        Ok(value) => {
+            if !matches!(value.as_str(), "clean" | "dirty" | "unknown") {
+                panic!("invalid ELASTICGRID_BUILD_GIT_STATE={value}");
+            }
+            value
+        }
+        Err(_) => detected_state.to_string(),
+    };
+
     let short = if git_commit.len() >= 12 { &git_commit[..12] } else { git_commit.as_str() };
     let artifact_type = "ae-native-plugin".to_string();
     let build_id = format!("elasticgrid-v{version}-{short}-{git_state}");
-    BuildIdentity { version, git_commit, git_state, build_id, artifact_type }
+    BuildIdentity {
+        version,
+        git_commit,
+        git_state,
+        build_id,
+        artifact_type,
+        target: target.to_string(),
+        toolchain: toolchain.to_string(),
+    }
 }
 
 fn emit_build_identity(root: &std::path::Path, identity: &BuildIdentity) {
@@ -48,6 +87,10 @@ fn emit_build_identity(root: &std::path::Path, identity: &BuildIdentity) {
     println!("cargo:rustc-env=ELASTICGRID_GIT_STATE={}", identity.git_state);
     println!("cargo:rustc-env=ELASTICGRID_BUILD_ID={}", identity.build_id);
     println!("cargo:rustc-env=ELASTICGRID_ARTIFACT_TYPE={}", identity.artifact_type);
+    println!("cargo:rustc-env=ELASTICGRID_TARGET={}", identity.target);
+    println!("cargo:rustc-env=ELASTICGRID_TOOLCHAIN={}", identity.toolchain);
+    println!("cargo:rerun-if-env-changed=ELASTICGRID_BUILD_COMMIT");
+    println!("cargo:rerun-if-env-changed=ELASTICGRID_BUILD_GIT_STATE");
 
     for path in [root.join(".git/HEAD"), root.join(".git/index")] {
         if path.exists() {
@@ -99,6 +142,10 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path, identity: &BuildIde
     <string>{}</string>
     <key>ElasticGridArtifactType</key>
     <string>{}</string>
+    <key>ElasticGridTarget</key>
+    <string>{}</string>
+    <key>ElasticGridToolchain</key>
+    <string>{}</string>
 </dict>
 </plist>
 "#,
@@ -107,17 +154,21 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path, identity: &BuildIde
         identity.git_commit,
         identity.git_state,
         identity.artifact_type,
+        identity.target,
+        identity.toolchain,
     );
     std::fs::write(&plist_path, plist).expect("write macOS Info.plist");
 
     let identity_path = target_profile_dir.join(format!("{package_name}_BuildIdentity.txt"));
     let identity_text = format!(
-        "version={}\ngit_commit={}\ngit_state={}\nbuild_id={}\nartifact_type={}\n",
+        "version={}\ngit_commit={}\ngit_state={}\nbuild_id={}\nartifact_type={}\ntarget={}\ntoolchain={}\n",
         identity.version,
         identity.git_commit,
         identity.git_state,
         identity.build_id,
         identity.artifact_type,
+        identity.target,
+        identity.toolchain,
     );
     std::fs::write(identity_path, identity_text).expect("write build identity");
 }
@@ -149,7 +200,7 @@ fn main() {
     let manifest_dir =
         std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
     let root = manifest_dir.parent().expect("repo root").to_path_buf();
-    let build_identity = detect_build_identity(&root);
+    let build_identity = detect_build_identity(&root, &target, &rustc_version);
     emit_build_identity(&root, &build_identity);
     let lock_fingerprint = hot_reload_lock_fingerprint(&manifest_dir);
     println!(

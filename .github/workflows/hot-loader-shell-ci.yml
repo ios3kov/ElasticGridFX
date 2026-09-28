@@ -33,8 +33,23 @@ concurrency:
 jobs:
   shell:
     runs-on: macos-15
+    env:
+      ELASTICGRID_BUILD_COMMIT: ${{ github.sha }}
+      ELASTICGRID_BUILD_GIT_STATE: clean
     steps:
       - uses: actions/checkout@v5
+
+      - name: Verify clean source identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git diff --exit-code
+          git diff --cached --exit-code
+          UNTRACKED="$(git ls-files --others --exclude-standard)"
+          test -z "$UNTRACKED" || {
+            printf 'ERROR: untracked source files before build:\n%s\n' "$UNTRACKED"
+            exit 20
+          }
 
       - uses: dtolnay/rust-toolchain@1.98.1
         with:
@@ -128,11 +143,15 @@ jobs:
           strings "$CANDIDATE_ROOT/libelasticgrid_ae.dylib" | grep 'elasticgrid-candidate-v2'
           grep -F "git_commit=$GITHUB_SHA" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
           grep -F "git_state=clean" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
+          grep -F "target=aarch64-apple-darwin" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
+          grep -F "toolchain=rustc 1.98.1" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
           BUILD_ID="$(sed -n 's/^build_id=//p' "$BUNDLE/Contents/Resources/BuildIdentity.txt")"
           test -n "$BUILD_ID"
           /usr/libexec/PlistBuddy -c 'Print :ElasticGridBuildID' "$BUNDLE/Contents/Info.plist" | grep -Fx "$BUILD_ID"
           /usr/libexec/PlistBuddy -c 'Print :ElasticGridGitCommit' "$BUNDLE/Contents/Info.plist" | grep -Fx "$GITHUB_SHA"
           /usr/libexec/PlistBuddy -c 'Print :ElasticGridGitState' "$BUNDLE/Contents/Info.plist" | grep -Fx clean
+          /usr/libexec/PlistBuddy -c 'Print :ElasticGridTarget' "$BUNDLE/Contents/Info.plist" | grep -Fx aarch64-apple-darwin
+          /usr/libexec/PlistBuddy -c 'Print :ElasticGridToolchain' "$BUNDLE/Contents/Info.plist" | grep -F 'rustc 1.98.1'
           for impl in "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" "$CANDIDATE_ROOT/libelasticgrid_ae.dylib"; do
             nm -gU "$impl" | grep -E 'EffectMain|AEHotLoader_ImplementationABI|AEHotLoader_ImplementationStateABI|AEHotLoader_ImplementationKey|AEHotLoader_ImplementationLabel|AEHotLoader_ImplementationBuildID|AEHotLoader_ImplementationCommit|AEHotLoader_ImplementationGitState|AEHotLoader_ImplementationRuntimeABI|AEHotLoader_SetGeneration'
           done
