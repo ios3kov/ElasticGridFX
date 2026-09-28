@@ -53,7 +53,7 @@ fn main() {
         .unwrap_or_else(|| "rustc-unknown".to_string());
     let target = std::env::var("TARGET").unwrap_or_else(|_| "target-unknown".to_string());
     println!(
-        "cargo:rustc-env=AE_HOT_LOADER_RUNTIME_ABI={}|{}|after-effects=0.4.0",
+        "cargo:rustc-env=AE_HOT_LOADER_RUNTIME_ABI={}|{}|after-effects=83dcc93734fd5db1335b6ec83cba7a6505a39dcc",
         rustc_version,
         target
     );
