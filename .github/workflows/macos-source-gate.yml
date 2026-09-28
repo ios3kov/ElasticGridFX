@@ -3,7 +3,7 @@ name: macOS source gate
 on:
   workflow_dispatch:
   push:
-    branches: [chore/github-ci-v1]
+    branches: [chore/github-ci-v1, fix/original-gridwarp-parity]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
@@ -43,10 +43,6 @@ jobs:
           xcrun -sdk macosx metallib "$RUNNER_TEMP/elasticgrid-warp.air" -o "$RUNNER_TEMP/elasticgrid-warp.metallib"
       - name: Full macOS preflight
         run: tools/preflight_macos.command
-      - name: Hot-loader shell syntax
-        run: |
-          zsh -n tools/stage_hot_reload_macos.command
-          xcrun clang++ -std=c++17 -arch "$(uname -m)" -Wall -Wextra -Wpedantic -Werror -fsyntax-only host-rust/shell/ElasticGridShell.cpp
       - name: Build unsigned-install-free plugin bundle
         run: tools/build_macos_sdkless.command
       - name: Upload plugin and reports

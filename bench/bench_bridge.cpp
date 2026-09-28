@@ -44,11 +44,11 @@ int main(int argc, char** argv) {
     // deformed guide state through the same public drag ABI used by the AE UI.
     // In identity mode keep a uniform grid with wave/easing disabled so the
     // exact no-op fast path can be measured separately.
-    std::vector<float> x(static_cast<std::size_t>(p.columns) + 1u);
-    std::vector<float> y(static_cast<std::size_t>(p.rows) + 1u);
+    std::vector<float> x(static_cast<std::size_t>(p.columns) + 2u);
+    std::vector<float> y(static_cast<std::size_t>(p.rows) + 2u);
     std::vector<std::uint8_t> xp(x.size(), 0), yp(y.size(), 0);
-    for (std::size_t i = 0; i < x.size(); ++i) x[i] = static_cast<float>(i) / static_cast<float>(p.columns);
-    for (std::size_t i = 0; i < y.size(); ++i) y[i] = static_cast<float>(i) / static_cast<float>(p.rows);
+    for (std::size_t i = 0; i < x.size(); ++i) x[i] = static_cast<float>(i) / static_cast<float>(p.columns + 1);
+    for (std::size_t i = 0; i < y.size(); ++i) y[i] = static_cast<float>(i) / static_cast<float>(p.rows + 1);
     xp.front() = xp.back() = 1;
     yp.front() = yp.back() = 1;
     if (!identity) {

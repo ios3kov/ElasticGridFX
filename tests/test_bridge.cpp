@@ -93,6 +93,8 @@ int main() {
         float y[] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};
         std::uint8_t xp[] = {1, 0, 0, 0, 1};
         std::uint8_t yp[] = {1, 0, 0, 0, 1};
+        p.columns = 3;
+        p.rows = 3;
         p.column_lines = x;
         p.column_line_count = 5;
         p.column_pins = xp;
@@ -185,6 +187,7 @@ int main() {
         std::uint8_t pin[] = {1,0,0,0,1};
         auto full_p = defaults();
         full_p.quality = 2;
+        full_p.columns=3; full_p.rows=3;
         full_p.column_lines=x; full_p.column_line_count=5; full_p.column_pins=pin;
         full_p.row_lines=y; full_p.row_line_count=5; full_p.row_pins=pin;
         full_p.canvas_width=cw; full_p.canvas_height=ch;
@@ -241,17 +244,17 @@ int main() {
         }
     }
     {
-        // Maximum supported 128x128 topology, extreme spacing, and negative time.
-        std::vector<float> lines(129);
-        std::vector<std::uint8_t> pins(129, 0);
-        for (int i=0;i<=128;++i) lines[static_cast<std::size_t>(i)] = float(i) / 128.0f;
+        // Maximum original 50x50 internal-guide topology, extreme spacing, and negative time.
+        std::vector<float> lines(52);
+        std::vector<std::uint8_t> pins(52, 0);
+        for (int i=0;i<=51;++i) lines[static_cast<std::size_t>(i)] = float(i) / 51.0f;
         pins.front() = pins.back() = 1;
         auto p = defaults();
-        p.columns = 128; p.rows = 128;
-        p.column_lines = lines.data(); p.column_line_count = 129; p.column_pins = pins.data();
-        p.row_lines = lines.data(); p.row_line_count = 129; p.row_pins = pins.data();
-        p.min_spacing = 0.25f; // core clamps to feasible 1/128
-        p.wave_enabled = 1; p.wave_amplitude = 0.25f; p.wave_frequency = 20.0f;
+        p.columns = 50; p.rows = 50;
+        p.column_lines = lines.data(); p.column_line_count = 52; p.column_pins = pins.data();
+        p.row_lines = lines.data(); p.row_line_count = 52; p.row_pins = pins.data();
+        p.min_spacing = 0.25f; // core clamps to half uniform spacing
+        p.wave_enabled = 1; p.wave_amplitude = 0.25f; p.wave_frequency = 10.0f;
         p.wave_speed = -10.0f; p.time_seconds = -12345.75f; p.quality = 2;
         std::vector<float> src(64 * 64 * 4, 0.5f), dst(src.size(), 0.0f);
         assert(eg_render_frame(src.data(), 64*16, 64, 64, dst.data(), 64*16, 64, 64, 32, &p) == 0);

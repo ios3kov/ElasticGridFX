@@ -64,11 +64,11 @@ constexpr A_long FourCC(char a, char b, char c, char d) {
 
 constexpr A_long kAEEffectKind = FourCC('e', 'F', 'K', 'T');
 constexpr A_long kApiMajor = 13;
-constexpr A_long kApiMinor = 28;
+constexpr A_long kApiMinor = 29;
 constexpr A_long kRegistrationReservedInfo = 8;
 constexpr std::uint32_t kShellAbi = 1;
 constexpr std::uint32_t kImplementationAbi = 2;
-constexpr std::uint64_t kImplementationStateAbi = 4;
+constexpr std::uint64_t kImplementationStateAbi = 5;
 constexpr const char* kImplementationKey = "elasticgrid";
 constexpr std::size_t kMaxImplementationGenerations = 64;
 

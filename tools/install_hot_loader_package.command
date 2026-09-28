@@ -248,7 +248,7 @@ fi
 trap - EXIT
 
 echo
-echo "CLEAN ELASTICGRID INSTALL COMPLETE"
+echo "CLEAN ELASTICGRID ORIGINAL-PARITY INSTALL COMPLETE"
 echo
 echo "Installed exactly one active copy:"
 echo "  $TARGET"
@@ -265,4 +265,4 @@ echo "Next:"
 echo "  1. Start After Effects once."
 echo "  2. Verify ElasticGrid FX is present and deforms the image."
 echo "  3. Keep AE open for STAGE_CANDIDATE.command and Reload Plugins."
-echo "See ELASTICGRID_LIVE_TEST.md in this package."
+echo "See ELASTICGRID_LIVE_TEST.md and ORIGINAL_GRIDWARP_AUDIT.md in this package."

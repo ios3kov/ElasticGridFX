@@ -16,8 +16,8 @@ static EgRenderParams make_params(int quality, int edge,
                                   const float* y, int ny, const std::uint8_t* yp,
                                   bool wave = true) {
     EgRenderParams p{};
-    p.columns = nx - 1;
-    p.rows = ny - 1;
+    p.columns = nx - 2;
+    p.rows = ny - 2;
     p.column_lines = x;
     p.column_line_count = nx;
     p.column_pins = xp;

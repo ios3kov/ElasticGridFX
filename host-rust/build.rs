@@ -3,7 +3,7 @@ use std::process::Command;
 use std::path::PathBuf;
 
 const PF_PLUG_IN_VERSION: u16 = 13;
-const PF_PLUG_IN_SUBVERS: u16 = 28;
+const PF_PLUG_IN_SUBVERS: u16 = 29;
 
 fn generate_metal_header(root: &std::path::Path, out_dir: &std::path::Path) {
     let shader_path = root.join("src/gpu/warp.metal");

@@ -17,6 +17,7 @@ on:
       - "tools/rollback_packaged_hot_reload.command"
       - "tools/collect_hot_loader_logs.command"
       - "docs/hot-loader-live-test.md"
+      - "docs/original-gridwarp-binary-audit.md"
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +40,9 @@ jobs:
           python3 tools/verify_shell_metadata.py host-rust/build.rs host-rust/shell/ElasticGridShell.cpp
           python3 tools/verify_hot_reload_state.py host-rust/src/lib.rs host-rust/shell/ElasticGridShell.cpp
           grep -q "checkout_smart_render_dependencies(in_data, params)" host-rust/src/lib.rs
-          grep -q "Params::GridState" host-rust/src/lib.rs
+          grep -q "MAX_GUIDES: usize = 50" host-rust/src/lib.rs
+          grep -q '"Num Columns"' host-rust/src/lib.rs
+          grep -q '"Smoothstep", "Gaussian", "Linear"' host-rust/src/lib.rs
           grep -q "extra.set_gpu_render_possible(false)" host-rust/src/lib.rs
           zsh -n tools/stage_hot_reload_macos.command
           zsh -n tools/install_hot_loader_package.command
@@ -219,6 +222,7 @@ jobs:
           cp tools/rollback_packaged_hot_reload.command package/ROLLBACK_TO_BUNDLED.command
           cp tools/collect_hot_loader_logs.command package/COLLECT_LOGS.command
           cp docs/hot-loader-live-test.md package/ELASTICGRID_LIVE_TEST.md
+          cp docs/original-gridwarp-binary-audit.md package/ORIGINAL_GRIDWARP_AUDIT.md
           chmod +x package/INSTALL_HOT_LOADER.command package/STAGE_CANDIDATE.command package/ROLLBACK_TO_BUNDLED.command package/COLLECT_LOGS.command
           codesign --force --sign - package/ElasticGridImpl-candidate.dylib
           ditto -c -k --sequesterRsrc --keepParent package ElasticGridFX-hot-loader-shell.zip

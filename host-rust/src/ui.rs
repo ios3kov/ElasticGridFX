@@ -192,42 +192,8 @@ fn draw_viewer(
     Ok(())
 }
 
-fn draw_effect_control(
-    params: &ae::Parameters<Params>,
-    event: &mut ae::EventExtra,
-) -> Result<(), ae::Error> {
-    if event.effect_area() != ae::EffectArea::Control
-        || params.index(Params::GridState) != Some(event.param_index())
-    {
-        return Ok(());
-    }
-
-    let grid = grid_snapshot(params)?;
-    let drawbot = event.context_handle().drawing_reference()?;
-    let supplier = drawbot.supplier()?;
-    let surface = drawbot.surface()?;
-    let frame = event.current_frame();
-    let font = supplier.new_default_font(supplier.default_font_size()?)?;
-    let brush = supplier.new_brush(&ae::drawbot::ColorRgba {
-        red: 0.85,
-        green: 0.85,
-        blue: 0.85,
-        alpha: 1.0,
-    })?;
-    let label = format!("{} × {} — drag guides in Viewer", grid.columns, grid.rows);
-    let origin = ae::drawbot::PointF32 {
-        x: frame.left as f32 + 5.0,
-        y: frame.top as f32 + 4.0,
-    };
-    surface.draw_string(
-        &brush,
-        &font,
-        &label,
-        &origin,
-        ae::drawbot::TextAlignment::Left,
-        ae::drawbot::TextTruncation::End,
-        frame.width() as f32 - 10.0,
-    )?;
+fn draw_effect_control(params:&ae::Parameters<Params>,event:&mut ae::EventExtra)->Result<(),ae::Error>{
+    if event.effect_area()!=ae::EffectArea::Control || params.index(Params::GridState)!=Some(event.param_index()) { return Ok(()); }
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
 }
@@ -282,7 +248,7 @@ pub fn drag(
         if index == 0 || index + 1 >= grid.column_lines.len() {
             return Ok(());
         }
-        let target = (layer_x / width).clamp(0.0, 1.0);
+        let target = layer_x / width;
         unsafe {
             eg_drag_axis(
                 grid.column_lines.as_mut_ptr(),
@@ -297,7 +263,7 @@ pub fn drag(
         if index == 0 || index + 1 >= grid.row_lines.len() {
             return Ok(());
         }
-        let target = (layer_y / height).clamp(0.0, 1.0);
+        let target = layer_y / height;
         unsafe {
             eg_drag_axis(
                 grid.row_lines.as_mut_ptr(),

@@ -59,12 +59,12 @@ float weird_float(std::mt19937_64& rng) {
 EgRenderParams base_params(std::vector<float>& cx, std::vector<std::uint8_t>& px,
                            std::vector<float>& cy, std::vector<std::uint8_t>& py,
                            int cols, int rows) {
-    cx.resize(static_cast<std::size_t>(cols + 1));
-    cy.resize(static_cast<std::size_t>(rows + 1));
-    px.assign(static_cast<std::size_t>(cols + 1), 0);
-    py.assign(static_cast<std::size_t>(rows + 1), 0);
-    for (int i = 0; i <= cols; ++i) cx[static_cast<std::size_t>(i)] = static_cast<float>(i) / static_cast<float>(cols);
-    for (int i = 0; i <= rows; ++i) cy[static_cast<std::size_t>(i)] = static_cast<float>(i) / static_cast<float>(rows);
+    cx.resize(static_cast<std::size_t>(cols + 2));
+    cy.resize(static_cast<std::size_t>(rows + 2));
+    px.assign(static_cast<std::size_t>(cols + 2), 0);
+    py.assign(static_cast<std::size_t>(rows + 2), 0);
+    for (int i = 0; i <= cols + 1; ++i) cx[static_cast<std::size_t>(i)] = static_cast<float>(i) / static_cast<float>(cols + 1);
+    for (int i = 0; i <= rows + 1; ++i) cy[static_cast<std::size_t>(i)] = static_cast<float>(i) / static_cast<float>(rows + 1);
     px.front() = px.back() = 1;
     py.front() = py.back() = 1;
 
@@ -165,7 +165,7 @@ void fuzz_axis(std::mt19937_64& rng, int iters) {
         w.enabled = (rng() & 1u) != 0;
         w.amplitude = weird_float(rng);
         w.frequency = weird_float(rng);
-        w.phase_cycles = weird_float(rng);
+        w.phase_degrees = weird_float(rng);
         w.speed_cycles_per_second = weird_float(rng);
         w.axis = static_cast<WaveAxis>(rng() & 0xffu);
         auto eval = g.evaluated(w, weird_float(rng), weird_float(rng), (rng() & 1u) != 0);
