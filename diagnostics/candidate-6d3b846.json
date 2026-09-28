@@ -1,0 +1,47 @@
+{
+  "build": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-603e9d3e4025d271e0488201",
+    "commit": "6d3b846463410f37198fda4b625e56e4cea44c22",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+    "source_sha256": "a70fa9ca6cbff38e7bd1fb36481afbf7d4868c1dff897d320f28be286450f21d",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+      "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+    },
+    "version": "0.9.0"
+  },
+  "files": {
+    "Contents/Info.plist": {
+      "executable": false,
+      "sha256": "a5bc8bcb7ab462a86a3b206f57b12e67cde7a4de3441ada890ea9a32670ead0f"
+    },
+    "Contents/MacOS/ElasticGrid": {
+      "executable": true,
+      "sha256": "4958d73bff702cbf21fa46d1aee670fa524cc99c57f2423c62a7d0cae32ebae7"
+    },
+    "Contents/PkgInfo": {
+      "executable": false,
+      "sha256": "e13c5afd5f73acd972f0bc6472b86b8b0adf50bb82ed19a4680978469d45675a"
+    },
+    "Contents/Resources/BuildIdentity.json": {
+      "executable": false,
+      "sha256": "850bf1a4d559883bf798f939df6e2ec3818cce460f12a5a180e54508f3c8ceb9"
+    },
+    "Contents/Resources/ElasticGrid.rsrc": {
+      "executable": false,
+      "sha256": "0fb811240dd73626ab6145e016501f4a6030390260a4f7ea06799b43e540d62e"
+    },
+    "Contents/_CodeSignature/CodeResources": {
+      "executable": false,
+      "sha256": "a4aa048cc05399bf39848d0c05c139869b20930674506d0bb1fbe75baef71e9c"
+    }
+  },
+  "package_sha256": "40da0cc354833518609dc93550f5f930f7f34d299d035ddbd57710d976d13fe7",
+  "runtime_verification": "NOT RUN",
+  "schema": 1
+}

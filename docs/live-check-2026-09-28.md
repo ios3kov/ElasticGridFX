@@ -1,0 +1,53 @@
+# Non-installing live-image diagnostic
+
+Scope and predefined acceptance: live-check-plan-2026-09-28.md. This is a separate
+source-identified diagnostic artifact. Its baseline candidate remains the already
+inspected 6d3b846 / EGFX-603e9d3e4025d271e0488201. No native source/ABI changes.
+
+The previous smoke kept loaded_build_id null because disk hashes do not prove
+loading. The new tool observes a live image UUID and path via Apple's sample,
+checks the exact signed payload before/after, and maps the observed UUID to the
+pinned candidate. `direct_runtime_build_id` remains null: this is explicitly a
+UUID-to-known-build association, not a direct read of the Build ID from memory.
+LC_UUID is a linker identifier, not a cryptographic attestation against injected
+code. Full image/pixel correctness and release status are always separate.
+
+User workflow: save work, leave one idle AE open, run the diagnostic launcher,
+return the generated report ZIP. No plugin is distributed in that ZIP or in the
+diagnostic package. No JSX, saving/closing projects, automatic install/update,
+preferences, elevated permissions or process kill. The sampler briefly pauses
+threads; it runs once for 1 second at 10 ms intervals and has a 15-second timeout.
+Failure never causes an automatic retry or security-setting change.
+
+Reports have unique directories. Only AE/app/plugin identity records and redacted
+user paths go into the report ZIP. The complete sample is private local evidence
+under a mode-0700 per-run directory, not included in the shareable archive. The
+report is never uploaded automatically. Unsupported formats, unreadable scan
+roots, duplicates, stale captures, different UUID/hash/path and process changes
+are BLOCKED, not PASS. Custom roots must be supplied explicitly when needed.
+
+Local verification: 20 diagnostic unit/pipeline tests PASS; the Apple sampler
+integration test is NOT RUN locally (Linux). Existing 53 Python tests and 25 JSX
+control-flow cases pass. Strict C++ Release 10/10 passed; native renderer files
+are unchanged. Mach-O reader also inspected the actual pinned baseline binary:
+UUID 00A8E7CC-AD95-35AA-ADB6-F076A4E83AD7; all six pinned file hashes match.
+The first unit run exposed a bytearray/bytes fixture mismatch, corrected by
+passing bytes to the bytes-typed parser; no failed run is counted as PASS.
+
+Required macOS evidence: the separate Live-image diagnostic workflow samples an
+OWNED child process which dlopens an OWNED fixture dylib. It tests the native
+sampler/path/UUID chain and rejects a mismatched UUID. This is not AE; only that
+child may be terminated by the fixture cleanup. Diagnostic packaging requires
+clean Git and verifies all included bytes. Exact-commit results and final ZIP
+hash are recorded in the PR checkpoint. No actual target AE result is claimed
+before the user's unique-environment diagnostic is received.
+
+Primary references:
+- Apple's loader header for Mach-O LC_UUID:
+  https://github.com/apple-oss-distributions/cctools/blob/main/include/mach-o/loader.h
+- Apple binary image UUID/path explanation:
+  https://developer.apple.com/documentation/xcode/interpreting-the-json-format-of-a-crash-report
+- Apple build UUID matching:
+  https://developer.apple.com/documentation/xcode/locating-a-missing-debug-symbol-file
+The actual current sample behavior is validated by the native fixture gate,
+not inferred solely from documentation or a mocked process.

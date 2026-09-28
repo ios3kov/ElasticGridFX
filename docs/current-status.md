@@ -3,6 +3,15 @@
 Date: 2026-09-28. Branch: fix/final-validation, draft PR #5.
 **NOT READY FOR RELEASE.** Main is not changed or merged by this work.
 
+## Current target-Mac action
+
+A separate read-only live-image diagnostic is implemented; see live-check-2026-09-28.md.
+It maps a live process image UUID/path to the pinned 6d3b846 signed payload. It
+does not change the native plugin or run JSX. The target Mac itself remains
+NOT RUN until its report is received; exact diagnostic CI/package identity is
+recorded in PR #5. This is the minimum unique-environment request, not an
+installation or delegated trial-and-error QA.
+
 ## Source history
 
 - main inspected: 5b4843f94a04d2b5f4d205feb6415954a2f2d9bb.
