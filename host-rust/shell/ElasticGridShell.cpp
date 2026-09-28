@@ -39,6 +39,7 @@ using PF_PluginDataCB2 = A_Err (*)(
     const std::uint8_t*);
 
 using ImplLabelFn = int (*)(char*, std::size_t);
+using ImplStringFn = int (*)(char*, std::size_t);
 using ImplAbiFn = std::uint32_t (*)();
 using ImplStateAbiFn = std::uint64_t (*)();
 using ImplKeyFn = int (*)(char*, std::size_t);
@@ -337,13 +338,19 @@ int LoadImplementationFromSourceLocked(
         dlsym(handle, "AEHotLoader_ImplementationKey"));
     auto label_fn = reinterpret_cast<ImplLabelFn>(
         dlsym(handle, "AEHotLoader_ImplementationLabel"));
+    auto build_id_fn = reinterpret_cast<ImplStringFn>(
+        dlsym(handle, "AEHotLoader_ImplementationBuildID"));
+    auto commit_fn = reinterpret_cast<ImplStringFn>(
+        dlsym(handle, "AEHotLoader_ImplementationCommit"));
+    auto git_state_fn = reinterpret_cast<ImplStringFn>(
+        dlsym(handle, "AEHotLoader_ImplementationGitState"));
     auto runtime_abi_fn = reinterpret_cast<ImplRuntimeAbiFn>(
         dlsym(handle, "AEHotLoader_ImplementationRuntimeABI"));
     auto set_generation_fn = reinterpret_cast<ImplSetGenerationFn>(
         dlsym(handle, "AEHotLoader_SetGeneration"));
 
-    if (!abi_fn || !state_abi_fn || !key_fn || !label_fn || !runtime_abi_fn ||
-        !set_generation_fn) {
+    if (!abi_fn || !state_abi_fn || !key_fn || !label_fn || !build_id_fn ||
+        !commit_fn || !git_state_fn || !runtime_abi_fn || !set_generation_fn) {
         if (detail) *detail = "Implementation hot-reload ABI exports are missing.";
         RetainRejectedCandidate(handle, runtime_path);
         return -4108;
@@ -399,6 +406,29 @@ int LoadImplementationFromSourceLocked(
         label_buffer,
         static_cast<std::size_t>(label_terminator - label_buffer));
 
+
+    auto read_identity = [&](ImplStringFn fn, const char* field, std::string* value) -> bool {
+        char buffer[512]{};
+        const int result = fn(buffer, sizeof(buffer));
+        const auto* terminator = static_cast<const char*>(
+            std::memchr(buffer, '\0', sizeof(buffer)));
+        if (result != 0 || !terminator || buffer[0] == '\0') {
+            if (detail) *detail = std::string("Implementation ") + field + " is invalid.";
+            return false;
+        }
+        *value = std::string(buffer, static_cast<std::size_t>(terminator - buffer));
+        return true;
+    };
+
+    std::string build_id;
+    std::string git_commit;
+    std::string git_state;
+    if (!read_identity(build_id_fn, "Build ID", &build_id) ||
+        !read_identity(commit_fn, "Git commit", &git_commit) ||
+        !read_identity(git_state_fn, "Git state", &git_state)) {
+        RetainRejectedCandidate(handle, runtime_path);
+        return -4117;
+    }
 
     char runtime_abi_buffer[512]{};
     const int runtime_abi_result =
@@ -469,9 +499,16 @@ int LoadImplementationFromSourceLocked(
 
     if (detail) {
         *detail = "Reloaded ElasticGrid implementation " + implementation_label +
+                  " build_id=" + build_id +
+                  " commit=" + git_commit +
+                  " git_state=" + git_state +
                   " from " + source;
     }
-    Log("active implementation: " + runtime_path + " source=" + source);
+    Log("active implementation: " + runtime_path +
+        " source=" + source +
+        " build_id=" + build_id +
+        " commit=" + git_commit +
+        " git_state=" + git_state);
     return 0;
 }
 

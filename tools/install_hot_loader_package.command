@@ -213,7 +213,8 @@ done
 
 # Clear only ElasticGrid hot-reload state. Preserve it in the install backup.
 state_index=0
-for stale in   "$STAGED_DIR/current.dylib"   "$STAGED_DIR/current.tmp.dylib"   /tmp/ae-hot-loader-elasticgrid-shell.log   /tmp/ae-hot-loader-shell-reloader.log   /tmp/ae-hot-loader-agent.log; do
+for stale in   "$STAGED_DIR/current.dylib"   "$STAGED_DIR/current.tmp.dylib"   /tmp/ae-hot-loader-elasticgrid-shell.log   /tmp/ae-hot-loader-shell-reloader.log   /tmp/ae-hot-loader-agent.log \
+  /tmp/elasticgrid-fx.log; do
   if [[ -e "$stale" ]]; then
     state_index=$((state_index + 1))
     mv "$stale" "$USER_BACKUP_ROOT/state/${state_index}-${stale:t}"
@@ -237,6 +238,12 @@ cp -R "$BUNDLE" "$TARGET"
 xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
 
 codesign --verify --deep --strict "$TARGET"
+
+IDENTITY_FILE="$TARGET/Contents/Resources/BuildIdentity.txt"
+[[ -f "$IDENTITY_FILE" ]] || { echo "ERROR: installed BuildIdentity.txt is missing."; exit 8; }
+grep -q '^build_id=' "$IDENTITY_FILE" || { echo "ERROR: installed build identity is invalid."; exit 8; }
+grep -q '^git_commit=' "$IDENTITY_FILE" || { echo "ERROR: installed git commit identity is missing."; exit 8; }
+
 installed_archs="$(lipo -archs "$TARGET/Contents/MacOS/ElasticGrid" 2>/dev/null || true)"
 [[ "$installed_archs" == *arm64* ]] || { echo "ERROR: installed ElasticGrid shell is not arm64."; exit 8; }
 
@@ -270,6 +277,9 @@ echo "CLEAN ELASTICGRID ORIGINAL-PARITY INSTALL COMPLETE"
 echo
 echo "Installed exactly one active copy:"
 echo "  $TARGET"
+echo
+echo "Build Identity:"
+cat "$IDENTITY_FILE"
 echo
 echo "Previous/test ElasticGrid copies were moved to backup, not deleted."
 echo "User backup:"

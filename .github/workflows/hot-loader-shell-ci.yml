@@ -14,6 +14,7 @@ on:
       - "tools/verify_smartfx_contract.py"
       - "tools/verify_visualization_contract.py"
       - "tools/verify_clean_installer.py"
+      - "tools/verify_build_identity.py"
       - "tools/stage_hot_reload_macos.command"
       - "tools/install_hot_loader_package.command"
       - "tools/stage_packaged_hot_reload.command"
@@ -45,6 +46,7 @@ jobs:
           python3 tools/verify_smartfx_contract.py host-rust/src/lib.rs host-rust/src/ui.rs
           python3 tools/verify_visualization_contract.py host-rust/src/lib.rs src/bridge/elasticgrid_ffi.h src/bridge/elasticgrid_ffi.cpp
           python3 tools/verify_clean_installer.py tools/install_hot_loader_package.command
+          python3 tools/verify_build_identity.py host-rust/build.rs host-rust/src/lib.rs host-rust/shell/ElasticGridShell.cpp
           grep -q "checkout_smart_render_state(params)" host-rust/src/lib.rs
           grep -q "MAX_GUIDES: usize = 50" host-rust/src/lib.rs
           grep -q '"Num Columns"' host-rust/src/lib.rs
@@ -108,6 +110,7 @@ jobs:
           cp "$ROOT/elasticgrid_ae.rsrc" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc"
           cp "$ROOT/elasticgrid_ae_PkgInfo" "$BUNDLE/Contents/PkgInfo"
           cp "$ROOT/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
+          cp "$ROOT/elasticgrid_ae_BuildIdentity.txt" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
 
           /usr/libexec/PlistBuddy -c 'Set :CFBundleIdentifier com.elasticgrid.fx' "$BUNDLE/Contents/Info.plist"
           /usr/libexec/PlistBuddy -c 'Add :CFBundleExecutable string ElasticGrid' "$BUNDLE/Contents/Info.plist" 2>/dev/null || \
@@ -121,8 +124,15 @@ jobs:
 
           strings "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" | grep 'elasticgrid-default'
           strings "$CANDIDATE_ROOT/libelasticgrid_ae.dylib" | grep 'elasticgrid-candidate-v2'
+          grep -F "git_commit=$GITHUB_SHA" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
+          grep -F "git_state=clean" "$BUNDLE/Contents/Resources/BuildIdentity.txt"
+          BUILD_ID="$(sed -n 's/^build_id=//p' "$BUNDLE/Contents/Resources/BuildIdentity.txt")"
+          test -n "$BUILD_ID"
+          /usr/libexec/PlistBuddy -c 'Print :ElasticGridBuildID' "$BUNDLE/Contents/Info.plist" | grep -Fx "$BUILD_ID"
+          /usr/libexec/PlistBuddy -c 'Print :ElasticGridGitCommit' "$BUNDLE/Contents/Info.plist" | grep -Fx "$GITHUB_SHA"
+          /usr/libexec/PlistBuddy -c 'Print :ElasticGridGitState' "$BUNDLE/Contents/Info.plist" | grep -Fx clean
           for impl in "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" "$CANDIDATE_ROOT/libelasticgrid_ae.dylib"; do
-            nm -gU "$impl" | grep -E 'EffectMain|AEHotLoader_ImplementationABI|AEHotLoader_ImplementationStateABI|AEHotLoader_ImplementationKey|AEHotLoader_ImplementationLabel|AEHotLoader_ImplementationRuntimeABI|AEHotLoader_SetGeneration'
+            nm -gU "$impl" | grep -E 'EffectMain|AEHotLoader_ImplementationABI|AEHotLoader_ImplementationStateABI|AEHotLoader_ImplementationKey|AEHotLoader_ImplementationLabel|AEHotLoader_ImplementationBuildID|AEHotLoader_ImplementationCommit|AEHotLoader_ImplementationGitState|AEHotLoader_ImplementationRuntimeABI|AEHotLoader_SetGeneration'
           done
           for impl in "$BUNDLE/Contents/Frameworks/libelasticgrid_impl.dylib" "$CANDIDATE_ROOT/libelasticgrid_ae.dylib"; do
             if otool -L "$impl" | tail -n +2 | grep -E '@(rpath|loader_path|executable_path)'; then
@@ -229,12 +239,16 @@ jobs:
           cp tools/collect_hot_loader_logs.command package/COLLECT_LOGS.command
           cp docs/hot-loader-live-test.md package/ELASTICGRID_LIVE_TEST.md
           cp docs/original-gridwarp-binary-audit.md package/ORIGINAL_GRIDWARP_AUDIT.md
+          cp dist/mac/ElasticGrid.plugin/Contents/Resources/BuildIdentity.txt package/BUILD_IDENTITY.txt
           chmod +x package/INSTALL_HOT_LOADER.command package/STAGE_CANDIDATE.command package/ROLLBACK_TO_BUNDLED.command package/COLLECT_LOGS.command
           codesign --force --sign - package/ElasticGridImpl-candidate.dylib
           ditto -c -k --sequesterRsrc --keepParent package ElasticGridFX-hot-loader-shell.zip
+          shasum -a 256 ElasticGridFX-hot-loader-shell.zip > ElasticGridFX-hot-loader-shell.zip.sha256
 
       - uses: actions/upload-artifact@v4
         with:
           name: ElasticGridFX-hot-loader-shell
-          path: ElasticGridFX-hot-loader-shell.zip
+          path: |
+            ElasticGridFX-hot-loader-shell.zip
+            ElasticGridFX-hot-loader-shell.zip.sha256
           if-no-files-found: error

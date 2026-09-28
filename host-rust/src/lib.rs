@@ -3,7 +3,9 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::{SeqAccess, Visitor};
 use std::fmt;
 use std::ffi::{c_char, c_void};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::sync::{Once, atomic::{AtomicU64, Ordering}};
 
 mod ui;
 
@@ -564,6 +566,36 @@ fn hot_reload_generation() -> u64 {
     HOT_RELOAD_GENERATION.load(Ordering::Acquire)
 }
 
+const BUILD_VERSION: &str = env!("ELASTICGRID_VERSION");
+const BUILD_GIT_COMMIT: &str = env!("ELASTICGRID_GIT_COMMIT");
+const BUILD_GIT_STATE: &str = env!("ELASTICGRID_GIT_STATE");
+const BUILD_ID: &str = env!("ELASTICGRID_BUILD_ID");
+const BUILD_ARTIFACT_TYPE: &str = env!("ELASTICGRID_ARTIFACT_TYPE");
+static BUILD_LOG_ONCE: Once = Once::new();
+
+fn log_build_identity_once() {
+    BUILD_LOG_ONCE.call_once(|| {
+        let path = std::env::temp_dir().join("elasticgrid-fx.log");
+        if let Ok(mut file) = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(path)
+        {
+            let _ = writeln!(
+                file,
+                "build_id={} commit={} git_state={} version={} artifact_type={} impl_label={}",
+                BUILD_ID,
+                BUILD_GIT_COMMIT,
+                BUILD_GIT_STATE,
+                BUILD_VERSION,
+                BUILD_ARTIFACT_TYPE,
+                HOT_RELOAD_IMPL_LABEL,
+            );
+        }
+    });
+}
+
 fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
     enabled && amplitude.abs() > 1.0e-12 && speed.abs() > 1.0e-12
 }
@@ -1033,9 +1065,16 @@ impl AdobePluginGlobal for Plugin {
         mut out_data: ae::OutData,
         params: &mut ae::Parameters<Params>,
     ) -> Result<(), ae::Error> {
+        log_build_identity_once();
         match cmd {
             ae::Command::About => {
-                out_data.set_return_msg("ElasticGrid FX\rOriginal GridWarp behavior parity build");
+                out_data.set_return_msg(&format!(
+                    "ElasticGrid FX v{}\rBuild ID: {}\rCommit: {}\rGit: {}",
+                    BUILD_VERSION,
+                    BUILD_ID,
+                    BUILD_GIT_COMMIT,
+                    BUILD_GIT_STATE,
+                ));
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::Columns) == Some(param_index) || params.index(Params::Rows) == Some(param_index) {
@@ -1229,6 +1268,9 @@ const HOT_RELOAD_IMPL_LABEL: &str = match option_env!("AE_HOT_LOADER_IMPL_LABEL"
 fn write_hot_reload_string(v:&str,o:*mut c_char,n:usize)->i32 { if o.is_null()||n==0{return -1;} let b=v.as_bytes(); let c=b.len().min(n.saturating_sub(1)); unsafe{std::ptr::copy_nonoverlapping(b.as_ptr(),o.cast::<u8>(),c);*o.add(c)=0;} 0 }
 #[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationKey(o:*mut c_char,n:usize)->i32 { write_hot_reload_string("elasticgrid",o,n) }
 #[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationLabel(o:*mut c_char,n:usize)->i32 { write_hot_reload_string(HOT_RELOAD_IMPL_LABEL,o,n) }
+#[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationBuildID(o:*mut c_char,n:usize)->i32 { write_hot_reload_string(BUILD_ID,o,n) }
+#[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationCommit(o:*mut c_char,n:usize)->i32 { write_hot_reload_string(BUILD_GIT_COMMIT,o,n) }
+#[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationGitState(o:*mut c_char,n:usize)->i32 { write_hot_reload_string(BUILD_GIT_STATE,o,n) }
 const HOT_RELOAD_RUNTIME_ABI:&str=env!("AE_HOT_LOADER_RUNTIME_ABI");
 #[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_ImplementationRuntimeABI(o:*mut c_char,n:usize)->i32 { write_hot_reload_string(HOT_RELOAD_RUNTIME_ABI,o,n) }
 #[unsafe(no_mangle)] pub extern "C" fn AEHotLoader_SetGeneration(g:u64) { HOT_RELOAD_GENERATION.store(g,Ordering::Release); }

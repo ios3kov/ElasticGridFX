@@ -5,6 +5,57 @@ use std::path::PathBuf;
 const PF_PLUG_IN_VERSION: u16 = 13;
 const PF_PLUG_IN_SUBVERS: u16 = 29;
 
+#[derive(Clone, Debug)]
+struct BuildIdentity {
+    version: String,
+    git_commit: String,
+    git_state: String,
+    build_id: String,
+    artifact_type: String,
+}
+
+fn git_stdout(root: &std::path::Path, args: &[&str]) -> Option<String> {
+    Command::new("git")
+        .current_dir(root)
+        .args(args)
+        .output()
+        .ok()
+        .filter(|out| out.status.success())
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .map(|s| s.trim().to_string())
+}
+
+fn detect_build_identity(root: &std::path::Path) -> BuildIdentity {
+    let version = std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0.0.0".to_string());
+    let git_commit = git_stdout(root, &["rev-parse", "HEAD"])
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| "unknown".to_string());
+    let status = git_stdout(root, &["status", "--porcelain", "--untracked-files=normal"]);
+    let git_state = match status {
+        Some(s) if s.is_empty() => "clean",
+        Some(_) => "dirty",
+        None => "unknown",
+    }.to_string();
+    let short = if git_commit.len() >= 12 { &git_commit[..12] } else { git_commit.as_str() };
+    let artifact_type = "ae-native-plugin".to_string();
+    let build_id = format!("elasticgrid-v{version}-{short}-{git_state}");
+    BuildIdentity { version, git_commit, git_state, build_id, artifact_type }
+}
+
+fn emit_build_identity(root: &std::path::Path, identity: &BuildIdentity) {
+    println!("cargo:rustc-env=ELASTICGRID_VERSION={}", identity.version);
+    println!("cargo:rustc-env=ELASTICGRID_GIT_COMMIT={}", identity.git_commit);
+    println!("cargo:rustc-env=ELASTICGRID_GIT_STATE={}", identity.git_state);
+    println!("cargo:rustc-env=ELASTICGRID_BUILD_ID={}", identity.build_id);
+    println!("cargo:rustc-env=ELASTICGRID_ARTIFACT_TYPE={}", identity.artifact_type);
+
+    for path in [root.join(".git/HEAD"), root.join(".git/index")] {
+        if path.exists() {
+            println!("cargo:rerun-if-changed={}", path.display());
+        }
+    }
+}
+
 fn generate_metal_header(root: &std::path::Path, out_dir: &std::path::Path) {
     let shader_path = root.join("src/gpu/warp.metal");
     let source = std::fs::read_to_string(&shader_path).expect("read Metal shader");
@@ -16,7 +67,7 @@ fn generate_metal_header(root: &std::path::Path, out_dir: &std::path::Path) {
     std::fs::write(out_dir.join("elasticgrid_metal_source.h"), header).expect("write Metal shader header");
 }
 
-fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
+fn generate_macos_bundle_metadata(out_dir: &std::path::Path, identity: &BuildIdentity) {
     let target_profile_dir = out_dir.join("../../..");
     let package_name = std::env::var("CARGO_PKG_NAME").expect("CARGO_PKG_NAME");
     let pkginfo_path = target_profile_dir.join(format!("{package_name}_PkgInfo"));
@@ -26,7 +77,7 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
     // generate the two bundle metadata files expected by the packaging step.
     std::fs::write(&pkginfo_path, b"eFKTFXTC").expect("write macOS PkgInfo");
 
-    let plist = r#"<?xml version="1.0" encoding="UTF-8"?>
+    let plist = format!(r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -36,10 +87,39 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
     <string>eFKT</string>
     <key>CFBundleSignature</key>
     <string>FXTC</string>
+    <key>CFBundleShortVersionString</key>
+    <string>{}</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>ElasticGridBuildID</key>
+    <string>{}</string>
+    <key>ElasticGridGitCommit</key>
+    <string>{}</string>
+    <key>ElasticGridGitState</key>
+    <string>{}</string>
+    <key>ElasticGridArtifactType</key>
+    <string>{}</string>
 </dict>
 </plist>
-"#;
+"#,
+        identity.version,
+        identity.build_id,
+        identity.git_commit,
+        identity.git_state,
+        identity.artifact_type,
+    );
     std::fs::write(&plist_path, plist).expect("write macOS Info.plist");
+
+    let identity_path = target_profile_dir.join(format!("{package_name}_BuildIdentity.txt"));
+    let identity_text = format!(
+        "version={}\ngit_commit={}\ngit_state={}\nbuild_id={}\nartifact_type={}\n",
+        identity.version,
+        identity.git_commit,
+        identity.git_state,
+        identity.build_id,
+        identity.artifact_type,
+    );
+    std::fs::write(identity_path, identity_text).expect("write build identity");
 }
 
 fn hot_reload_lock_fingerprint(manifest_dir: &std::path::Path) -> String {
@@ -68,6 +148,9 @@ fn main() {
     let target = std::env::var("TARGET").unwrap_or_else(|_| "target-unknown".to_string());
     let manifest_dir =
         std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"));
+    let root = manifest_dir.parent().expect("repo root").to_path_buf();
+    let build_identity = detect_build_identity(&root);
+    emit_build_identity(&root, &build_identity);
     let lock_fingerprint = hot_reload_lock_fingerprint(&manifest_dir);
     println!(
         "cargo:rustc-env=AE_HOT_LOADER_RUNTIME_ABI={}|{}|after-effects=0.4.0|lock={}",
@@ -84,8 +167,6 @@ fn main() {
     // Never let a Rust panic cross the After Effects C ABI in release builds.
     // The after-effects host macro wraps EffectMain in catch_unwind when this cfg is set.
     println!("cargo:rustc-cfg=catch_panics");
-    let root = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
-        .parent().unwrap().to_path_buf();
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
 
@@ -111,7 +192,7 @@ fn main() {
         .compile("elasticgrid_core");
 
     if target_os == "macos" {
-        generate_macos_bundle_metadata(&out_dir);
+        generate_macos_bundle_metadata(&out_dir, &build_identity);
         generate_metal_header(&root, &out_dir);
         let mut metal = cc::Build::new();
         metal.cpp(true)
