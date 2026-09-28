@@ -21,18 +21,28 @@ python3 "$ROOT/tools/verify_hot_reload_state.py" \
   "$ROOT/host-rust/src/lib.rs" \
   "$ROOT/host-rust/shell/ElasticGridShell.cpp"
 
+USE_RUSTUP=0
 if command -v rustup >/dev/null 2>&1; then
   rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal >/dev/null
+  USE_RUSTUP=1
 else
   active_rust="$(rustc --version 2>/dev/null | awk '{print $2}' || true)"
   [[ "$active_rust" == "$RUST_TOOLCHAIN" ]] || {
     echo "ERROR: Rust $RUST_TOOLCHAIN required for hot-reload Runtime ABI compatibility."
     exit 4
   }
+  command -v cargo >/dev/null 2>&1 || {
+    echo "ERROR: cargo is required."
+    exit 4
+  }
 fi
 
 echo "Building ElasticGrid implementation: $LABEL"
-cargo +"$RUST_TOOLCHAIN" build --release --locked --manifest-path "$MANIFEST"
+if (( USE_RUSTUP )); then
+  cargo +"$RUST_TOOLCHAIN" build --release --locked --manifest-path "$MANIFEST"
+else
+  cargo build --release --locked --manifest-path "$MANIFEST"
+fi
 
 [[ -f "$SOURCE" ]] || { echo "ERROR: missing implementation: $SOURCE"; exit 2; }
 
