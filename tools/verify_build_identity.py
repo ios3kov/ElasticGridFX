@@ -17,7 +17,7 @@ build_required = [
     "ElasticGridBuildID",
     "ElasticGridGitCommit",
     "ElasticGridGitState",
-    'git", "status", "--porcelain", "--untracked-files=normal"',
+    '["status", "--porcelain", "--untracked-files=normal"]',
 ]
 lib_required = [
     'env!("ELASTICGRID_BUILD_ID")',
