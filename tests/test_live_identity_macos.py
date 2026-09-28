@@ -16,7 +16,16 @@ import live_identity as li
 @unittest.skipUnless(platform.system()=='Darwin','Apple sampler requires macOS; not AE evidence')
 class NativeImageObservation(unittest.TestCase):
     def test_real_sampler_reads_owned_child_image(self):
-        with tempfile.TemporaryDirectory(prefix='egfx-native-probe-') as tmp:
+        # Private /var/folders paths are redacted even with -fullPaths on the
+        # observed macOS runner. Use an owned non-private fixture for positive
+        # exact-path acceptance; private-path refusal remains a separate test.
+        self.exercise(Path('/Users/Shared'), False)
+
+    def test_private_path_redaction_is_not_accepted_as_exact(self):
+        self.exercise(None, True)
+
+    def exercise(self, parent, allow_redaction):
+        with tempfile.TemporaryDirectory(prefix='egfx-native-probe-', dir=parent) as tmp:
             folder=Path(tmp).resolve()
             library=folder/'ElasticGrid-fixture.dylib'
             (folder/'library.c').write_text('int fixture(void){return 42;}\n')
@@ -31,13 +40,18 @@ class NativeImageObservation(unittest.TestCase):
                 self.assertEqual(child.stdout.readline().strip(), 'READY')
                 try:
                     images,observation=li.capture(child.pid,host,folder)
-                except Exception:
+                except Exception as error:
                     # Owned CI fixture only: retain header/images for diagnosis.
                     sample=folder/'sample-private.txt'
-                    if sample.exists():
-                        text=sample.read_text()
-                        print('FIXTURE SAMPLE HEADER:', text[:2500])
-                        print('FIXTURE IMAGE:', '\n'.join(line for line in text.splitlines() if 'ElasticGrid-fixture' in line))
+                    text=sample.read_text() if sample.exists() else ''
+                    print('FIXTURE SAMPLE HEADER:', text[:2500])
+                    print('FIXTURE IMAGE:', '\n'.join(line for line in text.splitlines() if 'ElasticGrid-fixture' in line))
+                    if allow_redaction and isinstance(error, li.Blocked) and str(error) == 'Sample belongs to a different process':
+                        headers=[line for line in text.splitlines() if line.startswith('Path:')]
+                        self.assertEqual(len(headers), 1)
+                        self.assertIn('*', headers[0], 'Only evidenced redaction is expected; other failures must fail')
+                        print('PASS: private-path redaction correctly BLOCKED; not exact identity acceptance')
+                        return
                     raise
                 uuidset=li.macho_uuids(library.read_bytes())
                 observed=li.select_image(images,library,uuidset)

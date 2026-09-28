@@ -59,3 +59,14 @@ comparison; it is not PASS. Explicit -fullPaths sampling and retained fixture
 header/image diagnostics are now being checked. No user permissions are changed
 and no redacted/mismatched path is silently accepted. The exact follow-up native
 result is required before handing over the diagnostic.
+
+The follow-up run36465410962 reproduced the same refusal even with -fullPaths.
+The retained native fixture report proves the reason: Path was replaced with
+/private/var/folders/*/probe-host and its image paths were similarly redacted.
+No wildcard is accepted as an exact path. The native fixture now covers both
+an owned non-private /Users/Shared location (required positive exact match) and
+the default private temporary location (evidenced redaction must be BLOCKED).
+This changes fixture coverage, not production acceptance. A new unit case keeps
+that observed redaction from being accidentally accepted. Neither historical
+failed run is retroactively counted as successful; no diagnostic is delivered
+until the positive native fixture and packaging checks pass.
