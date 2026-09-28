@@ -105,7 +105,8 @@ set -o pipefail
 "$ROOT/tools/preflight_macos.command" 2>&1 | tee -a "$REPORT"
 
 echo "[2/6] Building ElasticGrid FX v0.9 (native $(uname -m))..." | tee -a "$REPORT"
-cargo build --release --locked --manifest-path "$MANIFEST" 2>&1 | tee -a "$REPORT"
+cargo build --release --locked --manifest-path "$MANIFEST" --message-format=json-render-diagnostics \
+  2>&1 | tee "$DIST/host-build.jsonl" | tee -a "$REPORT"
 
 echo "[3/6] Creating After Effects .plugin bundle..." | tee -a "$REPORT"
 rm -rf "$BUNDLE"
@@ -126,12 +127,21 @@ cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 9' "$BUNDLE/Contents/Info.plist" >/dev/null 2>&1 || \
   /usr/libexec/PlistBuddy -c 'Set :CFBundleVersion 9' "$BUNDLE/Contents/Info.plist" >/dev/null
 
+python3 "$ROOT/tools/build_identity.py" stamp --root "$ROOT" --bundle "$BUNDLE" --cargo-log "$DIST/host-build.jsonl"
+
 xattr -cr "$BUNDLE" || true
 codesign --force --deep --sign - "$BUNDLE"
 
 echo "[4/6] Verifying bundle/entrypoints/signature..." | tee -a "$REPORT"
 "$ROOT/tools/verify_bundle_macos.command" "$BUNDLE" 2>&1 | tee -a "$REPORT"
 
+# Hash/sign first; archive and manifest refer to these exact bytes, never a rebuild.
+python3 "$ROOT/tools/build_identity.py" seal --bundle "$BUNDLE" \
+  --package "$DIST/ElasticGrid.plugin.zip" --out "$DIST/ElasticGrid.artifact.json"
+python3 "$ROOT/tools/build_identity.py" verify --bundle "$BUNDLE" \
+  --package "$DIST/ElasticGrid.plugin.zip" --manifest "$DIST/ElasticGrid.artifact.json"
+printf '[artifact] signed payload + package manifest verified (AE runtime NOT RUN)\n' | tee -a "$REPORT"
+shasum -a 256 "$DIST/ElasticGrid.plugin.zip" "$DIST/ElasticGrid.artifact.json" | tee -a "$REPORT"
 printf '[artifact] sha256\n' | tee -a "$REPORT"
 shasum -a 256 "$BUNDLE/Contents/MacOS/ElasticGrid" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
 

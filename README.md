@@ -14,6 +14,18 @@ Work continues on `fix/final-validation`, based on the latest SmartFX parameter-
 
 [Current release blockers and next steps](docs/current-status.md) are authoritative for this branch. Use actual commit-specific Actions results; do not infer PASS from the presence of a test script or an old artifact.
 
+## Latest hardening stage
+
+Host labels/ranges now match the parity renderer without reassigning saved
+parameter IDs or popup ordinals. Deterministic Build ID generation and
+signed-payload/ZIP manifests are implemented. The existing custom control shows
+a short build ID; About reports the full identity.
+
+Portable tooling checks: 24 Python cases and 11 Node control-flow cases pass.
+The exact-head macOS package/Rust results and actual AE runtime acceptance must
+be evaluated separately. See [stage report](docs/host-identity-2026-09-28.md).
+This does not approve the plugin for installation or release.
+
 ## Architecture and quality
 
 The existing source implements guide editing/keyframes, elasticity/falloff/spacing, waves, CPU 8/16/32-bpc rendering, Clamp/Wrap/Mirror and a Metal 32-bpc path. Supported-host claims require the corresponding runtime evidence. Final quality remains Catmull-Rom Bicubic; it is not replaced by Bilinear for speed. Real Metal parity thresholds remain max absolute error 2.5e-5 and RMS 3.0e-6.
@@ -29,6 +41,7 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
 cmake --build build --parallel 2
 ctest --test-dir build --output-on-failure
 node tests/test_ae_project_safety.js
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
 The Node test mocks host calls and cannot replace AE testing. macOS development builds use `tools/build_macos_sdkless.command`; hosted macOS CI compiles Metal but has no hardware/runtime approval. Do not install test candidates into a working AE environment before the release requirements are satisfied.

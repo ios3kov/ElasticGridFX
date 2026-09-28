@@ -45,6 +45,11 @@ jobs:
         run: |
           set -euo pipefail
           node tests/test_ae_project_safety.js 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
+      - name: Source contracts and build identity regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/identity-tests.log"
       - name: Configure clean portable build
         run: cmake -S . -B build-final-validation -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
       - name: Build
@@ -64,6 +69,7 @@ jobs:
             ${{ runner.temp }}/elasticgrid-evidence/scope.txt
             ${{ runner.temp }}/elasticgrid-evidence/portable.*
             ${{ runner.temp }}/elasticgrid-evidence/script-safety.log
+            ${{ runner.temp }}/elasticgrid-evidence/identity-tests.log
             build-final-validation/Testing/Temporary/LastTest.log
           if-no-files-found: error
           retention-days: 30

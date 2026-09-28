@@ -5,6 +5,9 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod build_identity {
+    include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
+}
 
 const GRID_REFCON: u64 = 0x4547_4658_4752_4944; // "EGFXGRID"
 const MAX_GUIDES: usize = 50;
@@ -832,7 +835,7 @@ impl AdobePluginGlobal for Plugin {
     ) -> Result<(), ae::Error> {
         params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(128);
+            f.set_valid_max(MAX_GUIDES as i32);
             f.set_slider_min(1);
             f.set_slider_max(32);
             f.set_default(4);
@@ -840,7 +843,7 @@ impl AdobePluginGlobal for Plugin {
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
         params.add_with_flags(Params::Rows, "Rows", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
-            f.set_valid_max(128);
+            f.set_valid_max(MAX_GUIDES as i32);
             f.set_slider_min(1);
             f.set_slider_max(32);
             f.set_default(4);
@@ -858,10 +861,12 @@ impl AdobePluginGlobal for Plugin {
         })?;
 
         params.add(Params::TensionRadius, "Tension Radius", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 32.0), (0.0, 8.0), 3.0, 1, false);
+            setup_float(f, (0.0, 20.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
         params.add(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
-            f.set_options(&["Linear", "Smoothstep", "Gaussian", "Cosine"]);
+            // Keep saved numeric values and all four slots. Relabel to the
+            // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
+            f.set_options(&["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]);
             f.set_default(2);
             f.set_value(f.default());
         }))?;
@@ -878,19 +883,22 @@ impl AdobePluginGlobal for Plugin {
             setup_float(f, (1.0, 50.0), (1.0, 50.0), 25.0, 1, true);
         }))?;
 
-        params.add(Params::WaveEnabled, "Wave Animation", ae::CheckBoxDef::setup(|f| {
+        // The parity implementation uses amplitude=0 to disable waves. Keep
+        // this old checkbox slot/ID/type for projects, but do not expose a no-op.
+        params.add_with_flags(Params::WaveEnabled, "Wave Animation", ae::CheckBoxDef::setup(|f| {
             f.set_label("Enable");
             f.set_default(false);
             f.set_value(f.default());
-        }))?;
+        }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
         params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 25.0), (0.0, 10.0), 0.0, 2, true);
         }))?;
         params.add(Params::WaveFrequency, "Wave Frequency", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 20.0), (0.0, 10.0), 1.0, 2, false);
+            setup_float(f, (0.0, 10.0), (0.0, 10.0), 1.0, 2, false);
         }))?;
         params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
+            // Stored values already use degrees; do not rescale old keyframes.
+            setup_float(f, (-360.0, 360.0), (-180.0, 180.0), 0.0, 2, false);
         }))?;
         params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
@@ -931,8 +939,12 @@ impl AdobePluginGlobal for Plugin {
         params: &mut ae::Parameters<Params>,
     ) -> Result<(), ae::Error> {
         match cmd {
+            ae::Command::GlobalSetup => {
+                // One noninteractive diagnostic per host setup, never per frame.
+                eprintln!("{}", build_identity::ABOUT.replace('\r', " | "));
+            }
             ae::Command::About => {
-                out_data.set_return_msg("ElasticGrid FX v0.9\rSMARTFX-SNAPSHOT test build");
+                out_data.set_return_msg(build_identity::ABOUT);
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::Columns) == Some(param_index)
@@ -1109,6 +1121,31 @@ mod tests {
         row_lines: Vec<f32>,
         column_pins: Vec<u8>,
         row_pins: Vec<u8>,
+    }
+
+    #[test]
+    fn saved_falloff_ordinals_keep_their_render_behavior() {
+        // Baseline e1aa77e: retain all four numeric values while fixing labels.
+        let expected = [
+            (1, [0.0, 0.27407408, 0.5, 0.6740741, 0.82592595, 1.0]),
+            (2, [0.0, 0.26411805, 0.5, 0.66411805, 0.8169013, 1.0]),
+            (3, [0.0, 0.26666665, 0.5, 0.6666667, 0.8333333, 1.0]),
+            (4, [0.0, 0.27407408, 0.5, 0.6740741, 0.82592595, 1.0]),
+        ];
+        for (falloff, reference) in expected {
+            let mut lines = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0];
+            let mut pins = [1, 0, 0, 0, 0, 1];
+            let settings = EgElasticParams {
+                tension_radius: 3.0, falloff, elasticity_strength: 1.0, min_spacing: 0.005,
+            };
+            // SAFETY: arrays contain exactly the six elements passed to the ABI.
+            assert_eq!(unsafe {
+                eg_drag_axis(lines.as_mut_ptr(), pins.as_mut_ptr(), 6, 2, 0.5, &settings)
+            }, 0);
+            for (actual, expected) in lines.into_iter().zip(reference) {
+                assert!((actual - expected).abs() < 1.0e-6);
+            }
+        }
     }
 
     #[test]

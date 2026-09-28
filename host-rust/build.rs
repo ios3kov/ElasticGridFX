@@ -57,6 +57,19 @@ fn main() {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
 
+    // Identity is generated only in OUT_DIR. The Python tool validates Git or a
+    // hash-checked source snapshot and emits Cargo change-tracking directives.
+    let identity = std::process::Command::new("python3")
+        .arg(root.join("tools/build_identity.py"))
+        .arg("generate").arg("--root").arg(&root)
+        .arg("--out").arg(&out_dir)
+        .arg("--target").arg(std::env::var("TARGET").expect("TARGET"))
+        .arg("--profile").arg(std::env::var("PROFILE").expect("PROFILE"))
+        .output().expect("run source/build identity generator");
+    assert!(identity.status.success(), "build identity: {}", String::from_utf8_lossy(&identity.stderr));
+    print!("{}", String::from_utf8(identity.stdout).expect("UTF-8 Cargo directives"));
+
+
     let mut cpp = cc::Build::new();
     cpp.cpp(true)
         .std("c++20")
