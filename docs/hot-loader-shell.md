@@ -139,8 +139,8 @@ The previous implementation remains active when:
 
 Current hardened checkpoints:
 
-- Hot Loader Shell CI **#57 — SUCCESS**
-- full project CI **#135 — SUCCESS**
+- Hot Loader Shell CI **#60 — SUCCESS**
+- full project CI **#139 — SUCCESS**
 
 Coverage includes:
 
@@ -154,6 +154,12 @@ Coverage includes:
 - ASan / UBSan;
 - TSan;
 - static analysis.
+
+## Live status — 2026-09-28
+
+The generic AE Hot Loader Control Shell gate is fully passed in real AE 25.6. ElasticGrid is now the first real adapter live gate.
+
+Use the packaged `ELASTICGRID_LIVE_TEST.md`. Manual cache Purge is not considered product UX; a parameter change may be used only to force evaluation during validation while automatic post-reload cache invalidation remains a loader release requirement.
 
 ## Remaining live AE gate
 

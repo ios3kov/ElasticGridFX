@@ -129,6 +129,7 @@ fi
 
 codesign --verify --deep --strict "$TARGET"
 rm -f "$STAGED_DIR/current.dylib" "$STAGED_DIR/current.tmp.dylib" 2>/dev/null || true
+rm -f /tmp/ae-hot-loader-elasticgrid-shell.log 2>/dev/null || true
 
 trap - EXIT
 

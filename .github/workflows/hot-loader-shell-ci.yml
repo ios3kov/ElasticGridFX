@@ -14,6 +14,9 @@ on:
       - "tools/stage_hot_reload_macos.command"
       - "tools/install_hot_loader_package.command"
       - "tools/stage_packaged_hot_reload.command"
+      - "tools/rollback_packaged_hot_reload.command"
+      - "tools/collect_hot_loader_logs.command"
+      - "docs/hot-loader-live-test.md"
   workflow_dispatch:
 
 concurrency:
@@ -38,6 +41,8 @@ jobs:
           zsh -n tools/stage_hot_reload_macos.command
           zsh -n tools/install_hot_loader_package.command
           zsh -n tools/stage_packaged_hot_reload.command
+          zsh -n tools/rollback_packaged_hot_reload.command
+          zsh -n tools/collect_hot_loader_logs.command
           bash -n tools/build_macos_sdkless.command
           bash -n tools/verify_bundle_macos.command
           xcrun clang++ -std=c++17 -arch arm64 -Wall -Wextra -Wpedantic -Werror \
@@ -205,7 +210,10 @@ jobs:
           cp target-hot-candidate/aarch64-apple-darwin/release/libelasticgrid_ae.dylib package/ElasticGridImpl-candidate.dylib
           cp tools/install_hot_loader_package.command package/INSTALL_HOT_LOADER.command
           cp tools/stage_packaged_hot_reload.command package/STAGE_CANDIDATE.command
-          chmod +x package/INSTALL_HOT_LOADER.command package/STAGE_CANDIDATE.command
+          cp tools/rollback_packaged_hot_reload.command package/ROLLBACK_TO_BUNDLED.command
+          cp tools/collect_hot_loader_logs.command package/COLLECT_LOGS.command
+          cp docs/hot-loader-live-test.md package/ELASTICGRID_LIVE_TEST.md
+          chmod +x package/INSTALL_HOT_LOADER.command package/STAGE_CANDIDATE.command package/ROLLBACK_TO_BUNDLED.command package/COLLECT_LOGS.command
           codesign --force --sign - package/ElasticGridImpl-candidate.dylib
           ditto -c -k --sequesterRsrc --keepParent package ElasticGridFX-hot-loader-shell.zip
 
