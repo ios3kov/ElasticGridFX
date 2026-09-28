@@ -68,6 +68,15 @@ if(ELASTICGRID_BUILD_TESTS)
   elasticgrid_enable_test_assertions(elasticgrid_quality_tests)
   add_test(NAME elasticgrid_quality COMMAND elasticgrid_quality_tests)
 
+  add_executable(elasticgrid_pixel_contract_tests
+      tests/test_pixel_contract.cpp
+      src/bridge/elasticgrid_ffi.cpp
+  )
+  target_link_libraries(elasticgrid_pixel_contract_tests PRIVATE elasticgrid_core)
+  target_include_directories(elasticgrid_pixel_contract_tests PRIVATE src)
+  elasticgrid_enable_test_assertions(elasticgrid_pixel_contract_tests)
+  add_test(NAME elasticgrid_pixel_contract COMMAND elasticgrid_pixel_contract_tests)
+
   add_executable(elasticgrid_mfr_tests
       tests/test_mfr.cpp
       src/bridge/elasticgrid_ffi.cpp
