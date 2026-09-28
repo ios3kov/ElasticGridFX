@@ -52,6 +52,7 @@ jobs:
             echo
             /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 8 8 bilinear identity 0
             /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 8 8 bilinear deformed 0
+            /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 5 8 bilinear deformed 0 no-poll viz
             /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 5 8 bicubic deformed 0
             /usr/bin/time -v build-perf/elasticgrid_bridge_bench 3840 2160 3 32 bicubic deformed 0 poll
             /usr/bin/time -v build-perf/elasticgrid_plan_bench 3840 2160
