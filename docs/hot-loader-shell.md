@@ -2,7 +2,7 @@
 
 Branch: `feature/ae-hot-loader-shell`.
 
-This branch adapts ElasticGrid FX to the stable-shell architecture used by AE Hot Loader. It does not change the production `main` branch.
+This branch adapts ElasticGrid FX to the stable-shell architecture used by AE Hot Loader. It does not change production `main`.
 
 ## Host-visible identity
 
@@ -12,7 +12,10 @@ The After Effects identity is preserved:
 - category: `ElasticGrid FX`;
 - match name: `com.elasticgrid.fx.warp`;
 - effect API: `13.28`;
-- existing parameter IDs and GridState serialization remain unchanged.
+- existing parameter IDs remain frozen;
+- GridState wire format/version remains frozen.
+
+PiPL metadata and shell registration metadata are compared in CI.
 
 ## Bundle layout
 
@@ -26,63 +29,146 @@ ElasticGrid.plugin
 
 `MacOS/ElasticGrid` is the stable C++ shell registered by AE at startup.
 
-`libelasticgrid_impl.dylib` is the existing Rust/C++/Metal implementation. The shell forwards the normal AE `EffectMain` ABI to the active implementation.
+`libelasticgrid_impl.dylib` contains the Rust/C++/Metal implementation. The shell keeps the host-visible `EffectMain` stable and forwards calls to the active implementation generation.
 
-## Hot-reload ABI
+## Hot-reload contract
 
-The implementation exports:
+Current adapter contract:
 
-- `EffectMain`;
-- `AEHotLoader_ImplementationABI() = 1`;
-- `AEHotLoader_ImplementationStateABI() = 1`;
-- `AEHotLoader_ImplementationKey() = "elasticgrid"`;
-- `AEHotLoader_ImplementationLabel()`.
+- Shell ABI: `1`
+- Implementation Protocol ABI: `2`
+- StateABI: `4`
+- implementation key: `elasticgrid`
+- pinned Rust toolchain: `1.98.1`
 
-The shell validates all identity/state exports before publishing a new `EffectMain` pointer.
+Required implementation exports:
 
-A parameter-schema, persistent sequence/global-data, or incompatible GPU-state change must increment the state ABI and requires a rebuilt shell plus one AE restart.
+- `EffectMain`
+- `AEHotLoader_ImplementationABI`
+- `AEHotLoader_ImplementationStateABI`
+- `AEHotLoader_ImplementationKey`
+- `AEHotLoader_ImplementationLabel`
+- `AEHotLoader_ImplementationRuntimeABI`
+- `AEHotLoader_SetGeneration`
+
+The Runtime ABI freezes the Rust/compiler/dependency family for a running AE session. The bundled implementation establishes that baseline; an external candidate cannot define it.
+
+## Generation-safe persistent state
+
+The shell assigns a content-fingerprint generation to every accepted dylib before publishing its `EffectMain`.
+
+ElasticGrid currently generation-tags:
+
+- Metal GPU state;
+- SmartFX pre-render state.
+
+GPU state also stores the destroy-function pointer from the implementation generation that created the native Metal resource. Old dylibs remain loaded, so stale resources can be destroyed by their creator generation rather than by incompatible newer code.
+
+State-contract CI freezes:
+
+- Params names/order;
+- GridState wire version;
+- empty plugin global/sequence state contract;
+- SmartFX pre-render payload layout;
+- MetalGpuData layout;
+- Protocol ABI and StateABI parity between shell and implementation.
+
+Any intentional state/schema change requires an explicit StateABI bump and verifier update.
+
+## MFR / reload synchronization
+
+Concurrent MFR calls are allowed.
+
+Reload is fail-fast:
+
+- if EffectMain calls are in flight, reload returns busy/retry;
+- AE's main thread is never blocked waiting for a render;
+- old/new generations are not allowed to overlap on the same shell publication point.
 
 ## Reload workflow
 
-First install of the shell requires one normal AE restart.
+First installation of the shell requires one normal AE restart.
 
-For implementation-only changes while AE remains open:
+### Source workflow
 
 ```bash
 zsh tools/stage_hot_reload_macos.command my-build-label
 ```
 
-The candidate is staged to:
+The source staging script:
 
-`~/Library/Application Support/AE Hot Loader/implementations/elasticgrid/current.dylib`
+- validates shell/PiPL metadata;
+- validates the frozen state contract;
+- pins Rust `1.98.1`;
+- pins macOS deployment target `11.0`;
+- supports both rustup-managed and standalone pinned Cargo;
+- signs and atomically stages `current.dylib`.
+
+### Packaged test kit
+
+The CI artifact contains:
+
+- `ElasticGrid.plugin`
+- `ElasticGridImpl-candidate.dylib`
+- `INSTALL_HOT_LOADER.command`
+- `STAGE_CANDIDATE.command`
+
+The installer refuses ambiguous duplicate copies, backs up the existing bundle, verifies signature/arm64, and restores the previous installation if replacement fails.
 
 Then use:
 
 `Window → AE Hot Loader → Reload Plugins`
 
-The shell copies the candidate to a unique runtime path, validates it, and atomically switches subsequent calls to the new implementation. Old dylib images remain loaded until AE exits so in-flight calls cannot jump into unloaded code.
+Removing the staged candidate is an explicit rollback request; Reload returns to the bundled default implementation.
 
 ## Failure behavior
 
-A candidate is rejected before the active pointer changes when:
+The previous implementation remains active when:
 
 - `dlopen` fails;
-- `EffectMain` is missing;
-- protocol ABI differs;
-- state ABI differs;
-- implementation key is not `elasticgrid`.
+- required exports are missing;
+- Protocol ABI differs;
+- StateABI differs;
+- Runtime ABI differs;
+- implementation key is not `elasticgrid`;
+- ABI strings are malformed;
+- effect is currently busy rendering;
+- the per-process generation limit is reached.
 
-The previous implementation remains active.
+## CI status
 
-## Merge gate
+Current hardened checkpoints:
 
-Before this adapter can merge:
+- Hot Loader Shell CI **#57 — SUCCESS**
+- full project CI **#135 — SUCCESS**
 
-1. original project files still resolve `com.elasticgrid.fx.warp`;
+Coverage includes:
+
+- PiPL ↔ shell metadata parity;
+- state-contract verifier;
+- state behavior/unit tests;
+- default → candidate → unchanged → bundled rollback;
+- deployment target check;
+- dylib dependency check;
+- GCC / Clang;
+- ASan / UBSan;
+- TSan;
+- static analysis.
+
+## Remaining live AE gate
+
+Before merge:
+
+1. existing projects still resolve `com.elasticgrid.fx.warp`;
 2. GridState and parameter IDs survive save/reopen;
 3. custom viewer UI works;
-4. CPU, Smart Render, MFR and Metal paths work through the shell;
-5. an implementation update activates without AE restart;
-6. an existing effect instance renders after the swap;
-7. repeated reload/noop cycles are stable;
-8. an invalid candidate leaves the previous implementation active.
+4. CPU and Smart Render work;
+5. MFR works under real AE scheduling;
+6. Metal setup/render/setdown works;
+7. reload during active render returns retry, not hang;
+8. reload between SmartPreRender/SmartRender never consumes stale generation data;
+9. existing instances render after A→B→C swaps;
+10. removing the candidate rolls back to bundled default;
+11. repeated reload/noop cycles remain stable.
+
+No merge to `main` before this live gate passes.
