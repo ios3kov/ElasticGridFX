@@ -390,6 +390,12 @@ struct EgRectI32 {
     bottom: i32,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default)]
+struct HotReloadPreRenderState {
+    generation: u64,
+}
+
 unsafe extern "C" {
     fn eg_required_source_rect(
         canvas_width: i32,
@@ -896,6 +902,9 @@ impl AdobePluginGlobal for Plugin {
                 let input_max: ae::Rect = input.max_result_rect.into();
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
+                extra.set_pre_render_data(HotReloadPreRenderState {
+                    generation: hot_reload_generation(),
+                });
                 #[cfg(target_os = "macos")]
                 {
                     let mut gpu_possible = false;
@@ -917,6 +926,14 @@ impl AdobePluginGlobal for Plugin {
                 }
             }
             ae::Command::SmartRender { extra } => {
+                let Some(reload_state) =
+                    extra.pre_render_data::<HotReloadPreRenderState>()
+                else {
+                    return Err(ae::Error::InternalStructDamaged);
+                };
+                if reload_state.generation != hot_reload_generation() {
+                    return Err(ae::Error::BadCallbackParameter);
+                }
                 let cb = extra.callbacks();
                 let Some(input) = cb.checkout_layer_pixels(0)? else {
                     return Ok(());
@@ -971,6 +988,14 @@ impl AdobePluginGlobal for Plugin {
             }
             #[cfg(target_os = "macos")]
             ae::Command::SmartRenderGpu { extra } => {
+                let Some(reload_state) =
+                    extra.pre_render_data::<HotReloadPreRenderState>()
+                else {
+                    return Err(ae::Error::InternalStructDamaged);
+                };
+                if reload_state.generation != hot_reload_generation() {
+                    return Err(ae::Error::BadCallbackParameter);
+                }
                 let cb = extra.callbacks();
                 let Some(input) = cb.checkout_layer_pixels(0)? else {
                     return Ok(());
@@ -1003,7 +1028,7 @@ impl AdobePluginGlobal for Plugin {
     }
 }
 
-const HOT_RELOAD_STATE_ABI: u64 = 3;
+const HOT_RELOAD_STATE_ABI: u64 = 4;
 
 const HOT_RELOAD_IMPL_LABEL: &str = match option_env!("AE_HOT_LOADER_IMPL_LABEL") {
     Some(value) => value,
@@ -1187,6 +1212,12 @@ mod tests {
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 152);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
         assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
+        assert_eq!(std::mem::size_of::<HotReloadPreRenderState>(), 8);
+        assert_eq!(std::mem::align_of::<HotReloadPreRenderState>(), 8);
+        assert_eq!(
+            std::mem::offset_of!(HotReloadPreRenderState, generation),
+            0
+        );
         #[cfg(target_os = "macos")]
         {
             assert_eq!(std::mem::size_of::<MetalGpuData>(), 24);
