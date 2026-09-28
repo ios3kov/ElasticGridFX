@@ -124,7 +124,7 @@ shell_abi = int(require(r'kImplementationStateAbi\s*=\s*(\d+)\s*;', shell, "shel
 if impl_abi != shell_abi:
     raise SystemExit(f"StateABI drift: implementation={impl_abi} shell={shell_abi}")
 
-if impl_abi != 3:
+if impl_abi != 4:
     raise SystemExit(f"unexpected ElasticGrid StateABI {impl_abi}; update verifier intentionally when schema changes")
 
 if "ae::define_effect!(Plugin, (), Params);" not in lib:
@@ -195,10 +195,32 @@ if gpu_fields != expected_gpu:
         f"  expected={expected_gpu}\n  actual={gpu_fields}"
     )
 
+
+pre_render_body = require(
+    r'struct\s+HotReloadPreRenderState\s*\{(.*?)\}',
+    lib,
+    "HotReloadPreRenderState",
+)
+pre_render_fields = {
+    name: typ.strip()
+    for name, typ in re.findall(
+        r'([A-Za-z_][A-Za-z0-9_]*)\s*:\s*([^,]+),',
+        pre_render_body,
+    )
+}
+expected_pre_render = {"generation": "u64"}
+if pre_render_fields != expected_pre_render:
+    raise SystemExit(
+        "ElasticGrid SmartFX pre-render schema changed; bump StateABI and update verifier intentionally:\n"
+        f"  expected={expected_pre_render}\n  actual={pre_render_fields}"
+    )
+
 for evidence in [
     "size_of::<MetalGpuData>()",
     "offset_of!(MetalGpuData, generation)",
     "offset_of!(MetalGpuData, destroy_fn)",
+    "size_of::<HotReloadPreRenderState>()",
+    "offset_of!(HotReloadPreRenderState, generation)",
     "AEHotLoader_ImplementationRuntimeABI",
     "AEHotLoader_SetGeneration",
 ]:
