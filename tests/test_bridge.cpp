@@ -106,6 +106,100 @@ int main() {
     }
 
     {
+        // Recovered GridWarp Visualization: ARGB guide color, antialiased
+        // centered band, opacity scaling, and source-over compositing.
+        constexpr int vw = 9, vh = 7;
+        std::vector<std::uint8_t> src(vw * vh * 4, 0), dst(src.size(), 0);
+        for (int i = 0; i < vw * vh; ++i) src[static_cast<std::size_t>(i) * 4] = 255;
+
+        auto p = defaults();
+        float x[] = {0.0f, 0.5f, 1.0f};
+        float y[] = {0.0f, 0.5f, 1.0f};
+        std::uint8_t pins[] = {1, 0, 1};
+        p.columns = 1; p.rows = 1;
+        p.column_lines = x; p.column_line_count = 3; p.column_pins = pins;
+        p.row_lines = y; p.row_line_count = 3; p.row_pins = pins;
+        p.visualization_enabled = 1;
+        p.column_stroke_argb[0] = 255;
+        p.column_stroke_argb[1] = 255;
+        p.column_stroke_argb[2] = 0;
+        p.column_stroke_argb[3] = 0;
+        p.row_stroke_argb[0] = 0;
+        p.visualization_stroke_width = 1.0f;
+        p.visualization_opacity = 1.0f;
+        p.visualization_canvas_width = vw;
+        p.visualization_canvas_height = vh;
+
+        assert(eg_render_frame(src.data(), vw * 4, vw, vh,
+                               dst.data(), vw * 4, vw, vh, 8, &p) == 0);
+        const auto center = static_cast<std::size_t>((3 * vw + 4) * 4);
+        assert(dst[center + 0] == 255);
+        assert(dst[center + 1] == 255);
+        assert(dst[center + 2] == 0);
+        assert(dst[center + 3] == 0);
+        const auto off_line = static_cast<std::size_t>((3 * vw + 2) * 4);
+        assert(dst[off_line + 1] == 0);
+
+        p.visualization_opacity = 0.5f;
+        std::fill(dst.begin(), dst.end(), 0);
+        assert(eg_render_frame(src.data(), vw * 4, vw, vh,
+                               dst.data(), vw * 4, vw, vh, 8, &p) == 0);
+        assert(dst[center + 1] >= 127 && dst[center + 1] <= 128);
+    }
+
+    {
+        // Visualization spatial contract uses the full source dimensions and
+        // the host output origin, so an ROI sees the same guide position as a
+        // crop from a full-frame render.
+        constexpr int cw = 17, ch = 13;
+        std::vector<std::uint8_t> full_src(cw * ch * 4, 0), full_dst(full_src.size(), 0);
+        for (int i = 0; i < cw * ch; ++i) full_src[static_cast<std::size_t>(i) * 4] = 255;
+        float x[] = {0.0f, 0.5f, 1.0f};
+        float y[] = {0.0f, 0.5f, 1.0f};
+        std::uint8_t pins[] = {1, 0, 1};
+        auto p = defaults();
+        p.columns = p.rows = 1;
+        p.column_lines = x; p.column_line_count = 3; p.column_pins = pins;
+        p.row_lines = y; p.row_line_count = 3; p.row_pins = pins;
+        p.visualization_enabled = 1;
+        p.column_stroke_argb[0] = 255;
+        p.column_stroke_argb[1] = 0;
+        p.column_stroke_argb[2] = 255;
+        p.column_stroke_argb[3] = 0;
+        p.row_stroke_argb[0] = 0;
+        p.visualization_stroke_width = 1.0f;
+        p.visualization_opacity = 1.0f;
+        p.visualization_canvas_width = cw;
+        p.visualization_canvas_height = ch;
+        p.canvas_width = cw; p.canvas_height = ch;
+
+        assert(eg_render_frame(full_src.data(), cw * 4, cw, ch,
+                               full_dst.data(), cw * 4, cw, ch, 8, &p) == 0);
+
+        constexpr int ox = 5, oy = 3, rw = 8, rh = 7;
+        std::vector<std::uint8_t> roi_src(rw * rh * 4), roi_dst(roi_src.size(), 0);
+        for (int yy = 0; yy < rh; ++yy) {
+            std::copy_n(full_src.data() + ((oy + yy) * cw + ox) * 4,
+                        rw * 4, roi_src.data() + yy * rw * 4);
+        }
+        auto rp = p;
+        rp.input_origin_x = ox; rp.input_origin_y = oy;
+        rp.output_origin_x = ox; rp.output_origin_y = oy;
+        rp.visualization_origin_x = ox; rp.visualization_origin_y = oy;
+        assert(eg_render_frame(roi_src.data(), rw * 4, rw, rh,
+                               roi_dst.data(), rw * 4, rw, rh, 8, &rp) == 0);
+
+        for (int yy = 0; yy < rh; ++yy) {
+            for (int xx = 0; xx < rw; ++xx) {
+                for (int cc = 0; cc < 4; ++cc) {
+                    assert(roi_dst[(yy * rw + xx) * 4 + cc] ==
+                           full_dst[((oy + yy) * cw + (ox + xx)) * 4 + cc]);
+                }
+            }
+        }
+    }
+
+    {
         // A host-supplied guide state must drive the actual render, rather
         // than being a UI-only state blob.
         std::vector<std::uint8_t> src(w * h * 4), dst(src.size(), 0);

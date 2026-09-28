@@ -418,6 +418,15 @@ struct EgRenderParams {
     wave_axis: i32,
     edge_mode: i32,
     quality: i32,
+    visualization_enabled: i32,
+    column_stroke_argb: [u8; 4],
+    row_stroke_argb: [u8; 4],
+    visualization_stroke_width: f32,
+    visualization_opacity: f32,
+    visualization_canvas_width: i32,
+    visualization_canvas_height: i32,
+    visualization_origin_x: i32,
+    visualization_origin_y: i32,
     time_seconds: f32,
     threads: u32,
     canvas_width: i32,
@@ -639,6 +648,21 @@ fn evaluated_params(
         wave_axis: params.get(Params::WaveAxis)?.as_popup()?.value(),
         edge_mode: params.get(Params::EdgeMode)?.as_popup()?.value(),
         quality: params.get(Params::Quality)?.as_popup()?.value(),
+        visualization_enabled: if params.get(Params::EnableVisualization)?.as_checkbox()?.value() { 1 } else { 0 },
+        column_stroke_argb: {
+            let c = params.get(Params::ColumnStrokeColor)?.as_color()?.value();
+            [c.alpha, c.red, c.green, c.blue]
+        },
+        row_stroke_argb: {
+            let c = params.get(Params::RowStrokeColor)?.as_color()?.value();
+            [c.alpha, c.red, c.green, c.blue]
+        },
+        visualization_stroke_width: params.get(Params::StrokeWidth)?.as_float_slider()?.value() as f32,
+        visualization_opacity: params.get(Params::Opacity)?.as_float_slider()?.value() as f32 / 100.0,
+        visualization_canvas_width: in_data.width().max(1),
+        visualization_canvas_height: in_data.height().max(1),
+        visualization_origin_x: in_data.output_origin().h,
+        visualization_origin_y: in_data.output_origin().v,
         time_seconds,
         threads: 0,
         canvas_width: 0,
@@ -766,6 +790,11 @@ struct CheckedRenderState {
     wave_axis: i32,
     edge_mode: i32,
     quality: i32,
+    visualization_enabled: bool,
+    column_stroke_argb: [u8; 4],
+    row_stroke_argb: [u8; 4],
+    visualization_stroke_width: f32,
+    visualization_opacity: f32,
 }
 
 impl CheckedRenderState {
@@ -803,6 +832,15 @@ impl CheckedRenderState {
             wave_axis: self.wave_axis,
             edge_mode: self.edge_mode,
             quality: self.quality,
+            visualization_enabled: if self.visualization_enabled { 1 } else { 0 },
+            column_stroke_argb: self.column_stroke_argb,
+            row_stroke_argb: self.row_stroke_argb,
+            visualization_stroke_width: self.visualization_stroke_width,
+            visualization_opacity: self.visualization_opacity,
+            visualization_canvas_width: in_data.width().max(1),
+            visualization_canvas_height: in_data.height().max(1),
+            visualization_origin_x: in_data.output_origin().h,
+            visualization_origin_y: in_data.output_origin().v,
             time_seconds,
             threads: 0,
             canvas_width: 0,
@@ -847,16 +885,20 @@ fn checkout_smart_render_state(
 
     // The original also checks out visualization parameters during SmartRender.
     // Keep those dependencies even before visualization is routed into pixels.
-    let _visualization_enabled =
+    let visualization_enabled =
         params.checkout(Params::EnableVisualization)?.as_checkbox()?.value();
-    let _column_stroke_color =
-        params.checkout(Params::ColumnStrokeColor)?.as_color()?.value();
-    let _row_stroke_color =
-        params.checkout(Params::RowStrokeColor)?.as_color()?.value();
-    let _stroke_width =
-        params.checkout(Params::StrokeWidth)?.as_float_slider()?.value();
-    let _opacity =
-        params.checkout(Params::Opacity)?.as_float_slider()?.value();
+    let column_stroke_argb = {
+        let c = params.checkout(Params::ColumnStrokeColor)?.as_color()?.value();
+        [c.alpha, c.red, c.green, c.blue]
+    };
+    let row_stroke_argb = {
+        let c = params.checkout(Params::RowStrokeColor)?.as_color()?.value();
+        [c.alpha, c.red, c.green, c.blue]
+    };
+    let visualization_stroke_width =
+        params.checkout(Params::StrokeWidth)?.as_float_slider()?.value() as f32;
+    let visualization_opacity =
+        params.checkout(Params::Opacity)?.as_float_slider()?.value() as f32 / 100.0;
 
     if !grid.is_valid() {
         return Err(ae::Error::InvalidParms);
@@ -874,6 +916,11 @@ fn checkout_smart_render_state(
         wave_axis,
         edge_mode,
         quality,
+        visualization_enabled,
+        column_stroke_argb,
+        row_stroke_argb,
+        visualization_stroke_width,
+        visualization_opacity,
     })
 }
 
@@ -1327,9 +1374,18 @@ mod tests {
     #[test]
     fn ffi_layout_is_frozen_on_64_bit_hosts() {
         assert_eq!(std::mem::size_of::<usize>(), 8);
-        assert_eq!(std::mem::size_of::<EgRenderParams>(), 160);
-        assert_eq!(std::mem::offset_of!(EgRenderParams, abort_fn), 144);
-        assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 152);
+        assert_eq!(std::mem::size_of::<EgRenderParams>(), 200);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_enabled), 112);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, column_stroke_argb), 116);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, row_stroke_argb), 120);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_stroke_width), 124);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_opacity), 128);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_canvas_width), 132);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_canvas_height), 136);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_origin_x), 140);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, visualization_origin_y), 144);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, abort_fn), 184);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 192);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
         assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
         assert_eq!(std::mem::size_of::<HotReloadPreRenderState>(),8);

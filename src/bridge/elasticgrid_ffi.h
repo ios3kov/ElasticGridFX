@@ -31,6 +31,18 @@ typedef struct EgRenderParams {
     std::int32_t wave_axis;
     std::int32_t edge_mode;
     std::int32_t quality;
+
+    // Original GridWarp rendered Visualization into output pixels after warp.
+    std::int32_t visualization_enabled;
+    std::uint8_t column_stroke_argb[4];
+    std::uint8_t row_stroke_argb[4];
+    float visualization_stroke_width;
+    float visualization_opacity;
+    std::int32_t visualization_canvas_width;
+    std::int32_t visualization_canvas_height;
+    std::int32_t visualization_origin_x;
+    std::int32_t visualization_origin_y;
+
     float time_seconds;
     std::uint32_t threads;
     // SmartFX spatial context in rendered-pixel layer coordinates. Zero canvas

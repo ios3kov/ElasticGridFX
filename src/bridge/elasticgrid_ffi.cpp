@@ -11,14 +11,24 @@
 #include <limits>
 #include <span>
 #include <thread>
+#include <type_traits>
 #include <vector>
 
 namespace eg = elasticgrid;
 
 static_assert(sizeof(void*) == 8, "ElasticGrid AE host ABI requires 64-bit pointers");
-static_assert(sizeof(EgRenderParams) == 160, "EgRenderParams ABI drift");
-static_assert(offsetof(EgRenderParams, abort_fn) == 144, "EgRenderParams::abort_fn ABI drift");
-static_assert(offsetof(EgRenderParams, abort_refcon) == 152, "EgRenderParams::abort_refcon ABI drift");
+static_assert(sizeof(EgRenderParams) == 200, "EgRenderParams ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_enabled) == 112, "EgRenderParams::visualization_enabled ABI drift");
+static_assert(offsetof(EgRenderParams, column_stroke_argb) == 116, "EgRenderParams::column_stroke_argb ABI drift");
+static_assert(offsetof(EgRenderParams, row_stroke_argb) == 120, "EgRenderParams::row_stroke_argb ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_stroke_width) == 124, "EgRenderParams::visualization_stroke_width ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_opacity) == 128, "EgRenderParams::visualization_opacity ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_canvas_width) == 132, "EgRenderParams::visualization_canvas_width ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_canvas_height) == 136, "EgRenderParams::visualization_canvas_height ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_origin_x) == 140, "EgRenderParams::visualization_origin_x ABI drift");
+static_assert(offsetof(EgRenderParams, visualization_origin_y) == 144, "EgRenderParams::visualization_origin_y ABI drift");
+static_assert(offsetof(EgRenderParams, abort_fn) == 184, "EgRenderParams::abort_fn ABI drift");
+static_assert(offsetof(EgRenderParams, abort_refcon) == 192, "EgRenderParams::abort_refcon ABI drift");
 static_assert(sizeof(EgElasticParams) == 16, "EgElasticParams ABI drift");
 static_assert(sizeof(EgRectI32) == 16, "EgRectI32 ABI drift");
 static_assert(sizeof(EgGpuLinearSample) == 16, "EgGpuLinearSample ABI drift");
@@ -134,6 +144,159 @@ PreparedBridge& reusable_bridge_state() {
     // cross-frame mutable state.
     thread_local PreparedBridge state;
     return state;
+}
+
+struct VisualizationColor {
+    float a = 0.0f;
+    float r = 0.0f;
+    float g = 0.0f;
+    float b = 0.0f;
+};
+
+VisualizationColor visualization_color(const std::uint8_t argb[4]) noexcept {
+    constexpr float inv255 = 1.0f / 255.0f;
+    return {
+        static_cast<float>(argb[0]) * inv255,
+        static_cast<float>(argb[1]) * inv255,
+        static_cast<float>(argb[2]) * inv255,
+        static_cast<float>(argb[3]) * inv255,
+    };
+}
+
+template <typename T>
+float normalized_channel(T value, float channel_max) noexcept {
+    return static_cast<float>(value) / channel_max;
+}
+
+template <>
+float normalized_channel<float>(float value, float) noexcept {
+    return value;
+}
+
+template <typename T>
+T store_visualization_channel(float value, float channel_max) noexcept {
+    value = std::clamp(value, 0.0f, 1.0f);
+    return static_cast<T>(value * channel_max + 0.5f);
+}
+
+template <>
+float store_visualization_channel<float>(float value, float) noexcept {
+    return value;
+}
+
+template <typename T>
+void blend_visualization_pixel(
+    T* pixel,
+    const VisualizationColor& color,
+    float coverage,
+    float opacity,
+    float channel_max) noexcept {
+    constexpr float epsilon = 1.0e-6f;
+    const float src_a = std::clamp(coverage * opacity * color.a, 0.0f, 1.0f);
+    if (src_a <= 0.0f) return;
+
+    const float dst_a = std::clamp(normalized_channel(pixel[0], channel_max), 0.0f, 1.0f);
+    const float out_a = src_a + dst_a * (1.0f - src_a);
+
+    const float dst_r = normalized_channel(pixel[1], channel_max);
+    const float dst_g = normalized_channel(pixel[2], channel_max);
+    const float dst_b = normalized_channel(pixel[3], channel_max);
+
+    const float keep = dst_a * (1.0f - src_a);
+    const float out_r = out_a > epsilon ? (color.r * src_a + dst_r * keep) / out_a : 0.0f;
+    const float out_g = out_a > epsilon ? (color.g * src_a + dst_g * keep) / out_a : 0.0f;
+    const float out_b = out_a > epsilon ? (color.b * src_a + dst_b * keep) / out_a : 0.0f;
+
+    pixel[0] = store_visualization_channel<T>(out_a, channel_max);
+    if constexpr (std::is_same_v<T, float>) {
+        // Keep HDR RGB legal on the 32f path; the reference blends in
+        // unpremultiplied float space rather than clipping to display range.
+        pixel[1] = out_r;
+        pixel[2] = out_g;
+        pixel[3] = out_b;
+    } else {
+        pixel[1] = store_visualization_channel<T>(out_r, channel_max);
+        pixel[2] = store_visualization_channel<T>(out_g, channel_max);
+        pixel[3] = store_visualization_channel<T>(out_b, channel_max);
+    }
+}
+
+template <typename T>
+void composite_visualization(
+    T* output_data,
+    std::ptrdiff_t row_bytes,
+    int output_width,
+    int output_height,
+    float channel_max,
+    const EgRenderParams& p,
+    const PreparedBridge& prepared) {
+    if (!p.visualization_enabled || !output_data || output_width <= 0 || output_height <= 0) {
+        return;
+    }
+
+    const float stroke_width =
+        std::clamp(finite_or(p.visualization_stroke_width, 2.0f), 0.0f, 100.0f);
+    const float opacity =
+        std::clamp(finite_or(p.visualization_opacity, 1.0f), 0.0f, 1.0f);
+    if (stroke_width <= 0.0f || opacity <= 0.0f) return;
+
+    const int canvas_width =
+        p.visualization_canvas_width > 0 ? p.visualization_canvas_width : output_width;
+    const int canvas_height =
+        p.visualization_canvas_height > 0 ? p.visualization_canvas_height : output_height;
+    const auto column_color = visualization_color(p.column_stroke_argb);
+    const auto row_color = visualization_color(p.row_stroke_argb);
+    const float half_width = stroke_width * 0.5f;
+    const float support = half_width + 0.5f;
+
+    auto row_ptr = [&](int y) -> T* {
+        auto* bytes = reinterpret_cast<std::uint8_t*>(output_data);
+        return reinterpret_cast<T*>(bytes + static_cast<std::ptrdiff_t>(y) * row_bytes);
+    };
+
+    // The recovered routine composites column guides first, then row guides.
+    if (column_color.a > 0.0f) {
+        for (float guide : prepared.x_lines) {
+            const float center =
+                guide * static_cast<float>(canvas_width) -
+                static_cast<float>(p.visualization_origin_x);
+            const int x0 = std::max(0, static_cast<int>(std::floor(center - support - 0.5f)));
+            const int x1 = std::min(output_width - 1, static_cast<int>(std::ceil(center + support - 0.5f)));
+            for (int x = x0; x <= x1; ++x) {
+                const float pixel_center = static_cast<float>(x) + 0.5f;
+                const float coverage =
+                    std::clamp(support - std::abs(pixel_center - center), 0.0f, 1.0f);
+                if (coverage <= 0.0f) continue;
+                for (int y = 0; y < output_height; ++y) {
+                    blend_visualization_pixel(
+                        row_ptr(y) + static_cast<std::ptrdiff_t>(x) * 4,
+                        column_color, coverage, opacity, channel_max);
+                }
+            }
+        }
+    }
+
+    if (row_color.a > 0.0f) {
+        for (float guide : prepared.y_lines) {
+            const float center =
+                guide * static_cast<float>(canvas_height) -
+                static_cast<float>(p.visualization_origin_y);
+            const int y0 = std::max(0, static_cast<int>(std::floor(center - support - 0.5f)));
+            const int y1 = std::min(output_height - 1, static_cast<int>(std::ceil(center + support - 0.5f)));
+            for (int y = y0; y <= y1; ++y) {
+                const float pixel_center = static_cast<float>(y) + 0.5f;
+                const float coverage =
+                    std::clamp(support - std::abs(pixel_center - center), 0.0f, 1.0f);
+                if (coverage <= 0.0f) continue;
+                T* row = row_ptr(y);
+                for (int x = 0; x < output_width; ++x) {
+                    blend_visualization_pixel(
+                        row + static_cast<std::ptrdiff_t>(x) * 4,
+                        row_color, coverage, opacity, channel_max);
+                }
+            }
+        }
+    }
 }
 
 int prepare_bridge(std::int32_t input_width,
@@ -408,6 +571,9 @@ int eg_render_frame(
                 static_cast<float*>(output_data), output_width, output_height,
                 output_row_bytes / static_cast<std::ptrdiff_t>(sizeof(float))};
             eg::renderWarpRGBAfPrepared(src, dst, prepared.plan, prepared.settings);
+            composite_visualization(
+                static_cast<float*>(output_data), output_row_bytes,
+                output_width, output_height, 1.0f, *p, prepared);
             return 0;
         }
         if (bit_depth == 16) {
@@ -418,6 +584,9 @@ int eg_render_frame(
                 static_cast<std::uint16_t*>(output_data), output_width, output_height,
                 output_row_bytes / static_cast<std::ptrdiff_t>(sizeof(std::uint16_t))};
             eg::renderWarpRGBA16Prepared(src, dst, prepared.plan, prepared.settings, 32768);
+            composite_visualization(
+                static_cast<std::uint16_t*>(output_data), output_row_bytes,
+                output_width, output_height, 32768.0f, *p, prepared);
             return 0;
         }
         if (bit_depth == 8) {
@@ -428,6 +597,9 @@ int eg_render_frame(
                 static_cast<std::uint8_t*>(output_data), output_width, output_height,
                 output_row_bytes};
             eg::renderWarpRGBA8Prepared(src, dst, prepared.plan, prepared.settings);
+            composite_visualization(
+                static_cast<std::uint8_t*>(output_data), output_row_bytes,
+                output_width, output_height, 255.0f, *p, prepared);
             return 0;
         }
         return 2;

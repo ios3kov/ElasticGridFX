@@ -30,3 +30,8 @@ The line coverage function is an antialiased centered band:
 followed by opacity/color-alpha scaling and source-over blending.
 
 This behavior is now a required automatic parity test before another live AE package is issued.
+
+
+## Visualization parity implementation
+
+The independent implementation now includes the recovered rendered-Visualization stage on its CPU path. The compositor uses evaluated guide positions, full source dimensions, output origin, A/R/G/B stroke colors, Stroke Width and Opacity, with the antialias/source-over math documented above. Automatic tests include full-frame vs ROI spatial equivalence.

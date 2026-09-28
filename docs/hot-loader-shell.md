@@ -40,3 +40,23 @@ The implementation now:
 - has automated gates that reject ordinary-param reads inside SmartRender.
 
 This change is **not yet a user-test release**. It must pass the automatic regression/audit/performance stages first.
+
+
+## Visualization parity implementation — 2026-09-28
+
+The recovered rendered-Visualization contract is now implemented on the CPU parity path:
+
+- evaluated column/row guides are composited after the warp;
+- PF colors are interpreted as A,R,G,B;
+- Stroke Width and Opacity use the recovered antialiased coverage equation;
+- blending follows the recovered unpremultiplied source-over formula;
+- full source width/height and PF_InData output origin are carried separately from SmartFX ROI coordinates;
+- 8/16/32f CPU paths share the same compositor;
+- HDR RGB is not clipped on the 32f path.
+
+New automated regression checks cover:
+- exact default/off behavior;
+- full-coverage and 50% opacity guide pixels;
+- ROI/full-frame visualization spatial equivalence.
+
+Metal remains intentionally disabled in the live parity gate until CPU behavior is proven; GPU Visualization parity is a later gate.
