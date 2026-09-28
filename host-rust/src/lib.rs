@@ -449,15 +449,6 @@ pub(crate) struct EgElasticParams {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
-struct EgRectI32 {
-    left: i32,
-    top: i32,
-    right: i32,
-    bottom: i32,
-}
-
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default)]
 struct HotReloadPreRenderState {
     generation: u64,
 }
@@ -1413,7 +1404,6 @@ mod tests {
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_fn), 184);
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 192);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
-        assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
         assert_eq!(std::mem::size_of::<HotReloadPreRenderState>(),8);
         #[cfg(target_os="macos")] {
             assert_eq!(std::mem::size_of::<MetalGpuData>(),24);
