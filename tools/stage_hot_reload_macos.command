@@ -8,12 +8,23 @@ SOURCE="$TARGET/libelasticgrid_ae.dylib"
 DEST_DIR="$HOME/Library/Application Support/AE Hot Loader/implementations/elasticgrid"
 DEST="$DEST_DIR/current.dylib"
 LABEL="${1:-elasticgrid-dev}"
+RUST_TOOLCHAIN="1.98.1"
 
 export MACOSX_DEPLOYMENT_TARGET="11.0"
 export AE_HOT_LOADER_IMPL_LABEL="$LABEL"
 
+if command -v rustup >/dev/null 2>&1; then
+  rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal >/dev/null
+else
+  active_rust="$(rustc --version 2>/dev/null | awk '{print $2}' || true)"
+  [[ "$active_rust" == "$RUST_TOOLCHAIN" ]] || {
+    echo "ERROR: Rust $RUST_TOOLCHAIN required for hot-reload Runtime ABI compatibility."
+    exit 4
+  }
+fi
+
 echo "Building ElasticGrid implementation: $LABEL"
-cargo build --release --locked --manifest-path "$MANIFEST"
+cargo +"$RUST_TOOLCHAIN" build --release --locked --manifest-path "$MANIFEST"
 
 [[ -f "$SOURCE" ]] || { echo "ERROR: missing implementation: $SOURCE"; exit 2; }
 
