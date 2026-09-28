@@ -13,6 +13,14 @@ RUST_TOOLCHAIN="1.98.1"
 export MACOSX_DEPLOYMENT_TARGET="11.0"
 export AE_HOT_LOADER_IMPL_LABEL="$LABEL"
 
+echo "Verifying ElasticGrid host/state contract..."
+python3 "$ROOT/tools/verify_shell_metadata.py" \
+  "$ROOT/host-rust/build.rs" \
+  "$ROOT/host-rust/shell/ElasticGridShell.cpp"
+python3 "$ROOT/tools/verify_hot_reload_state.py" \
+  "$ROOT/host-rust/src/lib.rs" \
+  "$ROOT/host-rust/shell/ElasticGridShell.cpp"
+
 if command -v rustup >/dev/null 2>&1; then
   rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal >/dev/null
 else
