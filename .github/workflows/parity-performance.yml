@@ -1,0 +1,65 @@
+name: Parity Performance Gate
+
+on:
+  push:
+    branches: ["feature/ae-hot-loader-shell"]
+    paths:
+      - "src/**"
+      - "bench/**"
+      - "tests/**"
+      - ".github/workflows/parity-performance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: elasticgrid-parity-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cpu-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build release tests and benchmarks
+        env:
+          CXX: clang++
+        run: |
+          set -euo pipefail
+          cmake -S . -B build-perf \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DELASTICGRID_BUILD_TESTS=ON \
+            -DELASTICGRID_BUILD_BENCH=ON \
+            -DCMAKE_CXX_COMPILER="$CXX"
+          cmake --build build-perf --parallel 2
+
+      - name: Regression suite
+        env:
+          EG_FUZZ_SCALE: "0.1"
+          EG_SOAK_CYCLES: "5000"
+        run: ctest --test-dir build-perf --output-on-failure
+
+      - name: Measure CPU parity baseline
+        run: |
+          set -euo pipefail
+          {
+            echo "ElasticGrid parity CPU benchmark"
+            echo "commit=${GITHUB_SHA}"
+            echo "runner=$(uname -a)"
+            echo
+            /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 8 8 bilinear identity 0
+            /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 8 8 bilinear deformed 0
+            /usr/bin/time -v build-perf/elasticgrid_bridge_bench 1920 1080 5 8 bicubic deformed 0
+            /usr/bin/time -v build-perf/elasticgrid_bridge_bench 3840 2160 3 32 bicubic deformed 0 poll
+            /usr/bin/time -v build-perf/elasticgrid_plan_bench 3840 2160
+          } 2>&1 | tee parity-performance-report.txt
+
+      - name: Upload performance evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGrid-parity-performance
+          path: parity-performance-report.txt
+          if-no-files-found: error
