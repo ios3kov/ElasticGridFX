@@ -38,3 +38,47 @@ jobs:
             AEXCompat/source-identity.txt
           if-no-files-found: error
           retention-days: 1
+
+
+  build-linux-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout pinned AEXCompat research source
+        uses: actions/checkout@v5
+        with:
+          repository: onmokoworks/AEXCompat
+          ref: ee86f33f3867e952a5c55d953259d59e712f820b
+          path: AEXCompat
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@1.93.1
+
+      - name: Build Linux AEX guest worker
+        run: |
+          set -euo pipefail
+          cargo build --release --locked \
+            --manifest-path AEXCompat/guest/Cargo.toml \
+            -p aex-guest-worker
+          file AEXCompat/guest/target/release/aex-guest-worker
+          AEXCompat/guest/target/release/aex-guest-worker --help >/dev/null 2>&1 || true
+
+      - name: Record research worker identity
+        run: |
+          set -euo pipefail
+          sha256sum AEXCompat/guest/target/release/aex-guest-worker \
+            > AEXCompat/aex-guest-worker-linux-x86_64.sha256
+          printf '%s\n' 'source_repo=onmokoworks/AEXCompat' > AEXCompat/linux-worker-source.txt
+          printf '%s\n' 'source_commit=ee86f33f3867e952a5c55d953259d59e712f820b' >> AEXCompat/linux-worker-source.txt
+          printf '%s\n' 'purpose=local behavioral research only' >> AEXCompat/linux-worker-source.txt
+
+      - name: Upload Linux guest worker
+        uses: actions/upload-artifact@v4
+        with:
+          name: AEXCompat-guest-linux-x86_64-ee86f33f
+          path: |
+            AEXCompat/guest/target/release/aex-guest-worker
+            AEXCompat/aex-guest-worker-linux-x86_64.sha256
+            AEXCompat/linux-worker-source.txt
+          if-no-files-found: error
+          retention-days: 1
