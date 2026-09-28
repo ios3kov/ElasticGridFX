@@ -130,6 +130,11 @@ if impl_abi != 4:
 if "ae::define_effect!(Plugin, (), Params);" not in lib:
     raise SystemExit("effect global/sequence contract changed; review StateABI")
 
+if not re.search(r'struct\s+Plugin\s*\{\s*\}', lib):
+    raise SystemExit(
+        "Plugin global state is no longer empty; bump StateABI and update verifier intentionally"
+    )
+
 wire_version = int(require(r'GRID_WIRE_VERSION:\s*u16\s*=\s*(\d+)\s*;', lib, "GRID_WIRE_VERSION"))
 if wire_version != 1:
     raise SystemExit("GridArb wire version changed; review/bump hot-reload StateABI")
