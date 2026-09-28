@@ -15,6 +15,21 @@ def require(pattern: str, text: str, label: str) -> str:
         raise SystemExit(f"missing {label}")
     return m.group(1)
 
+impl_protocol = int(require(
+    r'AEHotLoader_ImplementationABI\(\)\s*->\s*u32\s*\{\s*(\d+)\s*\}',
+    lib,
+    "implementation protocol ABI",
+))
+shell_protocol = int(require(
+    r'kImplementationAbi\s*=\s*(\d+)\s*;',
+    shell,
+    "shell implementation ABI",
+))
+if impl_protocol != 2 or shell_protocol != 2 or impl_protocol != shell_protocol:
+    raise SystemExit(
+        f"Protocol ABI drift: implementation={impl_protocol} shell={shell_protocol}; expected=2"
+    )
+
 impl_abi = int(require(r'const\s+HOT_RELOAD_STATE_ABI:\s*u64\s*=\s*(\d+)\s*;', lib, "implementation StateABI"))
 shell_abi = int(require(r'kImplementationStateAbi\s*=\s*(\d+)\s*;', shell, "shell StateABI"))
 if impl_abi != shell_abi:
@@ -29,6 +44,28 @@ if "ae::define_effect!(Plugin, (), Params);" not in lib:
 wire_version = int(require(r'GRID_WIRE_VERSION:\s*u16\s*=\s*(\d+)\s*;', lib, "GRID_WIRE_VERSION"))
 if wire_version != 1:
     raise SystemExit("GridArb wire version changed; review/bump hot-reload StateABI")
+
+grid_body = require(r'struct\s+GridArb\s*\{(.*?)\}', lib, "GridArb")
+grid_fields = [
+    (name, typ.strip())
+    for name, typ in re.findall(
+        r'(?:pub\(crate\)\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*:\s*([^,]+),',
+        grid_body,
+    )
+]
+expected_grid_fields = [
+    ("columns", "u16"),
+    ("rows", "u16"),
+    ("column_lines", "Vec<f32>"),
+    ("row_lines", "Vec<f32>"),
+    ("column_pins", "Vec<u8>"),
+    ("row_pins", "Vec<u8>"),
+]
+if grid_fields != expected_grid_fields:
+    raise SystemExit(
+        "GridArb persistent schema changed; bump StateABI/wire version and update verifier intentionally:\n"
+        f"  expected={expected_grid_fields}\n  actual={grid_fields}"
+    )
 
 params_body = require(r'enum\s+Params\s*\{(.*?)\}', lib, "Params enum")
 params_body = re.sub(r'//.*', '', params_body)
