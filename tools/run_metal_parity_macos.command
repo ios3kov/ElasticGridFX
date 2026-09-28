@@ -2,7 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="$ROOT/.metal-parity-macos"
+# Keep generated output inside the ignored/export-excluded test workspace.
+BUILD="$ROOT/.preflight-macos/metal-parity"
+[[ ! -L "$ROOT/.preflight-macos" ]] || { echo "ERROR: refusing symlinked preflight workspace" >&2; exit 4; }
 CXX="${CXX:-clang++}"
 
 if [[ "$(uname -s)" != "Darwin" ]]; then

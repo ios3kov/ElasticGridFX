@@ -57,3 +57,24 @@ jobs:
             dist/mac/host-build.jsonl
             dist/compliance/**
             host-rust/Cargo.lock
+      - name: Record source state and keep failed-run diagnostics
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p dist/mac
+          {
+            printf 'run=%s attempt=%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            git rev-parse HEAD
+            git status --porcelain --untracked-files=all
+          } > dist/mac/source-state.txt
+      - name: Upload diagnostic reports (not an installable candidate)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-mac-diagnostics-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            dist/mac/source-state.txt
+            dist/mac/preflight-report.txt
+            dist/mac/host-build.jsonl
+            dist/compliance/**

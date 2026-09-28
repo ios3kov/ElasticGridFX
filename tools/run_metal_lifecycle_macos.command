@@ -1,7 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="$ROOT/.metal-lifecycle-macos"
+# Keep generated output inside the ignored/export-excluded test workspace.
+BUILD="$ROOT/.preflight-macos/metal-lifecycle"
+[[ ! -L "$ROOT/.preflight-macos" ]] || { echo "ERROR: refusing symlinked preflight workspace" >&2; exit 4; }
 CXX="${CXX:-clang++}"
 [[ "$(uname -s)" == "Darwin" ]] || { echo "ERROR: Metal lifecycle test requires macOS."; exit 2; }
 xcode-select -p >/dev/null 2>&1 || { echo "ERROR: Xcode Command Line Tools are required."; exit 3; }

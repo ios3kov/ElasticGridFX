@@ -4,6 +4,14 @@ Date: 2026-09-28. Branch: fix/final-validation. **NOT READY FOR RELEASE.**
 
 ## Latest stage
 
+The 64aa67e macOS run 36455408377 passed Rust 11/11 (including saved Falloff
+ordinals), Clippy, sanitizers and dependency audit, then failed the mandatory
+clean-Git snapshot: test tools created unignored root scratch directories.
+The workspace correction relocates those outputs under `.preflight-macos/`
+and adds regression tests plus failure-report retention. The clean-source
+requirement is unchanged. Read the new exact-head macOS result; the prior
+failure is not treated as a successful package. See preflight-workspace-2026-09-28.md.
+
 See host-identity-2026-09-28.md for the host metadata/Build ID change and its
 predefined acceptance criteria. Local Python tooling tests are 24/24 PASS;
 existing Node control-flow tests 11/11 PASS. Real AE/Metal remains BLOCKED.
@@ -18,7 +26,7 @@ this later source. Read exact-head Actions results/checkpoint comments.
 - 53c2a299265caf3e653a766eaf0f6e03b728a621: uniform-grid pixel and ROI fix.
 - 0882cdf0fc7ff64a273232f1d6b7097a1d995db6: project-test ownership protection.
 
-The current documentation update does not change production code. Prior test-build branch 9fa06ff adds packaging workflow changes only; its binary is not a verified release of this work. The original-gridwarp-parity PR remains separate; no merge to main has been performed.
+The historical e1aa77e documentation-only checkpoint did not change production code; the newer host/identity stage does. Prior test-build branch 9fa06ff adds packaging workflow changes only; its binary is not a verified release of this work. The original-gridwarp-parity PR remains separate; no merge to main has been performed.
 
 ## Verified scope
 

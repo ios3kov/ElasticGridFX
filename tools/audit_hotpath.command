@@ -1,7 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-BUILD="$ROOT/.hotpath-audit"
+# Keep generated output inside the ignored/export-excluded test workspace.
+BUILD="$ROOT/.preflight-macos/hotpath"
+[[ ! -L "$ROOT/.preflight-macos" ]] || { echo "ERROR: refusing symlinked preflight workspace" >&2; exit 4; }
 CXX="${CXX:-clang++}"
 rm -rf "$BUILD"; mkdir -p "$BUILD"
 
