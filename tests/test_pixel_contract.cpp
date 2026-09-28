@@ -76,8 +76,11 @@ int main() {
         assert(eg_render_frame(src.data(), w * 4, w, h,
                                dst.data(), w * 4, w, h, 8, &p) == 0);
         assert(src == dst);
-        assert(dst[0] == 0);
-        assert(dst[1] != 0 || dst[2] != 0 || dst[3] != 0);
+        const std::size_t transparent = 4; // x=1, y=0
+        assert(dst[transparent + 0] == 0);
+        assert(dst[transparent + 1] != 0 ||
+               dst[transparent + 2] != 0 ||
+               dst[transparent + 3] != 0);
     }
 
     {
