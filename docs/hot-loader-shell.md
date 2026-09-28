@@ -22,3 +22,21 @@ Observed:
 This means the current implementation is not accepted as a GridWarp parity baseline even though CI is green.
 
 No further user manual build is allowed until the automatic/research phase is complete. The next stage is binary decomposition + Adobe SDK/open-source comparison + deterministic render/UI regression harness + code audit/debugging/profiling. A new user test package is produced only after those gates are exhausted.
+
+
+## Automatic SmartFX contract fix — 2026-09-28
+
+Binary decomposition and Adobe/open-source cross-check identified a concrete host-contract bug:
+
+- the original GridWarp SmartRender explicitly checks out render parameters from AE;
+- ElasticGrid was reading the ordinary parameter view during SmartRender;
+- the custom UI therefore could update its guide state while SmartRender saw stale/invalid render-time state.
+
+The implementation now:
+- checks out the original render dependency set during SmartRender;
+- renders only from those checked values;
+- explicitly invalidates the AE viewer after a guide mutation;
+- treats the untouched original 4-guide/N+2 grid as exact identity even with the original Stretch Easing default;
+- has automated gates that reject ordinary-param reads inside SmartRender.
+
+This change is **not yet a user-test release**. It must pass the automatic regression/audit/performance stages first.

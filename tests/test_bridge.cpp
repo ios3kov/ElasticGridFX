@@ -25,10 +25,10 @@ static EgRenderParams defaults() {
     p.columns = 4;
     p.rows = 4;
     p.tension_radius = 3.0f;
-    p.falloff = 2;
+    p.falloff = 1;
     p.elasticity_strength = 1.0f;
     p.min_spacing = 0.005f;
-    p.stretch_easing = 0.0f;
+    p.stretch_easing = 0.5f;
     p.easing_distance = 0.25f;
     p.wave_enabled = 0;
     p.wave_frequency = 1.0f;
@@ -79,6 +79,28 @@ int main() {
         assert(src == dst);
         p.wave_enabled = 1;
         p.wave_amplitude = 0.05f;
+        assert(eg_render_frame(src.data(), w * 4, w, h, dst.data(), w * 4, w, h, 8, &p) == 0);
+        assert(src != dst);
+    }
+
+    {
+        // Original default: 4 internal guides means 6 stored positions. Even
+        // with Stretch Easing=50%, the untouched grid must be exact identity.
+        std::vector<std::uint8_t> src(w * h * 4), dst(src.size(), 0);
+        fill_pattern(src, w, h, static_cast<std::uint8_t>(255));
+        auto p = defaults();
+        float x[] = {0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+        float y[] = {0.0f, 0.2f, 0.4f, 0.6f, 0.8f, 1.0f};
+        std::uint8_t pin[] = {1, 0, 0, 0, 0, 1};
+        p.columns = 4; p.rows = 4;
+        p.column_lines = x; p.column_line_count = 6; p.column_pins = pin;
+        p.row_lines = y; p.row_line_count = 6; p.row_pins = pin;
+        assert(eg_render_frame(src.data(), w * 4, w, h, dst.data(), w * 4, w, h, 8, &p) == 0);
+        assert(src == dst);
+
+        // Moving one original-style internal guide must change real pixels.
+        x[2] = 0.52f;
+        std::fill(dst.begin(), dst.end(), 0);
         assert(eg_render_frame(src.data(), w * 4, w, h, dst.data(), w * 4, w, h, 8, &p) == 0);
         assert(src != dst);
     }

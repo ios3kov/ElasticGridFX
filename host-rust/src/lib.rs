@@ -753,24 +753,128 @@ fn render_metal(
     }
 }
 
-fn checkout_smart_render_dependencies(
-    in_data: ae::InData,
-    params: &ae::Parameters<Params>,
-) -> Result<(), ae::Error> {
-    const DEPS: &[Params] = &[
-        Params::Columns, Params::Rows, Params::GridState, Params::MinSpacing,
-        Params::StretchEasing, Params::EasingDistance, Params::WaveAmplitude,
-        Params::WaveFrequency, Params::WavePhase, Params::WaveSpeed,
-        Params::WaveAxis, Params::EdgeMode, Params::Quality,
-    ];
-    let interact = in_data.interact();
-    let mut checked = Vec::with_capacity(DEPS.len());
-    for &param in DEPS {
-        let index = params.index(param).ok_or(ae::Error::InvalidIndex)? as i32;
-        checked.push(interact.checkout_param(index, in_data.current_time(), in_data.time_step(), in_data.time_scale())?);
+#[derive(Clone, Debug)]
+struct CheckedRenderState {
+    grid: GridArb,
+    min_spacing: f32,
+    stretch_easing: f32,
+    easing_distance: f32,
+    wave_amplitude: f32,
+    wave_frequency: f32,
+    wave_phase: f32,
+    wave_speed: f32,
+    wave_axis: i32,
+    edge_mode: i32,
+    quality: i32,
+}
+
+impl CheckedRenderState {
+    fn render_params(&self, in_data: ae::InData) -> EgRenderParams {
+        let time_seconds = if in_data.time_scale() != 0 {
+            in_data.current_time() as f32 / in_data.time_scale() as f32
+        } else {
+            0.0
+        };
+
+        EgRenderParams {
+            columns: self.grid.columns as i32,
+            rows: self.grid.rows as i32,
+            column_lines: self.grid.column_lines.as_ptr(),
+            column_line_count: self.grid.column_lines.len() as i32,
+            column_pins: self.grid.column_pins.as_ptr(),
+            row_lines: self.grid.row_lines.as_ptr(),
+            row_line_count: self.grid.row_lines.len() as i32,
+            row_pins: self.grid.row_pins.as_ptr(),
+
+            // These three values affect interactive guide construction only.
+            // The original SmartRender does not checkout them.
+            tension_radius: 3.0,
+            falloff: 1,
+            elasticity_strength: 1.0,
+
+            min_spacing: self.min_spacing,
+            stretch_easing: self.stretch_easing,
+            easing_distance: self.easing_distance,
+            wave_enabled: 1,
+            wave_amplitude: self.wave_amplitude,
+            wave_frequency: self.wave_frequency,
+            wave_phase: self.wave_phase,
+            wave_speed: self.wave_speed,
+            wave_axis: self.wave_axis,
+            edge_mode: self.edge_mode,
+            quality: self.quality,
+            time_seconds,
+            threads: 0,
+            canvas_width: 0,
+            canvas_height: 0,
+            input_origin_x: 0,
+            input_origin_y: 0,
+            output_origin_x: 0,
+            output_origin_y: 0,
+            abort_fn: Some(ae_abort_trampoline),
+            abort_refcon: in_data.as_ptr() as *mut c_void,
+        }
     }
-    drop(checked);
-    Ok(())
+}
+
+fn checkout_smart_render_state(
+    params: &ae::Parameters<Params>,
+) -> Result<CheckedRenderState, ae::Error> {
+    // This order intentionally mirrors the parameter checkouts recovered from
+    // GridWarp.aex SmartRender: 4,10,11,12,15,16,17,18,19,29,30,22..26.
+    let grid = {
+        let param = params.checkout(Params::GridState)?;
+        let value = param.as_arbitrary()?.value::<GridArb>()?;
+        (*value).clone()
+    };
+    let min_spacing =
+        params.checkout(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0;
+    let stretch_easing =
+        params.checkout(Params::StretchEasing)?.as_float_slider()?.value() as f32 / 100.0;
+    let easing_distance =
+        params.checkout(Params::EasingDistance)?.as_float_slider()?.value() as f32 / 100.0;
+    let wave_amplitude =
+        params.checkout(Params::WaveAmplitude)?.as_float_slider()?.value() as f32 / 100.0;
+    let wave_frequency =
+        params.checkout(Params::WaveFrequency)?.as_float_slider()?.value() as f32;
+    let wave_phase =
+        params.checkout(Params::WavePhase)?.as_float_slider()?.value() as f32;
+    let wave_speed =
+        params.checkout(Params::WaveSpeed)?.as_float_slider()?.value() as f32;
+    let wave_axis = params.checkout(Params::WaveAxis)?.as_popup()?.value();
+    let edge_mode = params.checkout(Params::EdgeMode)?.as_popup()?.value();
+    let quality = params.checkout(Params::Quality)?.as_popup()?.value();
+
+    // The original also checks out visualization parameters during SmartRender.
+    // Keep those dependencies even before visualization is routed into pixels.
+    let _visualization_enabled =
+        params.checkout(Params::EnableVisualization)?.as_checkbox()?.value();
+    let _column_stroke_color =
+        params.checkout(Params::ColumnStrokeColor)?.as_color()?.value();
+    let _row_stroke_color =
+        params.checkout(Params::RowStrokeColor)?.as_color()?.value();
+    let _stroke_width =
+        params.checkout(Params::StrokeWidth)?.as_float_slider()?.value();
+    let _opacity =
+        params.checkout(Params::Opacity)?.as_float_slider()?.value();
+
+    if !grid.is_valid() {
+        return Err(ae::Error::InvalidParms);
+    }
+
+    Ok(CheckedRenderState {
+        grid,
+        min_spacing,
+        stretch_easing,
+        easing_distance,
+        wave_amplitude,
+        wave_frequency,
+        wave_phase,
+        wave_speed,
+        wave_axis,
+        edge_mode,
+        quality,
+    })
 }
 
 impl AdobePluginGlobal for Plugin {
@@ -941,7 +1045,6 @@ impl AdobePluginGlobal for Plugin {
                 render(&in_layer, &mut out_layer, &p)?;
             }
             ae::Command::SmartPreRender { mut extra } => {
-                checkout_smart_render_dependencies(in_data, params)?;
                 let output_request = extra.output_request();
                 let output_rect = EgRectI32 {
                     left: output_request.rect.left,
@@ -981,6 +1084,7 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::SmartRender { extra } => {
                 let Some(reload_state) = extra.pre_render_data::<HotReloadPreRenderState>() else { return Err(ae::Error::InternalStructDamaged); };
                 if reload_state.generation != hot_reload_generation() { return Err(ae::Error::BadCallbackParameter); }
+                let checked = checkout_smart_render_state(params)?;
                 let cb = extra.callbacks();
                 let Some(input) = cb.checkout_layer_pixels(0)? else {
                     return Ok(());
@@ -989,8 +1093,7 @@ impl AdobePluginGlobal for Plugin {
                 // captures all fallible work; checkin is performed unconditionally.
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(mut output) = cb.checkout_output()? {
-                        let grid = grid_snapshot(params)?;
-                        let mut p = evaluated_params(params, in_data, &grid)?;
+                        let mut p = checked.render_params(in_data);
                         apply_spatial_context(in_data, &input, &output, &mut p);
                         render(&input, &mut output, &p)?;
                     }
@@ -1033,14 +1136,14 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::SmartRenderGpu { extra } => {
                 let Some(reload_state) = extra.pre_render_data::<HotReloadPreRenderState>() else { return Err(ae::Error::InternalStructDamaged); };
                 if reload_state.generation != hot_reload_generation() { return Err(ae::Error::BadCallbackParameter); }
+                let checked = checkout_smart_render_state(params)?;
                 let cb = extra.callbacks();
                 let Some(input) = cb.checkout_layer_pixels(0)? else {
                     return Ok(());
                 };
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(output) = cb.checkout_output()? {
-                        let grid = grid_snapshot(params)?;
-                        let mut p = evaluated_params(params, in_data, &grid)?;
+                        let mut p = checked.render_params(in_data);
                         apply_spatial_context(in_data, &input, &output, &mut p);
                         let gpu_data = extra.gpu_data::<MetalGpuData>().ok_or(ae::Error::InternalStructDamaged)?;
                         if gpu_data.generation != hot_reload_generation() { return Err(ae::Error::BadCallbackParameter); }

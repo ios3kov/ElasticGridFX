@@ -11,6 +11,7 @@ on:
       - "tools/verify_bundle_macos.command"
       - "tools/verify_shell_metadata.py"
       - "tools/verify_hot_reload_state.py"
+      - "tools/verify_smartfx_contract.py"
       - "tools/stage_hot_reload_macos.command"
       - "tools/install_hot_loader_package.command"
       - "tools/stage_packaged_hot_reload.command"
@@ -39,7 +40,8 @@ jobs:
           set -euo pipefail
           python3 tools/verify_shell_metadata.py host-rust/build.rs host-rust/shell/ElasticGridShell.cpp
           python3 tools/verify_hot_reload_state.py host-rust/src/lib.rs host-rust/shell/ElasticGridShell.cpp
-          grep -q "checkout_smart_render_dependencies(in_data, params)" host-rust/src/lib.rs
+          python3 tools/verify_smartfx_contract.py host-rust/src/lib.rs host-rust/src/ui.rs
+          grep -q "checkout_smart_render_state(params)" host-rust/src/lib.rs
           grep -q "MAX_GUIDES: usize = 50" host-rust/src/lib.rs
           grep -q '"Num Columns"' host-rust/src/lib.rs
           grep -q '"Smoothstep", "Gaussian", "Linear"' host-rust/src/lib.rs

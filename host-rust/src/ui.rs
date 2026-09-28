@@ -278,6 +278,11 @@ pub fn drag(
 
     if rc == 0 {
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
+
+        // ArbitraryDef::set_value marks PF_ChangeFlag_CHANGED_VALUE. Invalidate
+        // the viewer explicitly as Adobe's custom-UI samples do after mutation.
+        ae::pf::suites::App::new()?.invalidate_rect(event.context_handle(), None)?;
+
         event.set_event_out_flags(
             ae::EventOutFlags::HANDLED_EVENT
                 | ae::EventOutFlags::ALWAYS_UPDATE

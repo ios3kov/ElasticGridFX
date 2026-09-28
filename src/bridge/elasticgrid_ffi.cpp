@@ -223,7 +223,7 @@ int prepare_bridge(std::int32_t input_width,
     const bool semantic_identity =
         input_width == output_width && input_height == output_height &&
         p->input_origin_x == p->output_origin_x && p->input_origin_y == p->output_origin_y &&
-        float_bits_equal(easing, 0.0f) && axis_uniform_exact(out.x_lines) && axis_uniform_exact(out.y_lines);
+        axis_uniform_exact(out.x_lines) && axis_uniform_exact(out.y_lines);
     if (semantic_identity && !force_sampling_plan) {
         out.plan.src_width = input_width;
         out.plan.src_height = input_height;
