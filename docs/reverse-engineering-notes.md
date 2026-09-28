@@ -99,3 +99,72 @@ The next implementation step is therefore contract-level, not another image-warp
 2. Pixel evaluation will use only those checked values.
 3. Custom UI mutation will explicitly invalidate the host view in addition to marking the arbitrary parameter changed.
 4. Automated source gates will reject direct Smart Render reads from the ordinary parameter array.
+
+
+## 2026-09-28 — visualization and spatial-contract decomposition
+
+Further static decomposition of the supplied `GridWarp.aex` confirms that **Visualization is part of rendered pixels**, not only an AE custom-UI overlay.
+
+The SmartRender path conditionally calls the visualization compositor at image VA `0x180016c70` after the main warp when **Enable Visualization** is non-zero.
+
+Recovered call contract:
+
+1. output world
+2. pixel format
+3. `PF_InData::width`
+4. `PF_InData::height`
+5. `PF_InData::output_origin_x`
+6. `PF_InData::output_origin_y`
+7. evaluated column-line array
+8. column-line count
+9. evaluated row-line array
+10. row-line count
+11. Column Stroke Color
+12. Row Stroke Color
+13. Stroke Width
+14. Opacity normalized to 0..1
+
+The `PF_InData` offsets were cross-checked against the generated ABI contract in AEXCompat:
+- width: 252 / `0xfc`
+- height: 256 / `0x100`
+- output_origin_x: 276 / `0x114`
+- output_origin_y: 280 / `0x118`
+
+This resolves a previous uncertainty: the original compositor uses the host's **full source width/height and output origin**, rather than an inferred local ROI coordinate system.
+
+### Line rasterization recovered from `0x180016c70`
+
+For each evaluated guide, the original computes the line center in output-buffer coordinates from the full layer extent plus `output_origin`, then evaluates per-pixel antialias coverage:
+
+`coverage = clamp(half_width + 0.5 - abs(pixel_center - guide_center), 0, 1)`
+
+Effective source alpha is:
+
+`coverage * (Opacity / 100) * (stroke_color.alpha / 255)`
+
+The compositor then performs source-over alpha blending in unpremultiplied color space. The PF color byte order observed is **A,R,G,B**.
+
+The same routine is used for vertical column guides and horizontal row guides. It supports the output pixel-format paths used by the plug-in (8/16/32f).
+
+Constants confirmed in the binary:
+- antialias pixel-center term: `0.5`
+- wave displacement scale: `0.4`
+- clamp upper bound: `1.0`
+- epsilon: `1e-6`
+- color normalization: `255.0`
+
+### Axis/wave behavior recovered
+
+The axis evaluator at `0x18000f310` and spacing projector at `0x18000f1b0` confirm:
+- N columns/rows means N internal guides and N+2 stored boundary-inclusive positions;
+- wave displacement uses `amplitude_fraction * 0.4 * uniform_segment_spacing`;
+- phase is degrees (`pi/180`);
+- frequency/speed are evaluated in cycles (`2*pi`);
+- minimum spacing is clamped to `max(1e-6, min(requested, 0.5/(N+1)))`;
+- the final axis is projected forward/backward to remain monotonic.
+
+### Open parity gap
+
+The current ElasticGrid implementation exposes Visualization parameters and checks them out, but does **not yet composite those guide lines into rendered pixels**. Therefore it cannot be called exact GridWarp behavioral parity yet.
+
+This gap must be closed and regression-tested automatically before another user live test.

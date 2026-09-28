@@ -15,3 +15,18 @@ Recovered behavior used by this independent implementation: N columns/rows means
 The previous hot-loader branch missed these later parity fixes, which is why real AE showed a moving overlay with unchanged pixels and bright ROI/seam lines.
 
 Parity guide wire format is v3; Hot Loader StateABI is therefore 5.
+
+
+## Additional recovered render behavior
+
+The reference's Visualization group is a real output compositing feature. When enabled, it draws the evaluated column and row guides over the warped result using the configured A/R/G/B colors, Stroke Width and Opacity. It is not equivalent to the editor overlay.
+
+Spatially, the original uses `PF_InData.width/height` and `PF_InData.output_origin_x/y` directly. Static disassembly offsets were independently matched to AEXCompat's generated AE ABI contract.
+
+The line coverage function is an antialiased centered band:
+
+`clamp(stroke_width/2 + 0.5 - abs(pixel_center - guide_center), 0, 1)`
+
+followed by opacity/color-alpha scaling and source-over blending.
+
+This behavior is now a required automatic parity test before another live AE package is issued.
