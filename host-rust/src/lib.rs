@@ -452,8 +452,10 @@ unsafe extern "C" fn ae_abort_trampoline(refcon: *mut c_void) -> i32 {
 }
 
 #[cfg(target_os = "macos")]
+#[repr(C)]
 struct MetalGpuData {
     state: *mut c_void,
+    generation: u64,
 }
 
 #[cfg(target_os = "macos")]
@@ -494,6 +496,15 @@ fn setup_float(
     if percent {
         f.set_display_flags(ae::ValueDisplayFlag::PERCENT);
     }
+}
+
+fn hot_reload_generation() -> u64 {
+    let mut hash = 1469598103934665603u64;
+    for byte in HOT_RELOAD_IMPL_LABEL.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(1099511628211u64);
+    }
+    hash
 }
 
 fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
@@ -884,7 +895,24 @@ impl AdobePluginGlobal for Plugin {
                 max_rect.union(&input_max);
                 extra.set_max_result_rect(max_rect);
                 #[cfg(target_os = "macos")]
-                extra.set_gpu_render_possible(extra.what_gpu() == ae::GpuFramework::Metal && extra.bit_depth() == 32);
+                {
+                    let mut gpu_possible = false;
+                    if extra.what_gpu() == ae::GpuFramework::Metal && extra.bit_depth() == 32 {
+                        unsafe {
+                            let raw = extra.as_ptr();
+                            if !raw.is_null()
+                                && !(*raw).input.is_null()
+                                && !(*(*raw).input).gpu_data.is_null()
+                            {
+                                let gpu_data =
+                                    &*((*(*raw).input).gpu_data as *const MetalGpuData);
+                                gpu_possible =
+                                    gpu_data.generation == hot_reload_generation();
+                            }
+                        }
+                    }
+                    extra.set_gpu_render_possible(gpu_possible);
+                }
             }
             ae::Command::SmartRender { extra } => {
                 let cb = extra.callbacks();
@@ -916,7 +944,10 @@ impl AdobePluginGlobal for Plugin {
                     let info = gpu.device_info(in_data.effect_ref(), extra.device_index())?;
                     let state = unsafe { eg_metal_create(info.devicePV, info.command_queuePV) };
                     if !state.is_null() {
-                        extra.set_gpu_data(MetalGpuData { state });
+                        extra.set_gpu_data(MetalGpuData {
+                            state,
+                            generation: hot_reload_generation(),
+                        });
                         out_data.set_out_flag2(ae::OutFlags2::SupportsGpuRenderF32, true);
                     }
                 }
@@ -946,7 +977,12 @@ impl AdobePluginGlobal for Plugin {
                         let grid = grid_snapshot(params)?;
                         let mut p = evaluated_params(params, in_data, &grid)?;
                         apply_spatial_context(in_data, &input, &output, &mut p);
-                        let gpu_data = extra.gpu_data::<MetalGpuData>().ok_or(ae::Error::InternalStructDamaged)?;
+                        let gpu_data = extra
+                            .gpu_data::<MetalGpuData>()
+                            .ok_or(ae::Error::InternalStructDamaged)?;
+                        if gpu_data.generation != hot_reload_generation() {
+                            return Err(ae::Error::BadCallbackParameter);
+                        }
                         render_metal(in_data, &extra, input, output, &p, gpu_data)?;
                     }
                     Ok(())
@@ -964,6 +1000,8 @@ impl AdobePluginGlobal for Plugin {
     }
 }
 
+const HOT_RELOAD_STATE_ABI: u64 = 2;
+
 const HOT_RELOAD_IMPL_LABEL: &str = match option_env!("AE_HOT_LOADER_IMPL_LABEL") {
     Some(value) => value,
     None => "elasticgrid-dev",
@@ -976,7 +1014,7 @@ pub extern "C" fn AEHotLoader_ImplementationABI() -> u32 {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn AEHotLoader_ImplementationStateABI() -> u64 {
-    1
+    HOT_RELOAD_STATE_ABI
 }
 
 #[unsafe(no_mangle)]
@@ -1141,5 +1179,12 @@ mod tests {
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 152);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
         assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
+        #[cfg(target_os = "macos")]
+        {
+            assert_eq!(std::mem::size_of::<MetalGpuData>(), 16);
+            assert_eq!(std::mem::align_of::<MetalGpuData>(), 8);
+            assert_eq!(std::mem::offset_of!(MetalGpuData, state), 0);
+            assert_eq!(std::mem::offset_of!(MetalGpuData, generation), 8);
+        }
     }
 }
