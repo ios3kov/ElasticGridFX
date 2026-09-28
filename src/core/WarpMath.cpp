@@ -1,6 +1,7 @@
 #include "core/WarpMath.h"
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <stdexcept>
 
 namespace elasticgrid {
@@ -119,7 +120,7 @@ void buildInverseLUTRangeInto(WarpAxisLUT& lut,
     lut.source_u.resize(static_cast<std::size_t>(output_extent));
     const float denom = static_cast<float>(std::max(1, canvas_extent - 1));
     for (int i = 0; i < output_extent; ++i) {
-        const float u = static_cast<float>(output_origin + i) / denom;
+        const float u = static_cast<float>(static_cast<std::int64_t>(output_origin) + i) / denom;
         lut.source_u[static_cast<std::size_t>(i)] =
             inverseMapNormalized(u, destination_lines, easing, easing_distance);
     }

@@ -3,7 +3,7 @@ name: macOS source gate
 on:
   workflow_dispatch:
   push:
-    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot]
+    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"

@@ -54,6 +54,15 @@ if(ELASTICGRID_BUILD_TESTS)
   elasticgrid_enable_test_assertions(elasticgrid_bridge_tests)
   add_test(NAME elasticgrid_bridge COMMAND elasticgrid_bridge_tests)
 
+  add_executable(elasticgrid_identity_tests
+      tests/test_identity.cpp
+      src/bridge/elasticgrid_ffi.cpp
+  )
+  target_link_libraries(elasticgrid_identity_tests PRIVATE elasticgrid_core)
+  target_include_directories(elasticgrid_identity_tests PRIVATE src)
+  elasticgrid_enable_test_assertions(elasticgrid_identity_tests)
+  add_test(NAME elasticgrid_identity COMMAND elasticgrid_identity_tests)
+
   add_executable(elasticgrid_gpu_plan_tests
       tests/test_gpu_plan.cpp
       src/bridge/elasticgrid_ffi.cpp

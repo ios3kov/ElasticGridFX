@@ -117,6 +117,43 @@ bool axis_uniform_exact(const std::vector<float>& lines) noexcept {
     return true;
 }
 
+// A uniform destination axis is exactly the identity for every easing value.
+// Reconstructing it through normalized float coordinates/Hermite creates tiny
+// subpixel offsets (visible on high-contrast 16/32-bpc pixels). Emit exact unit
+// taps instead, but only after a bit-exact uniform-grid check: never round a
+// genuinely deformed axis or apply an epsilon-based identity approximation.
+int resolve_identity_pixel(std::int64_t pixel, int extent, eg::EdgeMode edge) noexcept {
+    if (extent <= 1) return 0;
+    const auto n = static_cast<std::int64_t>(extent);
+    if (edge == eg::EdgeMode::Clamp) {
+        return static_cast<int>(std::clamp(pixel, std::int64_t{0}, n - 1));
+    }
+    const auto period = edge == eg::EdgeMode::Mirror ? 2 * n - 2 : n;
+    auto wrapped = pixel % period;
+    if (wrapped < 0) wrapped += period;
+    if (edge == eg::EdgeMode::Mirror && wrapped >= n) wrapped = period - wrapped;
+    return static_cast<int>(wrapped);
+}
+
+void exact_uniform_axis_plan(std::vector<eg::LinearSample1D>& linear,
+                             std::vector<eg::CubicSample1D>& cubic,
+                             eg::SampleQuality quality, eg::EdgeMode edge,
+                             int input_extent, int canvas_extent,
+                             int input_origin, int output_origin, int output_extent) {
+    for (int i = 0; i < output_extent; ++i) {
+        const auto layer_pixel = std::clamp(
+            static_cast<std::int64_t>(output_origin) + i,
+            std::int64_t{0}, static_cast<std::int64_t>(canvas_extent) - 1);
+        const int source = resolve_identity_pixel(layer_pixel - input_origin, input_extent, edge);
+        const auto index = static_cast<std::size_t>(i);
+        if (quality == eg::SampleQuality::Bilinear) {
+            linear[index] = {source, source, 0.0f, 0};
+        } else {
+            cubic[index] = {{source, source, source, source}, {0.0f, 1.0f, 0.0f, 0.0f}};
+        }
+    }
+}
+
 struct PreparedBridge {
     eg::RenderSettings settings;
     eg::PreparedWarpRGBAf plan;
@@ -216,14 +253,17 @@ int prepare_bridge(std::int32_t input_width,
     out.settings.abort_fn = p->abort_fn;
     out.settings.abort_refcon = p->abort_refcon;
 
-    // Exact semantic identity: no approximation/tolerance is used here. The
-    // grid must be exactly uniform after evaluation, easing must be exactly
-    // disabled, and source/output sizes must match. CPU rendering can then
-    // skip sampling-plan construction entirely and perform an exact row copy.
+    // Easing changes transitions between different segment slopes. Uniform
+    // axes have slope 1 everywhere, so every easing value remains identity.
+    const bool uniform_x = axis_uniform_exact(out.x_lines);
+    const bool uniform_y = axis_uniform_exact(out.y_lines);
     const bool semantic_identity =
         input_width == output_width && input_height == output_height &&
         p->input_origin_x == p->output_origin_x && p->input_origin_y == p->output_origin_y &&
-        float_bits_equal(easing, 0.0f) && axis_uniform_exact(out.x_lines) && axis_uniform_exact(out.y_lines);
+        p->output_origin_x >= 0 && p->output_origin_y >= 0 &&
+        static_cast<std::int64_t>(p->output_origin_x) + output_width <= canvas_width &&
+        static_cast<std::int64_t>(p->output_origin_y) + output_height <= canvas_height &&
+        uniform_x && uniform_y;
     if (semantic_identity && !force_sampling_plan) {
         out.plan.src_width = input_width;
         out.plan.src_height = input_height;
@@ -238,6 +278,18 @@ int prepare_bridge(std::int32_t input_width,
         out.plan, input_width, input_height,
         output_width, output_height,
         out.x_lut, out.y_lut, out.settings);
+    // Cropped renders, GPU plans and the unchanged axis of a one-axis warp
+    // need the same exact integer mapping as the full-frame CPU identity path.
+    if (uniform_x) {
+        exact_uniform_axis_plan(out.plan.x_linear, out.plan.x_cubic, out.settings.quality,
+            out.settings.edge, input_width, canvas_width,
+            p->input_origin_x, p->output_origin_x, output_width);
+    }
+    if (uniform_y) {
+        exact_uniform_axis_plan(out.plan.y_linear, out.plan.y_cubic, out.settings.quality,
+            out.settings.edge, input_height, canvas_height,
+            p->input_origin_y, p->output_origin_y, output_height);
+    }
     return 0;
 }
 
