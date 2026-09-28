@@ -35,3 +35,12 @@ This behavior is now a required automatic parity test before another live AE pac
 ## Visualization parity implementation
 
 The independent implementation now includes the recovered rendered-Visualization stage on its CPU path. The compositor uses evaluated guide positions, full source dimensions, output origin, A/R/G/B stroke colors, Stroke Width and Opacity, with the antialias/source-over math documented above. Automatic tests include full-frame vs ROI spatial equivalence.
+
+
+## Exact defaults / host integration confirmed
+
+Binary ParamsSetup confirms both visualization stroke colors default to opaque `#0030FF` (PF A,R,G,B bytes `FF 00 30 FF`), Stroke Width defaults to 2.0, and Opacity to 100%.
+
+Binary SmartPreRender confirms the source checkout is `0,0,width,height` using full `PF_InData.width/height`, with `preserve_rgb_of_zero_alpha = TRUE`. Result/max rectangles follow the host checkout rather than being replaced by a guessed ROI.
+
+Binary drag handling returns exactly `PF_EO_HANDLED_EVENT | PF_EO_UPDATE_NOW` after writing the changed arbitrary Grid Positions parameter; it does not set `PF_EO_ALWAYS_UPDATE`.
