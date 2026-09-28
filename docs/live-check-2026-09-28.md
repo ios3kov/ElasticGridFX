@@ -51,3 +51,11 @@ Primary references:
   https://developer.apple.com/documentation/xcode/locating-a-missing-debug-symbol-file
 The actual current sample behavior is validated by the native fixture gate,
 not inferred solely from documentation or a mocked process.
+
+## Native-gate follow-up
+
+The first native run 36464999983 (a76622f) failed at the strict process-header
+comparison; it is not PASS. Explicit -fullPaths sampling and retained fixture
+header/image diagnostics are now being checked. No user permissions are changed
+and no redacted/mismatched path is silently accepted. The exact follow-up native
+result is required before handing over the diagnostic.

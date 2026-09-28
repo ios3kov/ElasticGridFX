@@ -29,7 +29,16 @@ class NativeImageObservation(unittest.TestCase):
                 ready, _, _ = select.select([child.stdout], [], [], 5)
                 self.assertTrue(ready, 'Fixture startup timed out')
                 self.assertEqual(child.stdout.readline().strip(), 'READY')
-                images,observation=li.capture(child.pid,host,folder)
+                try:
+                    images,observation=li.capture(child.pid,host,folder)
+                except Exception:
+                    # Owned CI fixture only: retain header/images for diagnosis.
+                    sample=folder/'sample-private.txt'
+                    if sample.exists():
+                        text=sample.read_text()
+                        print('FIXTURE SAMPLE HEADER:', text[:2500])
+                        print('FIXTURE IMAGE:', '\n'.join(line for line in text.splitlines() if 'ElasticGrid-fixture' in line))
+                    raise
                 uuidset=li.macho_uuids(library.read_bytes())
                 observed=li.select_image(images,library,uuidset)
                 self.assertIn(observed['uuid'],uuidset)

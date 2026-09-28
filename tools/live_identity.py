@@ -136,7 +136,7 @@ def capture(pid: int, executable: Path, folder: Path) -> tuple[list[dict], dict]
     if output.exists() or output.is_symlink():
         raise Blocked('Refusing stale sample path')
     started = time.time_ns()
-    result = subprocess.run(['/usr/bin/sample', str(pid), '1', '10', '-file', str(output)],
+    result = subprocess.run(['/usr/bin/sample', str(pid), '1', '10', '-fullPaths', '-file', str(output)],
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
     # Never include all stdout/stacks in the shareable report.
     if result.returncode:
