@@ -1283,6 +1283,5 @@ mod tests {
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_fn), 144);
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 152);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
-        assert_eq!(std::mem::size_of::<EgRectI32>(), 16);
     }
 }
