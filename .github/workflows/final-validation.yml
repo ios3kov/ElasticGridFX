@@ -40,6 +40,11 @@ jobs:
           path: ${{ runner.temp }}/elasticgrid-evidence/
           if-no-files-found: error
           retention-days: 30
+      - name: Test AE script ownership control flow (not a host test)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tests/test_ae_project_safety.js 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
       - name: Configure clean portable build
         run: cmake -S . -B build-final-validation -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
       - name: Build
@@ -58,6 +63,7 @@ jobs:
             ${{ runner.temp }}/elasticgrid-evidence/COMMIT.txt
             ${{ runner.temp }}/elasticgrid-evidence/scope.txt
             ${{ runner.temp }}/elasticgrid-evidence/portable.*
+            ${{ runner.temp }}/elasticgrid-evidence/script-safety.log
             build-final-validation/Testing/Temporary/LastTest.log
           if-no-files-found: error
           retention-days: 30

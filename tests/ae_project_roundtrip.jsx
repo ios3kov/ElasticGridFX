@@ -1,9 +1,9 @@
 (function () {
     var MATCH_NAME = "com.elasticgrid.fx.warp";
-    var AEP_PATH = "/tmp/ElasticGridFX-v1-project-roundtrip.aep";
-    var PNG_PATH = "/tmp/ElasticGridFX-v1-project-roundtrip.png";
-    var tempFile = new File(AEP_PATH);
-    var pngFile = new File(PNG_PATH);
+    var tempFile = null;
+    var pngFile = null;
+    var ownedProject = null;
+    var runFolder = null;
     var oldBpc = null;
     var stage = 40;
 
@@ -11,16 +11,29 @@
         app.exitCode = code;
         return false;
     }
-    function closeProjectNoSave() {
-        try {
-            if (app.project !== null) {
-                app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
-            }
-        } catch (e) {}
+    function closeOwnedProject() {
+        // A rejected test never owns the current project. Nor may a host error
+        // or context change grant ownership of a different project.
+        if (ownedProject === null || app.project !== ownedProject) {
+            throw new Error("The active project is not owned by this test.");
+        }
+        if (ownedProject.close(CloseOptions.DO_NOT_SAVE_CHANGES) === false) {
+            throw new Error("Could not close the test project.");
+        }
+        ownedProject = null;
     }
-    function cleanTempFiles() {
-        try { if (tempFile.exists) tempFile.remove(); } catch (e1) {}
-        try { if (pngFile.exists) pngFile.remove(); } catch (e2) {}
+    function prepareWorkspace() {
+        var runId = new Date().getTime().toString(36) + "-" + Math.floor(Math.random() * 0x7fffffff).toString(36);
+        runFolder = new Folder(Folder.temp.fsName + "/ElasticGridFX-roundtrip-" + runId);
+        // Never reuse or clean a previous run's path. Retain evidence on failure.
+        if (runFolder.exists || !runFolder.create()) {
+            throw new Error("Could not reserve a new test workspace.");
+        }
+        tempFile = new File(runFolder.fsName + "/project.aep");
+        pngFile = new File(runFolder.fsName + "/frame.png");
+        if (tempFile.exists || pngFile.exists) {
+            throw new Error("Test workspace is not empty.");
+        }
     }
     function approx(a, b, eps) {
         return Math.abs(a - b) <= eps;
@@ -31,16 +44,21 @@
     try {
         // Never run against user work.
         stage = 40;
-        var dirty = false;
-        try { dirty = (typeof app.project.dirty !== "undefined") ? app.project.dirty : false; } catch (_) {}
-        if (app.project.file !== null || app.project.numItems > 0 || dirty) {
+        if (app.project === null) {
+            fail(stage);
+            return;
+        }
+        // A failing state query must fail closed, not assume an empty project.
+        var dirty = app.project.dirty;
+        if (typeof dirty !== "boolean" || app.project.file !== null || app.project.numItems > 0 || dirty) {
             fail(stage);
             return;
         }
 
-        cleanTempFiles();
         oldBpc = app.project.bitsPerChannel;
-        app.project.bitsPerChannel = 32;
+        prepareWorkspace();
+        ownedProject = app.project;
+        ownedProject.bitsPerChannel = 32;
 
         stage = 41;
         var comp = app.project.items.addComp("__ElasticGridFX_Project_Roundtrip__", 480, 270, 1.0, 2.0, 30.0);
@@ -84,9 +102,15 @@
         }
 
         stage = 44;
-        closeProjectNoSave();
-        app.open(tempFile);
-        if (app.project === null || app.project.numItems < 1) {
+        closeOwnedProject();
+        var reopenedProject = app.open(tempFile);
+        if (reopenedProject === null || reopenedProject !== app.project ||
+                reopenedProject.file === null || reopenedProject.file.fsName !== tempFile.fsName) {
+            fail(stage);
+            return;
+        }
+        ownedProject = reopenedProject;
+        if (ownedProject.numItems < 1) {
             fail(stage);
             return;
         }
@@ -135,7 +159,10 @@
             fail(stage);
             return;
         }
-        if (pngFile.exists) pngFile.remove();
+        if (pngFile.exists) {
+            fail(stage);
+            return;
+        }
         reopenedComp.saveFrameToPng(0.75, pngFile);
         if (!pngFile.exists || pngFile.length <= 0) {
             fail(stage);
@@ -146,10 +173,25 @@
     } catch (e) {
         app.exitCode = stage;
     } finally {
-        try { closeProjectNoSave(); } catch (_) {}
-        try { app.newProject(); } catch (_) {}
-        try { if (oldBpc !== null) app.project.bitsPerChannel = oldBpc; } catch (_) {}
-        cleanTempFiles();
+        // `return` from a safety guard still executes finally. Cleanup must
+        // therefore be conditional on ownership, not just reaching this block.
+        if (ownedProject !== null && app.project === ownedProject) {
+            try {
+                closeOwnedProject();
+                var emptyProject = app.newProject();
+                if (emptyProject === null || emptyProject !== app.project) {
+                    throw new Error("Could not restore an empty project.");
+                }
+                if (oldBpc !== null) emptyProject.bitsPerChannel = oldBpc;
+            } catch (_) {
+                // Cleanup failure is a failed test, never a false PASS.
+                if (app.exitCode === 0) app.exitCode = 48;
+            }
+        } else if (app.exitCode === 0) {
+            app.exitCode = 48;
+        }
+        // The unique AEP/PNG workspace is intentionally retained as evidence.
+
         try { app.endSuppressDialogs(false); } catch (_) {}
     }
 })();
