@@ -1,0 +1,48 @@
+name: Authorized update safety
+on:
+  push:
+    branches: [fix/final-validation]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: authorized-update-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  mac-update:
+    runs-on: macos-14
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Replacement, rollback and native signature/xattr tests (NOT AE)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/update-evidence"
+          python3 -m unittest discover -s tests -p 'test_authorized_update.py' -v 2>&1 | tee "$RUNNER_TEMP/update-evidence/tests.log"
+          bash -n UPDATE_ELASTICGRID_MAC.command ROLLBACK_ELASTICGRID_MAC.command
+          git diff --exit-code
+      - name: Retrieve previously verified immutable candidate (never rebuild)
+        uses: actions/download-artifact@v4
+        with:
+          name: ElasticGridFX-mac-source-gate
+          run-id: 36461019413
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/pinned-candidate
+      - name: Package clean updater with byte-identical pinned candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/package_authorized_update.py "$RUNNER_TEMP/pinned-candidate/dist/mac/ElasticGrid.plugin.zip" "$RUNNER_TEMP/ElasticGridFX-Test-Update.zip" | tee "$RUNNER_TEMP/update-evidence/package.json"
+      - name: Retain package and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-update-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/update-evidence/
+            ${{ runner.temp }}/ElasticGridFX-Test-Update.zip
