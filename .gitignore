@@ -7,6 +7,7 @@ build-*/
 *.plugin
 *.pdb
 host-rust/target/
+target-*/
 dist/
 __pycache__/
 *.py[cod]
