@@ -54,3 +54,48 @@ The clean-room project uses the binary as a behavior/compatibility reference. Re
 - Metal-first macOS GPU plan;
 - explicit MFR/thread-safety design;
 - no bundled third-party licensing code.
+
+
+## 2026-09-28 — SmartFX selector decomposition
+
+The supplied binary was decomposed far enough to map the render selectors and their parameter dependencies.
+
+Confirmed command handlers:
+- `PF_Cmd_PARAMS_SETUP` -> function at image VA `0x180005380`
+- `PF_Cmd_EVENT` -> function at image VA `0x180011390`
+- `PF_Cmd_SMART_PRE_RENDER` -> inline handler at `0x18000ed01`
+- `PF_Cmd_SMART_RENDER` -> function at image VA `0x1800066d0`
+
+The original Smart Render handler explicitly performs host parameter checkouts before rendering and checkins afterward. The observed parameter indices are:
+
+`4, 10, 11, 12, 15, 16, 17, 18, 19, 22, 23, 24, 25, 26, 29, 30`
+
+Using the recovered ParamsSetup order, these correspond to:
+- Grid Positions;
+- Min Line Spacing;
+- Stretch Easing;
+- Easing Distance;
+- Wave Amplitude/Frequency/Phase/Speed/Axis;
+- Enable Visualization;
+- Column Stroke Color;
+- Row Stroke Color;
+- Stroke Width;
+- Opacity;
+- Edge Behavior;
+- Render Quality.
+
+Notably, Tension Radius, Falloff Profile and Elasticity Strength are not Smart Render inputs; they affect guide dragging/state construction rather than pixel evaluation.
+
+This is a materially stronger result than string-level inspection: the original does **not** rely on the normal `params[]` array during Smart Render. It checks non-layer parameters out from the host for the current render time.
+
+### Cross-check against Adobe/open-source reference code
+
+Adobe's SmartFX contract requires non-layer render parameters to be obtained through parameter checkout because Smart Pre-Render/Smart Render do not receive the ordinary parameter array. Adobe's ColorGrid sample follows the same pattern: it checks its arbitrary-data parameter out during Smart Render and renders from that checked value.
+
+The current ElasticGrid live failure is consistent with violating this contract: the custom UI changed GridState, while Smart Render read the ordinary Rust parameter view instead of a render-time checkout.
+
+The next implementation step is therefore contract-level, not another image-warp tweak:
+1. Smart Render will checkout the exact render dependencies above.
+2. Pixel evaluation will use only those checked values.
+3. Custom UI mutation will explicitly invalidate the host view in addition to marking the arbitrary parameter changed.
+4. Automated source gates will reject direct Smart Render reads from the ordinary parameter array.
