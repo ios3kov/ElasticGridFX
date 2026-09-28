@@ -60,3 +60,22 @@ New automated regression checks cover:
 - ROI/full-frame visualization spatial equivalence.
 
 Metal remains intentionally disabled in the live parity gate until CPU behavior is proven; GPU Visualization parity is a later gate.
+
+
+## SmartPreRender / drag parity correction — 2026-09-28
+
+Static decomposition of the original closed two more host-level mismatches.
+
+SmartPreRender now mirrors GridWarp:
+- checks out source rect `0,0,PF_InData.width,PF_InData.height`;
+- does not multiply source dimensions by downsample;
+- sets `preserve_rgb_of_zero_alpha = TRUE`;
+- unions host checkout result/max rectangles;
+- clips result rect to the original output request.
+
+Guide drag now mirrors the original event contract:
+- arbitrary Grid Positions is marked changed by the parameter write;
+- event flags are exactly `HANDLED_EVENT | UPDATE_NOW`;
+- the previous extra `ALWAYS_UPDATE` and App-suite invalidate call were removed.
+
+The hot-reload generation token remains as an intentional shell-only extension in pre-render data.

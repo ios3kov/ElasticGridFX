@@ -26,12 +26,30 @@ required = [
     "params.checkout(Params::Opacity)",
     "params.checkout(Params::EdgeMode)",
     "params.checkout(Params::Quality)",
-    "invalidate_rect(event.context_handle(), None)",
 ]
 for item in required:
-    target = ui if item.startswith("invalidate_rect") else lib
-    if item not in target:
+    if item not in lib:
         raise SystemExit(f"missing SmartFX/original contract evidence: {item}")
+
+for item in [
+    "request.rect = full_source.into()",
+    "request.preserve_rgb_of_zero_alpha = 1",
+    "right: in_data.width().max(1)",
+    "bottom: in_data.height().max(1)",
+    "max_rect.union(&full_source)",
+]:
+    if item not in lib:
+        raise SystemExit(f"missing original SmartPreRender contract: {item}")
+
+if "rendered_canvas(in_data)" in lib[lib.find("ae::Command::SmartPreRender"):lib.find("ae::Command::SmartRender { extra } =>")]:
+    raise SystemExit("SmartPreRender still uses downsampled canvas instead of full PF_InData dimensions")
+
+if "ae::EventOutFlags::ALWAYS_UPDATE" in ui:
+    raise SystemExit("drag path still sets ALWAYS_UPDATE; original returns event flags 0x9")
+if "invalidate_rect(event.context_handle()" in ui:
+    raise SystemExit("drag path still uses extra App-suite invalidation absent from original")
+if "ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW" not in ui:
+    raise SystemExit("missing exact original drag event flags")
 
 if "checkout_smart_render_dependencies" in lib:
     raise SystemExit("obsolete dropped SmartPreRender checkout helper still present")
@@ -48,4 +66,4 @@ for forbidden in ["grid_snapshot(params)", "evaluated_params(params"]:
 if "checkout_smart_render_state(params)" not in smart:
     raise SystemExit("SmartRender does not use render-time checked state")
 
-print("SmartFX contract: PASS render-time host checkouts + UI invalidation")
+print("SmartFX contract: PASS render-time checkouts + full-source pre-render + original drag flags")

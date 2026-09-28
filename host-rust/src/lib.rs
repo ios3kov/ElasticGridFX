@@ -1093,32 +1093,58 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::SmartPreRender { mut extra } => {
                 let output_request = extra.output_request();
-                let (cw, ch) = rendered_canvas(in_data);
-                // Correctness-first SmartFX checkout: a guide warp can pull
-                // pixels across cell boundaries, and bicubic filtering needs
-                // neighboring taps. Always checkout the complete source canvas
-                // until the ROI implementation is proven seam-free in AE.
-                let source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
+
+                // Exact GridWarp/Adobe distortion contract: request the full
+                // source-layer extent, not a downsampled guess, and preserve
+                // RGB under zero alpha because the warp may sample it.
+                let full_source = ae::Rect {
+                    left: 0,
+                    top: 0,
+                    right: in_data.width().max(1),
+                    bottom: in_data.height().max(1),
+                };
                 let mut request = output_request;
-                request.rect.left = source_rect.left;
-                request.rect.top = source_rect.top;
-                request.rect.right = source_rect.right;
-                request.rect.bottom = source_rect.bottom;
+                request.rect = full_source.into();
+                request.preserve_rgb_of_zero_alpha = 1;
+
                 let input = extra.callbacks().checkout_layer(
-                    0, 0, &request,
-                    in_data.current_time(), in_data.time_step(), in_data.time_scale(),
+                    0,
+                    0,
+                    &request,
+                    in_data.current_time(),
+                    in_data.time_step(),
+                    in_data.time_scale(),
                 )?;
 
-                // A grid warp can redistribute content anywhere inside the fixed
-                // layer canvas, so result bounds must not be inherited from the
-                // smaller input alpha bounds. Keep current result conservative and
-                // max bounds stable across render requests.
-                extra.set_result_rect(output_request.rect.into());
-                let mut max_rect = ae::Rect { left: 0, top: 0, right: cw, bottom: ch };
+                // The original unions the host checkout rectangles, then clips
+                // result_rect back to the original output request.
+                let input_result: ae::Rect = input.result_rect.into();
                 let input_max: ae::Rect = input.max_result_rect.into();
+
+                let mut result_rect = extra.result_rect();
+                result_rect.union(&input_result);
+                let requested: ae::Rect = output_request.rect.into();
+                result_rect.left = result_rect.left.max(requested.left);
+                result_rect.top = result_rect.top.max(requested.top);
+                result_rect.right = result_rect.right.min(requested.right);
+                result_rect.bottom = result_rect.bottom.min(requested.bottom);
+                if result_rect.left > result_rect.right {
+                    result_rect.right = result_rect.left;
+                }
+                if result_rect.top > result_rect.bottom {
+                    result_rect.bottom = result_rect.top;
+                }
+                extra.set_result_rect(result_rect);
+
+                let mut max_rect = extra.max_result_rect();
                 max_rect.union(&input_max);
+                max_rect.union(&full_source);
                 extra.set_max_result_rect(max_rect);
-                extra.set_pre_render_data(HotReloadPreRenderState { generation: hot_reload_generation() });
+
+                // Extension required only by the stable hot-reload shell.
+                extra.set_pre_render_data(HotReloadPreRenderState {
+                    generation: hot_reload_generation(),
+                });
                 #[cfg(target_os = "macos")]
                 extra.set_gpu_render_possible(false);
             }
