@@ -1,0 +1,63 @@
+name: Final validation
+
+on:
+  push:
+    branches: [fix/final-validation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: final-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Record immutable source snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/elasticgrid-evidence"
+          git diff --exit-code
+          git diff --cached --exit-code
+          git rev-parse HEAD > "$RUNNER_TEMP/elasticgrid-evidence/COMMIT.txt"
+          git bundle create "$RUNNER_TEMP/elasticgrid-evidence/source.bundle" HEAD
+          git bundle verify "$RUNNER_TEMP/elasticgrid-evidence/source.bundle"
+          sha256sum "$RUNNER_TEMP/elasticgrid-evidence/source.bundle" > "$RUNNER_TEMP/elasticgrid-evidence/source.sha256"
+          printf 'Test Run ID: %s-%s\nAE runtime: NOT RUN (Linux runner)\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$RUNNER_TEMP/elasticgrid-evidence/scope.txt"
+      - name: Preserve source for reproducible diagnosis
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-source-${{ github.sha }}
+          path: ${{ runner.temp }}/elasticgrid-evidence/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Configure clean portable build
+        run: cmake -S . -B build-final-validation -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
+      - name: Build
+        run: cmake --build build-final-validation --parallel 2
+      - name: Test
+        shell: bash
+        run: |
+          set -euo pipefail
+          ctest --test-dir build-final-validation --output-on-failure --output-junit "$RUNNER_TEMP/elasticgrid-evidence/portable.xml" 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/portable.log"
+      - name: Preserve actual test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-validation-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/elasticgrid-evidence/COMMIT.txt
+            ${{ runner.temp }}/elasticgrid-evidence/scope.txt
+            ${{ runner.temp }}/elasticgrid-evidence/portable.*
+            build-final-validation/Testing/Temporary/LastTest.log
+          if-no-files-found: error
+          retention-days: 30
