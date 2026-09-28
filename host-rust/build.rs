@@ -1,4 +1,5 @@
 use pipl::*;
+use std::process::Command;
 use std::path::PathBuf;
 
 const PF_PLUG_IN_VERSION: u16 = 13;
@@ -42,6 +43,20 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
+    let rustc = std::env::var("RUSTC").unwrap_or_else(|_| "rustc".to_string());
+    let rustc_version = Command::new(rustc)
+        .arg("--version")
+        .output()
+        .ok()
+        .and_then(|out| String::from_utf8(out.stdout).ok())
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|| "rustc-unknown".to_string());
+    let target = std::env::var("TARGET").unwrap_or_else(|_| "target-unknown".to_string());
+    println!(
+        "cargo:rustc-env=AE_HOT_LOADER_RUNTIME_ABI={}|{}|after-effects=0.4.0",
+        rustc_version,
+        target
+    );
     println!("cargo:rerun-if-env-changed=AE_HOT_LOADER_IMPL_LABEL");
     // The after-effects 0.4.0 macro expands these cfg names in the destination
     // crate. Register them explicitly so modern rustc check-cfg / Clippy can
