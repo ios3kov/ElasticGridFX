@@ -52,6 +52,15 @@ jobs:
           set -euo pipefail
           cargo build --release --locked --manifest-path host-rust/Cargo.toml --target aarch64-apple-darwin
 
+      - name: Test implementation state contract
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot-default
+          AE_HOT_LOADER_IMPL_LABEL: elasticgrid-default
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: |
+          set -euo pipefail
+          cargo test --release --locked --manifest-path host-rust/Cargo.toml --target aarch64-apple-darwin
+
       - name: Build candidate implementation
         env:
           CARGO_TARGET_DIR: ${{ github.workspace }}/target-hot-candidate
