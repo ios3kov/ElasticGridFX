@@ -2,7 +2,7 @@
 
 Targets are engineering acceptance criteria, not marketing claims.
 
-## Current CPU development baseline
+## Historical CPU development baseline
 
 Linux/x86-64 development container, 3840×2160, full C bridge including grid/wave evaluation,
 LUT/sampling-plan preparation and pixel render. Repeated-run approximate values:
@@ -31,7 +31,7 @@ Apple Silicon uses a separate NEON/GCD CPU path. Real Mac numbers must come from
 
 ## Final render targets
 
-- default quality is `Final (Bicubic)`;
+- original-parity default quality is `Draft (Bilinear)`; `Better (Bicubic)` remains the higher-quality user option;
 - 4K Metal Final: < 20 ms/frame end-to-end backend target on supported Apple Silicon where practical;
 - same sampling indices/weights as CPU final path;
 - Multi-Frame Rendering remains enabled and deterministic.
@@ -56,3 +56,17 @@ The target is not met by reducing quality. If hardware cannot meet a timing targ
 
 Any comparison with GridWarp must use the same resolution, quality, bit depth, cache state,
 AE version and hardware. Record exact OS/CPU/GPU and project settings.
+
+
+## Current parity benchmark evidence — 2026-09-28
+
+GitHub-hosted Linux runner, Release/Clang, current visualization-capable CPU bridge:
+
+- 1080p 8-bpc Bilinear identity: ~0.174 ms/frame;
+- 1080p 8-bpc Bilinear deformed: ~2.50 ms/frame;
+- 1080p 8-bpc Bilinear deformed + rendered Visualization: ~2.67 ms/frame;
+- 1080p 8-bpc Bicubic deformed: ~3.34 ms/frame;
+- 4K 32-bpc Bicubic deformed with AE-style abort polling: ~11.9 ms/frame;
+- 4K GPU-plan generation: ~0.09 ms/frame.
+
+These are CI regression measurements, not product/Mac claims. Visualization adds roughly 0.18 ms/frame in that specific 1080p CI case. Real Apple Silicon / After Effects profiling remains mandatory before a performance claim.

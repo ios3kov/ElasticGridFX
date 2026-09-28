@@ -1,29 +1,40 @@
-# Project / Keyframe Compatibility — v0.9
+# Project / Keyframe Compatibility — current original-parity branch
+
+> Current source of truth for `feature/ae-hot-loader-shell`. Earlier v0.8/v0.9 notes are migration history only.
 
 ## Stable effect identity
 
 - Match name remains `com.elasticgrid.fx.warp`.
-- Existing `Params` enum variant names are frozen because the Rust AE host derives parameter IDs from those names. New parameters may be added, but existing variants must not be renamed.
+- Existing `Params` enum variant names are frozen because the Rust AE host derives parameter IDs from those names.
+- The current original-derived visible topology limit is **50 internal column guides / 50 internal row guides**.
 
 ## Grid Positions wire format
 
-`GridState` remains the same six-field serde/bincode struct shape used by v0.8. To add explicit migration without breaking old projects, the existing `columns: u16` field now carries a compact header:
+The current `GridState` keeps the same six top-level serde/bincode fields for migration, but the compact header is now **wire schema v3**.
 
-- v0.8 legacy: `columns = 1..128`;
-- v0.9+: bit 15 = versioned marker, bits 8..14 = schema version, low 8 bits = actual column count.
+Current v3 semantics:
+- `columns` / `rows` count internal guides;
+- each axis stores `N+2` normalized positions including the 0/1 boundaries;
+- new states keep boundary pins only;
+- maximum accepted current topology is 50 internal guides per axis.
 
-Current schema version is 1. The decoder accepts the legacy v0.8 form and schema v1, and rejects unknown future versions instead of silently misreading project data.
+The decoder also recognizes older v1/v2 payloads where they can be migrated safely. The abandoned 2D-mesh payload is reset to a valid uniform separable grid rather than misrendered.
+
+Unknown versions, oversized vectors, non-finite positions and noncanonical states are rejected.
 
 ## Keyframes
 
 - Same-topology GridState keyframes interpolate guide positions linearly.
-- Different topologies step at the midpoint; the separate Columns/Rows parameters remain the authoritative topology and `grid_snapshot` resizes state safely if they disagree.
-- Pin state steps at the midpoint rather than blending.
+- Different topologies step at the midpoint.
+- Columns/Rows remain authoritative for topology.
+- Pin state is canonicalized to boundary-only state in the current parity model.
 
 ## Undo / redo
 
-Viewer dragging writes GridState through `ArbitraryDef::set_value`, which sets After Effects `CHANGED_VALUE`; the event is marked handled/update-now. This keeps edits in the host parameter transaction path instead of mutating hidden global state. Real undo/redo behavior remains a target-AE runtime gate.
+Viewer dragging writes GridState through `ArbitraryDef::set_value`, which marks the arbitrary parameter changed. The original-derived event flags are exactly `HANDLED_EVENT | UPDATE_NOW`.
 
-## Migration rule for future releases
+Real Undo/Redo remains an After Effects runtime gate and is not claimed automatically.
 
-Never change the six top-level serialized field types/order. Increment the compact schema version and migrate the interpretation of existing fields (or encode additional version-specific payload inside one of the vector fields). Unknown schema versions must fail loudly rather than render incorrectly.
+## Migration rule
+
+Do not change the six top-level serialized field types/order without an explicit migration. Increment the wire schema version for incompatible interpretation changes. Unknown versions must fail rather than render incorrectly.
