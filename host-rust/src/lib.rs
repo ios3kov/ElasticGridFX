@@ -1117,6 +1117,31 @@ mod tests {
         }
     }
 
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn hot_reload_generation_and_creator_teardown_are_stable() {
+        use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
+
+        static DESTROY_CALLS: AtomicUsize = AtomicUsize::new(0);
+
+        unsafe extern "C" fn test_destroy(state: *mut c_void) {
+            assert_eq!(state as usize, 0x1234);
+            DESTROY_CALLS.fetch_add(1, AtomicOrdering::SeqCst);
+        }
+
+        AEHotLoader_SetGeneration(0xA5A5_0123_4567_89AB);
+        assert_eq!(hot_reload_generation(), 0xA5A5_0123_4567_89AB);
+
+        DESTROY_CALLS.store(0, AtomicOrdering::SeqCst);
+        let gpu = MetalGpuData {
+            state: 0x1234usize as *mut c_void,
+            generation: hot_reload_generation(),
+            destroy_fn: test_destroy,
+        };
+        drop(gpu);
+        assert_eq!(DESTROY_CALLS.load(AtomicOrdering::SeqCst), 1);
+    }
+
     #[test]
     fn grid_wire_roundtrip_and_legacy_migration() {
         let mut g = GridArb::uniform(7, 5);
