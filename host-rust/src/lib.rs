@@ -414,6 +414,119 @@ struct EgRenderParams {
     abort_refcon: *mut c_void,
 }
 
+#[derive(Clone, Debug)]
+struct SmartRenderSnapshot {
+    grid: GridArb,
+    tension_radius: f32,
+    falloff: i32,
+    elasticity_strength: f32,
+    min_spacing: f32,
+    stretch_easing: f32,
+    easing_distance: f32,
+    wave_amplitude: f32,
+    wave_frequency: f32,
+    wave_phase: f32,
+    wave_speed: f32,
+    wave_axis: i32,
+    edge_mode: i32,
+    quality: i32,
+    time_seconds: f32,
+}
+
+impl SmartRenderSnapshot {
+    fn render_params(&self, abort_refcon: *mut c_void) -> EgRenderParams {
+        EgRenderParams {
+            columns: self.grid.columns as i32,
+            rows: self.grid.rows as i32,
+            column_lines: self.grid.column_lines.as_ptr(),
+            column_line_count: self.grid.column_lines.len() as i32,
+            column_pins: self.grid.column_pins.as_ptr(),
+            row_lines: self.grid.row_lines.as_ptr(),
+            row_line_count: self.grid.row_lines.len() as i32,
+            row_pins: self.grid.row_pins.as_ptr(),
+            tension_radius: self.tension_radius,
+            falloff: self.falloff,
+            elasticity_strength: self.elasticity_strength,
+            min_spacing: self.min_spacing,
+            stretch_easing: self.stretch_easing,
+            easing_distance: self.easing_distance,
+            // Original GridWarp has no Wave Enable switch; amplitude=0 disables it.
+            wave_enabled: 1,
+            wave_amplitude: self.wave_amplitude,
+            wave_frequency: self.wave_frequency,
+            wave_phase: self.wave_phase,
+            wave_speed: self.wave_speed,
+            wave_axis: self.wave_axis,
+            edge_mode: self.edge_mode,
+            quality: self.quality,
+            time_seconds: self.time_seconds,
+            threads: 0,
+            canvas_width: 0,
+            canvas_height: 0,
+            input_origin_x: 0,
+            input_origin_y: 0,
+            output_origin_x: 0,
+            output_origin_y: 0,
+            abort_fn: Some(ae_abort_trampoline),
+            abort_refcon,
+        }
+    }
+}
+
+fn checked_slider(params: &ae::Parameters<Params>, param: Params) -> Result<i32, ae::Error> {
+    let checked = params.checkout(param)?;
+    Ok(checked.as_slider()?.value())
+}
+
+fn checked_float(params: &ae::Parameters<Params>, param: Params) -> Result<f64, ae::Error> {
+    let checked = params.checkout(param)?;
+    Ok(checked.as_float_slider()?.value())
+}
+
+fn checked_popup(params: &ae::Parameters<Params>, param: Params) -> Result<i32, ae::Error> {
+    let checked = params.checkout(param)?;
+    Ok(checked.as_popup()?.value())
+}
+
+fn smart_render_snapshot(
+    params: &ae::Parameters<Params>,
+    in_data: ae::InData,
+) -> Result<SmartRenderSnapshot, ae::Error> {
+    // PF_Cmd_SMART_PRE_RENDER / SMART_RENDER do not receive a valid normal
+    // parameter array. Every render dependency must be checked out here and
+    // copied into owned pre_render_data for the matching SmartRender call.
+    let columns = checked_slider(params, Params::Columns)?.clamp(1, MAX_GUIDES as i32) as usize;
+    let rows = checked_slider(params, Params::Rows)?.clamp(1, MAX_GUIDES as i32) as usize;
+    let grid = {
+        let checked = params.checkout(Params::GridState)?;
+        let value = checked.as_arbitrary()?.value::<GridArb>()?;
+        (*value).resized(columns, rows)
+    };
+    let time_seconds = if in_data.time_scale() != 0 {
+        in_data.current_time() as f32 / in_data.time_scale() as f32
+    } else {
+        0.0
+    };
+
+    Ok(SmartRenderSnapshot {
+        grid,
+        tension_radius: checked_float(params, Params::TensionRadius)? as f32,
+        falloff: checked_popup(params, Params::Falloff)?,
+        elasticity_strength: checked_float(params, Params::ElasticityStrength)? as f32 / 100.0,
+        min_spacing: checked_float(params, Params::MinSpacing)? as f32 / 100.0,
+        stretch_easing: checked_float(params, Params::StretchEasing)? as f32 / 100.0,
+        easing_distance: checked_float(params, Params::EasingDistance)? as f32 / 100.0,
+        wave_amplitude: checked_float(params, Params::WaveAmplitude)? as f32 / 100.0,
+        wave_frequency: checked_float(params, Params::WaveFrequency)? as f32,
+        wave_phase: checked_float(params, Params::WavePhase)? as f32,
+        wave_speed: checked_float(params, Params::WaveSpeed)? as f32,
+        wave_axis: checked_popup(params, Params::WaveAxis)?,
+        edge_mode: checked_popup(params, Params::EdgeMode)?,
+        quality: checked_popup(params, Params::Quality)?,
+        time_seconds,
+    })
+}
+
 #[repr(C)]
 pub(crate) struct EgElasticParams {
     pub(crate) tension_radius: f32,
@@ -719,26 +832,6 @@ fn render_metal(
     }
 }
 
-fn checkout_smart_render_dependencies(
-    in_data: ae::InData,
-    params: &ae::Parameters<Params>,
-) -> Result<(), ae::Error> {
-    const DEPS: &[Params] = &[
-        Params::Columns, Params::Rows, Params::GridState, Params::MinSpacing,
-        Params::StretchEasing, Params::EasingDistance, Params::WaveAmplitude,
-        Params::WaveFrequency, Params::WavePhase, Params::WaveSpeed,
-        Params::WaveAxis, Params::EdgeMode, Params::Quality,
-    ];
-    let interact = in_data.interact();
-    let mut checked = Vec::with_capacity(DEPS.len());
-    for &param in DEPS {
-        let index = params.index(param).ok_or(ae::Error::InvalidIndex)? as i32;
-        checked.push(interact.checkout_param(index, in_data.current_time(), in_data.time_step(), in_data.time_scale())?);
-    }
-    drop(checked);
-    Ok(())
-}
-
 impl AdobePluginGlobal for Plugin {
     fn params_setup(
         &self,
@@ -896,29 +989,28 @@ impl AdobePluginGlobal for Plugin {
                 render(&in_layer, &mut out_layer, &p)?;
             }
             ae::Command::SmartPreRender { mut extra } => {
-                checkout_smart_render_dependencies(in_data, params)?;
+                let snapshot = smart_render_snapshot(params, in_data)?;
                 let output_request = extra.output_request();
-                let output_rect = EgRectI32 {
-                    left: output_request.rect.left,
-                    top: output_request.rect.top,
-                    right: output_request.rect.right,
-                    bottom: output_request.rect.bottom,
-                };
                 let (cw, ch) = rendered_canvas(in_data);
+
                 // Correctness-first SmartFX checkout: a guide warp can pull
                 // pixels across cell boundaries, and bicubic filtering needs
                 // neighboring taps. Always checkout the complete source canvas
                 // until the ROI implementation is proven seam-free in AE.
-                let source_rect = EgRectI32 { left: 0, top: 0, right: cw, bottom: ch };
                 let mut request = output_request;
-                request.rect.left = source_rect.left;
-                request.rect.top = source_rect.top;
-                request.rect.right = source_rect.right;
-                request.rect.bottom = source_rect.bottom;
+                request.rect.left = 0;
+                request.rect.top = 0;
+                request.rect.right = cw;
+                request.rect.bottom = ch;
                 let input = extra.callbacks().checkout_layer(
                     0, 0, &request,
                     in_data.current_time(), in_data.time_step(), in_data.time_scale(),
                 )?;
+
+                // Store the exact checked-out parameter state used for this
+                // SmartFX request. SmartRender must not read the ordinary
+                // params array because AE does not provide valid values there.
+                extra.set_pre_render_data(snapshot);
 
                 // A grid warp can redistribute content anywhere inside the fixed
                 // layer canvas, so result bounds must not be inherited from the
@@ -933,6 +1025,9 @@ impl AdobePluginGlobal for Plugin {
                 extra.set_gpu_render_possible(false);
             }
             ae::Command::SmartRender { extra } => {
+                let snapshot = extra
+                    .pre_render_data::<SmartRenderSnapshot>()
+                    .ok_or(ae::Error::InternalStructDamaged)?;
                 let cb = extra.callbacks();
                 let Some(input) = cb.checkout_layer_pixels(0)? else {
                     return Ok(());
@@ -941,8 +1036,7 @@ impl AdobePluginGlobal for Plugin {
                 // captures all fallible work; checkin is performed unconditionally.
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(mut output) = cb.checkout_output()? {
-                        let grid = grid_snapshot(params)?;
-                        let mut p = evaluated_params(params, in_data, &grid)?;
+                        let mut p = snapshot.render_params(in_data.as_ptr() as *mut c_void);
                         apply_spatial_context(in_data, &input, &output, &mut p);
                         render(&input, &mut output, &p)?;
                     }
@@ -989,8 +1083,10 @@ impl AdobePluginGlobal for Plugin {
                 };
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(output) = cb.checkout_output()? {
-                        let grid = grid_snapshot(params)?;
-                        let mut p = evaluated_params(params, in_data, &grid)?;
+                        let snapshot = extra
+                            .pre_render_data::<SmartRenderSnapshot>()
+                            .ok_or(ae::Error::InternalStructDamaged)?;
+                        let mut p = snapshot.render_params(in_data.as_ptr() as *mut c_void);
                         apply_spatial_context(in_data, &input, &output, &mut p);
                         let gpu_data = extra.gpu_data::<MetalGpuData>().ok_or(ae::Error::InternalStructDamaged)?;
                         render_metal(in_data, &extra, input, output, &p, gpu_data)?;
@@ -1022,6 +1118,42 @@ mod tests {
         row_lines: Vec<f32>,
         column_pins: Vec<u8>,
         row_pins: Vec<u8>,
+    }
+
+    #[test]
+    fn smart_render_snapshot_preserves_deformed_grid() {
+        let mut grid = GridArb::uniform(4, 4);
+        grid.column_lines[2] = 0.47;
+        grid.row_lines[3] = 0.66;
+        assert!(grid.is_valid());
+
+        let snapshot = SmartRenderSnapshot {
+            grid: grid.clone(),
+            tension_radius: 3.0,
+            falloff: 2,
+            elasticity_strength: 1.0,
+            min_spacing: 0.005,
+            stretch_easing: 0.25,
+            easing_distance: 0.2,
+            wave_amplitude: 0.0,
+            wave_frequency: 1.0,
+            wave_phase: 0.0,
+            wave_speed: 0.0,
+            wave_axis: 1,
+            edge_mode: 1,
+            quality: 2,
+            time_seconds: 0.0,
+        };
+        let p = snapshot.render_params(std::ptr::null_mut());
+
+        assert_eq!(p.columns, 4);
+        assert_eq!(p.rows, 4);
+        assert_eq!(p.column_line_count as usize, grid.column_lines.len());
+        assert_eq!(p.row_line_count as usize, grid.row_lines.len());
+        unsafe {
+            assert_eq!(*p.column_lines.add(2), 0.47);
+            assert_eq!(*p.row_lines.add(3), 0.66);
+        }
     }
 
     fn legacy_from(g: &GridArb) -> LegacyGridArb {
