@@ -9,7 +9,7 @@ from authorized_update import PACKAGE_SHA
 
 ROOT=Path(__file__).resolve().parents[1]
 FILES=('UPDATE_ELASTICGRID_MAC.command','ROLLBACK_ELASTICGRID_MAC.command',
-       'tools/authorized_update.py','tools/build_identity.py','tools/install_candidate.py',
+       'tools/authorized_update.py','tools/xattr_reader.py','tools/build_identity.py','tools/install_candidate.py',
        'diagnostics/candidate-6d3b846.json','diagnostics/UPDATE_README_RU.txt')
 
 

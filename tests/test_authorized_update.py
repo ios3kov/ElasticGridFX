@@ -232,7 +232,8 @@ class MacUpdate(unittest.TestCase):
         source.write_text('const char* marker(void) { return "'+self.marker+'"; }\n')
         subprocess.run(['clang','-dynamiclib',str(source),'-o',str(self.new/'Contents/MacOS/ElasticGrid')],check=True,timeout=30)
         subprocess.run(['/usr/bin/codesign','--force','--sign','-',str(self.new)],check=True,timeout=30)
-        os.setxattr(self.old/'Contents/keep','com.elasticgrid.test-preserve',b'original metadata')
+        subprocess.run(['/usr/bin/xattr', '-w', 'com.elasticgrid.test-preserve', 'original metadata',
+                        str(self.old/'Contents/keep')], check=True, timeout=10)
         self.before=au.snapshot(self.old)
         self.seal()
         file,record=self.apply(swap=au.native_swap,verify_signature=au.signature)
@@ -240,7 +241,8 @@ class MacUpdate(unittest.TestCase):
         self.assertEqual(au.snapshot(file.parent/'previous.plugin'),self.before)
         self.rollback(swap=au.native_swap)
         self.assert_old()
-        self.assertEqual(os.getxattr(self.old/'Contents/keep','com.elasticgrid.test-preserve'),b'original metadata')
+        self.assertEqual(au.attribute_hashes(self.old/'Contents/keep')['com.elasticgrid.test-preserve'],
+                         bi.digest(b'original metadata'))
 
     def test_real_exchange_postcheck_failure_rolls_back(self):
         def postcheck(path):

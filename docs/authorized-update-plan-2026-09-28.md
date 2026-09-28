@@ -39,3 +39,19 @@ Primary references: Apple's xnu bsd/sys/stdio.h and bsd/man/man2/rename.2
 (RENAME_SWAP=2, RENAME_NOFOLLOW_ANY=16), Apple's APFS Tools and APIs guide.
 Python shutil documentation warns that copying cannot preserve all Mac metadata;
 retaining the original directory by atomic swap avoids that loss.
+
+## Native preflight correction
+
+The first macOS updater run 36469954226 (f706218) failed before any replacement:
+CPython exposes os.listxattr/getxattr only on Linux, not macOS. The gate is FAIL;
+no installable package was produced. A bounded read-only Darwin adapter now uses
+Apple's documented listxattr/getxattr signatures with XATTR_NOFOLLOW. Missing
+attributes APIs, errors, concurrent size changes and oversized values still fail,
+not silently drop metadata from the preservation snapshot. The Mac fixture sets
+its own test attribute with /usr/bin/xattr and verifies the retained hash after
+real swap/rollback. No user data, security settings or native plugin is changed.
+The new helper is included in package integrity metadata.
+
+Sources checked for this correction:
+- https://docs.python.org/3/library/os.html#linux-extended-attributes
+- https://raw.githubusercontent.com/apple-oss-distributions/xnu/main/bsd/sys/xattr.h

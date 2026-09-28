@@ -16,6 +16,7 @@ import uuid
 import zipfile
 
 import build_identity as bi
+from xattr_reader import attribute_hashes
 from install_candidate import checked_path, adobe_hosts_stopped, signature, install_lock
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,8 +55,7 @@ def snapshot(root: Path) -> dict:
         item = dict(mode=info.st_mode, uid=info.st_uid, gid=info.st_gid,
                     inode=info.st_ino, device=info.st_dev,
                     flags=getattr(info, 'st_flags', 0), mtime_ns=info.st_mtime_ns)
-        item['xattrs'] = {n: bi.digest(os.getxattr(path, n, follow_symlinks=False))
-                          for n in sorted(os.listxattr(path, follow_symlinks=False))}
+        item['xattrs'] = attribute_hashes(path)
         if stat.S_ISREG(info.st_mode):
             total += info.st_size
             if total > MAX_BYTES:
