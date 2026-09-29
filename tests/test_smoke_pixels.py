@@ -28,14 +28,18 @@ class SmokePixels(unittest.TestCase):
         cls.other = sp.Image(319,241,array('f',cls.base.pixels[4*13:]+cls.base.pixels[:4*13]))
 
     def validate(self, frames):
-        with patch.object(sp,'read_png',side_effect=lambda p:frames[p.stem]):
+        with patch.object(sp,'read_png',side_effect=lambda p:self.base if p.stem=='pattern' else frames[p.stem]):
             return sp.validate_frames(self.root)
 
     def frames(self):
+        moved=sp.Image(319,241,array('f',self.other.pixels))
+        for i in range(319*241):
+            if sp.corner_coverage(i%319+0.5,i//319+0.5)==-1:
+                moved.pixels[i*4+3]=0
         return dict(bypass=self.base,identity=self.base,static_a=self.changed,static_b=self.changed,
                     animated_a=self.changed,animated_b=self.other,reset=self.base,
                     chain_before_corner=self.changed,chain_corner_identity=self.changed,
-                    chain_corner_moved=self.other)
+                    chain_corner_moved=moved)
 
     def test_positive_fixture_passes_direct_and_corner_pin_checks(self):
         result=self.validate(self.frames())
@@ -43,13 +47,28 @@ class SmokePixels(unittest.TestCase):
         self.assertEqual(len(result['checks']),7)
 
     def test_passthrough_fails_despite_all_valid_pngs(self):
-        result=self.validate(dict.fromkeys(sp.FRAMES,self.base))
+        frames=self.frames()
+        for name in sp.FRAMES:
+            if name!='chain_corner_moved': frames[name]=self.base
+        result=self.validate(frames)
         self.assertEqual(result['status'],'FAIL')
         self.assertEqual(result['checks']['identity_static_a']['status'],'FAIL')
 
     def test_frozen_animation_fails(self):
         frames=self.frames(); frames['animated_b']=frames['animated_a']
         self.assertEqual(self.validate(frames)['status'],'FAIL')
+
+    def test_export_scale_requires_exact_bypass_calibration(self):
+        frames=self.frames()
+        frames={n:sp.Image(im.width,im.height,array('f',(v*0.1 if i%4!=3 else v for i,v in enumerate(im.pixels)))) for n,im in frames.items()}
+        self.assertEqual(self.validate(frames)['export_rgb_scale'],0.1)
+        frames['bypass'].pixels[0]+=0.01
+        with self.assertRaises(ValueError): self.validate(frames)
+
+    def test_corner_interior_hole_and_opaque_exterior_fail(self):
+        for index,value in ((120*319+160,0),(0,1)):
+            frames=self.frames(); frames['chain_corner_moved'].pixels[index*4+3]=value
+            with self.assertRaises(ValueError): self.validate(frames)
 
     def test_identity_corruption_and_failed_reset_fail(self):
         for name in ('identity','reset'):

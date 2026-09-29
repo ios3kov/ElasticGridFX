@@ -49,6 +49,7 @@ function run(options = {}) {
             if(options.revisionThrows) throw Error('host unavailable');
             return Object.hasOwn(options,'revision') ? options.revision : 1;
         },
+        workingSpace:'sRGB',linearizeWorkingSpace:true,
         _bpc:16, get bitsPerChannel() {return this._bpc;}, set bitsPerChannel(v) {calls.modified++; this._bpc=v;},
         importFile() {calls.modified++; return footage;},
         items:{addComp() {calls.modified++; return comp;}},
@@ -106,6 +107,8 @@ for (const options of [
     assert.equal(calls.frames[4].speed,0.5);
     assert.equal(calls.frames[6].amplitude,0);
     assert.equal(calls.removed,5); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
+    assert.equal(app.project.workingSpace,'sRGB');
+    assert.equal(app.project.linearizeWorkingSpace,true);
 }
 {
     const {app,calls,capture}=run({unknownDirty:true,revision:1});

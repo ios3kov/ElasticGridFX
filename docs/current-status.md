@@ -11,6 +11,26 @@ No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
 
+### Fixture calibration and Corner Pin oracle
+
+Target probe found inherited sRGB with linearizeWorkingSpace=true. The fixture
+now explicitly uses an unmanaged, non-linearized 32bpc project and restores
+the prior project color settings during cleanup. Solid source and its empty
+test-created folder are removed. The target probe confirmed zero remaining items.
+Report `EGFX-AE-46d6329b9e194f848626a9a0f3a7faa8` then established that every
+bypass RGB sample equals the known input times 0.1 within 2/65535; alpha is
+unchanged. This local observation is the basis for the export calibration,
+not an assumption that all AE exports behave this way. The comparator accepts
+only scale 1 or 0.1 and requires a full-pixel match against the effect-disabled
+fixture before applying that same scale to every frame. PNG remains an SDR
+smoke oracle, not HDR/extended-range proof. Arbitrary darkening is rejected.
+Moved Corner Pin uses the known four corners with opaque interior, transparent
+exterior and a 3px antialias exclusion band. Interior holes and opaque exterior
+are regression-tested. Other frames still require full opacity. Prior generic
+alpha/dynamic-range refusals remain historical BLOCKED reports. A fresh packaged
+run is required for the new oracle; successful retrospective analysis is not
+a replacement for that run.
+
 ### Target capture evidence after authorized project reset
 
 The user authorized discarding the empty unsaved test state on 2026-09-29.

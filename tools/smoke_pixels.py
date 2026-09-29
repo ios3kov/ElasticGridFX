@@ -150,16 +150,38 @@ def difference(a: Image, b: Image) -> dict:
 FRAMES = ('bypass', 'identity', 'static_a', 'static_b', 'animated_a', 'animated_b', 'reset',
           'chain_before_corner', 'chain_corner_identity', 'chain_corner_moved')
 
+def corner_coverage(x: float, y: float) -> int:
+    """Expected opaque interior / transparent exterior, excluding a 3px AA band."""
+    points = ((20,15),(299,25),(309,225),(10,220))
+    distances = []
+    for (ax,ay),(bx,by) in zip(points, points[1:]+points[:1]):
+        distances.append(((bx-ax)*(y-ay)-(by-ay)*(x-ax))/((bx-ax)**2+(by-ay)**2)**0.5)
+    return 1 if min(distances)>3 else (-1 if min(distances)<-3 else 0)
+
 
 def validate_frames(folder: Path) -> dict:
     images = {name: read_png(folder / (name+'.png')) for name in FRAMES}
     reference = images['bypass']
     if (reference.width, reference.height) != (319, 241):
         raise ValueError('unexpected smoke dimensions')
-    for image in images.values():
+    fixture = read_png(folder/'pattern.png')
+    # Calibrate only against the effect-disabled known input, never effect output.
+    # AE 25.6 saveFrameToPng at 32bpc can apply exactly 0.1 to RGB.
+    scales = [s for s in (1.0, 0.1) if all(
+        abs(a-b*(s if i%4!=3 else 1)) <= 2/65535
+        for i,(a,b) in enumerate(zip(reference.pixels,fixture.pixels)))]
+    if (fixture.width,fixture.height)!=(319,241) or len(scales)!=1:
+        raise ValueError('bypass does not match the known fixture/export calibration')
+    scale=scales[0]
+    images={name:Image(im.width,im.height,array('f',(v/scale if i%4!=3 else v for i,v in enumerate(im.pixels)))) for name,im in images.items()}
+    for name,image in images.items():
         ranges = [max(image.pixels[c::4])-min(image.pixels[c::4]) for c in range(3)]
-        if sum(r > 0.2 for r in ranges) < 2 or min(image.pixels[3::4]) < 0.99:
+        if sum(r > 0.2 for r in ranges) < 2:
             raise ValueError('blank/flat/transparent frame cannot prove deformation')
+        for i,alpha in enumerate(image.pixels[3::4]):
+            coverage=corner_coverage(i%image.width+0.5,i//image.width+0.5) if name=='chain_corner_moved' else 1
+            if (coverage==1 and alpha<0.99) or (coverage==-1 and alpha>0.01):
+                raise ValueError('unexpected alpha coverage: '+name)
     checks = {}
     for a, b, should_change in (('bypass','identity',False), ('identity','static_a',True),
                                 ('static_a','static_b',False), ('animated_a','animated_b',True),
@@ -170,4 +192,5 @@ def validate_frames(folder: Path) -> dict:
         passed = (diff['changed_fraction'] >= 0.01 and diff['mean_abs'] >= 0.001) if should_change else diff['max_abs'] <= 1.0/255.0 + 1e-7
         checks[a+'_'+b] = dict(status='PASS' if passed else 'FAIL', **diff)
     return dict(status='PASS' if all(v['status']=='PASS' for v in checks.values()) else 'FAIL',
+                export_rgb_scale=scale,
                 checks=checks, scope='PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification')
