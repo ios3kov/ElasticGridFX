@@ -67,6 +67,25 @@ A new reversible updater is pinned specifically to installed 6d3b846 -> fd69988;
 it refuses any different current payload and retains 6d3b846 as rollback.
 This still does not constitute AE runtime PASS.
 
+## Target-Mac acceptance attempt — installed candidate mismatch
+
+A corrected target acceptance launch on 2026-09-29 stopped before live-image
+sampling or JSX/pixel execution with:
+
+`BLOCKED: manifest identity mismatch`
+
+The runner had already verified its own pinned fd69988 manifest/package before
+reaching the installed-payload check. Therefore this evidence means the installed
+ElasticGrid payload does not match the pinned fd69988 BuildIdentity expected by
+Stage 7. No AE functional result can be inferred; status is **AE NOT RUN**.
+
+This is consistent with the last confirmed installation receipt in this branch,
+which identified 6d3b846 / EGFX-603e9d3e4025d271e0488201. Stage 7 now requires
+the existing reversible updater to move that exact installed candidate to the
+immutable fd69988 payload, retain 6d3b846 as rollback, then restart/open AE and
+rerun the corrected acceptance package. A successful installer receipt is
+required before the next functional attempt is counted.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first
