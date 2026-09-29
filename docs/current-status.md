@@ -81,6 +81,31 @@ ElasticGrid -> identity/moved Corner Pin pixel assertions. Its shared ZIP includ
 only sanitized summary and synthetic frames; raw process sample remains private.
 Release status stays BLOCKED even when this functional gate passes.
 
+## Stage 8 preparation while Stage 7 remains open
+
+Performance measurement tooling is prepared and source-verified, but no target
+performance measurement has run and Stage 8 is NOT started for acceptance.
+
+- `e51703b`: controlled aerender benchmark + report comparison.
+- `1a177da`: synthetic 1080p/4K, 8/16/32-bpc static/animated AE fixture generator.
+- `c432da6`: fixture ownership test made an explicit Final Validation gate.
+- The new gate found a mock-only null-project substitution bug; `67f9e8d`
+  fixes the test harness without changing production fixture code.
+- Exact-head Final Validation and all five PR CI jobs at `67f9e8d` PASS.
+
+The benchmark requires Final Bicubic, a pinned synthetic AEP hash, unique output
+directories, runtime Build ID from aerender, warmups plus at least five measured
+samples, wall/user/sys/peak-RSS evidence and matching fixture/MFR settings for
+comparison. Timing results never imply quality equivalence.
+
+Actual synthetic AE fixture generation, aerender measurements and RAM Preview
+profiling remain NOT RUN until Stage 7 target-AE functional acceptance passes.
+
+The Stage 7 plugin candidate remains immutable `fd69988` /
+`EGFX-f442513cb6528f14295d6d45`. Later docs/test-tooling commits change source
+identity and may produce different CI Build IDs if rebuilt; those builds are not
+substitutes for the pinned Stage 7 artifact.
+
 ## Next gates, in order
 
 1. SmartFX source now wires the tested sparse CPU renderer: logical canvas is
