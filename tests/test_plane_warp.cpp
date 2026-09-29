@@ -23,6 +23,17 @@ int main() {
     assert(warp->sourceFor({NAN,0}).status==PlaneMapStatus::InvalidProjection);
 
     auto identity=PlaneWarp::prepare(*plane,{0,.5f,1},{0,.5f,1},1,1);assert(identity);
+    auto projected=PlaneWarp::prepareProjected(*plane,{200,100},{0,.5f,1},{0,.5f,1});assert(projected);
+    assert(projected->projectsSource());
+    for(int i=0;i<=20;++i) for(int j=0;j<=20;++j) {
+        auto q=plane->toSurface({i/20.0,j/20.0});assert(q);
+        auto p=projected->sourceFor(*q);assert(p.source);
+        near(*p.source,{i*10.0,j*5.0}); // source image moves even with uniform guides
+    }
+    auto projectedWarp=PlaneWarp::prepareProjected(*plane,{200,100},{0,.75f,1},{0,.5f,1});assert(projectedWarp);
+    near(*projectedWarp->sourceFor(*destination).source,{100,50});
+    assert(!PlaneWarp::prepareProjected(*plane,{-1,100},{0,1},{0,1}));
+    assert(!PlaneWarp::prepareProjected(*plane,{200,INFINITY},{0,1},{0,1}));
     for(int i=0;i<=20;++i) for(int j=0;j<=20;++j) {
         auto q=plane->toSurface({i/20.0,j/20.0});assert(q);
         auto same=identity->sourceFor(*q);assert(same.source);

@@ -12,6 +12,15 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Latest user feedback — Stage 9 corrections required
+
+User confirmed basic drag/Undo/save behavior but supplied screenshots showing
+Four Corners does not project the image and the overlay does not follow the 3D
+layer. Therefore the historical automated PASS below does not establish the
+intended plane behavior. Requirements, five UX corrections and remaining tasks
+are recorded in `stage9-user-corrections.md`. New core implementation is in
+development; installed de31498 has not been replaced. Stage 9 remains OPEN.
+
 ### Current installed checkpoint — de31498
 
 2026-09-29: user explicitly requested installing the new build, recording current

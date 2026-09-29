@@ -48,6 +48,26 @@ template<typename T> void verify(int depth) {
 }
 int main(){
     verify<std::uint8_t>(8);verify<std::uint16_t>(16);verify<float>(32);
+    // A reduced/translated quad must project the source, not leave it stationary.
+    // Float markers include negative/HDR values; outside destination is transparent.
+    {
+        constexpr int n=9;
+        std::vector<float> src(n*n*4),dst(n*n*4,-99);
+        for(int y=0;y<n;y++)for(int x=0;x<n;x++){
+            auto k=(y*n+x)*4;src[k]=float(x)-2;src[k+1]=float(y);src[k+2]=2;src[k+3]=1;
+        }
+        float axis[]={0,1};
+        EgPlaneFrame frame{{2,2,6,2,6,6,2,6},axis,axis,2,2,1,1,n,n,0,0,0,0,0,.25f,nullptr,nullptr};
+        EgPlaneImage a{src.data(),n*4*sizeof(float),n,n},b{dst.data(),n*4*sizeof(float),n,n};
+        EgPlaneReport report{};
+        assert(eg_render_plane(&a,&b,32,&frame,&report)==0);
+        for(int y=0;y<n;y++)for(int x=0;x<n;x++){
+            auto k=(y*n+x)*4;
+            if(x<2||x>6||y<2||y>6)for(int c=0;c<4;c++)assert(dst[k+c]==0);
+            else {assert(std::abs(dst[k]-(2*(x-2)-2))<1e-6);assert(std::abs(dst[k+1]-2*(y-2))<1e-6);assert(dst[k+2]==2&&dst[k+3]==1);}
+        }
+        assert(report.outside_pixels==56);
+    }
     const double corners[]={10,20,180,35,130,160,-15,115};
     auto* geometry=eg_plane_geometry_create(corners);assert(geometry);
     for(int y=0;y<=20;++y) for(int x=0;x<=20;++x) {

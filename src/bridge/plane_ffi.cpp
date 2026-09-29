@@ -64,7 +64,10 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
         auto transform=eg::PlaneTransform::fromCorners(corners);
         std::optional<eg::PlaneWarp> warp;
         if(transform) {
-            warp=eg::PlaneWarp::prepare(*transform,{f->columns,f->columns+f->column_count},
+            warp=eg::PlaneWarp::prepareProjected(*transform,
+                {(static_cast<double>(f->canvas_width)-1)*f->surface_units_x,
+                 (static_cast<double>(f->canvas_height)-1)*f->surface_units_y},
+                {f->columns,f->columns+f->column_count},
                 {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
             if(!warp) return 1;
         }

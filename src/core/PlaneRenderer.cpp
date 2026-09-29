@@ -125,8 +125,20 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                         }
                     }
                 }
-                else if(mapped.status==PlaneMapStatus::OutsidePlane) ++report.outside_pixels;
-                else ++report.invalid_projection_pixels;
+                else if(mapped.status==PlaneMapStatus::OutsidePlane) {
+                    ++report.outside_pixels;
+                    if(warp->projectsSource()) {
+                        std::memcpy(pixel,zero,4*sizeof(T));
+                        continue;
+                    }
+                }
+                else {
+                    ++report.invalid_projection_pixels;
+                    if(warp->projectsSource()) {
+                        std::memcpy(pixel,zero,4*sizeof(T));
+                        continue;
+                    }
+                }
             }
             if(p.x==q.x && p.y==q.y) {
                 std::memcpy(pixel,sourcePixel(static_cast<int>(qx),static_cast<int>(qy)),4*sizeof(T));

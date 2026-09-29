@@ -29,6 +29,15 @@ std::optional<PlaneWarp> PlaneWarp::prepare(PlaneTransform transform,
     warp.easing_=easing; warp.easing_distance_=easing_distance;
     return warp;
 }
+std::optional<PlaneWarp> PlaneWarp::prepareProjected(PlaneTransform destination,
+    PlanePoint source_extent,std::vector<float> columns,std::vector<float> rows,
+    float easing,float easing_distance) {
+    if(!std::isfinite(source_extent.x) || !std::isfinite(source_extent.y) ||
+       source_extent.x<0 || source_extent.y<0) return std::nullopt;
+    auto warp=prepare(destination,std::move(columns),std::move(rows),easing,easing_distance);
+    if(warp) warp->source_extent_=source_extent;
+    return warp;
+}
 PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     auto local=transform_.toLocal(destination);
     if(!local) return {PlaneMapStatus::InvalidProjection,std::nullopt};
@@ -36,11 +45,17 @@ PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     constexpr double border=1e-10;
     if(local->x < -border || local->x > 1+border || local->y < -border || local->y > 1+border)
         return {PlaneMapStatus::OutsidePlane,std::nullopt};
-    if(identity_) return {PlaneMapStatus::Mapped,destination};
+    if(identity_ && !source_extent_) return {PlaneMapStatus::Mapped,destination};
+    if(source_extent_ && identity_) return {PlaneMapStatus::Mapped,PlanePoint{
+        std::clamp(local->x,0.0,1.0)*source_extent_->x,
+        std::clamp(local->y,0.0,1.0)*source_extent_->y}};
     const float x=static_cast<float>(std::clamp(local->x,0.0,1.0));
     const float y=static_cast<float>(std::clamp(local->y,0.0,1.0));
-    auto source=transform_.toSurface({inverseMapNormalized(x,columns_,easing_,easing_distance_),
-                                     inverseMapNormalized(y,rows_,easing_,easing_distance_)});
+    PlanePoint normalized{inverseMapNormalized(x,columns_,easing_,easing_distance_),
+                          inverseMapNormalized(y,rows_,easing_,easing_distance_)};
+    if(source_extent_) return {PlaneMapStatus::Mapped,PlanePoint{
+        normalized.x*source_extent_->x,normalized.y*source_extent_->y}};
+    auto source=transform_.toSurface(normalized);
     if(!source) return {PlaneMapStatus::InvalidProjection,std::nullopt};
     return {PlaneMapStatus::Mapped,source};
 }
