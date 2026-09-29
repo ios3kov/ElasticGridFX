@@ -45,6 +45,7 @@ class PlanePixels(unittest.TestCase):
             frames[p+'original'] = self.base
             frames[p+'identity'] = self.base
             frames[p+'skew-identity'] = projected
+            frames[p+'native-skew'] = projected
             frames[p+'legacy-wave'] = a
             frames[p+'plane-wave'] = a
             frames[p+'skew-wave'] = b

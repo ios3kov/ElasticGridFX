@@ -62,6 +62,26 @@ Evidence: local `outputs/plane-acceptance/EGFX-PLANE-8af1eccd07904f00a0257b54f5d
 Next: controlled native-effect/reference test to distinguish host quantization
 from plugin sampling before changing implementation or acceptance tolerances.
 
+### Native Corner Pin comparison — diagnostic evidence, not acceptance PASS
+
+Run `EGFX-PLANE-7320acf3e2ed43488cf15d7582114f2d` on unchanged 099e492 adds
+three native Corner Pin frames (40 total). ElasticGrid is disabled for each native
+capture; native points use the same quad, then the reference effect is removed
+and ElasticGrid is reacquired/enabled. Loaded identity PASS, cleanup CLEAN.
+
+The independent oracle also fails for **native Corner Pin at 8 bpc**:
+maximum error 0.026762 versus ElasticGrid's 0.024958. Native 16/32 bpc maximum
+error ~0.008018, both PASS; ElasticGrid 16/32 bpc also PASS. Exterior alpha zero.
+Native source-boundary/sampling conventions differ, so exact pixel equality is
+not asserted. This demonstrates the low-light discrepancy is not unique to
+ElasticGrid, but does not establish its precise color/quantization cause.
+
+The 0.02 bound and overall FAIL are preserved. Reference diagnostics cannot turn
+a failed plugin assertion into PASS. Evidence is the same-named local ZIP under
+`outputs/plane-acceptance/`. Next: record/control the owned project's color context
+and isolate quantization before revising any oracle assumptions. The production
+plugin and installation were not changed.
+
 Stage 9 remains OPEN: native 3D overlay alignment/hit testing, native corner target
 visibility, legacy AEP migration and explicit zero-wave skew validation remain.
 Baseline 3D image-change checks are not overlay evidence. No release/main merge.

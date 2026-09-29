@@ -113,6 +113,15 @@ function elasticGridPlaneSmoke(config) {
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-original");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-identity");
             corners(skew);capture("d"+depth+"-skew-identity");corners(fit);
+            // Diagnostic host reference, not an equality oracle: Adobe's
+            // default source boundary convention can differ by one pixel.
+            fx.enabled=false;
+            var nativePin=layer.property("ADBE Effect Parade").addProperty("ADBE Corner Pin");
+            check(nativePin!==null,"Native Corner Pin unavailable");
+            nativePin.property(1).setValue(skew[0]);nativePin.property(2).setValue(skew[1]);
+            nativePin.property(3).setValue(skew[3]);nativePin.property(4).setValue(skew[2]);
+            capture("d"+depth+"-native-skew");
+            nativePin.remove();fx=findEffect(layer);check(fx!==null,"Effect lost after reference capture");fx.enabled=true;
             fx.property("Wave Amplitude").setValue(8);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-legacy-wave");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-plane-wave");

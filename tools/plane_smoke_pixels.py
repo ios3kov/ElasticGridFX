@@ -7,7 +7,7 @@ from smoke_pixels import Image, difference, read_png
 
 DEPTHS = (8, 16, 32)
 DEPTH_FRAMES = (
-    'original', 'identity', 'skew-identity', 'legacy-wave', 'plane-wave',
+    'original', 'identity', 'skew-identity', 'native-skew', 'legacy-wave', 'plane-wave',
     'skew-wave', 'invalid', 'half-identity', 'half-original',
 )
 EXTRA_FRAMES = (
@@ -122,6 +122,8 @@ def validate_plane_frames(folder: Path) -> dict:
         status=status,
         checks=checks,
         frames=len(images),
+        native_reference_diagnostics={str(depth): check_zero_wave_projection(
+            images[f'd{depth}-original'], images[f'd{depth}-native-skew']) for depth in DEPTHS},
         scope=('AE PNG plane pixels: 8/16/32 bpc identity/wave/skew/invalid/half-res, '
                'AEP save-reopen, 3D position/scale/rotation/parenting, active-camera motion/switch and no-camera fallback; '
                'not native guide drag/Undo/Redo or GPU parity'),
