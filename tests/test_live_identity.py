@@ -87,6 +87,13 @@ class LiveIdentity(unittest.TestCase):
         images=li.parse_sample(data,123,EXE)
         self.assertEqual(images[0]['uuid'],IMAGE_UUID)
 
+    def test_masked_header_still_requires_native_observation(self):
+        masked=report().replace('Path: '+EXE, 'Path: /Applications/*/Contents/MacOS/After Effects')
+        with self.assertRaises(li.Blocked):
+            li.parse_sample(masked,123,EXE)
+        images=li.parse_sample(masked,123,EXE,path_lookup=lambda address: EXE)
+        self.assertEqual(images[0]['uuid'],IMAGE_UUID)
+
     def test_masked_candidate_path_accepts_system_data_alias(self):
         reported='/Users/*/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'
         observed='/System/Volumes/Data/Users/alice/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'

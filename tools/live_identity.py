@@ -193,8 +193,16 @@ def parse_sample(text: str, pid: int, executable: str, *, path_lookup=None) -> l
     paths = re.findall(r'^Path:\s+(.+?)\s*$', header, re.M)
     if pids != [str(pid)] or len(paths) != 1:
         raise Blocked('Sample belongs to a different process')
-    if not path_text_consistent(paths[0], executable):
-        if (path_lookup is None or not path_text_consistent(paths[0], path_lookup(None))):
+    header_path = paths[0]
+    if '*' in header_path:
+        if path_lookup is None:
+            raise Blocked('Masked process path requires independent native observation')
+        native_process = path_lookup(None)
+        if (not masked_path_consistent(header_path, native_process)
+                or not path_text_consistent(native_process, executable)):
+            raise Blocked('Sample belongs to a different process')
+    elif not path_text_consistent(header_path, executable):
+        if path_lookup is None or not path_text_consistent(path_lookup(None), executable):
             raise Blocked('Sample belongs to a different process')
     result = []
     for line in table.splitlines():
@@ -270,6 +278,8 @@ def select_image(images: list[dict], binary: Path, expected_uuids: set[str]) -> 
     if len(relevant) != 1:
         raise Blocked('Candidate image missing or multiple copies loaded')
     image = relevant[0]
+    if '*' in image['path']:
+        raise Blocked('Masked image path requires independent native observation')
     if (not path_text_consistent(image['path'], str(binary))
             and not same_underlying_path(Path(image['path']), binary)):
         raise Blocked('Loaded image path differs from the candidate on disk')
