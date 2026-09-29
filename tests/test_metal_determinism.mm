@@ -4,6 +4,11 @@
 #include "bridge/elasticgrid_ffi.h"
 
 #include <atomic>
+// Test assertions (including reference renders) must execute in Release too.
+// This affects only this test translation unit, not production renderer flags.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <cmath>
 #include <cstddef>

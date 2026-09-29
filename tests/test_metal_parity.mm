@@ -4,6 +4,10 @@
 #include "bridge/elasticgrid_ffi.h"
 
 #include <algorithm>
+// Keep allocation/host guards active even in the optimized test executable.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <cmath>
 #include <cstddef>

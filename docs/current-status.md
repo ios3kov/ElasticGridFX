@@ -21,6 +21,11 @@ Moved the call to explicit checked execution without changing tolerance or any
 renderer code. All 18 parity cases now PASS, max_abs <= 4.76837e-7.
 Evidence: work/stage9-core/guide-install-metal-parity{,-fixed}.log.
 This is standalone Metal evidence, not AE acceptance; installation still pending.
+The determinism fixture had the same NDEBUG side-effect defect (reference renders
+skipped). Assertions now remain enabled in all three Metal test translation units,
+without changing production compile flags. Optimized sequential 384/concurrent
+256 determinism runs PASS; parity rerun PASS. These fixes invalidate neither the
+recorded failure nor the requirement to retest a clean final candidate.
 
 2026-09-29: markers enlarged from 5 to 10 frame units, retaining screen-space
 hit testing. Active viewer cursor uses open hand; guide capture uses closed hand
