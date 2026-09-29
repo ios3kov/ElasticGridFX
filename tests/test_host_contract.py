@@ -25,13 +25,16 @@ class HostContract(unittest.TestCase):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants), LEGACY + STAGE9_APPEND)
 
-        # Existing saved IDs must remain the exact prefix. Stage 9 may only append.
+        # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
-        self.assertEqual(direct, LEGACY + ['PlaneMode', 'ResetPlane'])
+        self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY)
+        self.assertEqual(direct[-1], 'Quality')
         for name in STAGE9_APPEND[1:-1]:
             self.assertIn(f'(Params::{name},', SETUP)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
+        self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
+        self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
         self.assertIn('["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]', block('Falloff'))
         self.assertIn('f.set_default(2)', block('Falloff'))
         # Ordinal 4 intentionally keeps the old Smoothstep fallback, not Cosine.
@@ -62,6 +65,15 @@ class HostContract(unittest.TestCase):
     def test_wire_version_remains_three(self):
         self.assertIn('const GRID_WIRE_VERSION: u16 = 3;', SOURCE)
         self.assertIn('const GRID_REFCON: u64 = 0x4547_4658_4752_4944;', SOURCE)
+
+    def test_plane_ui_mode_does_not_change_values(self):
+        plane = (ROOT / 'host-rust/src/plane.rs').read_text()
+        update = plane.split('pub(crate) fn update_ui', 1)[1].split('#[derive', 1)[0]
+        self.assertIn('Params::PlaneMode', update)
+        self.assertIn('ae::ParamUIFlags::DISABLED,!enabled', update)
+        self.assertIn('definition.update_param_ui()', update)
+        self.assertNotIn('set_value(', update)
+        self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(params)?', SOURCE)
 
     def test_smartfx_uses_sparse_logical_canvas_and_handles_empty_input(self):
         smart = SOURCE.split('ae::Command::SmartRender { extra } => {', 1)[1].split(

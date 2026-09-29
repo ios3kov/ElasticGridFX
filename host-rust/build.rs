@@ -183,6 +183,7 @@ fn main() {
             OutFlags::UseOutputExtent |
             OutFlags::NonParamVary |
             OutFlags::DeepColorAware |
+            OutFlags::SendUpdateParamsUI |
             OutFlags::CustomUI
         ),
         Property::AE_Effect_Global_OutFlags_2(out_flags2),

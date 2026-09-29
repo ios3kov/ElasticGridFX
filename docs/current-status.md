@@ -19,7 +19,11 @@ Four Corners does not project the image and the overlay does not follow the 3D
 layer. Therefore the historical automated PASS below does not establish the
 intended plane behavior. Requirements, five UX corrections and remaining tasks
 are recorded in `stage9-user-corrections.md`. New core implementation is in
-development; installed de31498 has not been replaced. Stage 9 remains OPEN.
+development; installed de31498 has not been replaced. UI source now includes
+square-pixel 3D camera projection/inverse hit-testing, Layer Plane naming,
+mode-dependent corner disabling and reordered controls with Render Quality last.
+Live alignment, native target hiding, non-square projection and legacy AEP loading
+remain unverified. Stage 9 remains OPEN.
 
 ### Current installed checkpoint — de31498
 

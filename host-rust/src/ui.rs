@@ -13,13 +13,18 @@ struct ViewPlane {
     geometry: Option<plane::Geometry>,
     width: f32,
     height: f32,
+    projection: Option<ui_projection::Projection>,
+    projection_unavailable: bool,
 }
 impl ViewPlane {
-    fn read(in_data: &ae::InData, params: &ae::Parameters<Params>) -> Result<Self, ae::Error> {
+    fn read(in_data: &ae::InData, params: &ae::Parameters<Params>, event: &ae::EventExtra) -> Result<Self, ae::Error> {
         let state = plane::State::read(params, in_data, false, false)?;
         let geometry = state.geometry();
+        let (projection,projection_unavailable)=match ui_projection::read(in_data,event) {
+            Ok(value)=>(value,false), Err(_)=>(None,true),
+        };
         Ok(Self {state, geometry, width: in_data.width().max(1) as f32,
-            height: in_data.height().max(1) as f32})
+            height: in_data.height().max(1) as f32, projection, projection_unavailable})
     }
     fn invalid(&self) -> bool { self.state.corners.is_some() && self.geometry.is_none() }
     fn local(&self, x: f32, y: f32) -> Option<(f32, f32)> {
@@ -37,7 +42,7 @@ fn grid_to_frame(in_data: &ae::InData, event: &ae::EventExtra, plane: &ViewPlane
             .ok_or(ae::Error::BadCallbackParameter)?;
         (x as f32,y as f32)
     } else {(x,y)};
-    layer_to_frame(in_data,event,x,y)
+    layer_to_frame(in_data,event,plane,x,y)
 }
 
 fn displayed_grid(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
@@ -138,20 +143,27 @@ fn column_crossings(in_data: &ae::InData, event: &ae::EventExtra,
 fn layer_to_frame(
     in_data: &ae::InData,
     event: &ae::EventExtra,
+    plane: &ViewPlane,
     x: f32,
     y: f32,
 ) -> Result<ae::drawbot::PointF32, ae::Error> {
     let unavailable=ae::drawbot::PointF32 {x:f32::NAN,y:f32::NAN};
+    if plane.projection_unavailable {return Ok(unavailable);}
     // AE's legacy UI conversion uses 16.16. Never saturate oversized corners
     // into a false on-screen position. Such points remain editable in the ECP.
     if !x.is_finite() || !y.is_finite() || x.abs()>32767.0 || y.abs()>32767.0 {
         return Ok(unavailable);
     }
+    let (x,y)=if let Some(projection)=&plane.projection {
+        let Some((x,y))=projection.forward(x as f64,y as f64) else {return Ok(unavailable);};
+        if x.abs()>32767.0||y.abs()>32767.0 {return Ok(unavailable);}
+        (x as f32,y as f32)
+    } else {(x,y)};
     let mut p = ae::sys::PF_FixedPoint {
         x: ae::Fixed::from(x).as_fixed(),
         y: ae::Fixed::from(y).as_fixed(),
     };
-    if event.window_type() == ae::WindowType::Comp &&
+    if plane.projection.is_none() && event.window_type() == ae::WindowType::Comp &&
         event.callbacks().layer_to_comp(in_data.current_time(), in_data.time_scale(), &mut p).is_err() {
         return Ok(unavailable);
     }
@@ -165,13 +177,20 @@ fn layer_to_frame(
 fn frame_to_layer(
     in_data: &ae::InData,
     event: &ae::EventExtra,
+    plane: &ViewPlane,
     p: ae::Point,
 ) -> Result<(f32, f32), ae::Error> {
+    if plane.projection_unavailable {return Err(ae::Error::BadCallbackParameter);}
     let mut fixed = ae::sys::PF_FixedPoint {
         x: ae::Fixed::from_int(p.h).as_fixed(),
         y: ae::Fixed::from_int(p.v).as_fixed(),
     };
     event.callbacks().frame_to_source(&mut fixed)?;
+    if let Some(projection)=&plane.projection {
+        return projection.backward(ae::Fixed::from_fixed(fixed.x).as_f32() as f64,
+                                   ae::Fixed::from_fixed(fixed.y).as_f32() as f64)
+            .map(|(x,y)|(x as f32,y as f32)).ok_or(ae::Error::BadCallbackParameter);
+    }
     if event.window_type() == ae::WindowType::Comp {
         event.callbacks().comp_to_layer(in_data.current_time(), in_data.time_scale(), &mut fixed)?;
     }
@@ -212,7 +231,7 @@ fn hit_test(
 
     if let Some(corners) = plane.state.corners {
         for i in 0..4 {
-            let p = layer_to_frame(in_data,event,corners[2*i] as f32,corners[2*i+1] as f32)?;
+            let p = layer_to_frame(in_data,event,plane,corners[2*i] as f32,corners[2*i+1] as f32)?;
             let d = ((mouse.h as f32-p.x).powi(2)+(mouse.v as f32-p.y).powi(2)).sqrt();
             if d <= HIT_SLOP && best.map(|v| d<v.0).unwrap_or(true) {best=Some((d,DRAG_CORNER,i));}
         }
@@ -275,7 +294,11 @@ fn draw_viewer(
     if event.in_flags().contains(ae::EventInFlags::DONT_DRAW) {
         return Ok(());
     }
-    let plane = ViewPlane::read(in_data, params)?;
+    let plane = ViewPlane::read(in_data, params, event)?;
+    if plane.projection_unavailable {
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
+        return Ok(());
+    }
     let grid = displayed_grid(in_data,params,&plane)?;
     let drawbot = event.context_handle().drawing_reference()?;
     let supplier = drawbot.supplier()?;
@@ -297,7 +320,7 @@ fn draw_viewer(
 
     if let Some(corners) = plane.state.corners {
         for i in 0..4 {
-            let p=layer_to_frame(in_data,event,corners[2*i] as f32,corners[2*i+1] as f32)?;
+            let p=layer_to_frame(in_data,event,&plane,corners[2*i] as f32,corners[2*i+1] as f32)?;
             // Four visible, frame-sized corner grips, including invalid quads so
             // the user can repair them. Native point controls remain available.
             let pts=[(p.x-5.0,p.y-5.0),(p.x+5.0,p.y-5.0),(p.x+5.0,p.y+5.0),(p.x-5.0,p.y+5.0)];
@@ -379,7 +402,7 @@ fn draw_effect_control(
     })?;
     let raw_id = build_identity::BUILD_ID.strip_prefix("EGFX-").unwrap_or(build_identity::BUILD_ID);
     let short_len = raw_id.len().min(12);
-    let plane=ViewPlane::read(in_data,params)?;
+    let plane=ViewPlane::read(in_data,params,event)?;
     let label = if plane.invalid() {"Invalid plane: original image".to_owned()}
         else {format!("{} × {}   EGFX-{}", grid.columns, grid.rows, &raw_id[..short_len])};
     let origin = ae::drawbot::PointF32 {
@@ -418,7 +441,7 @@ pub fn click(
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }
-    let plane=ViewPlane::read(in_data,params)?;
+    let plane=ViewPlane::read(in_data,params,event)?;
     let grid=displayed_grid(in_data,params,&plane)?;
     if let Some((axis, index)) = hit_test(in_data, &grid, &plane, event, event.screen_point())? {
         event.set_continue_refcon(0, axis as _);
@@ -457,11 +480,12 @@ fn drag_inner(
     }
     set_drag_cursor(true);
 
-    let Ok((layer_x, layer_y)) = frame_to_layer(in_data, event, event.screen_point()) else {
+    let plane=ViewPlane::read(in_data,params,event)?;
+    let Ok((layer_x, layer_y)) = frame_to_layer(in_data, event, &plane, event.screen_point()) else {
         event.set_send_drag(false);return Ok(());
     };
     if axis == DRAG_CORNER {
-        if index>=4 {event.set_send_drag(false);return Ok(());}
+        if index>=4 || plane.state.corners.is_none() {event.set_send_drag(false);return Ok(());}
         let mut param=params.get_mut(plane::CORNERS[index])?;
         param.as_point_mut()?.set_value((layer_x,layer_y));
         param.set_value_changed();
@@ -469,7 +493,6 @@ fn drag_inner(
         event.set_send_drag(!event.last_time());
         return Ok(());
     }
-    let plane=ViewPlane::read(in_data,params)?;
     let Some((local_x,local_y))=plane.local(layer_x,layer_y) else {
         event.set_send_drag(false);return Ok(());
     };
@@ -540,7 +563,7 @@ pub fn adjust_cursor(
     }
     let dragging = GUIDE_DRAGGING.get();
     if !dragging {
-        let plane=ViewPlane::read(in_data,params)?;
+        let plane=ViewPlane::read(in_data,params,event)?;
         let grid=displayed_grid(in_data,params,&plane)?;
         if hit_test(in_data, &grid, &plane, event, event.screen_point())?.is_none() {
             // Documented AdjustCursor handoff; never call PF_SetCursor(NONE).

@@ -61,3 +61,35 @@ not a release PASS. No new AE acceptance claim for these source changes.
 Remaining high-risk work: 3D viewer projection/inverse pointer coordinates and
 native point-control visibility; friendly panel ordering requires preserving disk
 IDs rather than relying on source registration order. No UI changes yet.
+
+## UI/projection source checkpoint (not target-AE acceptance)
+
+- UI projection now obtains the effect layer, converts effect time to composition
+  time, reads the layer-to-world and effect-camera matrices, inverts the row-vector
+  camera matrix and derives a planar homography. The same homography and inverse
+  drive drawn guides/corners and pointer conversion. Acquired afresh per event;
+  never used in pixel-render callbacks, so no second camera transform on content.
+- Layer viewer and ordinary 2D comp use their previous callback route. Invalid,
+  singular or behind-camera projection refuses hit/drag rather than mutating data.
+  Unknown projection hides the custom overlay instead of drawing a false screen
+  plane or raising a UI callback error.
+- Current prototype is deliberately restricted to square layer and composition
+  pixels; non-square 3D projection is not implemented/accepted. Orthographic/custom
+  views and host camera conventions still require native verification.
+- Layer Plane/Four Corners retain ordinal 1/2. Corners and Fit Layer are disabled
+  by default and updated from the mode via UpdateParamsUi, without value changes.
+  Custom grips already require Four Corners. Whether disabled native point
+  parameters also hide AE's built-in targets remains NOT RUN; do not mark this
+  requirement complete before observing a candidate in AE.
+- UI order is now plane/corners/reset, columns/rows/grid, elastic controls, wave,
+  edges, Render Quality last. Existing stream labels otherwise remain to avoid
+  breaking name-based expressions; enum Debug names (persistent ID inputs), enum
+  ordinals, popup values and wire schema are unchanged. Old AEP/keyframe loading
+  after this registration-order change remains an explicit native gate.
+
+Source checks: 200 Python tests PASS and 24 Rust tests PASS, including projection/inverse roundtrip, layer
+rotation/translation and rejection cases. Clippy PASS with the two pre-existing
+macro exceptions. These are not proof of live grid/layer alignment. No new bundle
+installed; de31498 remains the target machine's historical candidate.
+Scanner: review_required (exit 1), unchanged workflow/test findings only; not
+treated as a security or release PASS.

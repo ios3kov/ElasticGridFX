@@ -4,6 +4,17 @@ use std::ptr::NonNull;
 
 pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopRight,
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
+
+pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
+    let enabled=params.get(Params::PlaneMode)?.as_popup()?.value()==2;
+    for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
+        let current=params.get(id)?;
+        let mut definition=(*current).clone();
+        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,!enabled);
+        definition.update_param_ui()?;
+    }
+    Ok(())
+}
 #[derive(Clone, Debug, Default)]
 pub(crate) struct State { pub corners: Option<[f64; 8]> }
 impl State {

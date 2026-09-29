@@ -5,6 +5,7 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod ui_projection;
 mod plane;
 #[cfg(test)]
 mod plane_contract_tests;
@@ -918,6 +919,24 @@ impl AdobePluginGlobal for Plugin {
         in_data: ae::InData,
         _: ae::OutData,
     ) -> Result<(), ae::Error> {
+        // UI order is independent of persistent IDs (derived from unchanged Params names).
+        params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
+            f.set_options(&["Layer Plane", "Four Corners"]);
+            f.set_default(1); f.set_value(1);
+        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+        for (id, name, point) in [
+            (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
+            (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
+            (Params::PlaneBottomRight, "Plane Bottom Right", (100.0, 100.0)),
+            (Params::PlaneBottomLeft, "Plane Bottom Left", (0.0, 100.0)),
+        ] {
+            params.add_with_flags(id, name, ae::PointDef::setup(|f| {
+                f.set_default(point); f.set_restrict_bounds(false);
+            }), ae::ParamFlag::empty(), ae::ParamUIFlags::DISABLED)?;
+        }
+        params.add_with_flags(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
+            f.set_label("Fit Layer");
+        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::DISABLED)?;
         params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
             f.set_valid_max(MAX_GUIDES as i32);
@@ -1005,24 +1024,6 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
 
-        // Append only: old saved IDs, types and popup ordinals are unchanged.
-        params.add(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
-            f.set_options(&["Existing Grid", "Four Corners"]);
-            f.set_default(1); f.set_value(1);
-        }))?;
-        for (id, name, point) in [
-            (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
-            (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
-            (Params::PlaneBottomRight, "Plane Bottom Right", (100.0, 100.0)),
-            (Params::PlaneBottomLeft, "Plane Bottom Left", (0.0, 100.0)),
-        ] {
-            params.add(id, name, ae::PointDef::setup(|f| {
-                f.set_default(point); f.set_restrict_bounds(false);
-            }))?;
-        }
-        params.add(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
-            f.set_label("Fit Layer");
-        }))?;
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(
                 ae::CustomEventFlags::COMP |
@@ -1043,6 +1044,7 @@ impl AdobePluginGlobal for Plugin {
     ) -> Result<(), ae::Error> {
         match cmd {
             ae::Command::GlobalSetup => {
+                out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
                 // One noninteractive diagnostic per host setup, never per frame.
                 eprintln!("{}", build_identity::ABOUT.replace('\r', " | "));
             }
@@ -1050,6 +1052,10 @@ impl AdobePluginGlobal for Plugin {
                 out_data.set_return_msg(build_identity::ABOUT);
             }
             ae::Command::UserChangedParam { param_index } => {
+                if params.index(Params::PlaneMode)==Some(param_index) {
+                    plane::update_ui(params)?;
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
+                }
                 if params.index(Params::ResetPlane) == Some(param_index) {
                     // Layer-space last pixel centers match the legacy raster
                     // grid domain. UI command: never consult frame-only origin.
@@ -1069,6 +1075,7 @@ impl AdobePluginGlobal for Plugin {
 
                 }
             }
+            ae::Command::UpdateParamsUi => plane::update_ui(params)?,
             ae::Command::QueryDynamicFlags => {
                 // Wave animation uses current_time even when no parameter has a
                 // keyframe. Tell AE only when that time dependency is active,
