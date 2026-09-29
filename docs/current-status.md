@@ -14,6 +14,12 @@ safe AE restart (never discard unsaved work).
 
 ### Stage 9 requested guide UI affordances (source implementation)
 
+Real AE 25.6 test of installed efa9bf2 displayed the larger markers but exposed
+a modal `PF_CursorType invalid (0)` warning on deactivation. Acceptance FAIL.
+PF_SetCursor must not receive NONE on this target: reset now requests Arrow,
+and the Mac AppKit CUSTOM sentinel is returned only through AdjustCursor, never
+sent to the App suite. A new candidate and real-AE retest are required.
+
 Installation preparation found a pre-existing Release test defect:
 test_metal_parity.mm placed the CPU reference render inside assert, so NDEBUG
 removed the render and compared Metal against zeros (max_abs 1.50966, exit 4).

@@ -25,15 +25,22 @@ fn hand_cursor(dragging: bool) -> ae::CursorType {
 
 fn set_drag_cursor(dragging: bool) {
     GUIDE_DRAGGING.set(dragging);
+    let cursor = hand_cursor(dragging);
+    // AppKit already set the custom cursor. CUSTOM belongs in AdjustCursor's
+    // response; do not pass sentinel values to the host's PF_SetCursor suite.
+    if cursor == ae::CursorType::Custom {
+        return;
+    }
     if let Ok(app) = ae::pf::suites::App::new() {
-        let _ = app.set_cursor(hand_cursor(dragging));
+        let _ = app.set_cursor(cursor);
     }
 }
 
 pub fn release_cursor() {
     GUIDE_DRAGGING.set(false);
     if let Ok(app) = ae::pf::suites::App::new() {
-        let _ = app.set_cursor(ae::CursorType::None);
+        // AE 25.6 rejects NONE here with a modal PF_CursorType invalid (0).
+        let _ = app.set_cursor(ae::CursorType::Arrow);
     }
 }
 
