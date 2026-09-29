@@ -49,9 +49,18 @@ int eg_render_plane(const EgPlaneImage* source,const EgPlaneImage* output,
 int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge) noexcept {
+    return eg_render_plane_projected(source,output,depth,f,report,quality,edge,
+        f?(static_cast<double>(f->canvas_width)-1)*f->surface_units_x:0,
+        f?(static_cast<double>(f->canvas_height)-1)*f->surface_units_y:0);
+}
+int eg_render_plane_projected(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y) noexcept {
     if(!report) return 1;
     *report={};
-    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2) return 1;
+    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
+       !std::isfinite(source_extent_x) || !std::isfinite(source_extent_y) ||
+       source_extent_x<0 || source_extent_y<0) return 1;
     const int bytes=depth==8?1:depth==16?2:depth==32?4:0;
     if(!bytes) return 2;
     if(!viewValid(*source,bytes,true) || !viewValid(*output,bytes,false) ||
@@ -65,8 +74,7 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
         std::optional<eg::PlaneWarp> warp;
         if(transform) {
             warp=eg::PlaneWarp::prepareProjected(*transform,
-                {(static_cast<double>(f->canvas_width)-1)*f->surface_units_x,
-                 (static_cast<double>(f->canvas_height)-1)*f->surface_units_y},
+                {source_extent_x,source_extent_y},
                 {f->columns,f->columns+f->column_count},
                 {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
             if(!warp) return 1;

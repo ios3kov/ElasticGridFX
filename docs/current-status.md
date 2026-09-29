@@ -45,8 +45,16 @@ exited subsequently without force termination. Atomic replacement completed
 - Runner explicitly pins both historical and current candidates; no identity
   override or pixel threshold change. Six runner control-flow tests PASS.
 
-Next: isolate downsample coordinate/source-extent regression, add regression
-coverage, fix and create a NEW immutable candidate. Native overlay alignment,
+Source correction: preserve `(full layer dimension - 1) * downsample` as an
+owned render-snapshot source extent, rather than using rounded raster size minus
+one. Added explicit projected bridge entry point; old ABI and entry points are
+unchanged. A 128x96 half-resolution identity regression failed before this change
+and passes with the explicit 63.5x47.5 extent (both qualities, all edge modes).
+Local CTest 18/18 and Python 201/201 PASS; Rust ABI coverage also tests explicit
+extent and invalid input. Scanner retains existing workflow/test review findings.
+This is source evidence only; installed f842e8d remains the failed candidate.
+
+Next: create a NEW immutable candidate and repeat target-AE acceptance. Native overlay alignment,
 legacy AEP migration and zero-wave skew acceptance remain separate open gates.
 Do not treat baseline 3D render changes as proof of overlay alignment. Stage 9
 remains OPEN; release BLOCKED. Failed candidate remains installed for diagnosis.

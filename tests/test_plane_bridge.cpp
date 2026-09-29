@@ -48,6 +48,23 @@ template<typename T> void verify(int depth) {
 }
 int main(){
     verify<std::uint8_t>(8);verify<std::uint16_t>(16);verify<float>(32);
+    // AE scales the full-resolution endpoint (127 -> 63.5), not
+    // the rounded raster endpoint (64 - 1). A fit plane must stay identity.
+    {
+        constexpr int w=64,h=48;
+        std::vector<float> src(w*h*4),dst(w*h*4);
+        for(int i=0;i<w*h*4;++i)src[i]=float(i%97)/96;
+        float axis[]={0,1};
+        EgPlaneFrame frame{{0,0,63.5,0,63.5,47.5,0,47.5},axis,axis,2,2,1,1,w,h,0,0,0,0,0,.25f,nullptr,nullptr};
+        EgPlaneImage a{src.data(),w*4*sizeof(float),w,h},b{dst.data(),w*4*sizeof(float),w,h};
+        EgPlaneReport report{};
+        for(int quality=0;quality<2;++quality)for(int edge=0;edge<3;++edge){
+            assert(eg_render_plane_projected(&a,&b,32,&frame,&report,quality,edge,63.5,47.5)==0);
+            // Float bicubic arithmetic may round by a few ULPs; the original
+            // half-pixel compression differs by orders of magnitude more.
+            for(std::size_t i=0;i<src.size();++i)assert(std::abs(src[i]-dst[i])<2e-6f);
+        }
+    }
     // A reduced/translated quad must project the source, not leave it stationary.
     // Float markers include negative/HDR values; outside destination is transparent.
     {

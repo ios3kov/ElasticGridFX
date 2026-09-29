@@ -3,7 +3,7 @@ use super::plane::*;
 
 #[test]
 fn shared_geometry_roundtrip_and_owned_snapshot() {
-    let mut state=State {corners:Some([10.0,20.0,180.0,35.0,130.0,160.0,-15.0,115.0])};
+    let mut state=State {corners:Some([10.0,20.0,180.0,35.0,130.0,160.0,-15.0,115.0]), ..State::default()};
     let snapshot=state.clone();
     let geometry=snapshot.geometry().unwrap();
     state.corners=Some([0.0;8]);
@@ -58,6 +58,13 @@ fn plane_abi_layout_and_identity_roundtrip() {
     assert_eq!(unsafe {eg_render_plane(&src,&dst,32,&frame,&mut report)}, 0);
     assert_eq!(output, input);
     assert_eq!(report.invalid_plane, 0);
+    frame.corners = [0.0,0.0,2.5,0.0,2.5,2.5,0.0,2.5];
+    assert_eq!(unsafe {eg_render_plane_projected(&src,&dst,32,&frame,&mut report,1,0,2.5,2.5)},0);
+    for (actual,expected) in output.iter().zip(&input) {
+        assert!((actual-expected).abs()<1e-5);
+    }
+    assert_eq!(unsafe {eg_render_plane_projected(&src,&dst,32,&frame,&mut report,1,0,f64::NAN,2.5)},1);
+    frame.corners = [0.0,0.0,2.0,0.0,2.0,2.0,0.0,2.0];
     for quality in 0..2 {
         for edge in 0..3 {
             assert_eq!(unsafe {eg_render_plane_sampled(&src,&dst,32,&frame,&mut report,quality,edge)}, 0);

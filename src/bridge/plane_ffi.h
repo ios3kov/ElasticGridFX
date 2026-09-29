@@ -50,3 +50,10 @@ extern "C" int eg_render_plane(const EgPlaneImage* source, const EgPlaneImage* o
 extern "C" int eg_render_plane_sampled(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
     std::int32_t quality, std::int32_t edge) noexcept;
+
+// Explicit source endpoint in surface coordinates, before raster rounding.
+// AE supplies (full layer dimension - 1) * downsample. The old entry points
+// retain raster endpoint semantics for existing callers; frame ABI is unchanged.
+extern "C" int eg_render_plane_projected(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge, double source_extent_x, double source_extent_y) noexcept;
