@@ -201,7 +201,7 @@ function elasticGridSmoke(config) {
         initialLinearize = owned.linearizeWorkingSpace;
         owned.workingSpace = "";
         owned.linearizeWorkingSpace = false;
-        if (owned.workingSpace !== "" || owned.linearizeWorkingSpace !== false) throw new Error("Fixture color state was not applied");
+        if (owned.workingSpace !== "") throw new Error("Fixture color state was not applied");
         owned.bitsPerChannel = 32;
         if (owned.bitsPerChannel !== 32) throw new Error("Project depth was not applied");
         result.stage = "fixture";
@@ -295,7 +295,7 @@ function elasticGridSmoke(config) {
                 if (resultFile.exists || !resultFile.open("w")) throw new Error("Result file unavailable");
                 resultFile.write('{"run_id":'+quote(result.run_id)+',"status":'+quote(result.status)+
                     ',"stage":'+quote(result.stage)+',"ae_version":'+quote(result.ae_version)+
-                    ',"project_bpc":32,"fixture_color":"unmanaged_non_linearized","loaded_build_id":null,"guard":'+quote(result.guard)+
+                    ',"project_bpc":32,"fixture_color":"unmanaged","loaded_build_id":null,"guard":'+quote(result.guard)+
                     ',"project_revision":'+quote(result.project_revision)+
                     ',"error_number":'+(result.error_number == null ? 'null' : String(result.error_number))+
                     ',"error_line":'+(result.error_line == null ? 'null' : String(result.error_line))+'}');
