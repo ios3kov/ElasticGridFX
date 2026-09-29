@@ -54,3 +54,20 @@ production automatic binding. Stage 9 remains OPEN; render/picking and direct
 
 Rollback receipt EGFX-update-dc594d4c00c544d7b2e9ba2b67cfcaca is ROLLED_BACK;
 ordinary 1eed79a / EGFX-25e03a7ae1a9304311095c8e payload reverified byte-for-byte.
+
+## Deferred observation experiment
+
+Next hypothesis: parameters are readable after the apply operation returns,
+using a registered idle hook, not from SequenceSetup. Setup now only sets an
+atomic request; no PF handle survives the callback. One main-thread idle attempt
+per process reacquires the active layer and its second effect, restricted to
+the named owned text fixture and exact match name. It reads only stream count,
+disposes the acquired effect reference, logs once, and never changes parameters
+or expressions. Idle sleep scheduling is untouched. No continuous project scan.
+
+Acceptance: identified research candidate; add returns successfully; deferred
+journal reports 24 streams; removal in a separate JSX call succeeds; close the
+owned fixture without saving and restore ordinary installed payload. Tests must
+not reuse Property references across calls. Default build excludes all hooks.
+This experiment does not prove expression writes, Undo, non-interactive first
+render or a supported production initialization mechanism. Native run pending.

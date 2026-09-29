@@ -1,12 +1,62 @@
 //! Opt-in, read-only lifecycle experiment. Never shipped in the default build.
 //! Enable with RUSTFLAGS='--cfg fstr_lifecycle_probe' (recorded in build identity).
 use super::*;
+use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
 #[derive(Default)]
 pub(crate) struct Probe {
     id: Option<ae::aegp::PluginId>,
     records: Vec<String>,
     journal_entries: u8,
+    pending: Arc<AtomicBool>,
+}
+
+// One deferred observation per process. No PF effect handle crosses callbacks.
+struct Deferred { id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool }
+impl Deferred {
+    fn observe(&mut self) {
+        if self.consumed || !main_thread() || !self.pending.swap(false, Ordering::AcqRel) { return; }
+        self.consumed = true;
+        let result = self.inspect();
+        journal("idle", &format!("idle main: {result:?}"));
+    }
+    fn inspect(&self) -> Result<i32, ae::Error> {
+        let layers = ae::aegp::suites::Layer::new()?;
+        let layer = layers.active_layer()?.ok_or(ae::Error::BadCallbackParameter)?;
+        // Research fixture only; never inspect arbitrary active user effects.
+        if layers.layer_name(layer, self.id)?.0 != "__EGFX_TEST_TEXT" {
+            return Err(ae::Error::BadCallbackParameter);
+        }
+        let comp = layers.layer_parent_comp(layer)?;
+        let item = ae::aegp::suites::Comp::new()?.item_from_comp(comp)?;
+        let name = ae::aegp::suites::Item::new()?.item_name(item, self.id)?;
+        if name != "__EGFX_TEXT_b7c354d8976942c1ad5d9088d9222f30" {
+            return Err(ae::Error::BadCallbackParameter);
+        }
+        let effects = ae::aegp::suites::Effect::new()?;
+        if effects.layer_num_effects(layer)? != 2 { return Err(ae::Error::BadCallbackParameter); }
+        let effect = effects.layer_effect_by_index(layer, self.id, 1)?;
+        let result = (|| {
+            let key = effects.installed_key_from_layer_effect(effect)?;
+            if effects.effect_match_name(key)? != "com.elasticgrid.fx.warp" {
+                return Err(ae::Error::BadCallbackParameter);
+            }
+            ae::aegp::suites::Stream::new()?.effect_num_param_streams(effect)
+        })();
+        let disposed = effects.dispose_effect(effect);
+        match (result, disposed) { (Ok(n), Ok(())) => Ok(n), (Err(e), _) | (_, Err(e)) => Err(e) }
+    }
+}
+
+fn journal(index: &str, record: &str) {
+    #[cfg(target_os = "macos")] {
+        use std::io::Write;
+        use std::os::unix::fs::OpenOptionsExt;
+        let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{index}.txt", std::process::id()));
+        if let Ok(mut f) = std::fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(path) {
+            let _ = writeln!(f, "{}\n{}", build_identity::ABOUT, record);
+        }
+    }
 }
 
 #[cfg(target_os = "macos")]
@@ -27,7 +77,10 @@ impl Probe {
         };
         // Never acquire AEGP suites off the main thread, including resetup.
         let result = if !main_thread() { "worker: no AEGP calls".to_owned() }
-        else { match self.inspect(cmd, input) {
+        else if matches!(cmd, ae::Command::SequenceSetup) {
+            self.pending.store(true, Ordering::Release);
+            "main: deferred; no AEGP calls".to_owned()
+        } else { match self.inspect(cmd, input) {
             Ok(n) => format!("main: streams={n}"),
             Err(e) => format!("main: {e:?}"),
         }};
@@ -36,15 +89,8 @@ impl Probe {
         // No project names, contents, handles or coordinates are recorded.
         #[cfg(target_os = "macos")]
         if self.journal_entries < 4 {
-            use std::io::Write;
-            use std::os::unix::fs::OpenOptionsExt;
-            let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{}.txt",
-                std::process::id(), self.journal_entries));
+            journal(&self.journal_entries.to_string(), &record);
             self.journal_entries += 1;
-            if let Ok(mut f) = std::fs::OpenOptions::new().write(true).create_new(true)
-                .mode(0o600).open(path) {
-                let _ = writeln!(f, "{}\n{}", build_identity::ABOUT, record);
-            }
         }
         if self.records.len() == 4 { self.records.remove(0); }
         self.records.push(record);
@@ -54,6 +100,10 @@ impl Probe {
         if matches!(cmd, ae::Command::GlobalSetup) {
             self.id = Some(ae::aegp::suites::Utility::new()?
                 .register_with_aegp("com.elasticgrid.fx.warp")?);
+            let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;
+            ae::aegp::suites::RegisterNonAegp::new()?.register_idle_hook(id,
+                Box::new(|state: &mut Deferred, _| { state.observe(); Ok(()) }),
+                Deferred { id, pending: self.pending.clone(), consumed: false })?;
             return Ok(0);
         }
         let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;
