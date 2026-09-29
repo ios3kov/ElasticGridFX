@@ -12,6 +12,37 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 8 — initial measurements available; full performance gate open
 
+#### Bounded profile — PNG encoding observed, native bottleneck still unproven
+
+Runner `510ce07`, SHA-256
+`f505fa38eaff8d0c4602ecfe24a13dfa3639547b2d7801f467db90d3df0148b6`.
+Run `identity-probe-ef3b2cec0c39468e887d311686bea943`: PROFILE_CAPTURED,
+three one-second/10ms-interval samples after 5, 20 and 40 observed output files.
+Each confirmed the same owned aerendercore PID 69278, process key and fd69988
+Mach-O UUID. Final exit 0, exact payload before/after, 60 outputs with digest
+matching all twelve prior MFR-series runs. Instrumented time is not a benchmark.
+
+Thresholded leaf histograms show PNGIO longest_match counts 60/71/54,
+png_write_find_filter 5/absent/9 and deflate_slow absent/absent/8; color-conversion
+functions also appear. Waiting threads dominate raw counts. These counts are
+not CPU percentages; absence means below threshold or outside the short sample,
+not zero cost. The result supports investigating PNG export overhead before
+attributing the end-to-end baseline to native rendering. It does not yet prove
+the primary ElasticGrid bottleneck or justify a native optimization.
+
+Target UI inspection found an empty Untitled Project. Attempted fixture selection
+through the native Open dialog was cancelled without opening/saving a project.
+AE exposes only the window/menu accessibility tree, and observed UI automation
+latency is unsuitable for precise first-frame/cache-completion timings. RAM
+Preview remains NOT RUN; next step is a guarded host-side measurement of fresh
+frames (separately labelled from playback) and reliable lifecycle instrumentation,
+not timing delayed screenshots or using unverified menu IDs. No user cache purge.
+
+Evidence: exported `ElasticGridFX-Stage8-profile.json`; full raw samples remain
+private in the controlled workspace. Fourteen aerender tooling tests PASS,
+including malformed/thresholded histogram checks. Static audit remains
+review_required for existing unrelated workflow findings; not a release PASS.
+
 #### Serial requested-MFR comparison — 2026-09-29
 
 Runner commit `27241ee`, SHA-256
