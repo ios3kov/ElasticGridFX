@@ -50,4 +50,29 @@ int main() {
     // Invalid plane preserves even nonfinite input bit patterns (no resampling).
     input[0]=NAN;renderPlaneRGBAf(src,dst,nullptr);
     assert(!std::memcmp(input.data(),output.data(),4*sizeof(float)));
+    // Compact checkout equals a zero-filled canvas, including fractional border taps.
+    std::fill(input.begin(),input.end(),0);
+    std::vector<float> compact(3*16,0),tile(4*20,-777);
+    for(int y=0;y<3;++y) for(int x=0;x<3;++x) for(int c=0;c<4;++c) {
+        float v=c==3?.5f:static_cast<float>(x-y+c)*2;
+        compact[y*16+x*4+c]=v; input[(y+2)*stride+(x+3)*4+c]=v;
+    }
+    for(const PlaneWarp* selected:std::array<const PlaneWarp*,3>{&*fullwarp,&*identity,nullptr}) {
+        renderPlaneRGBAf(src,dst,selected);
+        renderPlaneRGBAfRegion({compact.data(),3,3,16},{reference.data(),n,n,stride},
+                               {n,n,3,2,0,0},selected);
+        for(int y=0;y<n;++y)
+            assert(!std::memcmp(&output[y*stride],&reference[y*stride],n*4*sizeof(float)));
+        renderPlaneRGBAfRegion({compact.data(),3,3,16},{tile.data(),4,4,20},
+                               {n,n,3,2,2,3},selected);
+        for(int y=0;y<4;++y) {
+            assert(!std::memcmp(&tile[y*20],&output[(y+3)*stride+2*4],16*sizeof(float)));
+            for(int i=16;i<20;++i) assert(tile[y*20+i]==-777);
+        }
+    }
+    renderPlaneRGBAfRegion({nullptr,0,0,0},dst,{n,n},&*fullwarp);
+    for(int y=0;y<n;++y) for(int i=0;i<n*4;++i) assert(output[y*stride+i]==0);
+    rejected=false;
+    try {renderPlaneRGBAfRegion(src,dst,{n,n,1,0,0,0},nullptr);}
+    catch(const std::invalid_argument&) {rejected=true;} assert(rejected);
 }

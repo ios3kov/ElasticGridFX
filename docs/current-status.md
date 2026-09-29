@@ -12,6 +12,20 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 9 initial geometry foundation
 
+Latest continuation: standalone float PlaneRenderer now supports compact source
+checkout and independently positioned output rectangles on a logical canvas.
+Missing checkout taps are transparent, not stretched. Empty input yields zero;
+outside/invalid-plane copying uses logical coordinates. Compact and zero-filled
+full inputs are tested bit-exact, including cropped output/padding. Regions
+extending outside the logical canvas are rejected explicitly; host integration,
+expanded output, PAR/downsample and 8/16-bpc remain open. No native installation.
+The initial new test failed to compile due to mixed pointer constness in a test
+initializer list; corrected the list type and reran the complete checks.
+Verification: 14/14 Release CTest targets and region test under ASan/UBSan PASS.
+Evidence: work/stage9-core/Testing/Temporary/LastTest.log, plane-region-sanitized,
+plane-region-audit.json. Static audit remains review_required for existing findings;
+no findings in changed renderer/test files. No full-AE acceptance is claimed.
+
 Latest slice: user approved outside/invalid-plane pass-through. Added standalone
 dense 32-bit float PlaneRenderer: a single Catmull-Rom sample after coordinate
 composition; exact copy outside/identity/invalid plane, structured fallback

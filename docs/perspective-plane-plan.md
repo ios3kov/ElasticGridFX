@@ -47,7 +47,17 @@ Cancellation is checked per row and can leave partial output, which callers must
 discard on RenderCancelled. The old separable renderer is unchanged.
 Tests: Final equivalence on a flat plane, fractional negative/HDR values, alpha,
 outside/invalid/identity copying, padding preservation, alias rejection and cancellation.
-Next: sparse canvas, PAR/downsampling, 8/16-bit adapters and actual host wiring.
+Sparse-canvas slice now implemented in standalone float renderer: source/output
+origins are independent of storage dimensions; cubic taps clamp against the logical
+canvas and absent checkout pixels read transparent zero. No allocation of a full
+zero-filled canvas is needed. A 0x0 source is valid; stored rectangles must lie
+inside a positive canvas, with nonempty output and valid strides/nonoverlap.
+Expanded rectangles outside that canvas are explicitly rejected pending host
+semantics, not implicitly stretched. Dense API delegates to the same region path.
+Tests require bit-exact compact/full-zero-filled equivalence for deformed,
+identity and invalid-plane states, tiled-output equivalence, padding preservation,
+empty input and malformed-region rejection.
+Next: expanded-canvas policy, PAR/downsampling, 8/16-bit adapters and actual host wiring.
 The new scalar float path is not yet compiled into the native plugin; no AE claim.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host

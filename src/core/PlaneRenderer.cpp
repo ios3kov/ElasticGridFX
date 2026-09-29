@@ -46,16 +46,37 @@ PlaneRenderReport renderPlaneRGBAf(const ConstImageRGBAf& src,const ImageRGBAf& 
                                    const PlaneWarp* warp,AbortFn abort,void* refcon) {
     if(src.width!=dst.width || src.height!=dst.height)
         throw std::invalid_argument("plane renderer requires same canvas");
-    auto se=endAddress(src.data,src.width,src.height,src.row_stride_floats);
+    return renderPlaneRGBAfRegion(src,dst,{src.width,src.height},warp,abort,refcon);
+}
+PlaneRenderReport renderPlaneRGBAfRegion(const ConstImageRGBAf& src,const ImageRGBAf& dst,
+    const PlaneCanvasRegion& region,const PlaneWarp* warp,AbortFn abort,void* refcon) {
+    auto fits=[](int origin,int extent,int canvas) {
+        return canvas>0 && origin>=0 && extent>=0 && origin<=canvas && extent<=canvas-origin;
+    };
+    if(!fits(region.source_x,src.width,region.canvas_width) ||
+       !fits(region.source_y,src.height,region.canvas_height) ||
+       !fits(region.output_x,dst.width,region.canvas_width) ||
+       !fits(region.output_y,dst.height,region.canvas_height) ||
+       ((src.width==0)!=(src.height==0)))
+        throw std::invalid_argument("invalid plane canvas region");
+    const bool empty=src.width==0;
+    auto se=empty?0:endAddress(src.data,src.width,src.height,src.row_stride_floats);
     auto de=endAddress(dst.data,dst.width,dst.height,dst.row_stride_floats);
-    if(reinterpret_cast<std::uintptr_t>(src.data)<de && reinterpret_cast<std::uintptr_t>(dst.data)<se)
+    if(!empty && reinterpret_cast<std::uintptr_t>(src.data)<de && reinterpret_cast<std::uintptr_t>(dst.data)<se)
         throw std::invalid_argument("overlapping plane image views");
+    const float zero[4]{};
+    auto sourcePixel=[&](int x,int y)->const float* {
+        if(empty || x<region.source_x || y<region.source_y ||
+           x-region.source_x>=src.width || y-region.source_y>=src.height) return zero;
+        return src.data+static_cast<std::ptrdiff_t>(y-region.source_y)*src.row_stride_floats+
+               static_cast<std::ptrdiff_t>(x-region.source_x)*4;
+    };
     PlaneRenderReport report;report.invalid_plane=!warp;
     for(int y=0;y<dst.height;++y) {
         if(abort && abort(refcon)) throw RenderCancelled{};
         auto out=dst.data+static_cast<std::ptrdiff_t>(y)*dst.row_stride_floats;
         for(int x=0;x<dst.width;++x) {
-            PlanePoint q{static_cast<double>(x),static_cast<double>(y)},p=q;
+            PlanePoint q{static_cast<double>(x+region.output_x),static_cast<double>(y+region.output_y)},p=q;
             if(warp) {
                 auto mapped=warp->sourceFor(q);
                 if(mapped.status==PlaneMapStatus::Mapped) p=*mapped.source;
@@ -64,17 +85,15 @@ PlaneRenderReport renderPlaneRGBAf(const ConstImageRGBAf& src,const ImageRGBAf& 
             }
             auto pixel=out+static_cast<std::ptrdiff_t>(x)*4;
             if(p.x==q.x && p.y==q.y) {
-                std::memcpy(pixel,src.data+static_cast<std::ptrdiff_t>(y)*src.row_stride_floats+
-                            static_cast<std::ptrdiff_t>(x)*4,4*sizeof(float));
+                std::memcpy(pixel,sourcePixel(x+region.output_x,y+region.output_y),4*sizeof(float));
                 continue;
             }
-            auto xs=taps(p.x,src.width),ys=taps(p.y,src.height);
+            auto xs=taps(p.x,region.canvas_width),ys=taps(p.y,region.canvas_height);
             for(int c=0;c<4;++c) {
                 float value=0;
                 for(int j=0;j<4;++j) {
                     float horizontal=0;
-                    auto row=src.data+static_cast<std::ptrdiff_t>(ys.index[j])*src.row_stride_floats;
-                    for(int i=0;i<4;++i) horizontal+=row[static_cast<std::ptrdiff_t>(xs.index[i])*4+c]*xs.w[i];
+                    for(int i=0;i<4;++i) horizontal+=sourcePixel(xs.index[i],ys.index[j])[c]*xs.w[i];
                     value+=horizontal*ys.w[j];
                 }
                 pixel[c]=value; // preserve float alpha/HDR/negative values, no clamp
