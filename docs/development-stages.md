@@ -108,9 +108,14 @@ ZIP SHA-256. The executable Stage 9 launcher is non-installing and fail-closed.
 It automates loaded identity, 34 pixel frames across 8/16/32 bpc, AEP save/reopen
 and 3D position,
 scale, rotation, parenting, camera movement/switch and no-camera fallback, followed
-by safe cleanup. The real target-AE run remains NOT_RUN; native viewer dragging and
-UI Undo/Redo remain separate real-host interaction gates. See current-status.md
-for evidence. Installation/tooling PASS is not stage completion.
+by safe cleanup. The first real target-AE attempt was BLOCKED before the first
+numeric frame because the fixture checked stale ExtendScript File metadata directly
+after `saveFrameToPng`; identity/pixels remained NOT RUN, so this was not a plugin
+FAIL. Tooling fix 724001c adds the same bounded file-publication wait used by the
+proven Stage 7 smoke; Final Validation, PR CI and macOS source gate PASS. A fresh
+real target-AE rerun is required. Native viewer dragging and UI Undo/Redo remain
+separate real-host interaction gates. See current-status.md for evidence.
+Installation/tooling PASS is not stage completion.
 
 - Four-corner projective plane with transformed grid/handles/hit-test/render.
 - 3D layer position/scale/rotation/parenting and active-camera perspective.

@@ -48,7 +48,7 @@ Next: run the exact de31498 Stage 9 target-AE acceptance runner in the controlle
 target host, then perform the remaining native viewer drag/Undo/Redo acceptance.
 Installation success and source-tooling PASS do not close Stage 9.
 
-### Stage 9 target-AE acceptance tooling — SOURCE-VALIDATED, REAL AE NOT RUN
+### Stage 9 target-AE acceptance tooling — SOURCE-VALIDATED, RERUN REQUIRED
 
 The Stage 9 acceptance path is now automated around the already installed immutable
 candidate de31498; no plugin/runtime source changed after that candidate. The runner
@@ -75,10 +75,26 @@ toolchain/Metal compilation, full preflight and signed install-free bundle.
 The acceptance regression now refuses both an altered candidate ZIP and a manifest
 whose package digest is not the known de31498 SHA-256. Validated tooling checkpoint:
 `0291bb807daa8f7df689831d3c6e00c7ac84908b`; macOS workflow run `36616083315`.
-The real de31498 AE runner has **NOT_RUN** status; no 3D/camera runtime claim is made
-until that target execution passes. Native viewer corner/guide dragging and UI
-Undo/Redo remain the final manual interaction checks because they require real host
-UI event semantics rather than scripted parameter assignment.
+
+First real Stage 9 target-AE attempt: report
+`EGFX-PLANE-94219e58cc354fadae128742a2ccbdb4` was **BLOCKED** during the
+first 8-bpc frame publication (`pixels_8`, `d8-original`). The JSX called
+`saveFrameToPng` successfully but immediately reused stale ExtendScript `File`
+metadata and reported `Missing frame d8-original`; no frame entered the numeric
+matrix. Identity and pixel status therefore remained **NOT RUN** and this attempt
+is not a plugin/render FAIL. The fixture fail-safe reset only its owned test state.
+
+Tooling fix `724001cc6772d5c4fdc6015a66bb138a3144d8b8` now matches the proven
+Stage 7 capture behavior: recreate the `File` object and wait up to 50 x 100 ms
+for a non-empty PNG, while rechecking project ownership. It never retries the
+render, kills/restarts AE or touches user work. Final Validation PASS, PR CI PASS,
+and macOS source gate run `36620529285` PASS for this fix. The installed/runtime
+candidate remains immutable de31498; no `src/` or `host-rust/` file changed.
+
+A fresh controlled target-AE rerun is still required before any 2D/3D/camera
+runtime PASS claim. Native viewer corner/guide dragging and UI Undo/Redo remain
+the final manual interaction checks because they require real host UI event
+semantics rather than scripted parameter assignment.
 
 ### Stage 9 native four-corner source integration
 
