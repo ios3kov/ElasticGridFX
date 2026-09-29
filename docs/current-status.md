@@ -12,8 +12,21 @@ Root cause is not yet confirmed. Investigation: reconcile effect canvas coordina
 with native layer coordinates in ui_projection.rs; do not apply guessed offsets.
 Required regression: owned text fixture, 2D -> 3D -> 2D, then rotation/camera,
 overlay and inverse picking agreement, with the solid fixture retained.
-Fresh host reproduction is BLOCKED: the open project has unsaved user changes
-(confirmed in AE title on 2026-09-30); it was neither closed nor modified.
+Fresh host reproduction was initially BLOCKED by unsaved user changes. After
+permission, AE was already a clean empty project; the agent did not close or save
+the former user project. Owned baseline now REPRODUCED (FAIL):
+`outputs/text-plane-3d-20260930/text-plane.aep`, run 8aca677833f245ab9133529a719d3097.
+640x480 text at [320,200], Layer Plane, zero wave: switching only threeDLayer to
+true moves the overlay by [320,200] while the text stays fixed. Screenshots were
+inspected in chat before and after, both script transports returned 0.
+New `ae_text_plane_probe.jsx` preserves the reproduction and refuses foreign work.
+Research: Adobe documents that text is always continuously rasterized and that
+continuous rasterization applies transforms before effects, unlike raster layers.
+Sources: https://helpx.adobe.com/after-effects/desktop/add-text/create-and-edit-text-layers/creating-editing-text-layers.html
+and https://helpx.adobe.com/no/after-effects/desktop/work-with-layers/manage-layers/layers.html .
+This supports an effect-canvas/native-layer space mismatch; merely subtracting
+position would not establish rotated/camera-aligned deformation. Next work must
+reconcile render-space and UI-space contracts, not only move the drawn overlay.
 No replacement artifact has been built or installed for this regression.
 
 Historical acceptance: user replied “работает” to the combined remaining manual checks on 2026-09-30.
