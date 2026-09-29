@@ -44,10 +44,15 @@ class PlanePixels(unittest.TestCase):
             frames[p+'invalid'] = self.base
             frames[p+'half-identity'] = self.base
             frames[p+'half-original'] = self.base
+        f = self.shifted(self.base, 45)
+        g = self.shifted(self.base, 53)
+        h = self.shifted(self.base, 61)
+        i = self.shifted(self.base, 69)
         frames.update({
             'roundtrip-before': b, 'roundtrip-after': b,
-            '3d-base': b, '3d-layer-rotate': c,
-            '3d-camera-move': d, '3d-parent': e,
+            '3d-base': b, '3d-position': c, '3d-scale': d,
+            '3d-layer-rotate': e, '3d-camera-move': f, '3d-parent': g,
+            '3d-camera-switch': h, '3d-no-camera': i,
         })
         return frames
 
@@ -59,7 +64,7 @@ class PlanePixels(unittest.TestCase):
         result = self.validate(self.frames())
         self.assertEqual(result['status'], 'PASS')
         self.assertEqual(result['frames'], len(pp.FRAMES))
-        self.assertEqual(len(result['checks']), 22)
+        self.assertEqual(len(result['checks']), 26)
 
     def test_plane_passthrough_fails(self):
         frames = self.frames()
@@ -75,8 +80,13 @@ class PlanePixels(unittest.TestCase):
         frames['roundtrip-after'] = self.shifted(self.base, 44)
         self.assertEqual(self.validate(frames)['checks']['roundtrip']['status'], 'FAIL')
 
-    def test_frozen_camera_or_parent_fails(self):
-        for name, source in (('3d-camera-move','3d-layer-rotate'), ('3d-parent','3d-camera-move')):
+    def test_frozen_3d_or_camera_state_fails(self):
+        for name, source in (
+            ('3d-position','3d-base'), ('3d-scale','3d-position'),
+            ('3d-layer-rotate','3d-scale'), ('3d-camera-move','3d-layer-rotate'),
+            ('3d-parent','3d-camera-move'), ('3d-camera-switch','3d-parent'),
+            ('3d-no-camera','3d-camera-switch'),
+        ):
             frames = self.frames()
             frames[name] = frames[source]
             self.assertEqual(self.validate(frames)['status'], 'FAIL')
