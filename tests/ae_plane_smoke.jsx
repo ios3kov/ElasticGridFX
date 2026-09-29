@@ -112,6 +112,7 @@ function elasticGridPlaneSmoke(config) {
             comp.resolutionFactor=[1,1];fx.property("Wave Amplitude").setValue(0);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-original");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-identity");
+            corners(skew);capture("d"+depth+"-skew-identity");corners(fit);
             fx.property("Wave Amplitude").setValue(8);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-legacy-wave");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-plane-wave");

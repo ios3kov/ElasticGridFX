@@ -130,7 +130,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         identity_status='NOT RUN', pixel_status='NOT RUN', cleanup_status='NOT RUN',
         functional_status='BLOCKED', release='BLOCKED',
         scope=('Stage 9 baseline real-AE plane pixels, same-build AEP roundtrip, 3D renders; '
-               'zero-wave skew, native overlay alignment and legacy AEP migration remain separate'),
+               'zero-wave projective coordinate ramp; native overlay alignment and legacy AEP migration remain separate'),
     )
 
     captured = False

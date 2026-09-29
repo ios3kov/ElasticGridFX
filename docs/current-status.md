@@ -44,6 +44,24 @@ updater after normal AE/Dynamic Link exit (no force kill). Previous f842e8d reta
 - CI at last inspection: five workflows PASS, macOS source gate queued; not
   presented as all-green CI for this candidate.
 
+### Expanded zero-wave perspective check — FAIL under investigation
+
+Run `EGFX-PLANE-8af1eccd07904f00a0257b54f5d79051` tested unchanged installed
+099e492: loaded identity PASS, 37 frames / 29 checks, 28 PASS, cleanup CLEAN.
+The new independent inverse-homography oracle checks a smooth horizontal source
+coordinate ramp and transparent exterior, explicitly rejecting stationary content
+and stationary content with a quad mask. Local comparator/safety tests: 15 PASS.
+
+16/32-bpc zero-wave skew checks PASS (maximum coordinate errors ~0.000243 and
+0.0000835). 8-bpc check FAIL: maximum 0.024958 exceeds the predefined 0.02 bound;
+at output (5,82), expected green ~0.024958, actual 0. Other worst samples jump to
+~0.050996. This may involve host low-light quantization, but cause is NOT proven.
+No threshold change or plugin change made. Exterior alpha zero in all depths;
+the historical 26 checks still PASS. Overall expanded acceptance remains FAIL.
+Evidence: local `outputs/plane-acceptance/EGFX-PLANE-8af1eccd07904f00a0257b54f5d79051.zip`.
+Next: controlled native-effect/reference test to distinguish host quantization
+from plugin sampling before changing implementation or acceptance tolerances.
+
 Stage 9 remains OPEN: native 3D overlay alignment/hit testing, native corner target
 visibility, legacy AEP migration and explicit zero-wave skew validation remain.
 Baseline 3D image-change checks are not overlay evidence. No release/main merge.

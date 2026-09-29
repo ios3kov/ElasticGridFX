@@ -34,10 +34,17 @@ class PlanePixels(unittest.TestCase):
         d = self.shifted(self.base, 29)
         e = self.shifted(self.base, 37)
         frames = {}
+        projected = sp.Image(128,96,array('f',[0.0])*(128*96*4))
+        for x,y,u,v in pp.perspective_coordinates():
+            if 0<=u<127 and 0<=v<95:
+                ix=int(u); iy=int(v); t=u-ix
+                for channel in range(4):
+                    projected.pixels[(y*128+x)*4+channel]=(1-t)*self.base.pixels[(iy*128+ix)*4+channel]+t*self.base.pixels[(iy*128+ix+1)*4+channel]
         for depth in pp.DEPTHS:
             p = f'd{depth}-'
             frames[p+'original'] = self.base
             frames[p+'identity'] = self.base
+            frames[p+'skew-identity'] = projected
             frames[p+'legacy-wave'] = a
             frames[p+'plane-wave'] = a
             frames[p+'skew-wave'] = b
@@ -64,7 +71,21 @@ class PlanePixels(unittest.TestCase):
         result = self.validate(self.frames())
         self.assertEqual(result['status'], 'PASS')
         self.assertEqual(result['frames'], len(pp.FRAMES))
-        self.assertEqual(len(result['checks']), 26)
+        self.assertEqual(len(result['checks']), 29)
+
+    def test_zero_wave_stationary_image_and_mask_are_rejected(self):
+        self.assertEqual(pp.check_zero_wave_projection(self.base,self.base)['status'],'FAIL')
+        masked=sp.Image(128,96,array('f',self.base.pixels))
+        for x,y,u,v in pp.perspective_coordinates():
+            if not (0<=u<=127 and 0<=v<=95):
+                masked.pixels[(y*128+x)*4+3]=0
+        self.assertEqual(pp.check_zero_wave_projection(self.base,masked)['status'],'FAIL')
+
+    def test_inverse_oracle_maps_known_quad_corners(self):
+        points={(x,y):(u,v) for x,y,u,v in pp.perspective_coordinates()}
+        for dest,source in [((10,5),(0,0)),((120,0),(127,0)),((127,85),(127,95)),((0,95),(0,95))]:
+            for actual,expected in zip(points[dest],source):
+                self.assertAlmostEqual(actual,expected,places=8)
 
     def test_plane_passthrough_fails(self):
         frames = self.frames()
