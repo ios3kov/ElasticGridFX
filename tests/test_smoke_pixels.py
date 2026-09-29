@@ -33,14 +33,16 @@ class SmokePixels(unittest.TestCase):
 
     def frames(self):
         return dict(bypass=self.base,identity=self.base,static_a=self.changed,static_b=self.changed,
-                    animated_a=self.changed,animated_b=self.other,reset=self.base)
+                    animated_a=self.changed,animated_b=self.other,reset=self.base,
+                    chain_before_corner=self.changed,chain_corner_identity=self.changed,
+                    chain_corner_moved=self.other)
 
-    def test_positive_fixture_passes_five_pixel_checks(self):
+    def test_positive_fixture_passes_direct_and_corner_pin_checks(self):
         result=self.validate(self.frames())
         self.assertEqual(result['status'],'PASS')
-        self.assertEqual(len(result['checks']),5)
+        self.assertEqual(len(result['checks']),7)
 
-    def test_passthrough_fails_despite_seven_valid_pngs(self):
+    def test_passthrough_fails_despite_all_valid_pngs(self):
         result=self.validate(dict.fromkeys(sp.FRAMES,self.base))
         self.assertEqual(result['status'],'FAIL')
         self.assertEqual(result['checks']['identity_static_a']['status'],'FAIL')
@@ -57,6 +59,18 @@ class SmokePixels(unittest.TestCase):
     def test_nonstatic_zero_speed_fails(self):
         frames=self.frames(); frames['static_b']=self.other
         self.assertEqual(self.validate(frames)['status'],'FAIL')
+
+    def test_corner_pin_identity_black_frame_is_rejected(self):
+        frames=self.frames()
+        frames['chain_corner_identity']=sp.Image(319,241,array('f',[0,0,0,1])*(319*241))
+        with self.assertRaises(ValueError):
+            self.validate(frames)
+
+    def test_corner_pin_identity_must_not_change_pixels(self):
+        frames=self.frames(); frames['chain_corner_identity']=self.other
+        result=self.validate(frames)
+        self.assertEqual(result['status'],'FAIL')
+        self.assertEqual(result['checks']['chain_before_corner_chain_corner_identity']['status'],'FAIL')
 
     def test_flat_colored_or_transparent_frame_is_rejected(self):
         for rgba in ([0,0.5,1,1],[0.2,0.5,0.9,0]):

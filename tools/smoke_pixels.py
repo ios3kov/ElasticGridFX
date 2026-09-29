@@ -147,7 +147,8 @@ def difference(a: Image, b: Image) -> dict:
     return dict(max_abs=maximum, mean_abs=total/len(a.pixels), changed_fraction=changed/(a.width*a.height))
 
 
-FRAMES = ('bypass', 'identity', 'static_a', 'static_b', 'animated_a', 'animated_b', 'reset')
+FRAMES = ('bypass', 'identity', 'static_a', 'static_b', 'animated_a', 'animated_b', 'reset',
+          'chain_before_corner', 'chain_corner_identity', 'chain_corner_moved')
 
 
 def validate_frames(folder: Path) -> dict:
@@ -162,9 +163,11 @@ def validate_frames(folder: Path) -> dict:
     checks = {}
     for a, b, should_change in (('bypass','identity',False), ('identity','static_a',True),
                                 ('static_a','static_b',False), ('animated_a','animated_b',True),
-                                ('identity','reset',False)):
+                                ('identity','reset',False),
+                                ('chain_before_corner','chain_corner_identity',False),
+                                ('chain_corner_identity','chain_corner_moved',True)):
         diff = difference(images[a], images[b])
         passed = (diff['changed_fraction'] >= 0.01 and diff['mean_abs'] >= 0.001) if should_change else diff['max_abs'] <= 1.0/255.0 + 1e-7
         checks[a+'_'+b] = dict(status='PASS' if passed else 'FAIL', **diff)
     return dict(status='PASS' if all(v['status']=='PASS' for v in checks.values()) else 'FAIL',
-                checks=checks, scope='PNG image smoke only; not HDR accuracy, guide-drag or GPU verification')
+                checks=checks, scope='PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification')

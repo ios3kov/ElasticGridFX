@@ -59,9 +59,13 @@ queued jobs and hardware compile-only stages are never host/runtime PASS.
    as transparent instead of leaving output untouched. The ordinary Render path
    remains dense; Metal remains disabled. This is SOURCE-VERIFIED only until a
    new exact candidate reproduces raster/text/Adjustment Layer chains in AE.
-2. The custom-control label now uses a taller control and a readable short Build
-   ID; full identity remains in About/diagnostics. Verify loaded identity,
-   drag/Undo/Redo,
+2. The automated AE smoke now also creates an Adjustment Layer and captures
+   ElasticGrid before Corner Pin, immediately after identity Corner Pin, and
+   after moved corners. Pixel validation rejects a black/flat frame, requires
+   identity Corner Pin to preserve pixels, and requires moved corners to change
+   them. This is prepared automation; actual AE execution still requires the new
+   candidate. The custom-control label also uses a taller readable short Build ID.
+   Verify loaded identity, drag/Undo/Redo,
    save/reopen/restart, actual 8/16/32-bpc alpha/HDR/ROI/PAR/MFR/cancel/aerender.
 3. Profile equal-quality Render/RAM Preview, then optimize proven costs. AE GPU
    dispatch stays disabled pending real host/Metal correctness and lifecycle QA.

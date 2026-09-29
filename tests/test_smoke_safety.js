@@ -18,9 +18,17 @@ function run(options = {}) {
             if (options.missingParameter && name === 'Wave Amplitude') return null;
             return properties[name] ||= {value:0, setValue(v) {this.value=v;}};
         }};
+    const cornerPoints = Array.from({length:4},()=>({value:null,setValue(v){this.value=v;}}));
+    const corner = {matchName:'ADBE Corner Pin', property(index){return cornerPoints[index-1] || null;}};
+    const parade = {addProperty(name) {
+        if (name === 'com.elasticgrid.fx.warp') return fx;
+        if (name === 'ADBE Corner Pin') return options.cornerUnavailable ? null : corner;
+        return null;
+    }};
     const footage = {remove() {calls.removed++; if (options.cleanupError) throw Error('cleanup');}};
-    const layer = {source:footage, property() {return {addProperty() {return fx;}};}};
-    const comp = {resolutionFactor:[1,1], layers:{add() {return layer;},addSolid() {return layer;}},
+    const layer = {source:footage, property() {return parade;}};
+    const adjustment = {adjustmentLayer:false, property(){return parade;}};
+    const comp = {resolutionFactor:[1,1], layers:{add() {return layer;},addSolid() {return adjustment;}},
         remove() {calls.removed++; if (options.cleanupError) throw Error('cleanup');},
         saveFrameToPng(time,file) {
             calls.frames.push({name:file.fsName.split('/').pop(),time,enabled:fx.enabled,
@@ -64,19 +72,19 @@ for (const options of [{saved:true},{occupied:true},{dirty:true},{dirtyThrows:tr
 {
     const {app,calls,capture}=run();
     assert.equal(app.exitCode,0);
-    assert.equal(calls.frames.length,7,'must capture seven states, not a single nonempty PNG');
+    assert.equal(calls.frames.length,10,'must capture direct states plus the Adjustment Layer / Corner Pin chain');
     assert.equal(capture.status,'CAPTURED','JSX cannot declare image assertions PASS');
     assert.equal(capture.loaded_build_id,null,'do not invent observed identity');
-    assert.deepEqual(calls.frames.map(f=>f.name), ['bypass.png','identity.png','static_a.png','static_b.png','animated_a.png','animated_b.png','reset.png']);
+    assert.deepEqual(calls.frames.map(f=>f.name), ['bypass.png','identity.png','static_a.png','static_b.png','animated_a.png','animated_b.png','reset.png','chain_before_corner.png','chain_corner_identity.png','chain_corner_moved.png']);
     assert.equal(calls.frames[0].enabled,false);
     assert.equal(calls.frames[1].enabled,true);
     assert.equal(calls.frames[2].amplitude,10);
     assert.equal(calls.frames[2].speed,0);
     assert.equal(calls.frames[4].speed,0.5);
     assert.equal(calls.frames[6].amplitude,0);
-    assert.equal(calls.removed,2); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
+    assert.equal(calls.removed,3); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
 }
-for (const options of [{missingParameter:true},{noOutput:true},{cleanupError:true},{writeFailure:true},{staleFrame:true}]) {
+for (const options of [{missingParameter:true},{cornerUnavailable:true},{noOutput:true},{cleanupError:true},{writeFailure:true},{staleFrame:true}]) {
     const {app,capture}=run(options);
     assert.notEqual(app.exitCode,0);
     assert.notEqual(capture?.status,'PASS');
