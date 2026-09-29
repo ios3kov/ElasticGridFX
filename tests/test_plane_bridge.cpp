@@ -1,6 +1,7 @@
 #include "bridge/plane_ffi.h"
 #include "core/PlaneRenderer.h"
 #include <cassert>
+#include <cmath>
 #include <cstring>
 #include <vector>
 using namespace elasticgrid;
