@@ -1,7 +1,16 @@
 # Persistent viewer grid — feasibility gate
 
-2026-09-29. Stage 9. Target: AE 25.6 arm64. Status: BLOCKED pending architecture
-choice; no parameter, runtime code or installed payload changed for this request.
+2026-09-29. Target: AE 25.6 arm64. Status: DEFERRED BY USER to a future version.
+Not a blocker for the current Stage 9/10 scope; not implemented and not PASS.
+No parameter, runtime code or installed payload changed for this request.
+
+Resume only on a future user request. Preserve all requirements below. The supplied
+GridWarp.aex (SHA-256 d26054ae75b0561a4d391a3d8866212f922239754d9cc7d658a4df4e727db91e)
+contains Visualization / Enable Visualization / stroke color, width and opacity
+strings. A sibling macOS bundle contains render symbols accepting colors and
+floats. These are leads, not proof of its drawing mechanism or preview/export
+exclusion. Revisit behavior before asserting a separate module is necessary;
+do not copy proprietary code or licensing routines.
 
 ## Confirmed requirements
 
