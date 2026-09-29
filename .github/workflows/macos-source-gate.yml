@@ -41,15 +41,16 @@ jobs:
         run: |
           xcrun -sdk macosx metal -c src/gpu/warp.metal -o "$RUNNER_TEMP/elasticgrid-warp.air"
           xcrun -sdk macosx metallib "$RUNNER_TEMP/elasticgrid-warp.air" -o "$RUNNER_TEMP/elasticgrid-warp.metallib"
-      # The bundle command runs the entire mandatory preflight exactly once.
-      - name: Full preflight and install-free signed plugin bundle
-        run: tools/build_macos_sdkless.command
       - name: Portable acceptance-tooling regression on macOS
         run: |
           python3 -m unittest discover -s tests -p 'test_*.py' -v
           node tests/test_ae_project_safety.js
           node tests/test_smoke_safety.js
           node tests/test_plane_smoke_safety.js
+      # Expensive full build runs only after fast cross-platform tooling gates.
+      # The bundle command runs the entire mandatory preflight exactly once.
+      - name: Full preflight and install-free signed plugin bundle
+        run: tools/build_macos_sdkless.command
       - name: Read-only candidate inspection and smoke preparation (NOT AE execution)
         run: |
           python3 tools/install_candidate.py > dist/mac/install-inspection.json
