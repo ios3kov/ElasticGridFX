@@ -201,7 +201,7 @@ function elasticGridSmoke(config) {
         initialLinearize = owned.linearizeWorkingSpace;
         owned.workingSpace = "";
         owned.linearizeWorkingSpace = false;
-        if (owned.workingSpace !== "") throw new Error("Fixture color state was not applied");
+        if ((owned.workingSpace !== "" && owned.workingSpace !== "None") || owned.linearizeWorkingSpace !== false) throw new Error("Fixture color state was not applied");
         owned.bitsPerChannel = 32;
         if (owned.bitsPerChannel !== 32) throw new Error("Project depth was not applied");
         result.stage = "fixture";
