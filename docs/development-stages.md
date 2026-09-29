@@ -116,9 +116,14 @@ proven Stage 7 smoke; Final Validation, PR CI and macOS source gate PASS.
 The second real run then captured 33/34 frames and blocked only on the fixture's
 post-disable no-camera assertion; identity/pixel aggregation remained NOT RUN.
 Fix e6dbc26 captures Default Camera before creating camera layers and passes
-Final Validation, PR CI and macOS source gate. A fresh real target-AE rerun is
-required. Native viewer dragging and UI Undo/Redo remain separate real-host
-interaction gates. See current-status.md for evidence.
+Final Validation, PR CI and macOS source gate. The third real run then showed that
+target AE 25.6 exposes a non-null `activeCamera` even though the owned comp has no
+camera layer, contrary to the scripting-guide contract; it blocked after the 24
+depth frames plus two roundtrip frames, before identity/pixel aggregation. Fix
+b327964 proves the no-camera case by owned layer topology instead of
+`activeCamera`, and passes Final Validation, PR CI and macOS source gate. A fresh
+real target-AE rerun is required. Native viewer dragging and UI Undo/Redo remain
+separate real-host interaction gates. See current-status.md for evidence.
 Installation/tooling PASS is not stage completion.
 
 - Four-corner projective plane with transformed grid/handles/hit-test/render.

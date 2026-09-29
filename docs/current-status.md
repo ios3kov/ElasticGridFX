@@ -108,6 +108,23 @@ Final Validation PASS, PR CI PASS, and macOS source gate run `36623152320` PASS.
 The installed/runtime candidate remains immutable de31498; no `src/` or
 `host-rust/` file changed.
 
+Third real Stage 9 target-AE attempt: report
+`EGFX-PLANE-77f143f3385447ebbb2ce00e80548756` captured the complete
+24-frame 8/16/32-bpc plane matrix plus both AEP roundtrip frames (**26 frames**),
+then blocked before the no-camera frame because target AE 25.6 returned a non-null
+`CompItem.activeCamera` despite the owned composition containing no camera layer.
+Identity/pixel aggregation therefore remained **NOT RUN**; this is not a
+plugin/render FAIL.
+
+The scripting guide documents `activeCamera == null` when no enabled camera
+layers exist, but target-host evidence contradicts that assumption. Tooling fix
+`b327964ce218055c7c1dfffe2baabae5e1b18227` no longer uses
+`activeCamera` to prove the Default Camera case. The owned fixture instead proves
+its topology directly (`comp.numLayers === 1` and that sole layer is the test
+footage), captures `3d-no-camera`, then creates Camera A/B for the remaining
+cases. Final Validation PASS, PR CI PASS, and macOS source gate run
+`36625654300` PASS. Runtime de31498 is unchanged.
+
 A fresh controlled target-AE rerun is still required before any 2D/3D/camera
 runtime PASS claim. Native viewer corner/guide dragging and UI Undo/Redo remain
 the final manual interaction checks because they require real host UI event
