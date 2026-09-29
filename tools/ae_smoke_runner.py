@@ -18,6 +18,54 @@ from smoke_pixels import FRAMES, pattern, validate_frames
 
 ROOT = Path(__file__).resolve().parents[1]
 
+GUARDS = frozenset((
+    'CLEAN', 'DIRTY_UNAVAILABLE', 'DIRTY', 'DIRTY_INVALID', 'DIRTY_READ_ERROR',
+    'SAVED', 'FILE_READ_ERROR', 'OCCUPIED', 'ITEMS_READ_ERROR', 'NO_PROJECT',
+    'PROJECT_READ_ERROR', 'NOT_CHECKED',
+))
+
+
+class AEPhaseError(ValueError):
+    """A bounded, shareable AE phase failure rather than a transport failure."""
+
+    def __init__(self, message: str, record: dict | None = None):
+        super().__init__(message)
+        self.record = record
+
+
+def _phase_record(folder: Path, name: str, run_id: str, fields: tuple[str, ...]) -> dict:
+    path = bi.safe_file(folder, name)
+    if path.stat().st_size > 16384:
+        raise ValueError('oversized AE phase record: '+name)
+    data = json.loads(path.read_text(encoding='utf-8-sig'))
+    if data.get('run_id') != run_id or data.get('status') not in ('ARMED', 'CLEAN', 'CAPTURED', 'FAIL'):
+        raise ValueError('missing, stale or invalid AE phase record: '+name)
+    record = dict(run_id=run_id, status=data['status'])
+    stage = data.get('stage')
+    if not isinstance(stage, str) or not re.fullmatch(r'[a-z_]{1,64}', stage):
+        raise ValueError('invalid AE phase stage: '+name)
+    record['stage'] = stage
+    for field in fields:
+        value = data.get(field)
+        if field in ('guard', 'fresh_guard'):
+            if value not in GUARDS:
+                raise ValueError('invalid AE project guard record: '+name)
+        elif field in ('project_revision', 'fresh_project_revision'):
+            if not isinstance(value, str) or not (value in ('INVALID', 'READ_ERROR', 'UNAVAILABLE', 'NOT_CHECKED') or
+                                                  re.fullmatch(r'[1-9][0-9]{0,9}', value)):
+                raise ValueError('invalid AE project revision record: '+name)
+        elif field == 'ae_version':
+            if not isinstance(value, str) or not re.fullmatch(r'[0-9A-Za-z._ -]{1,64}', value):
+                raise ValueError('invalid AE version record: '+name)
+        record[field] = value
+    return record
+
+
+def _proves_test_project_ownership(record: dict, guard_field: str, revision_field: str) -> bool:
+    return record[guard_field] == 'CLEAN' or (
+        record[guard_field] == 'DIRTY_UNAVAILABLE' and record[revision_field] == '1'
+    )
+
 
 def prepare(parent: Path, build: dict) -> tuple[Path, dict]:
     checked_path(parent)
@@ -77,7 +125,7 @@ def _transport_context(metadata: dict, ae_app: Path, installed: Path, package: P
     return identifier, hosts[0]['pid']
 
 
-def _run_jsx(folder: Path, script_name: str, identifier: str, timeout_seconds: int = 125) -> None:
+def _run_jsx(folder: Path, script_name: str, identifier: str, timeout_seconds: int = 125) -> int:
     apple = '''on run argv
 set jsxText to read POSIX file (item 1 of argv) as «class utf8»
 if not (running of application id "IDENTIFIER") then error "Selected test AE is not running"
@@ -92,18 +140,28 @@ end run
     result = subprocess.run(['/usr/bin/osascript', '-', str(folder/script_name)], input=apple,
                             capture_output=True, text=True, timeout=timeout_seconds)
     (folder/(script_name+'.transport.log')).write_text(result.stdout + '\n' + result.stderr)
-    if result.returncode or result.stdout.strip() != '0':
+    if result.returncode:
         raise ValueError('AE transport failed for '+script_name+'; see retained transport log')
+    output = result.stdout.strip()
+    if not re.fullmatch(r'-?[0-9]+', output):
+        raise ValueError('AE transport returned no numeric script status for '+script_name+'; see retained transport log')
+    return int(output)
 
 
 def arm(folder: Path, metadata: dict, ae_app: Path, installed: Path, package: Path, manifest: Path) -> dict:
     identifier, pid = _transport_context(metadata, ae_app, installed, package, manifest)
-    _run_jsx(folder, 'arm.jsx', identifier)
-    data = json.loads(bi.safe_file(folder, 'arm.json').read_text(encoding='utf-8-sig'))
-    if data.get('run_id') != metadata['run_id'] or data.get('status') != 'ARMED':
-        raise ValueError('AE arm phase did not complete')
+    exit_code = _run_jsx(folder, 'arm.jsx', identifier)
+    record = _phase_record(folder, 'arm.json', metadata['run_id'], ('ae_version', 'guard', 'project_revision'))
+    if exit_code != 0:
+        if record['status'] == 'FAIL' and record['stage'] == 'guard':
+            raise AEPhaseError('AE arm guard refused: '+record['guard'], record)
+        raise AEPhaseError('AE arm script exited '+str(exit_code), record)
+    if (record['status'] != 'ARMED' or record['stage'] != 'armed' or
+            not _proves_test_project_ownership(record, 'guard', 'project_revision')):
+        raise AEPhaseError('AE arm phase record did not prove test-project ownership', record)
     metadata['target_pid'] = pid
     metadata['arm_status'] = 'ARMED'
+    metadata['arm'] = record
     return metadata
 
 
@@ -111,11 +169,15 @@ def disarm(folder: Path, metadata: dict, ae_app: Path, installed: Path, package:
     identifier, pid = _transport_context(metadata, ae_app, installed, package, manifest)
     if metadata.get('target_pid') != pid:
         raise ValueError('AE process changed before arm cleanup')
-    _run_jsx(folder, 'disarm.jsx', identifier)
-    data = json.loads(bi.safe_file(folder, 'disarm.json').read_text(encoding='utf-8-sig'))
-    if data.get('run_id') != metadata['run_id'] or data.get('status') != 'CLEAN':
-        raise ValueError('AE arm cleanup did not complete')
+    exit_code = _run_jsx(folder, 'disarm.jsx', identifier)
+    record = _phase_record(folder, 'disarm.json', metadata['run_id'], ('fresh_guard', 'fresh_project_revision'))
+    if exit_code != 0:
+        raise AEPhaseError('AE arm cleanup script exited '+str(exit_code), record)
+    if (record['status'] != 'CLEAN' or record['stage'] != 'clean' or
+            not _proves_test_project_ownership(record, 'fresh_guard', 'fresh_project_revision')):
+        raise AEPhaseError('AE arm cleanup record did not prove a fresh test project', record)
     metadata['disarm_status'] = 'CLEAN'
+    metadata['disarm'] = record
     return metadata
 
 
@@ -126,7 +188,9 @@ def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
         raise ValueError('AE process changed before pixel capture')
     metadata['target_pid'] = pid
     metadata['ae_execution_attempted'] = True
-    _run_jsx(folder, 'run.jsx', identifier)
+    exit_code = _run_jsx(folder, 'run.jsx', identifier)
+    if exit_code != 0:
+        raise ValueError('AE smoke script exited '+str(exit_code)+'; see retained transport log')
     pixels = inspect_capture(folder, metadata)
     metadata['actual_ae_execution'] = True
     metadata['pixels'] = pixels

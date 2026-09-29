@@ -1,8 +1,57 @@
 // Phase 1: instantiate ElasticGrid in a strictly empty test project so the native
 // image is resident before Python performs live-image identity sampling.
+//
+// `Project.dirty` is an undocumented host attribute.  A missing attribute is not
+// treated as a blanket opt-in: the only fallback ownership proof is an otherwise
+// empty, unsaved project at the documented initial revision (1).  Read failures
+// and malformed values remain unsafe.
+function elasticGridProjectGuard(project) {
+    var dirty = null;
+    if (project === null || typeof project === "undefined") return "NO_PROJECT";
+    try { if (project.file !== null) return "SAVED"; }
+    catch (e) { return "FILE_READ_ERROR"; }
+    try { if (project.numItems !== 0) return "OCCUPIED"; }
+    catch (e) { return "ITEMS_READ_ERROR"; }
+    try { dirty = project.dirty; }
+    catch (e) { return "DIRTY_READ_ERROR"; }
+    if (typeof dirty === "undefined") return "DIRTY_UNAVAILABLE";
+    if (typeof dirty !== "boolean") return "DIRTY_INVALID";
+    return dirty ? "DIRTY" : "CLEAN";
+}
+
+function elasticGridProjectRevision(project) {
+    var revision = null;
+    if (project === null || typeof project === "undefined") return "UNAVAILABLE";
+    try { revision = project.revision; }
+    catch (e) { return "READ_ERROR"; }
+    if (typeof revision !== "number" || !isFinite(revision) || Math.floor(revision) !== revision || revision < 1)
+        return "INVALID";
+    return String(revision);
+}
+
+function elasticGridCurrentProjectState() {
+    var project = null;
+    try { project = app.project; }
+    catch (e) { return {guard:"PROJECT_READ_ERROR",project_revision:"READ_ERROR"}; }
+    return {guard:elasticGridProjectGuard(project),project_revision:elasticGridProjectRevision(project)};
+}
+
+function elasticGridHasTestProjectOwnership(guard, revision) {
+    return guard === "CLEAN" || (guard === "DIRTY_UNAVAILABLE" && revision === "1");
+}
+
+function elasticGridAppVersion() {
+    try {
+        var version = String(app.version);
+        return /^[0-9A-Za-z._ -]{1,64}$/.test(version) ? version : "UNAVAILABLE";
+    }
+    catch (e) { return "UNAVAILABLE"; }
+}
+
 function elasticGridSmokeArm(config) {
     var resultFile = null, suppressing = false;
-    var result = {run_id:config.run_id,status:"FAIL",stage:"guard",ae_version:""};
+    var result = {run_id:config.run_id,status:"FAIL",stage:"guard",ae_version:"",
+                  guard:"NOT_CHECKED",project_revision:"NOT_CHECKED"};
     function q(s){return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n") + '"';}
     app.exitCode=91;
     try {
@@ -13,11 +62,13 @@ function elasticGridSmokeArm(config) {
         if (resultFile.exists) { resultFile=null; throw new Error("Refusing old arm result"); }
         var input=new File(config.folder+"/pattern.png");
         if (!input.exists) throw new Error("Input fixture is missing");
-        if (app.project===null || app.project.file!==null || app.project.numItems!==0 ||
-            typeof app.project.dirty!=="boolean" || app.project.dirty)
+        result.ae_version=elasticGridAppVersion();
+        var currentState=elasticGridCurrentProjectState();
+        result.guard=currentState.guard;
+        result.project_revision=currentState.project_revision;
+        if (!elasticGridHasTestProjectOwnership(result.guard,result.project_revision))
             throw new Error("Requires an empty, unsaved, non-dirty test project");
         app.beginSuppressDialogs(); suppressing=true;
-        result.ae_version=app.version;
         var footage=app.project.importFile(new ImportOptions(input));
         footage.name="__EGFX_ARM_FOOTAGE_"+config.run_id;
         var comp=app.project.items.addComp("__EGFX_ARM_COMP_"+config.run_id,64,64,1.0,1.0,30.0);
@@ -34,7 +85,9 @@ function elasticGridSmokeArm(config) {
             try {
                 resultFile.encoding="UTF-8";
                 if (resultFile.exists || !resultFile.open("w")) throw new Error("Result unavailable");
-                resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+',"ae_version":'+q(result.ae_version)+'}');
+                resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+
+                    ',"ae_version":'+q(result.ae_version)+',"guard":'+q(result.guard)+
+                    ',"project_revision":'+q(result.project_revision)+'}');
                 resultFile.close();
             } catch(e) { result.status="FAIL"; }
         }
@@ -44,7 +97,8 @@ function elasticGridSmokeArm(config) {
 }
 
 function elasticGridSmokeDisarm(config) {
-    var resultFile=null, result={run_id:config.run_id,status:"FAIL",stage:"guard"};
+    var resultFile=null, result={run_id:config.run_id,status:"FAIL",stage:"guard",
+                                 fresh_guard:"NOT_CHECKED",fresh_project_revision:"NOT_CHECKED"};
     function q(s){return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"') + '"';}
     app.exitCode=93;
     try {
@@ -66,8 +120,10 @@ function elasticGridSmokeDisarm(config) {
             throw new Error("Armed effect state changed");
         if (!app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES)) throw new Error("Owned project close failed");
         app.newProject();
-        if (app.project===null || app.project.file!==null || app.project.numItems!==0 ||
-            typeof app.project.dirty!=="boolean" || app.project.dirty)
+        var freshState=elasticGridCurrentProjectState();
+        result.fresh_guard=freshState.guard;
+        result.fresh_project_revision=freshState.project_revision;
+        if (!elasticGridHasTestProjectOwnership(result.fresh_guard,result.fresh_project_revision))
             throw new Error("Fresh empty project unavailable");
         result.status="CLEAN"; result.stage="clean";
     } catch(error) {
@@ -77,7 +133,8 @@ function elasticGridSmokeDisarm(config) {
         try {
             resultFile.encoding="UTF-8";
             if (resultFile.exists || !resultFile.open("w")) throw new Error("Result unavailable");
-            resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+'}');
+            resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+
+                ',"fresh_guard":'+q(result.fresh_guard)+',"fresh_project_revision":'+q(result.fresh_project_revision)+'}');
             resultFile.close();
         } catch(e) { result.status="FAIL"; }
         app.exitCode=result.status==="CLEAN"?0:93;
@@ -89,7 +146,8 @@ function elasticGridSmokeDisarm(config) {
 function elasticGridSmoke(config) {
     var owned = null, comp = null, chainComp = null, footage = null, initialBpc = null;
     var resultFile = null, suppressing = false;
-    var result = {run_id: config.run_id, status: "FAIL", stage: "guard", ae_version: "", loaded_build_id: null};
+    var result = {run_id: config.run_id, status: "FAIL", stage: "guard", ae_version: "", loaded_build_id: null,
+                  guard:"NOT_CHECKED",project_revision:"NOT_CHECKED"};
     function quote(s) {
         return '"' + String(s).replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/\t/g, "\\t") + '"';
     }
@@ -117,11 +175,13 @@ function elasticGridSmoke(config) {
         if (resultFile.exists) { resultFile = null; throw new Error("Refusing old result"); }
         var input = new File(config.folder + "/pattern.png");
         if (!input.exists) throw new Error("Input fixture is missing");
-        if (app.project === null || app.project.file !== null || app.project.numItems !== 0 ||
-                typeof app.project.dirty !== "boolean" || app.project.dirty) {
+        result.ae_version = elasticGridAppVersion();
+        var currentState=elasticGridCurrentProjectState();
+        result.guard=currentState.guard;
+        result.project_revision=currentState.project_revision;
+        if (!elasticGridHasTestProjectOwnership(result.guard,result.project_revision)) {
             throw new Error("Requires an empty, unsaved, non-dirty test project");
         }
-        result.ae_version = app.version;
         app.beginSuppressDialogs(); suppressing = true;
         initialBpc = app.project.bitsPerChannel;
         owned = app.project;
@@ -210,7 +270,8 @@ function elasticGridSmoke(config) {
                 if (resultFile.exists || !resultFile.open("w")) throw new Error("Result file unavailable");
                 resultFile.write('{"run_id":'+quote(result.run_id)+',"status":'+quote(result.status)+
                     ',"stage":'+quote(result.stage)+',"ae_version":'+quote(result.ae_version)+
-                    ',"project_bpc":32,"loaded_build_id":null}');
+                    ',"project_bpc":32,"loaded_build_id":null,"guard":'+quote(result.guard)+
+                    ',"project_revision":'+quote(result.project_revision)+'}');
                 resultFile.close();
             } catch (writeError) { result.status = "FAIL"; }
         }

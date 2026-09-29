@@ -39,7 +39,15 @@ function run(options = {}) {
     const project = options.noProject ? null : {
         file:options.saved ? {fsName:'/user/work.aep'} : null,
         numItems:options.occupied ? 5 : 0,
-        get dirty() {if(options.dirtyThrows) throw Error('host unavailable'); return options.unknownDirty ? undefined : !!options.dirty;},
+        get dirty() {
+            if(options.dirtyThrows) throw Error('host unavailable');
+            if(Object.hasOwn(options,'dirtyValue')) return options.dirtyValue;
+            return options.unknownDirty ? undefined : !!options.dirty;
+        },
+        get revision() {
+            if(options.revisionThrows) throw Error('host unavailable');
+            return Object.hasOwn(options,'revision') ? options.revision : 1;
+        },
         _bpc:16, get bitsPerChannel() {return this._bpc;}, set bitsPerChannel(v) {calls.modified++; this._bpc=v;},
         importFile() {calls.modified++; return footage;},
         items:{addComp() {calls.modified++; return comp;}},
@@ -63,7 +71,12 @@ function run(options = {}) {
     try {capture=JSON.parse(files[folder+'/capture.json']);} catch {}
     return {app,calls,files,capture};
 }
-for (const options of [{saved:true},{occupied:true},{dirty:true},{dirtyThrows:true},{unknownDirty:true},{noProject:true}]) {
+for (const options of [
+    {saved:true},{occupied:true},{dirty:true},{dirtyThrows:true},
+    {unknownDirty:true,revision:0},{unknownDirty:true,revision:2},
+    {unknownDirty:true,revision:1.5},{unknownDirty:true,revisionThrows:true},
+    {dirtyValue:null,revision:1},{dirtyValue:'false',revision:1},{noProject:true}
+]) {
     const {app,calls}=run(options);
     assert.notEqual(app.exitCode,0,'unsafe project must refuse');
     assert.equal(calls.modified+calls.removed+calls.closed,0,'no user project side effects');
@@ -75,6 +88,8 @@ for (const options of [{saved:true},{occupied:true},{dirty:true},{dirtyThrows:tr
     assert.equal(calls.frames.length,10,'must capture direct states plus the Adjustment Layer / Corner Pin chain');
     assert.equal(capture.status,'CAPTURED','JSX cannot declare image assertions PASS');
     assert.equal(capture.loaded_build_id,null,'do not invent observed identity');
+    assert.equal(capture.guard,'CLEAN');
+    assert.equal(capture.project_revision,'1');
     assert.deepEqual(calls.frames.map(f=>f.name), ['bypass.png','identity.png','static_a.png','static_b.png','animated_a.png','animated_b.png','reset.png','chain_before_corner.png','chain_corner_identity.png','chain_corner_moved.png']);
     assert.equal(calls.frames[0].enabled,false);
     assert.equal(calls.frames[1].enabled,true);
@@ -83,6 +98,14 @@ for (const options of [{saved:true},{occupied:true},{dirty:true},{dirtyThrows:tr
     assert.equal(calls.frames[4].speed,0.5);
     assert.equal(calls.frames[6].amplitude,0);
     assert.equal(calls.removed,3); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
+}
+{
+    const {app,calls,capture}=run({unknownDirty:true,revision:1});
+    assert.equal(app.exitCode,0,'only a pristine revision-1 project may replace an unavailable dirty attribute');
+    assert.equal(calls.frames.length,10);
+    assert.equal(capture.status,'CAPTURED');
+    assert.equal(capture.guard,'DIRTY_UNAVAILABLE');
+    assert.equal(capture.project_revision,'1');
 }
 for (const options of [{missingParameter:true},{cornerUnavailable:true},{noOutput:true},{cleanupError:true},{writeFailure:true},{staleFrame:true}]) {
     const {app,capture}=run(options);
@@ -101,4 +124,4 @@ for (const options of [{missingParameter:true},{cornerUnavailable:true},{noOutpu
     assert.equal(calls.removed+calls.closed,0); assert.equal(capture.stage,'foreign_project');
     assert.notEqual(app.exitCode,0);
 }
-console.log('PASS: 14 smoke capture/ownership/error cases (mock control flow, not AE execution)');
+console.log('PASS: 21 smoke capture/ownership/error cases (mock control flow, not AE execution)');

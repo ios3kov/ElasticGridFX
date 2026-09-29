@@ -4,7 +4,7 @@ The user explicitly requires all 27 sections and the final rule of the authorita
 
 https://github.com/ios3kov/FSTR-Line/blob/main/DEVELOPMENT_RULES.md
 
-Reference read on 2026-09-28: Git blob a1760fde8763f789b50b91c20407938b4fcaea4a.
+Reference re-read on 2026-09-29: Git blob 701a8c1ae3acb4dbfe1d7eda94acbf8095b88608.
 
 This file is a pointer, not a shortened replacement. Re-read the authoritative rules before significant stages and record any substantive revision of that source.
 

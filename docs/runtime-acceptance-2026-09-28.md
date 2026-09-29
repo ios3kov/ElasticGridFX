@@ -83,7 +83,13 @@ run, fixture hash and pixels; keeps hashes and tool versions. AppleScript has a
 120-second limit, its transport process 125 seconds. Timeout is BLOCKED: AE may
 continue executing; no host kill, workspace reuse or automatic retry occurs.
 
-Project safety: absent/saved/occupied/dirty/unknown state refuses execution.
+Project safety: no-project/saved/occupied/dirty/unknown state refuses execution.
+The later Stage-7 arm/disarm runner records the opaque guard state and adds one
+strict compatibility proof for the undocumented `Project.dirty` attribute:
+only an absent attribute together with an otherwise empty unsaved project at
+`Project.revision == 1` may proceed. A thrown/non-Boolean dirty value or any
+other/unreadable revision still refuses execution. This does not change the
+historical result described above.
 Only created comp/footage are removed; foreign project context is not touched.
 Cleanup/write/transport errors cannot become PASS. Initial project bit depth is
 restored, but its dirty flag/UI state may change through normal AE operations.
@@ -116,7 +122,8 @@ Metal/performance tests remain NOT RUN/BLOCKED; no binaries handed over.
   https://ae-plugins.docsforadobe.dev/intro/where-installers-should-put-plug-ins/
 - Adobe-derived/community scripting reference:
   https://ae-scripting.docsforadobe.dev/general/project/
-  (dirty is documented there as officially undocumented; absence refuses tests)
+  (dirty is documented there as officially undocumented; absence requires the
+  separate revision-1 ownership proof in the later Stage-7 runner)
 - https://ae-scripting.docsforadobe.dev/general/application/
 - https://docs.python.org/3.12/library/shutil.html
 - PNG specification: https://www.w3.org/TR/png-3/

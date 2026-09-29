@@ -20,36 +20,47 @@ delivery or performance approval.
 - Installed plugin must match the complete fd69988 signed manifest before any host
   action. Different/mutated builds refuse execution.
 - No install/update, sudo, preferences reset, cache deletion, process termination,
-  project close/save, security changes or automatic retry are permitted here.
+  user-project close/save, security changes or automatic retry are permitted here.
+  The sole close exception is the arm project after the runner has proved its
+  exact two-item/run-ID/effect inventory; it is closed without saving and a
+  fresh empty project is created for the pixel phase.
 
 ## Required automated sequence
 
 1. Create a unique private Test Run directory and record runner identity.
 2. Verify exact installed payload, signature, target architecture and candidate
    package/manifest.
-3. Observe the live loaded plugin image path + UUID and map it to the pinned
-   candidate. Disk identity alone is insufficient.
-4. Only after live identity PASS, execute the guarded AE smoke in the existing
-   empty test project.
-5. Capture deterministic patterned frames:
+3. Guard the initial test project, create only a test-owned ElasticGrid
+   footage/comp/layer, and keep its AE PID.
+4. Observe the live loaded plugin image path + UUID in that same PID and map it
+   to the pinned candidate. Disk identity alone is insufficient.
+5. Verify the complete owned arm inventory, close only that test project without
+   saving, and create/guard a fresh empty project for the pixel phase.
+6. Only after live identity PASS, capture deterministic patterned frames:
    bypass, identity, static deformation x2, animated deformation x2, reset,
    Adjustment Layer + ElasticGrid before Corner Pin, identity Corner Pin, moved
    Corner Pin.
-6. Pixel assertions:
+7. Pixel assertions:
    identity and reset preserve expected pixels; deformation changes enough pixels;
    static wave is stable across time; animated wave changes; adding identity
    Corner Pin does not change or black the frame; moved Corner Pin changes it.
-7. Retain frame hashes and the synthetic test PNGs. No stale frame/result can be
+8. Retain frame hashes and the synthetic test PNGs. No stale frame/result can be
    reused. Timeout/crash/missing output is not PASS.
-8. Write one sanitized report ZIP. Raw process sample remains local/private.
-9. Combined functional status may be PASS only when both live identity and all
+9. Write one sanitized report ZIP. Raw process sample remains local/private.
+10. Combined functional status may be PASS only when both live identity and all
    pixel checks PASS on the same run. Release status remains BLOCKED.
 
 ## Safety / cleanup
 
 The JSX must refuse saved/occupied/dirty/unknown project state before mutation.
+`Project.dirty` is undocumented in AE: its absence is not enough to proceed.
+Only `file == null`, zero project items, absent `dirty`, and the documented fresh
+`Project.revision == 1` form an alternate, fail-closed ownership proof. A dirty
+value, property read error, invalid type or any other revision refuses execution.
+The phase record retains only opaque guard/revision tokens and AE version, never
+project names or paths.
 It creates only its own footage/compositions/effects, removes only those objects,
-restores project bit depth, never closes the project and never touches user files.
+restores project bit depth, never closes a user project and never touches user files.
 A foreign-project/context change or cleanup error fails the run. Full stack/sample
 data is not included in the shared report.
 

@@ -165,6 +165,25 @@ Common MediaCore plus `/Applications/Adobe After Effects [version]/Plug-ins/`.
 Only the documented root itself may be resolved when it is a symlink; inner
 symlinks remain refused.
 
+## Target-Mac acceptance reports — opaque project guard
+
+The two later Stage-7 reports `EGFX-AE-0968a7a315644ba3b87fa9519d59a7db` and
+`EGFX-AE-1b9cdc075220463e8319610a14f84ec4` stopped before identity sampling and
+pixel capture. Their `91` is the JSX arm script's deliberate guard exit, not an
+AppleScript transport failure. The old phase record did not write AE version or
+the individual guard predicate until after the combined guard, so it cannot
+prove whether the project was saved/occupied/dirty or whether the undocumented
+`Project.dirty` attribute was absent.
+
+The follow-up acceptance tooling preserves all saved/occupied/dirty refusals,
+records only opaque guard/revision tokens plus AE version before mutation, and
+does not relabel an AE script exit as a transport fault. For an absent `dirty`
+attribute only, it accepts a separately readable fresh `Project.revision == 1`
+alongside an empty unsaved project; getter errors, malformed values and any other
+revision remain blocking. These historical reports remain `BLOCKED`; a new
+same-PID identity plus ten-frame target-AE result is still required to close
+Stage 7.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first

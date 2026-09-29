@@ -94,23 +94,36 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
             smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
         )
     except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+        if getattr(error, 'record', None) is not None:
+            result['arm'] = error.record
         result['reason'] = 'AE arm phase blocked: ' + str(error)
         return result, write_report(run, result, smoke_folder)
 
-    identity = live_identity.diagnose(identity_dir, manifest, [])
-    result['identity'] = identity
-    result['identity_status'] = identity.get('loaded_image_status', 'NOT RUN')
-    identity_ok = (identity.get('status') == 'PASS'
-                   and identity.get('loaded_image_status') == 'PASS'
-                   and identity.get('observed_build_id') == manifest['build']['build_id']
-                   and Path(identity.get('ae',{}).get('path','')) == ae_app
-                   and identity.get('ae',{}).get('pid') == smoke_meta.get('target_pid'))
+    identity = None
+    identity_error = None
+    identity_ok = False
+    try:
+        identity = live_identity.diagnose(identity_dir, manifest, [])
+        result['identity'] = identity
+        result['identity_status'] = identity.get('loaded_image_status', 'NOT RUN')
+        identity_ok = (identity.get('status') == 'PASS'
+                       and identity.get('loaded_image_status') == 'PASS'
+                       and identity.get('observed_build_id') == manifest['build']['build_id']
+                       and Path(identity.get('ae',{}).get('path','')) == ae_app
+                       and identity.get('ae',{}).get('pid') == smoke_meta.get('target_pid'))
+    except (ValueError, OSError, KeyError, TypeError, AttributeError, subprocess.SubprocessError) as error:
+        identity_error = error
     try:
         smoke_meta = ae_smoke_runner.disarm(
             smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
         )
     except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+        if getattr(error, 'record', None) is not None:
+            result['disarm'] = error.record
         result['reason'] = 'AE arm cleanup blocked: ' + str(error)
+        return result, write_report(run, result, smoke_folder)
+    if identity_error is not None:
+        result['reason'] = 'live candidate identity diagnostic blocked: ' + str(identity_error)
         return result, write_report(run, result, smoke_folder)
     if not identity_ok:
         result['reason'] = 'loaded candidate identity was not proven after controlled effect instantiation'

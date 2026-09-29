@@ -1,4 +1,5 @@
 """Target-AE orchestrator unit tests. These do not execute After Effects."""
+import json
 from pathlib import Path
 import platform
 import sys
@@ -59,6 +60,41 @@ class Acceptance(unittest.TestCase):
         self.assertEqual(result['functional_status'],'PASS')
         self.assertEqual(result['release'],'BLOCKED')
         self.assertTrue(archive.is_file())
+
+    def test_arm_guard_record_is_preserved_in_blocked_report(self):
+        record={'run_id':'a'*32,'status':'FAIL','stage':'guard','ae_version':'25.6.0',
+                'guard':'DIRTY_UNAVAILABLE','project_revision':'2'}
+        failure=ta.ae_smoke_runner.AEPhaseError('AE arm guard refused: DIRTY_UNAVAILABLE',record)
+        with patch.object(ta.platform,'system',return_value='Darwin'), \
+             patch.object(ta.platform,'machine',return_value='arm64'), \
+             patch.object(ta,'load_candidate',return_value=self.manifest), \
+             patch.object(ta,'verify_installed'), \
+             patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare), \
+             patch.object(ta.ae_smoke_runner,'arm',side_effect=failure):
+            result,archive=ta.run_acceptance(self.report,self.app,self.plugin,self.root/'m',self.root/'p')
+        self.assertEqual(result['functional_status'],'BLOCKED')
+        self.assertEqual(result['arm'],record)
+        self.assertTrue(archive.is_file())
+        import zipfile
+        with zipfile.ZipFile(archive) as zipped:
+            self.assertEqual(json.loads(zipped.read('acceptance.json'))['arm'],record)
+
+    def test_identity_exception_still_disarms_owned_project(self):
+        with patch.object(ta.platform,'system',return_value='Darwin'), \
+             patch.object(ta.platform,'machine',return_value='arm64'), \
+             patch.object(ta,'load_candidate',return_value=self.manifest), \
+             patch.object(ta,'verify_installed'), \
+             patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare), \
+             patch.object(ta.ae_smoke_runner,'arm',side_effect=lambda f,m,*a: dict(m,target_pid=42,arm_status='ARMED')), \
+             patch.object(ta.live_identity,'diagnose',side_effect=ValueError('sampler unavailable')), \
+             patch.object(ta.ae_smoke_runner,'disarm',side_effect=lambda f,m,*a: dict(m,disarm_status='CLEAN')) as disarm, \
+             patch.object(ta.ae_smoke_runner,'execute') as execute:
+            result,archive=ta.run_acceptance(self.report,self.app,self.plugin,self.root/'m',self.root/'p')
+        self.assertEqual(result['functional_status'],'BLOCKED')
+        self.assertIn('live candidate identity diagnostic blocked: sampler unavailable',result['reason'])
+        self.assertTrue(archive.is_file())
+        disarm.assert_called_once()
+        execute.assert_not_called()
 
     def test_identity_blocked_cleans_arm_and_never_runs_pixel_smoke(self):
         blocked=dict(self.identity,status='BLOCKED',loaded_image_status='NOT RUN')
