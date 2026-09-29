@@ -119,21 +119,69 @@ def system_path(pid: int, address: int | None = None) -> str:
     return value
 
 
-def masked_path_consistent(reported: str, observed: str) -> bool:
-    """A mask only constrains an independent observation; it never proves a path."""
-    def aliases(value):
-        # Apple's sample uses /var while libproc may return its /private/var path.
-        for prefix in ('/var/', '/tmp/'):
-            if value.startswith(prefix):
-                return '/private' + value
-        return value
+def path_alias(value: str) -> str:
+    """Normalize only documented/observed macOS filesystem aliases, not arbitrary symlinks."""
+    if value == '/System/Volumes/Data':
+        value = '/'
+    elif value.startswith('/System/Volumes/Data/'):
+        value = value[len('/System/Volumes/Data'):]
+    # Apple's tools may spell these VFS aliases either with or without /private.
+    for short in ('/var/', '/tmp/'):
+        if value.startswith(short):
+            value = '/private' + value
+    return value
+
+
+def path_text_consistent(reported: str, observed: str) -> bool:
+    """Text-path check only; live identity still requires UUID and on-disk payload checks."""
+    reported, observed = path_alias(reported), path_alias(observed)
+    if '*' not in reported:
+        return reported == observed
     if reported.count('*') != 1 or '*' in observed:
         return False
-    prefix, suffix = aliases(reported).split('*')
-    value = aliases(observed)
+    prefix, suffix = reported.split('*')
     return (prefix.startswith('/') and prefix.endswith('/') and suffix.startswith('/')
-            and value.startswith(prefix) and value.endswith(suffix)
-            and len(value) >= len(prefix) + len(suffix))
+            and observed.startswith(prefix) and observed.endswith(suffix)
+            and len(observed) >= len(prefix) + len(suffix))
+
+
+def masked_path_consistent(reported: str, observed: str) -> bool:
+    """Backward-compatible name for the privacy-mask constraint."""
+    return '*' in reported and path_text_consistent(reported, observed)
+
+
+def same_underlying_path(a: Path, b: Path) -> bool:
+    """Compare inode/device after refusing ordinary symlinked paths."""
+    try:
+        a = checked_path(a)
+        b = checked_path(b)
+        sa, sb = a.stat(), b.stat()
+        return (sa.st_dev, sa.st_ino) == (sb.st_dev, sb.st_ino)
+    except (OSError, ValueError):
+        return False
+
+
+def redundant_symlink_root(root: Path, roots: list[Path]) -> Path | None:
+    """Accept a symlink scan root only when it aliases another independently listed root."""
+    if not root.is_symlink():
+        return None
+    try:
+        target = root.resolve(strict=True)
+        if not target.is_dir():
+            raise ValueError('symlinked scan root target is not a directory')
+        target_stat = target.stat()
+        for peer in roots:
+            if peer == root or peer.is_symlink():
+                continue
+            try:
+                peer_stat = peer.stat()
+            except FileNotFoundError:
+                continue
+            if (peer_stat.st_dev, peer_stat.st_ino) == (target_stat.st_dev, target_stat.st_ino):
+                return peer
+    except (OSError, RuntimeError) as error:
+        raise ValueError('unresolvable symlinked scan root') from error
+    raise ValueError('symlinked scan root is not a redundant known Adobe root')
 
 
 def parse_sample(text: str, pid: int, executable: str, *, path_lookup=None) -> list[dict]:
@@ -145,9 +193,8 @@ def parse_sample(text: str, pid: int, executable: str, *, path_lookup=None) -> l
     paths = re.findall(r'^Path:\s+(.+?)\s*$', header, re.M)
     if pids != [str(pid)] or len(paths) != 1:
         raise Blocked('Sample belongs to a different process')
-    if paths != [executable]:
-        if (path_lookup is None or not masked_path_consistent(paths[0], executable)
-                or path_lookup(None) != executable):
+    if not path_text_consistent(paths[0], executable):
+        if (path_lookup is None or not path_text_consistent(paths[0], path_lookup(None))):
             raise Blocked('Sample belongs to a different process')
     result = []
     for line in table.splitlines():
@@ -218,13 +265,16 @@ def capture(pid: int, executable: Path, folder: Path) -> tuple[list[dict], dict]
 
 
 def select_image(images: list[dict], binary: Path, expected_uuids: set[str]) -> dict:
-    relevant = [image for image in images if image['path'] == str(binary) or
+    relevant = [image for image in images if path_text_consistent(image['path'], str(binary)) or
                 'elasticgrid' in image['path'].lower() or 'com.elasticgrid.fx' in image['label'].lower()]
     if len(relevant) != 1:
         raise Blocked('Candidate image missing or multiple copies loaded')
     image = relevant[0]
-    if image['path'] != str(binary) or image['uuid'] not in expected_uuids:
-        raise Blocked('Loaded image differs from the candidate on disk')
+    if (not path_text_consistent(image['path'], str(binary))
+            and not same_underlying_path(Path(image['path']), binary)):
+        raise Blocked('Loaded image path differs from the candidate on disk')
+    if image['uuid'] not in expected_uuids:
+        raise Blocked('Loaded image UUID differs from the candidate on disk')
     return image
 
 
@@ -305,9 +355,14 @@ def diagnose(folder: Path, manifest: dict, additional: list[Path]) -> dict:
         result['ae'] = dict(pid=host['pid'], path=str(app), version=app_meta.get('CFBundleShortVersionString'))
         roots = installed_roots(app, additional)
         result['scan_roots'] = list(map(str, roots))
+        result['scan_aliases'] = []
         found: set[Path] = set()
         for root in roots:
             try:
+                alias = redundant_symlink_root(root, roots)
+                if alias is not None:
+                    result['scan_aliases'].append({'root': str(root), 'same_as': str(alias)})
+                    continue
                 found.update(discover([root]))
             except (OSError, ValueError) as error:
                 result['scan_errors'].append({'root': str(root), 'kind': type(error).__name__})
@@ -330,17 +385,24 @@ def diagnose(folder: Path, manifest: dict, additional: list[Path]) -> dict:
         result['loaded_images'] = [image for image in images if 'elasticgrid' in image['path'].lower() or 'com.elasticgrid.fx' in image['label'].lower()]
         if len(result['loaded_images']) != 1:
             raise Blocked('Candidate image absent or multiple copies loaded')
-        binary = checked_path(Path(result['loaded_images'][0]['path']))
-        if binary.name != 'ElasticGrid' or binary.parent.name != 'MacOS' or binary.parent.parent.name != 'Contents':
+        observed_binary = checked_path(Path(result['loaded_images'][0]['path']))
+        if observed_binary.name != 'ElasticGrid' or observed_binary.parent.name != 'MacOS' or observed_binary.parent.parent.name != 'Contents':
             raise Blocked('Unexpected loaded plugin layout')
-        bundle = binary.parent.parent.parent
-        if bundle not in matching_before:
-            raise Blocked('Installed payload was not the pinned candidate before sampling')
+        matches = [candidate for candidate in matching_before
+                   if same_underlying_path(candidate/'Contents/MacOS/ElasticGrid', observed_binary)
+                   or path_text_consistent(str(candidate/'Contents/MacOS/ElasticGrid'), str(observed_binary))]
+        if len(matches) != 1:
+            raise Blocked('Loaded image does not map uniquely to the pinned installed candidate')
+        bundle = matches[0]
+        binary = checked_path(bundle/'Contents/MacOS/ElasticGrid')
         meta = verify_disk(bundle, manifest)
         signature(bundle)
         observed = select_image(images, binary, macho_uuids(binary.read_bytes()))
-        # Do not promote an unknown additional scan scope to absence of conflicts.
-        if result['scan_errors'] or found != {bundle}:
+        # Do not promote an unknown scan scope or a distinct second copy to PASS.
+        distinct = [candidate for candidate in found
+                    if not same_underlying_path(candidate/'Contents/MacOS/ElasticGrid', binary)
+                    and not path_text_consistent(str(candidate/'Contents/MacOS/ElasticGrid'), str(binary))]
+        if result['scan_errors'] or distinct:
             raise Blocked('Incomplete scan or conflicting installed copies')
         if bi.digest(process_key(host['pid']).encode()) != observation['process_key_sha256']:
             raise Blocked('AE restarted after sampling')

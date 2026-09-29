@@ -106,6 +106,29 @@ immutable fd69988 payload, retain 6d3b846 as rollback, then restart/open AE and
 rerun the corrected acceptance package. A successful installer receipt is
 required before the next functional attempt is counted.
 
+## Target-Mac acceptance attempt — live path diagnostic alias
+
+After the corrected fd69988 installation, the returned acceptance report confirms
+the exact installed candidate on disk:
+
+- Build ID: `EGFX-f442513cb6528f14295d6d45`;
+- commit: `fd69988c10b25268eb8cad6ee6ced7f6a28bee9d`;
+- binary SHA-256: `8fc61c9c4dd20f1f398e470d3f0b75003bcfac4aa45a4669de120b188865426d`;
+- Mach-O UUID: `A7C24F56-9776-3971-9CB7-972DD1F7AF8F`;
+- AE 25.6.0 arm64 was running.
+
+The run stopped before JSX/pixel execution because the live-image diagnostic
+reported `Native path contradicts reported image`. It also recorded a ValueError
+for the app-parent `Plug-ins` scan root. Pixel status therefore remains NOT RUN.
+
+Research found that macOS can expose the same Data-volume object through both
+`/Users/...` and `/System/Volumes/Data/Users/...`. The diagnostic is updated
+to normalize only these known VFS/firmlink aliases for text constraints while
+still requiring the pinned on-disk payload, Mach-O UUID and underlying file
+identity. A symlinked scan root is ignored only when it aliases another
+independently listed plugin root; unknown symlink targets remain blocking.
+No plugin or user state is changed by this diagnostic fix.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first

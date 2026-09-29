@@ -73,6 +73,28 @@ class LiveIdentity(unittest.TestCase):
             images=li.parse_sample(report(value),123,EXE)
             self.assertEqual(li.select_image(images,BINARY,{IMAGE_UUID})['uuid'],IMAGE_UUID)
 
+    def test_data_volume_firmlink_aliases_are_text_equivalent(self):
+        self.assertTrue(li.path_text_consistent(
+            '/System/Volumes/Data/Users/alice/Library/Application Support/x',
+            '/Users/alice/Library/Application Support/x'))
+        self.assertTrue(li.path_text_consistent(
+            '/Users/*/Library/Application Support/Adobe/Common/Plug-ins/x',
+            '/System/Volumes/Data/Users/alice/Library/Application Support/Adobe/Common/Plug-ins/x'))
+        self.assertFalse(li.path_text_consistent('/Users/*/Library/A', '/Users/alice/Library/B'))
+
+    def test_sample_header_accepts_system_data_alias(self):
+        data=report().replace('Path: '+EXE, 'Path: /System/Volumes/Data'+EXE)
+        images=li.parse_sample(data,123,EXE)
+        self.assertEqual(images[0]['uuid'],IMAGE_UUID)
+
+    def test_masked_candidate_path_accepts_system_data_alias(self):
+        reported='/Users/*/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'
+        observed='/System/Volumes/Data/Users/alice/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'
+        data=report(path=reported)
+        images=li.parse_sample(data,123,EXE,path_lookup=lambda address: observed if address is not None else EXE)
+        self.assertEqual(images[0]['path'],observed)
+        self.assertEqual(images[0]['path_source'],'libproc region at sampled load address')
+
     def test_wrong_header_or_stack_token_refused(self):
         for text in (report(header=False), report().replace('[123]','[124]'),
                      report().replace('Path: '+EXE,'Path: /other'),
@@ -94,6 +116,14 @@ class LiveIdentity(unittest.TestCase):
         with patch.object(li.platform,'system',return_value='Darwin'),patch.object(li,'running_ae',return_value=[]),patch.object(li,'capture') as capture:
             result=li.diagnose(self.folder,manifest,[])
             self.assertEqual(result['status'],'BLOCKED'); capture.assert_not_called()
+
+    def test_redundant_symlink_scan_root_is_accepted_only_as_duplicate(self):
+        real=self.folder/'real-plugins'; real.mkdir()
+        alias=self.folder/'alias-plugins'; alias.symlink_to(real)
+        self.assertEqual(li.redundant_symlink_root(alias,[real,alias]),real)
+        other=self.folder/'other'; other.mkdir()
+        with self.assertRaises(ValueError):
+            li.redundant_symlink_root(alias,[other,alias])
 
     def test_ps_selects_only_actual_ae_executables(self):
         text=f' 123 {EXE}\n 456 /usr/bin/aerender\n 789 /tmp/After Effects helper\n 101 {EXE} helper\n'
