@@ -180,3 +180,26 @@ The harness:
 
 CI exercises parser/safety/comparison contracts only. Actual aerender measurements
 remain NOT RUN until Stage 7 passes and a controlled target fixture is generated.
+
+## Synthetic fixture generator
+
+The benchmark never needs a user project. `tools/perf_fixture_runner.py` plus
+`tests/perf_fixture.jsx` prepare a dedicated 2-second synthetic project in a
+unique workspace, but only when the currently open AE project is empty, unsaved
+and clean.
+
+The fixture uses:
+- 1920x1080 or 3840x2160 at 30 fps;
+- explicit 8/16/32-bpc project depth;
+- Final Bicubic ElasticGrid with 8x8 guides and static or animated deformation;
+- documented Render Queue `items.add(comp)` / template APIs;
+- exact local templates `Best Settings` and `PNG Sequence`; absence is BLOCKED,
+  never silently substituted;
+- a render-queue item pinned to 60 frames and a PNG sequence output inside the
+  fixture workspace;
+- `Project.save(File)` to create `EGFX_PERF.aep` without a save dialog.
+
+After the AEP is saved, the JSX closes only the synthetic project it owns and
+creates a fresh empty project, restoring the previous bit depth. Mock safety
+tests cover saved/dirty/occupied projects, missing effect/templates and cleanup
+failure. Actual target AE fixture generation remains NOT RUN until Stage 7 passes.
