@@ -100,6 +100,13 @@ Required:
 
 ## Stage 9 of 10 — 2D/3D perspective deformation plane — IN PROGRESS
 
+Current installed test candidate: de31498 / EGFX-0fa68430a170b3612e8d00f7.
+Four-corner native controls and render/overlay/drag integration are implemented;
+portable/native ABI checks and installed payload verification pass. Target AE
+plane pixels, interaction, project roundtrip and 3D/camera acceptance remain
+NOT_RUN for this candidate. See current-status.md for the immutable package hash
+and rollback receipt. Installation is not stage completion.
+
 - Four-corner projective plane with transformed grid/handles/hit-test/render.
 - 3D layer position/scale/rotation/parenting and active-camera perspective.
 - Defined singular/edge-on/outside-plane behavior.

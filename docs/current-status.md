@@ -12,6 +12,41 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Current installed checkpoint — de31498
+
+2026-09-29: user explicitly requested installing the new build, recording current
+status and pushing all current source updates. The earlier attempt was stopped
+before replacement because Adobe dynamiclinkmanager was still running. On this
+attempt the normal host guard passed; no process was killed or guard bypassed.
+
+- Plugin commit: `de314981005606741bc75c517d8bb33798b46a1d` (clean arm64 build).
+- Build ID: `EGFX-0fa68430a170b3612e8d00f7`.
+- ZIP SHA-256: `6a43f734c7dc5fd298b356b12db75ab5986c171a2ae241ef9c85ffc0ac22ec55`.
+- Atomic updater: **INSTALLED_FOR_TEST**; installed files and signature verified.
+- Rollback receipt: `EGFX-update-371ef6e56f92407d8b04b16af52e2c10`.
+- Previous installed de0becf is retained in that operation's backup.
+- Candidate/evidence: `work/plane-candidate-de31498/` (local, not a public release).
+- AE was not launched for this installation request. Loaded identity, 24-frame
+  plane smoke, native corner dragging, Undo/Redo/save/reopen and 3D/camera
+  acceptance remain **NOT_RUN** for this candidate.
+
+Implemented in this candidate: Four Corners/Existing Grid mode, four native points,
+Fit Layer reset, shared render/overlay/inverse-drag geometry, evaluated wave guides,
+8/16/32-bit sampling with both qualities and all edge modes, invalid-plane original
+image fallback. Existing Grid remains the default; previous parameter names/types
+and grid wire schema remain unchanged.
+
+Source verification: CTest 18/18, Rust 22/22, Clippy (existing macro exceptions),
+geometry ASan/UBSan, clean build, signed bundle and package identity PASS. Existing
+static workflow/test audit findings remain review items, not a release PASS.
+
+Overall: Stages 1–7 completed for their historical scope; Stage 8 skipped by user;
+Stage 9 in progress; Stage 10 not started. Persistent deselected viewer grid is
+deferred by user. GPU dispatch remains disabled. No main merge or release.
+Next: independently confirm loaded de31498, run the prepared plane fixture and
+analyze pixels, then verify native interaction and layer/camera cases. Installation
+success does not close Stage 9 or substitute for target-AE functional acceptance.
+
 ### Stage 9 native four-corner source integration
 
 Appended native Four Corners/Existing mode, four points and Fit Layer. Existing
