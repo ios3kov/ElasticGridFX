@@ -17,6 +17,38 @@ class PlaneAcceptance(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name).resolve()
 
+
+    def test_load_candidate_requires_exact_known_package_sha(self):
+        manifest_path = self.root/'manifest.json'
+        package_path = self.root/'candidate.zip'
+        package_path.write_bytes(b'candidate')
+        build = {'commit':pa.EXPECTED_COMMIT,'build_id':pa.EXPECTED_BUILD}
+        manifest_path.write_text(json.dumps({
+            'build':build,
+            'package_sha256':pa.EXPECTED_PACKAGE_SHA,
+        }))
+        with patch.object(pa.bi, 'validate_identity', side_effect=lambda value:value), \
+             patch.object(pa.bi, 'digest', return_value=pa.EXPECTED_PACKAGE_SHA):
+            self.assertEqual(pa.load_candidate(manifest_path, package_path)['build'], build)
+
+        manifest_path.write_text(json.dumps({
+            'build':build,
+            'package_sha256':'0'*64,
+        }))
+        with patch.object(pa.bi, 'validate_identity', side_effect=lambda value:value), \
+             patch.object(pa.bi, 'digest', return_value=pa.EXPECTED_PACKAGE_SHA):
+            with self.assertRaises(ValueError):
+                pa.load_candidate(manifest_path, package_path)
+
+        manifest_path.write_text(json.dumps({
+            'build':build,
+            'package_sha256':pa.EXPECTED_PACKAGE_SHA,
+        }))
+        with patch.object(pa.bi, 'validate_identity', side_effect=lambda value:value), \
+             patch.object(pa.bi, 'digest', return_value='f'*64):
+            with self.assertRaises(ValueError):
+                pa.load_candidate(manifest_path, package_path)
+
     def test_prepare_is_unique_and_not_run(self):
         a, meta_a = pa.prepare(self.root/'runs', {'build_id':pa.EXPECTED_BUILD})
         b, _ = pa.prepare(self.root/'runs', {'build_id':pa.EXPECTED_BUILD})
