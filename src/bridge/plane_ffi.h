@@ -35,3 +35,9 @@ struct EgPlaneReport {
 // Report is reset on entry and published only on success; nonnull required.
 extern "C" int eg_render_plane(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report) noexcept;
+
+// Additive entry point, same frame layout. quality: 0 Draft Bilinear, 1 Final
+// Catmull-Rom; edge: 0 Clamp, 1 Wrap, 2 Mirror. Unknown values return bad input.
+extern "C" int eg_render_plane_sampled(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge) noexcept;

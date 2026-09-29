@@ -14,6 +14,8 @@ struct PlaneCanvasRegion {
     // as plane corners (e.g. full-resolution pixels or PAR-corrected units).
     // Positive finite diagonal scale only; camera projection is NOT applied here.
     double surface_units_x = 1, surface_units_y = 1;
+    EdgeMode edge = EdgeMode::Clamp;
+    SampleQuality quality = SampleQuality::Bicubic;
 };
 // Stored rectangles may extend beyond the logical canvas, including negative
 // origins. Output outside the canvas and missing source pixels are transparent

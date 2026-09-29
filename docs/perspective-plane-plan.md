@@ -91,9 +91,13 @@ Limits: 2..52 guides per axis, aligned positive strides, nonoverlapping views;
 invalid grids/views return error before rendering, invalid corners pass through
 with a report flag. Exceptions never cross the C ABI; abort returns 5 and the
 caller must discard partial output. Reports reset on entry and publish on success.
-Current bridge is explicitly Final Catmull-Rom with logical-canvas Clamp; native
-dispatch must not silently route Draft/Wrap/Mirror through it. Before enabling
-plane controls, complete those modes or explicitly agree a narrower mode contract.
+The original bridge retains Final Catmull-Rom with logical-canvas Clamp. The
+additive eg_render_plane_sampled entry point supports both quality modes and all
+three edge modes without changing frame layout. Modes are explicit, unknown
+values fail before output mutation. Native dispatch must select this entry point
+when respecting existing Draft/Wrap/Mirror settings. The 18-target CTest suite
+and ASan/UBSan verify all six combinations against an independent scalar oracle
+in 8/16/32 bpc, including off-canvas mapping, HDR, sparse input and row padding.
 17 CTest targets, 20 Rust tests, Clippy (existing macro exceptions), bridge
 ASan/UBSan PASS. Tests include all depths, direct-core equality, ABI layouts,
 invalid-grid/depth/view handling, invalid-plane copying, empty input and abort.

@@ -25,9 +25,14 @@ bool viewValid(const EgPlaneImage& image,int bytes,bool allowEmpty) {
 }
 int eg_render_plane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report) noexcept {
+    return eg_render_plane_sampled(source,output,depth,f,report,1,0);
+}
+int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge) noexcept {
     if(!report) return 1;
     *report={};
-    if(!source || !output || !f) return 1;
+    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2) return 1;
     const int bytes=depth==8?1:depth==16?2:depth==32?4:0;
     if(!bytes) return 2;
     if(!viewValid(*source,bytes,true) || !viewValid(*output,bytes,false) ||
@@ -45,7 +50,8 @@ int eg_render_plane(const EgPlaneImage* source,const EgPlaneImage* output,
             if(!warp) return 1;
         }
         const eg::PlaneCanvasRegion region{f->canvas_width,f->canvas_height,
-            f->source_x,f->source_y,f->output_x,f->output_y,f->surface_units_x,f->surface_units_y};
+            f->source_x,f->source_y,f->output_x,f->output_y,f->surface_units_x,f->surface_units_y,
+            static_cast<eg::EdgeMode>(edge),static_cast<eg::SampleQuality>(quality)};
         const auto* mapping=warp?&*warp:nullptr;
         const auto ss=source->row_bytes/bytes,ds=output->row_bytes/bytes;
         eg::PlaneRenderReport result;

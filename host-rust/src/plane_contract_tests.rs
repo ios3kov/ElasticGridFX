@@ -28,6 +28,8 @@ struct Report { invalid_plane: i32, reserved: i32, outside_pixels: u64, invalid_
 unsafe extern "C" {
     fn eg_render_plane(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report) -> i32;
+    fn eg_render_plane_sampled(src: *const Image, dst: *const Image, depth: i32,
+                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
 }
 
 #[test]
@@ -52,6 +54,14 @@ fn plane_abi_layout_and_identity_roundtrip() {
     assert_eq!(unsafe {eg_render_plane(&src,&dst,32,&frame,&mut report)}, 0);
     assert_eq!(output, input);
     assert_eq!(report.invalid_plane, 0);
+    for quality in 0..2 {
+        for edge in 0..3 {
+            assert_eq!(unsafe {eg_render_plane_sampled(&src,&dst,32,&frame,&mut report,quality,edge)}, 0);
+            assert_eq!(output, input);
+        }
+    }
+    assert_eq!(unsafe {eg_render_plane_sampled(&src,&dst,32,&frame,&mut report,2,0)}, 1);
+    assert_eq!(output, input);
     frame.corners = [0.0; 8];
     assert_eq!(unsafe {eg_render_plane(&src,&dst,32,&frame,&mut report)}, 0);
     assert_eq!(output, input);

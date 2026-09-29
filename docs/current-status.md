@@ -12,6 +12,20 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Stage 9 perspective sampling modes
+
+Plane core and additive `eg_render_plane_sampled` now support Draft Bilinear and
+Final Catmull-Rom with Clamp/Wrap/Mirror. Existing frame ABI and the original
+Final/Clamp entry point remain unchanged. Index reduction occurs in double before
+integer conversion; mirror periods use int64. Sparse storage is still transparent
+outside the checkout, with edge modes resolved on the logical canvas.
+Release CTest 18/18 and sampling ASan/UBSan PASS. The new independent scalar oracle
+covers all six mode pairs in 8/16/32 bpc, skewed/off-canvas planes, negative/HDR
+float values, sparse/full equivalence, padding and invalid-mode rejection.
+Evidence: work/stage9-core/plane-sampling-{sanitized,audit.json} and CTest logs.
+Static audit: existing workflow/test review findings only; not a release PASS.
+This remains core/ABI evidence, not native controls or AE perspective acceptance.
+
 ### Stage 9 native plane bridge
 
 Additive EgPlaneFrame/EgPlaneImage/eg_render_plane bridge compiled in Cargo and
