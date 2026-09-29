@@ -31,4 +31,15 @@ Every performance-sensitive change requires a recoverable baseline, before/after
 
 ## Current state
 
-Pinned installed native candidate: 6d3b846 / EGFX-603e9d3e4025d271e0488201. User screenshots show bright streaks with the effect enabled and no such streaks with it disabled; the guide grid is nonuniform. A sparse-source/transparent-border investigation is in progress. Exact host cause, corrected AE output, target timing and physical Metal performance remain unconfirmed. No production release, new install or main merge is authorized by this document.
+Pinned installed native candidate: fd69988 / EGFX-f442513cb6528f14295d6d45.
+Stage 7 target functional smoke passed; see current-status.md for exact evidence
+and scope. Stage 8 has an initial 1080p/32bpc/Final Bicubic process-start baseline.
+Next measurement uses the same immutable AEP, OFF/ON warmups followed by five
+serial alternating OFF/ON pairs. Acceptance requires unique mapped candidate
+identity, unchanged installed payload, successful exits, 60 valid outputs per run
+and byte-identical output across both requested modes. Retain coarse host timing
+records without treating whole-second reports as accurate per-frame latency.
+Cache state remains uncontrolled: no cold/warm-cache or renderer acceleration
+claim from this experiment. Actual MFR concurrency is not instrumented.
+RAM Preview, HDR target fidelity and physical Metal performance remain open.
+No production release, new install or main merge is authorized by this document.
