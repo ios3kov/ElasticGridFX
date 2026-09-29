@@ -11,6 +11,22 @@ No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
 
+### Stage 7 runner path fixes — 2026-09-29
+
+Report `EGFX-AE-fd8177e566514d90b6227201607a6a6e` reached ARMED from
+CLEAN revision 1 and completed owned-project cleanup. Identity was blocked by
+two sampler privacy masks and a resource symlink inside MochaAE.bundle.
+The runner now matches separated complete masked path segments against the
+independent libproc observation. Visible path segments, UUID, payload, signature,
+same-process and conflict gates remain required. Adjacent/partial masks fail.
+Conflict discovery treats .bundle as a native bundle boundary like .plugin:
+it reads bundle identity and detects ElasticGrid even under another suffix,
+without scanning nested resource links. Unknown links in the discovery tree
+still block. No plugin payload or installed files are changed.
+The retained sample now maps to the expected UUID and the application plugin
+root scans successfully. These diagnostic checks are not functional PASS;
+a new packaged real-AE run is required.
+
 Installation receipt EGFX-update-bf076f0a16f44fb983e717d9e8779b3d reports
 INSTALLED_FOR_TEST, no install/rollback errors and a retained original backup.
 The installed candidate is 6d3b846463410f37198fda4b625e56e4cea44c22 /

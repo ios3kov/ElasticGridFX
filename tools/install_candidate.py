@@ -57,7 +57,9 @@ def discover(roots: list[Path]) -> list[Path]:
             checked_path(path)
             if not path.is_dir():
                 continue
-            if path.suffix.lower() == '.plugin':
+            if path.suffix.lower() in ('.plugin', '.bundle'):
+                # Native bundle boundary: inspect its identity, not internal
+                # frameworks/resources (which may contain ordinary symlinks).
                 candidate = 'elasticgrid' in path.name.lower()
                 plist = path / 'Contents/Info.plist'
                 if plist.exists():

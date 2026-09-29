@@ -137,12 +137,16 @@ def path_text_consistent(reported: str, observed: str) -> bool:
     reported, observed = path_alias(reported), path_alias(observed)
     if '*' not in reported:
         return reported == observed
-    if reported.count('*') != 1 or '*' in observed:
+    if '*' in observed:
         return False
-    prefix, suffix = reported.split('*')
-    return (prefix.startswith('/') and prefix.endswith('/') and suffix.startswith('/')
-            and observed.startswith(prefix) and observed.endswith(suffix)
-            and len(observed) >= len(prefix) + len(suffix))
+    # sample can redact multiple complete path segments, including several
+    # directories per mask. Keep every visible segment literal and ordered.
+    parts = reported.split('/')
+    if (not reported.startswith('/') or parts[-1] == '*' or '/*/*/' in reported
+            or any('*' in p and p != '*' for p in parts)):
+        return False
+    pattern = '/'.join(r'[^/]+(?:/[^/]+)*' if p == '*' else re.escape(p) for p in parts)
+    return re.fullmatch(pattern, observed) is not None
 
 
 def masked_path_consistent(reported: str, observed: str) -> bool:

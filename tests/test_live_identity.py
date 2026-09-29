@@ -87,6 +87,27 @@ class LiveIdentity(unittest.TestCase):
         images=li.parse_sample(data,123,EXE)
         self.assertEqual(images[0]['uuid'],IMAGE_UUID)
 
+    def test_multiple_complete_privacy_masks(self):
+        masked = '/Users/*/Library/Application Support/Adobe/*/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'
+        actual = '/Users/alice/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin/Contents/MacOS/ElasticGrid'
+        self.assertTrue(li.path_text_consistent(masked, actual))
+        for invalid in (actual.replace('/Adobe/', '/Other/'), actual + '-old', actual.replace('/alice/', '//')):
+            self.assertFalse(li.path_text_consistent(masked, invalid))
+        self.assertFalse(li.path_text_consistent('/Users/a*/Library/x', '/Users/alice/Library/x'))
+        images = li.parse_sample(report(path=masked), 123, EXE, path_lookup=lambda address: actual)
+        self.assertEqual(images[0]['path'], actual)
+
+    def test_bundle_boundary_preserves_candidate_and_symlink_guards(self):
+        bundle = self.folder/'MochaAE.bundle'
+        (bundle/'Contents').mkdir(parents=True)
+        (bundle/'Contents/Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier':'com.vendor.mocha'}))
+        (bundle/'Contents/internal-link').symlink_to('missing')
+        self.assertEqual(li.discover([self.folder]), [])
+        (bundle/'Contents/Info.plist').write_bytes(plistlib.dumps({'CFBundleIdentifier':'com.elasticgrid.fx'}))
+        self.assertEqual(li.discover([self.folder]), [bundle])
+        (self.folder/'unknown-link').symlink_to(bundle)
+        with self.assertRaises(ValueError): li.discover([self.folder])
+
     def test_masked_header_still_requires_native_observation(self):
         masked=report().replace('Path: '+EXE, 'Path: /Applications/*/Contents/MacOS/After Effects')
         with self.assertRaises(li.Blocked):
