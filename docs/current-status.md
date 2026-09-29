@@ -12,6 +12,15 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Persistent viewer grid request
+
+User confirmed a toggle for passive grid visibility after deselection, hidden
+during playback and absent from all rendered/cached frames. Current effect-only
+DRAWBOT API is selection-dependent. Research and scope are recorded in
+persistent-viewer-grid.md. Architecture decision required before an interactive
+renderer/overlay prototype; no fake toggle, pixel burn-in or installation made.
+Installed de0becf and its accepted appearance remain unchanged.
+
 ### Stage 9 continuation: expanded perspective canvas
 
 User accepted the thinner guide/intersection appearance of installed de0becf
