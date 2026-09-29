@@ -7,6 +7,7 @@ function elasticGridTextPlaneProbe(config) {
     if (!app.project || app.project.file !== null || app.project.numItems !== 0 || app.project.dirty !== false)
         throw new Error("Requires clean empty project");
     var comp = app.project.items.addComp("__EGFX_TEXT_" + config.run_id, 640, 480, 1, 1, 30);
+    comp.comment = "EGFX_TEXT_PROBE_V1:" + config.run_id;
     var layer = comp.layers.addText("GRID\rPLANE");
     layer.name = "__EGFX_TEST_TEXT";
     var source = layer.property("ADBE Text Properties").property("ADBE Text Document");
@@ -23,13 +24,23 @@ function elasticGridTextPlaneProbe(config) {
 }
 
 function elasticGridTextPlaneToggle(config) {
+    if (!/^[a-f0-9]{32}$/.test(config.run_id) || typeof config.three_d !== "boolean")
+        throw new Error("Invalid toggle config");
     var file = new File(config.folder + "/text-plane.aep");
     if (!app.project || !app.project.file || app.project.file.fsName !== file.fsName)
         throw new Error("Foreign project");
     var comp = app.project.activeItem;
-    if (!comp || comp.name !== "__EGFX_TEXT_" + config.run_id) throw new Error("Foreign comp");
+    if (!comp || comp.name !== "__EGFX_TEXT_" + config.run_id ||
+        comp.comment !== "EGFX_TEXT_PROBE_V1:" + config.run_id ||
+        comp.numLayers !== 1 || comp.width !== 640 || comp.height !== 480)
+        throw new Error("Foreign comp");
     var layer = comp.layer("__EGFX_TEST_TEXT");
+    var text = layer && layer.property("ADBE Text Properties");
+    var effects = layer && layer.property("ADBE Effect Parade");
+    var fx = effects && effects.property("com.elasticgrid.fx.warp");
+    if (!text || !text.property("ADBE Text Document") || !fx || layer.locked)
+        throw new Error("Foreign layer");
     layer.threeDLayer = config.three_d === true;
     layer.selected = true;
-    layer.property("ADBE Effect Parade").property("com.elasticgrid.fx.warp").selected = true;
+    fx.selected = true;
 }

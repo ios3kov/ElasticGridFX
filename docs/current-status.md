@@ -6,6 +6,30 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
+### Current installation and text-fixture safety checkpoint
+
+Installed candidate is now **1eed79aad052f144668c2ebed9426a7934f35f6b**,
+Build ID **EGFX-25e03a7ae1a9304311095c8e**. Receipt
+EGFX-update-82e493859f9b47ab950b0b4821a9f27a is INSTALLED_FOR_TEST;
+1232ad2 is retained for rollback. Installed payload reverified against manifest.
+After AE restart, native screenshot confirms Grid Positions and its stopwatch
+visible in Effect Controls, with no diagnostic text. This supersedes the pending
+installation statements below. Exact live-image identity and new keyframe
+roundtrip on this candidate are NOT RUN; do not reuse 1232ad2 pixel PASS as new evidence.
+
+The formerly owned text-plane.aep path now opens an image/adjustment-layer
+composition, as seen during that UI check. Preserve it; it is not a valid native
+text regression fixture anymore. Do not infer ownership from a historical path.
+The text probe now also requires run marker, expected dimensions/layer count,
+native text property, expected effect, unlocked layer and boolean toggle input
+before mutation. Existing path/name checks remain. Node negative guards and
+positive control PASS; static audit review_required with existing workflow/test
+findings. No renderer/UI projection changes or new plugin installation this step.
+
+Next: create a fresh uniquely owned native-text fixture in a clean project and
+capture effect-canvas versus layer-plane coordinates for rotation/camera cases.
+The 3D text displacement is still unresolved; Stage 9 stays OPEN.
+
 ### Grid Positions correction requested by user
 
 Hiding the entire Effect Controls row was a misunderstanding. Restore its
