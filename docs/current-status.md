@@ -10,7 +10,44 @@ No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
 
-### Stage 8 preparation — measurements BLOCKED
+### Stage 8 — initial measurements available; full performance gate open
+
+#### Serial requested-MFR comparison — 2026-09-29
+
+Runner commit `27241ee`, SHA-256
+`917fe0adde3e3aee6dd506c6b6c7985704db3846c91065d51c169a9239751d30`.
+Series `0ff9c4318e49481899ce2fc5f6b6e2b3`: OFF/ON warmups followed by five
+serial alternating OFF/ON pairs on the identical pinned AEP and fd69988 plugin.
+All 12 exits successful; mapped candidate and installed payload checks passed;
+every run produced 60 valid 1080p PNGs with the same aggregate digest as the
+previous baseline. No plugin change, GUI project mutation, cache purge or
+competing build/test was performed during measurement.
+
+| Requested MFR | Full-process median | Range | Nearest-rank p95 | Sampled core RSS maximum |
+|---|---:|---:|---:|---:|
+| OFF | 34.6547193 s | 33.4859687–35.7392201 s | 35.7392201 s | 2117337088 bytes |
+| ON | 34.5143172 s | 33.2587832–34.7046569 s | 34.7046569 s | 1909194752 bytes |
+
+Median difference is about 0.4%, within observed variability: **no demonstrated
+acceleration**. Actual concurrent frame execution was not instrumented, so this
+is comparison of CLI-requested modes, not proof of MFR utilization. The host
+reports total render time 22–23 whole seconds for measured runs; per-frame
+reports are retained with their whole-second resolution, not converted into
+misleading millisecond latency percentiles. Startup/output/shutdown/observation
+are included in wall time; child-process memory is excluded from core RSS.
+Raw logs report Full/Best, RGB Millions of Colors PNG output and sRGB working
+profile. The saved fixture remains 32bpc Final Bicubic, but PNG equality is not
+HDR fidelity. Cache state remains uncontrolled. Do not compare this later series
+to the earlier baseline as an optimization: no production code changed.
+
+Evidence: controlled workspace series.json and raw logs; exported
+`ElasticGridFX-Stage8-MFR-comparison.json` and companion evidence ZIP.
+Tooling tests: 13 aerender unit tests PASS. Static skill audit: review_required,
+not PASS; existing workflow action pinning/checkout-credential candidates remain,
+plus a rate-limit heuristic on a local test (not a network auth endpoint).
+Next: controlled cache/RAM Preview lifecycle measurements and bottleneck
+attribution before choosing an optimization. Stage 8 remains open; Stage 9
+perspective-plane requirements remain recorded, not implemented by this work.
 
 #### Initial serial end-to-end baseline measured (Stage 8 still open)
 
