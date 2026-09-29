@@ -12,6 +12,17 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 9 initial geometry foundation
 
+Latest slice: added 8/16-bpc plane region APIs through a shared typed sampler.
+Integer output rounds only after both Catmull-Rom axes, clamps sampled values to
+255 / AE 32768, and preserves exact pass-through bytes. Float remains unclamped.
+New test compares existing Final within one integer level and requires bit-exact
+sparse/full output, padding safety, empty source and malformed-stride rejection.
+This does not wire the new renderer into native AE; installed fd69988 is unchanged.
+Verification: 15/15 Release CTest targets PASS; new integer-depth tests under
+ASan/UBSan PASS. Static audit remains review_required with no findings in changed
+renderer/new tests. Evidence retained in work/stage9-core: LastTest.log under
+Testing/Temporary, plane-depth-sanitized and plane-depth-audit.json. No speed claim.
+
 Latest continuation: standalone float PlaneRenderer now supports compact source
 checkout and independently positioned output rectangles on a logical canvas.
 Missing checkout taps are transparent, not stretched. Empty input yields zero;

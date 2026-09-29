@@ -16,6 +16,14 @@ struct PlaneCanvasRegion {
 PlaneRenderReport renderPlaneRGBAfRegion(const ConstImageRGBAf& src, const ImageRGBAf& dst,
     const PlaneCanvasRegion& region, const PlaneWarp* warp,
     AbortFn abort = nullptr, void* abort_refcon = nullptr);
+// Integer sampling rounds once after both cubic axes; clamps to 255 / AE 32768.
+// Pass-through pixels retain their original bits, just like the existing renderer.
+PlaneRenderReport renderPlaneRGBA8Region(const ConstImageRGBA8& src, const ImageRGBA8& dst,
+    const PlaneCanvasRegion& region, const PlaneWarp* warp,
+    AbortFn abort = nullptr, void* abort_refcon = nullptr);
+PlaneRenderReport renderPlaneRGBA16Region(const ConstImageRGBA16& src, const ImageRGBA16& dst,
+    const PlaneCanvasRegion& region, const PlaneWarp* warp,
+    AbortFn abort = nullptr, void* abort_refcon = nullptr);
 // Dense, same-canvas float reference path. Integer pixel centers in plane surface
 // coordinates. Final Catmull-Rom only, clamp at canvas edges. Nonoverlapping views.
 // Null warp means invalid plane: exact pass-through with diagnostic flag.

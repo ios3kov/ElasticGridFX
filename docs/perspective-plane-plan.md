@@ -57,7 +57,14 @@ semantics, not implicitly stretched. Dense API delegates to the same region path
 Tests require bit-exact compact/full-zero-filled equivalence for deformed,
 identity and invalid-plane states, tiled-output equivalence, padding preservation,
 empty input and malformed-region rejection.
-Next: expanded-canvas policy, PAR/downsampling, 8/16-bit adapters and actual host wiring.
+8/16-bit region entry points now share the float path's coordinate/tap calculation.
+Accumulate both cubic axes in float and round once; sampled channels clamp to
+255 or AE's 32768, never 65535 for 16-bpc. Identity/outside/invalid-plane samples
+retain input bits (including unusual values), matching the previous copy policy.
+Acceptance: padded strides, sparse/full bit-exact equality, empty input, bad stride,
+outside/invalid copying and flat-plane Final comparison within one integer level.
+These are standalone core tests, not AE bit-depth acceptance.
+Next: expanded-canvas policy, PAR/downsampling and actual host wiring.
 The new scalar float path is not yet compiled into the native plugin; no AE claim.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host
