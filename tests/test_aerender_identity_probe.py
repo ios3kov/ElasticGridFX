@@ -8,6 +8,12 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 import aerender_identity_probe as probe
 
 class RenderProcessDiscovery(unittest.TestCase):
+    def test_leaf_histogram_is_thresholded_not_recursive_stack_sum(self):
+        text='Call graph:\n 999 recursive\nSort by top of stack, same collapsed (when >= 5):\n        longest_match  (in PNGIO)        52\n\nBinary Images:\nprivate paths\n'
+        self.assertEqual(probe.leaf_summary(text),[dict(symbol='longest_match',image='PNGIO',observations=52)])
+        for bad in ('',text+text,text.replace('52','4'),text.replace('(in PNGIO)','unknown')):
+            with self.assertRaises(ValueError): probe.leaf_summary(bad)
+
     def test_detached_process_requires_parent_token_and_output(self):
         path=Path('/test/aerendercore'); output=Path('/owned/frame_[#####].png')
         for token,want in (('10',True),('100',False)):

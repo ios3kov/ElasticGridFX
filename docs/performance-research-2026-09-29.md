@@ -1,9 +1,23 @@
 # Stage 8 research — Render / RAM Preview performance
 
 Date: 2026-09-29
-Current production stage: 7 of 10. This is parallel research/preparation only.
-No performance implementation is approved before the Stage 7 target pixel baseline
-is accepted. Authoritative quality contract: performance-quality-contract.md.
+Current production stage: 8 of 10. Stage 7 target smoke is accepted; current
+measurement evidence is in current-status.md. Authoritative quality contract:
+performance-quality-contract.md. Prepared-tooling descriptions below are historical
+unless superseded by that evidence (notably stdout identity and launcher memory).
+
+## Next diagnostic experiment
+
+Use the immutable AEP and fd69988 in a separate serial aerender run. Capture three
+bounded one-second Apple samples after observing at least 5, 20 and 40 output files.
+Bind each sample to the exact owned process and loaded Mach-O UUID. Require all
+three captures, successful render exit, 60 output frames and comparison with the
+prior output digest before interpreting the profile. Retain raw samples privately;
+export only thresholded symbol/image/count histograms. Sleeping-thread counts are
+not CPU percentages. This diagnostic is perturbed, sparse and output-progress
+biased, not a replacement timing baseline or proof of absence of plugin cost.
+Goal: distinguish evidence of encoding/host cost from native sampling cost before
+selecting the next controlled experiment. No native optimization or install here.
 
 ## Sources checked
 

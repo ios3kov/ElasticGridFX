@@ -37,7 +37,23 @@ def detached_renderers(parent, executable, output_path):
     return found
 
 
-def probe(workspace, aerender, bundle, package, manifest_path, render_executable):
+def leaf_summary(text):
+    """Apple's thresholded leaf histogram includes sleeping threads; not CPU %."""
+    start='Sort by top of stack, same collapsed (when >= 5):'
+    if text.count(start)!=1 or text.count('Binary Images:')!=1:
+        raise ValueError('missing or ambiguous sample histogram')
+    section=text.split(start,1)[1].split('Binary Images:',1)[0]
+    entries=[]
+    for line in section.splitlines():
+        if not line.strip(): continue
+        match=re.fullmatch(r'\s+(.+?)\s+\(in ([^)]+)\)\s+(\d+)\s*',line)
+        if not match or int(match[3])<5: raise ValueError('unexpected sample histogram')
+        entries.append(dict(symbol=match[1],image=match[2],observations=int(match[3])))
+    if not entries: raise ValueError('empty sample histogram')
+    return entries
+
+
+def probe(workspace, aerender, bundle, package, manifest_path, render_executable, profile=False):
     fixture = ab.load_fixture(workspace, workspace/'fixture.json')
     build = ab.verify_candidate(bundle, package, manifest_path)
     manifest = json.loads(manifest_path.read_text())
@@ -45,7 +61,8 @@ def probe(workspace, aerender, bundle, package, manifest_path, render_executable
     run.mkdir(mode=0o700)
     output = run/'output'; output.mkdir()
     record = dict(status='BLOCKED', scope='instrumented preflight; not timing baseline',
-                  build=build, observations=[], sampled_peak_rss_bytes=0)
+                  build=build, observations=[], sampled_peak_rss_bytes=0,profiles=[],
+                  runner_sha256=bi.digest(Path(__file__).read_bytes()))
     cmd = [str(aerender), '-project', str(fixture['project_path']), '-rqindex','1',
            '-output', str(output/fixture['output_pattern']), '-mfr','OFF','100',
            '-v','ERRORS_AND_PROGRESS']
@@ -74,6 +91,20 @@ def probe(workspace, aerender, bundle, package, manifest_path, render_executable
                         identity=dict(pid=target,uuid=image['uuid'],observation=observation)
                     except (ValueError,OSError,subprocess.SubprocessError) as error:
                         record['observations'].append(type(error).__name__)
+                if profile and identity is not None and len(record['profiles'])<3:
+                    threshold=(5,20,40)[len(record['profiles'])]
+                    frame_count=len(list(output.glob('*.png')))
+                    if frame_count>=threshold:
+                        folder=run/('profile-'+str(threshold));folder.mkdir()
+                        images,observation=li.capture(target,render_executable,folder)
+                        image=li.select_image(images,bundle/'Contents/MacOS/ElasticGrid',
+                            li.macho_uuids((bundle/'Contents/MacOS/ElasticGrid').read_bytes()))
+                        if observation['process_key_sha256']!=identity['observation']['process_key_sha256']:
+                            raise ValueError('profile process identity changed')
+                        record['profiles'].append(dict(threshold=threshold,observed_output_files=frame_count,
+                            uuid=image['uuid'],capture=observation,
+                            leaves=leaf_summary((folder/'sample-private.txt').read_text())))
+                        bi.dump(run/'profile-progress.json',record)
             elif len(hosts)>1:
                 record['reason']='ambiguous new AE process'; break
             time.sleep(0.25)
@@ -85,15 +116,24 @@ def probe(workspace, aerender, bundle, package, manifest_path, render_executable
         record.update(identity=identity,output_files=len(files),output_digest=digest)
         if len(files)==fixture['frame_end']-fixture['frame_start']+1:
             record['status']='IDENTITY_AND_FRAME_COUNT_PASS'
+            if profile:
+                record['status']='PROFILE_CAPTURED' if len(record['profiles'])==3 else 'PROFILE_INCOMPLETE'
+                record['limitations']=['three short frame-progress-triggered samples, not uniform full-run coverage',
+                    'leaf counts include waiting threads and omit symbols below five observations',
+                    'counts are not CPU percentages or wall-time attribution; sampler perturbs render',
+                    'raw samples retained locally only; sanitized histogram exported']
     if record['returncode'] is None:
         record['reason']='probe stopped; render processes were not killed'
     bi.dump(run/'probe.json',record)
     print(json.dumps(dict(report=str(run/'probe.json'),**record),indent=2))
+    if record['status'] not in ('IDENTITY_AND_FRAME_COUNT_PASS','PROFILE_CAPTURED'):
+        raise SystemExit(1)
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     for name in ('workspace','aerender','bundle','package','manifest','render-executable'):
         parser.add_argument('--'+name,type=Path,required=True)
+    parser.add_argument('--profile',action='store_true',help='Capture three diagnostic samples during frame output; NOT benchmark')
     args=parser.parse_args()
-    probe(args.workspace.resolve(),args.aerender,args.bundle,args.package,args.manifest,args.render_executable)
+    probe(args.workspace.resolve(),args.aerender,args.bundle,args.package,args.manifest,args.render_executable,args.profile)
