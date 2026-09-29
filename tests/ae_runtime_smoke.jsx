@@ -160,6 +160,7 @@ function elasticGridSmoke(config) {
         return value;
     }
     function frame(targetComp, name, time) {
+        result.stage = "frame_" + name;
         own();
         var file = new File(config.folder + "/" + name + ".png");
         if (file.exists) throw new Error("Refusing old frame");
@@ -246,7 +247,9 @@ function elasticGridSmoke(config) {
         result.status = "CAPTURED"; // Pixel assertions run externally, never infer PASS here.
     } catch (error) {
         result.status = "FAIL";
-        // Store the stage, not arbitrary exception text that may include user paths.
+        // Numeric host diagnostics cannot expose project names or user paths.
+        result.error_number = typeof error.number === "number" && isFinite(error.number) ? error.number : null;
+        result.error_line = typeof error.line === "number" && isFinite(error.line) ? error.line : null;
     } finally {
         if (owned !== null) {
             if (app.project !== owned) { result.status = "FAIL"; result.stage = "foreign_project"; }
@@ -271,7 +274,9 @@ function elasticGridSmoke(config) {
                 resultFile.write('{"run_id":'+quote(result.run_id)+',"status":'+quote(result.status)+
                     ',"stage":'+quote(result.stage)+',"ae_version":'+quote(result.ae_version)+
                     ',"project_bpc":32,"loaded_build_id":null,"guard":'+quote(result.guard)+
-                    ',"project_revision":'+quote(result.project_revision)+'}');
+                    ',"project_revision":'+quote(result.project_revision)+
+                    ',"error_number":'+(result.error_number == null ? 'null' : String(result.error_number))+
+                    ',"error_line":'+(result.error_line == null ? 'null' : String(result.error_line))+'}');
                 resultFile.close();
             } catch (writeError) { result.status = "FAIL"; }
         }

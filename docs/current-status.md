@@ -27,6 +27,18 @@ The retained sample now maps to the expected UUID and the application plugin
 root scans successfully. These diagnostic checks are not functional PASS;
 a new packaged real-AE run is required.
 
+Packaged runner commit `45594f9dd264e1aeff7109ce236f4387cfbb39bc`
+(ZIP SHA-256 `b416b615c1a754db797e1cdd5a4052074a57f74b614518b14e98ae5cd0d78e24`)
+was executed as `EGFX-AE-fff7f118bbb44553b4c55012521dc18c`.
+Live identity PASSED in AE 25.6.0 arm64 PID 42039: expected UUID/path/payload,
+no scan errors or duplicate candidate. Pixel capture exited 90 after writing
+bypass.png; capture status FAIL, stage capture, pixel assertions NOT RUN.
+Functional acceptance remains BLOCKED. This does not isolate the failure to
+the renderer: the previous capture record omitted frame-specific diagnostics.
+The next runner records the exact frame and numeric host error/line without
+arbitrary exception text. Local validation: 177 Python tests, both smoke safety
+JS suites and native libproc fixture checks PASS for the path fixes.
+
 Installation receipt EGFX-update-bf076f0a16f44fb983e717d9e8779b3d reports
 INSTALLED_FOR_TEST, no install/rollback errors and a retained original backup.
 The installed candidate is 6d3b846463410f37198fda4b625e56e4cea44c22 /
