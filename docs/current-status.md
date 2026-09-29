@@ -8,6 +8,13 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Latest checkpoint: direct SequenceSetup stream access returned Parameter error;
+do not use it for automatic binding. A bounded, read-only deferred idle probe
+is built from 8932480, EGFX-5263b63fcc6d802626046b97. Compilation, bundle/identity
+checks and harness guards PASS; native run BLOCKED by locked Mac. It is not
+installed. Ordinary 1eed79a payload remains unchanged and verified. See
+[lifecycle research](stage9-lifecycle-probe.md). This is research, not a 3D fix.
+
 User requires automatic behavior when the layer's 3D switch changes. No Bind
 button, manual expression setup or precomposition requirement is acceptable.
 Grid Positions keys must survive both directions of the transition.

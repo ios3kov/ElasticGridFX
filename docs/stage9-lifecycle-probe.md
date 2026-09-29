@@ -71,3 +71,14 @@ owned fixture without saving and restore ordinary installed payload. Tests must
 not reuse Property references across calls. Default build excludes all hooks.
 This experiment does not prove expression writes, Undo, non-interactive first
 render or a supported production initialization mechanism. Native run pending.
+
+Prepared clean research candidate 893248038c36a4ebfe898c2e290882ba24364ad8,
+EGFX-5263b63fcc6d802626046b97, package SHA-256
+78a2b8eaaa496e9f267db05e7d4de6e7689a91cc9ed8d4564e6316e43ce9095a.
+Opt-in check/build, signature, bundle verification and sealed identity PASS.
+Default Rust tests 24/24 PASS; Node ownership/add/remove/no-save guards PASS.
+Static audit review_required: existing workflow and test-heuristic findings,
+not security approval. Native run BLOCKED: Mac locked, UI tool explicitly
+requires manual unlock. No installation or AE shutdown attempted. Ordinary
+1eed79a installed payload reverified unchanged. Next: unlock, verify empty/owned
+AE state, reversible install, separate add/idle/remove calls, rollback.
