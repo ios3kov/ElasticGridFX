@@ -129,47 +129,44 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         result['capture'] = record
         if code != 0 or record.get('stage') != 'complete' or tuple(record.get('frames',())) != FRAMES:
             result['reason'] = 'Stage 9 AE fixture did not complete the exact frame matrix'
-            return result, write_report(run, result, fixture)
-        captured = True
-        meta['actual_ae_execution'] = True
+        else:
+            captured = True
+            meta['actual_ae_execution'] = True
 
-        identity_dir = run/'identity-private'
-        identity_dir.mkdir(mode=0o700)
-        identity = live_identity.diagnose(identity_dir, manifest, [])
-        result['identity'] = identity
-        result['identity_status'] = identity.get('loaded_image_status','NOT RUN')
-        identity_ok = (
-            identity.get('status') == 'PASS' and
-            identity.get('loaded_image_status') == 'PASS' and
-            identity.get('observed_build_id') == EXPECTED_BUILD and
-            identity.get('ae',{}).get('pid') == pid and
-            Path(identity.get('ae',{}).get('path','')) == ae_app
-        )
-        if not identity_ok:
-            result['reason'] = 'loaded de31498 identity was not proven in the fixture AE process'
-            return result, write_report(run, result, fixture)
-
-        pixels = validate_plane_frames(fixture)
-        result['pixels'] = pixels
-        result['pixel_status'] = pixels['status']
-        if pixels['status'] != 'PASS':
-            result['functional_status'] = 'FAIL'
-            result['reason'] = 'one or more Stage 9 plane/3D/camera pixel checks failed'
-            return result, write_report(run, result, fixture)
-
-        # Re-check immutable installed bytes after the live render work.
-        ae_smoke_runner._transport_context(
-            dict(expected_build=manifest['build']), ae_app, installed, package_path, manifest_path
-        )
-        result['functional_status'] = 'PASS'
-        result['reason'] = 'de31498 identity and automated Stage 9 plane/3D/camera pixel matrix passed'
-        return result, write_report(run, result, fixture)
+            identity_dir = run/'identity-private'
+            identity_dir.mkdir(mode=0o700)
+            identity = live_identity.diagnose(identity_dir, manifest, [])
+            result['identity'] = identity
+            result['identity_status'] = identity.get('loaded_image_status','NOT RUN')
+            identity_ok = (
+                identity.get('status') == 'PASS' and
+                identity.get('loaded_image_status') == 'PASS' and
+                identity.get('observed_build_id') == EXPECTED_BUILD and
+                identity.get('ae',{}).get('pid') == pid and
+                Path(identity.get('ae',{}).get('path','')) == ae_app
+            )
+            if not identity_ok:
+                result['reason'] = 'loaded de31498 identity was not proven in the fixture AE process'
+            else:
+                pixels = validate_plane_frames(fixture)
+                result['pixels'] = pixels
+                result['pixel_status'] = pixels['status']
+                if pixels['status'] != 'PASS':
+                    result['functional_status'] = 'FAIL'
+                    result['reason'] = 'one or more Stage 9 plane/3D/camera pixel checks failed'
+                else:
+                    # Re-check immutable installed bytes after the live render work.
+                    current_identifier, current_pid = ae_smoke_runner._transport_context(
+                        dict(expected_build=manifest['build']), ae_app, installed, package_path, manifest_path
+                    )
+                    if current_identifier != identifier or current_pid != pid:
+                        raise ValueError('AE process changed during Stage 9 acceptance')
+                    result['functional_status'] = 'PASS'
+                    result['reason'] = 'de31498 identity and automated Stage 9 plane/3D/camera pixel matrix passed'
     except subprocess.TimeoutExpired:
         result['reason'] = 'AE Stage 9 timeout; no host process was killed or retried'
-        return result, write_report(run, result, fixture)
     except (ValueError, OSError, KeyError, TypeError, AttributeError, subprocess.SubprocessError) as error:
         result['reason'] = type(error).__name__ + ': ' + str(error)
-        return result, write_report(run, result, fixture)
     finally:
         if captured:
             try:
@@ -190,6 +187,8 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
                 if result.get('functional_status') == 'PASS':
                     result['functional_status'] = 'BLOCKED'
                     result['reason'] = 'pixel/identity checks passed but safe cleanup was not proven'
+
+    return result, write_report(run, result, fixture)
 
 
 def main() -> int:
