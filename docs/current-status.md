@@ -14,6 +14,22 @@ safe AE restart (never discard unsaved work).
 
 ### Stage 9 requested guide UI affordances (source implementation)
 
+Follow-up: d26419c was installed with rollback retained (Build ID
+EGFX-7726b4f7add8cb5e7329ee90; package SHA-256
+fff53c06678ca531fba80789b404ce2fb1b4d384f215e39ae77ee6ebfaa0800c).
+User acceptance rejected overly thick lines and fixed central gaps. New source
+halves guide width (1.5 outer / 0.5 inner), slims grips, and recomputes vertical
+cuts at every transformed horizontal intersection, including during drags.
+Visual AE acceptance is explicitly delegated to the user at their request;
+it remains NOT_RUN for the follow-up candidate, not PASS. Renderer unchanged.
+Source verification: 19/19 Rust release tests PASS, Clippy PASS with existing
+macro exceptions. Static scan has existing workflow/test findings, no changed-UI
+findings (work/stage9-core/intersection-guide-audit.json). Real AE visual checks
+remain with the user. Replacement waits until their color dialog/project work
+is safely finished; d26419c is still installed at this source commit.
+
+Prior implementation/install records:
+
 Latest scope: elongated grips/gaps matching the user reference, hover-only hand,
 and white/black outlined guides. See guide-ui-v0.5.md for criteria and research.
 Source implementation complete; Rust release tests 17/17 and Clippy PASS (existing

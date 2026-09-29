@@ -2,7 +2,7 @@ use super::*;
 
 const HIT_SLOP: f32 = 9.0;
 const GRIP_LENGTH: f32 = 48.0;
-const GUIDE_GAP: f32 = 24.0;
+const GUIDE_GAP: f32 = 12.0;
 const DRAG_NONE: isize = 0;
 const DRAG_COLUMNS: isize = 1;
 const DRAG_ROWS: isize = 2;
@@ -50,28 +50,46 @@ fn overlay_color(value: f32) -> ae::drawbot::ColorRgba {
 type Segment = (ae::drawbot::PointF32, ae::drawbot::PointF32);
 
 // Layout in frame coordinates, so grips keep their size under layer zoom and
-// follow rotated guides. Short/dense guides retain a plain line.
+// follow rotated guides. Cut locations come from the current grid, not a fixed
+// midpoint. The same clipped geometry is used for drawing and picking.
 fn guide_segments(a: ae::drawbot::PointF32, b: ae::drawbot::PointF32,
-                  split: bool, handles: bool) -> (Vec<Segment>, Vec<Segment>) {
+                  crossings: &[ae::drawbot::PointF32], handles: bool) -> (Vec<Segment>, Vec<Segment>) {
     let length = ((b.x - a.x).powi(2) + (b.y - a.y).powi(2)).sqrt();
     if !length.is_finite() || length <= 1.0e-3 {
         return (Vec::new(), Vec::new());
     }
-    if !handles || length < GRIP_LENGTH + GUIDE_GAP + 8.0 {
-        return (vec![(a, b)], Vec::new());
-    }
     let point = |offset: f32| ae::drawbot::PointF32 {
-        x: (a.x + b.x) * 0.5 + (b.x - a.x) * offset / length,
-        y: (a.y + b.y) * 0.5 + (b.y - a.y) * offset / length,
+        x: a.x + (b.x - a.x) * offset / length,
+        y: a.y + (b.y - a.y) * offset / length,
     };
-    if split {
-        let gap = GUIDE_GAP * 0.5;
-        (vec![(a, point(-gap)), (point(gap), b)],
-         vec![(point(-gap - GRIP_LENGTH * 0.5), point(-gap)),
-              (point(gap), point(gap + GRIP_LENGTH * 0.5))])
-    } else {
-        (vec![(a, b)], vec![(point(-GRIP_LENGTH * 0.5), point(GRIP_LENGTH * 0.5))])
+    let mut cuts: Vec<f32> = crossings.iter().map(|p|
+        ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / length)
+        .filter(|s| s.is_finite() && *s > 0.0 && *s < length).collect();
+    cuts.sort_by(f32::total_cmp);
+    let mut spans = Vec::with_capacity(cuts.len() + 1);
+    let mut start = 0.0_f32;
+    for cut in cuts {
+        let end = (cut - GUIDE_GAP * 0.5).max(0.0);
+        if end > start { spans.push((start, end)); }
+        start = start.max((cut + GUIDE_GAP * 0.5).min(length));
     }
+    if start < length { spans.push((start, length)); }
+    let lines = spans.iter().map(|&(lo, hi)| (point(lo), point(hi))).collect();
+    let grips = if handles && length >= GRIP_LENGTH + GUIDE_GAP + 8.0 {
+        spans.iter().filter_map(|&(lo, hi)| {
+            let lo = lo.max((length - GRIP_LENGTH) * 0.5);
+            let hi = hi.min((length + GRIP_LENGTH) * 0.5);
+            (hi > lo).then(|| (point(lo), point(hi)))
+        }).collect()
+    } else { Vec::new() };
+    (lines, grips)
+}
+
+fn column_crossings(in_data: &ae::InData, event: &ae::EventExtra,
+                    grid: &GridArb, x: f32) -> Result<Vec<ae::drawbot::PointF32>, ae::Error> {
+    grid.row_lines.iter().skip(1).take(grid.row_lines.len().saturating_sub(2))
+        .map(|y| layer_to_frame(in_data, event, x, y * in_data.height().max(1) as f32))
+        .collect()
 }
 
 fn layer_to_frame(
@@ -148,7 +166,8 @@ fn hit_test(
         let x = grid.column_lines[i] * width;
         let a = layer_to_frame(in_data, event, x, 0.0)?;
         let b = layer_to_frame(in_data, event, x, height)?;
-        let (segments, _) = guide_segments(a, b, true,
+        let crossings = column_crossings(in_data, event, grid, x)?;
+        let (segments, _) = guide_segments(a, b, &crossings,
             grid.column_lines.len().max(grid.row_lines.len()) <= 34);
         let d = segments.into_iter().map(|(a, b)|
             point_segment_distance(mouse.h as f32, mouse.v as f32, a, b))
@@ -202,10 +221,10 @@ fn draw_viewer(
     // Opaque black/white strokes remain distinct even at middle gray.
     let color = overlay_color(1.0);
     let dark = overlay_color(0.0);
-    let pen = supplier.new_pen(&color, 1.0)?;
-    let outline = supplier.new_pen(&dark, 3.0)?;
-    let grip = supplier.new_pen(&color, 3.0)?;
-    let grip_outline = supplier.new_pen(&dark, 5.0)?;
+    let pen = supplier.new_pen(&color, 0.5)?;
+    let outline = supplier.new_pen(&dark, 1.5)?;
+    let grip = supplier.new_pen(&color, 1.5)?;
+    let grip_outline = supplier.new_pen(&dark, 3.0)?;
     let stroke = |a, b| -> Result<(), ae::Error> {
         draw_segment(&supplier, &surface, &outline, a, b)?;
         draw_segment(&supplier, &surface, &pen, a, b)
@@ -229,7 +248,8 @@ fn draw_viewer(
         let x = grid.column_lines[i] * width;
         let a = layer_to_frame(in_data, event, x, 0.0)?;
         let b = layer_to_frame(in_data, event, x, height)?;
-        let (lines, grips) = guide_segments(a, b, true,
+        let crossings = column_crossings(in_data, event, &grid, x)?;
+        let (lines, grips) = guide_segments(a, b, &crossings,
             draw_handles && grid.column_pins.get(i).copied().unwrap_or(0) == 0);
         for (a, b) in lines { stroke(a, b)?; }
         for (a, b) in grips {
@@ -241,7 +261,7 @@ fn draw_viewer(
         let y = grid.row_lines[i] * height;
         let a = layer_to_frame(in_data, event, 0.0, y)?;
         let b = layer_to_frame(in_data, event, width, y)?;
-        let (lines, grips) = guide_segments(a, b, false,
+        let (lines, grips) = guide_segments(a, b, &[],
             draw_handles && grid.row_pins.get(i).copied().unwrap_or(0) == 0);
         for (a, b) in lines { stroke(a, b)?; }
         for (a, b) in grips {
@@ -442,19 +462,19 @@ mod cursor_tests {
     fn split_grips_and_gap_follow_reference() {
         let a = ae::drawbot::PointF32 { x: 0.0, y: 0.0 };
         let b = ae::drawbot::PointF32 { x: 0.0, y: 200.0 };
-        let (lines, grips) = guide_segments(a, b, true, true);
+        let (lines, grips) = guide_segments(a, b, &[ae::drawbot::PointF32 {x:0.0,y:100.0}], true);
         assert_eq!(lines.len(), 2);
         assert_eq!(grips.len(), 2);
-        assert_eq!((lines[0].1.y, lines[1].0.y), (88.0, 112.0));
-        assert_eq!((grips[0].0.y, grips[1].1.y), (64.0, 136.0));
-        assert!(lines.iter().all(|&(a,b)| point_segment_distance(0.0,100.0,a,b) > HIT_SLOP));
+        assert_eq!((lines[0].1.y, lines[1].0.y), (94.0, 106.0));
+        assert_eq!((grips[0].0.y, grips[1].1.y), (76.0, 124.0));
+        assert!(lines.iter().all(|&(a,b)| point_segment_distance(0.0,100.0,a,b) >= GUIDE_GAP * 0.5));
     }
 
     #[test]
     fn horizontal_grip_rotates_with_guide_and_keeps_frame_length() {
         let a = ae::drawbot::PointF32 { x: 0.0, y: 0.0 };
         let b = ae::drawbot::PointF32 { x: 120.0, y: 160.0 };
-        let (_, grips) = guide_segments(a, b, false, true);
+        let (_, grips) = guide_segments(a, b, &[], true);
         assert_eq!(grips.len(), 1);
         let (g0, g1) = grips[0];
         assert!(((g1.x-g0.x).hypot(g1.y-g0.y) - GRIP_LENGTH).abs() < 0.001);
@@ -468,10 +488,31 @@ mod cursor_tests {
     fn short_dense_and_degenerate_guides_have_no_grips() {
         let a = ae::drawbot::PointF32 { x: 0.0, y: 0.0 };
         for (length, handles) in [(20.0,true), (200.0,false), (0.0,true)] {
-            let (lines, grips) = guide_segments(a, ae::drawbot::PointF32 {x:length,y:0.0}, true, handles);
+            let (lines, grips) = guide_segments(a, ae::drawbot::PointF32 {x:length,y:0.0}, &[], handles);
             assert!(grips.is_empty());
             assert_eq!(lines.len(), usize::from(length > 0.0));
         }
+    }
+
+    #[test]
+    fn gaps_follow_moving_intersections_without_a_phantom_center_gap() {
+        let p = |y| ae::drawbot::PointF32 { x: 0.0, y };
+        for middle in [40.0, 80.0, 140.0] {
+            let (lines, _) = guide_segments(p(0.0), p(200.0), &[p(20.0), p(middle), p(180.0)], false);
+            assert_eq!(lines.len(), 4);
+            assert_eq!(lines[1].1.y, middle - 6.0);
+            assert_eq!(lines[2].0.y, middle + 6.0);
+            assert!(lines.iter().any(|&(a,b)| a.y <= 100.0 && b.y >= 100.0));
+        }
+    }
+
+    #[test]
+    fn overlapping_gaps_merge_and_rotated_crossings_project_correctly() {
+        let p = |s: f32| ae::drawbot::PointF32 { x: s * 0.6, y: s * 0.8 };
+        let (lines, _) = guide_segments(p(0.0), p(200.0), &[p(101.0), p(99.0), p(99.0)], true);
+        assert_eq!(lines.len(), 2);
+        assert!((lines[0].1.x - p(93.0).x).abs() < 0.001);
+        assert!((lines[1].0.y - p(107.0).y).abs() < 0.001);
     }
 
     #[test]
