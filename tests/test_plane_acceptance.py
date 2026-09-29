@@ -61,6 +61,21 @@ class PlaneAcceptance(unittest.TestCase):
         self.assertIn('elasticGridPlaneSmoke(', (a/'run.jsx').read_text())
         self.assertIn('elasticGridPlaneSmokeCleanup(', (a/'cleanup.jsx').read_text())
 
+    def test_pinned_profiles_reject_cross_candidate_identity_and_bytes(self):
+        manifest_path = self.root/'manifest.json'
+        package_path = self.root/'candidate.zip'
+        package_path.write_bytes(b'candidate')
+        for (commit, build_id), digest in pa.PINNED_CANDIDATES.items():
+            build = dict(commit=commit, build_id=build_id)
+            manifest_path.write_text(json.dumps(dict(build=build, package_sha256=digest)))
+            with patch.object(pa.bi, 'validate_identity', side_effect=lambda value:value), \
+                 patch.object(pa.bi, 'digest', return_value=digest):
+                self.assertEqual(pa.load_candidate(manifest_path, package_path)['build'], build)
+                build['commit'] = '0'*40
+                manifest_path.write_text(json.dumps(dict(build=build, package_sha256=digest)))
+                with self.assertRaises(ValueError):
+                    pa.load_candidate(manifest_path, package_path)
+
     def test_phase_record_rejects_stale_or_wrong_status(self):
         folder = self.root/'phase'; folder.mkdir()
         (folder/'plane-smoke.json').write_text(json.dumps(

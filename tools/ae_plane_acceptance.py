@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage 9 target-Mac gate for de31498: loaded identity + plane/3D/camera pixels."""
+"""Stage 9 target-Mac gate for pinned candidates: identity + plane/3D/camera pixels."""
 from __future__ import annotations
 import argparse
 import json
@@ -26,21 +26,27 @@ PACKAGE = CANDIDATE/'ElasticGrid.plugin.zip'
 EXPECTED_COMMIT = 'de314981005606741bc75c517d8bb33798b46a1d'
 EXPECTED_BUILD = 'EGFX-0fa68430a170b3612e8d00f7'
 EXPECTED_PACKAGE_SHA = '6a43f734c7dc5fd298b356b12db75ab5986c171a2ae241ef9c85ffc0ac22ec55'
+PINNED_CANDIDATES = {
+    (EXPECTED_COMMIT, EXPECTED_BUILD): EXPECTED_PACKAGE_SHA,
+    ('f842e8d3c5e4656c4f9494bebdd4cd8881b362e7', 'EGFX-12fde3e033eb6c086655828f'):
+        '37a6a563644718c508306d9f7008828c483868ab05bc051a8dc1957cb74f955a',
+}
 
 
 def load_candidate(manifest_path: Path, package_path: Path) -> dict:
     checked_path(manifest_path)
     checked_path(package_path)
     if not manifest_path.is_file() or not package_path.is_file():
-        raise ValueError('de31498 candidate manifest/package not found')
+        raise ValueError('Candidate manifest/package not found')
     manifest = json.loads(manifest_path.read_text())
     build = bi.validate_identity(manifest['build'])
-    if build.get('commit') != EXPECTED_COMMIT or build.get('build_id') != EXPECTED_BUILD:
-        raise ValueError('Stage 9 runner requires exact de31498 candidate identity')
-    if manifest.get('package_sha256') != EXPECTED_PACKAGE_SHA:
-        raise ValueError('Stage 9 manifest is not pinned to the exact de31498 package SHA-256')
-    if bi.digest(package_path.read_bytes()) != EXPECTED_PACKAGE_SHA:
-        raise ValueError('Stage 9 package bytes do not match the exact de31498 SHA-256')
+    expected_sha = PINNED_CANDIDATES.get((build.get('commit'), build.get('build_id')))
+    if expected_sha is None:
+        raise ValueError('Stage 9 runner requires an exact pinned candidate identity')
+    if manifest.get('package_sha256') != expected_sha:
+        raise ValueError('Stage 9 manifest does not match the pinned package SHA-256')
+    if bi.digest(package_path.read_bytes()) != expected_sha:
+        raise ValueError('Stage 9 package bytes do not match the pinned SHA-256')
     return manifest
 
 
@@ -121,8 +127,8 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         schema=1, run_id=run.name, candidate=manifest['build'],
         identity_status='NOT RUN', pixel_status='NOT RUN', cleanup_status='NOT RUN',
         functional_status='BLOCKED', release='BLOCKED',
-        scope=('de31498 Stage 9 real-AE plane pixels, AEP roundtrip, 3D layer/camera/parenting; '
-               'native guide drag/Undo/Redo remains separate'),
+        scope=('Stage 9 baseline real-AE plane pixels, same-build AEP roundtrip, 3D renders; '
+               'zero-wave skew, native overlay alignment and legacy AEP migration remain separate'),
     )
 
     captured = False
@@ -147,12 +153,12 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
             identity_ok = (
                 identity.get('status') == 'PASS' and
                 identity.get('loaded_image_status') == 'PASS' and
-                identity.get('observed_build_id') == EXPECTED_BUILD and
+                identity.get('observed_build_id') == manifest['build']['build_id'] and
                 identity.get('ae',{}).get('pid') == pid and
                 Path(identity.get('ae',{}).get('path','')) == ae_app
             )
             if not identity_ok:
-                result['reason'] = 'loaded de31498 identity was not proven in the fixture AE process'
+                result['reason'] = 'Pinned loaded identity was not proven in the fixture AE process'
             else:
                 pixels = validate_plane_frames(fixture)
                 result['pixels'] = pixels
@@ -168,7 +174,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
                     if current_identifier != identifier or current_pid != pid:
                         raise ValueError('AE process changed during Stage 9 acceptance')
                     result['functional_status'] = 'PASS'
-                    result['reason'] = 'de31498 identity and automated Stage 9 plane/3D/camera pixel matrix passed'
+                    result['reason'] = 'Pinned identity and baseline pixel matrix passed; this does not close Stage 9'
     except subprocess.TimeoutExpired:
         result['reason'] = 'AE Stage 9 timeout; no host process was killed or retried'
     except (ValueError, OSError, KeyError, TypeError, AttributeError, subprocess.SubprocessError) as error:

@@ -19,13 +19,39 @@ Four Corners does not project the image and the overlay does not follow the 3D
 layer. Therefore the historical automated PASS below does not establish the
 intended plane behavior. Requirements, five UX corrections and remaining tasks
 are recorded in `stage9-user-corrections.md`. New core implementation is in
-development; installed de31498 has not been replaced. UI source now includes
+development; installed candidate is now f842e8d (test-only, failed Half Resolution gate). UI source includes
 square-pixel 3D camera projection/inverse hit-testing, Layer Plane naming,
 mode-dependent corner disabling and reordered controls with Render Quality last.
 Live alignment, native target hiding, non-square projection and legacy AEP loading
 remain unverified. Stage 9 remains OPEN.
 
-### Current installed checkpoint — de31498
+### Current installed checkpoint — f842e8d; functional FAIL
+
+2026-09-29: user authorized installation. AE exited normally; Dynamic Link
+exited subsequently without force termination. Atomic replacement completed
+`INSTALLED_FOR_TEST`; previous de31498 retained under receipt
+`EGFX-update-ba1c8a7114f74c3a973cb019c4169496`. Installed payload/signature PASS.
+
+- Commit: `f842e8d3c5e4656c4f9494bebdd4cd8881b362e7`.
+- Build ID: `EGFX-12fde3e033eb6c086655828f`.
+- Package SHA-256: `37a6a563644718c508306d9f7008828c483868ab05bc051a8dc1957cb74f955a`.
+- Exact-commit GitHub workflows: all six completed successfully.
+- Real AE run `EGFX-PLANE-2f689f7df8144029982a2ff55304d759`:
+  loaded identity PASS; 34 frames; 23/26 comparisons PASS; cleanup CLEAN.
+- **FAIL**: Four Corners identity at Half Resolution differs from effect-off
+  original at 8/16/32 bpc (mean absolute difference ~0.0303–0.0306,
+  max ~0.614–0.616). Full-resolution identity comparisons PASS.
+- Evidence: local `outputs/plane-acceptance/EGFX-PLANE-2f689f7df8144029982a2ff55304d759.zip`.
+- Runner explicitly pins both historical and current candidates; no identity
+  override or pixel threshold change. Six runner control-flow tests PASS.
+
+Next: isolate downsample coordinate/source-extent regression, add regression
+coverage, fix and create a NEW immutable candidate. Native overlay alignment,
+legacy AEP migration and zero-wave skew acceptance remain separate open gates.
+Do not treat baseline 3D render changes as proof of overlay alignment. Stage 9
+remains OPEN; release BLOCKED. Failed candidate remains installed for diagnosis.
+
+### Historical installed checkpoint — de31498
 
 2026-09-29: user explicitly requested installing the new build, recording current
 status and pushing all current source updates. The earlier attempt was stopped
