@@ -38,9 +38,11 @@ stretching the compact rectangle's edges and needs no full-canvas image copy.
 Empty input clears active output pixels. Legacy CPU and GPU-plan ABI/semantics,
 17 saved parameters, Rust host and installed candidate remain unchanged.
 
-**The AE host does not call the new entry yet.** Opt-in requires verified origin,
-reference-size and full-source checkout semantics; not every missing ROI is zero.
-Do not describe this as an installed fix for streaks or Corner Pin.
+The AE SmartRender source now calls the sparse entry only after requesting the
+complete logical canvas in SmartPreRender. Compact returned worlds use their
+host-provided origins; absent pixels are transparent. Empty adjustment input is
+explicitly cleared. The installed user candidate is still the older 6d3b846
+binary, so do not describe the user's current AE output as fixed yet.
 
 Local source checks: baseline 10/10; GCC Release 11/11; Clang Release 11/11;
 ASan/UBSan/LeakSanitizer 11/11; TSan sparse/MFR/determinism 3/3. Sparse/dense
@@ -51,11 +53,15 @@ queued jobs and hardware compile-only stages are never host/runtime PASS.
 
 ## Next gates, in order
 
-1. Validate SmartFX full reference dimensions, world origins, legal result/max
-   rectangles, empty/bounds-only requests and output initialization. Wire sparse
-   CPU semantics only after the host contract is established. Reproduce
-   raster/text/Adjustment Layer with Corner Pin before/after and Fast Blur.
-2. Fix clipped custom-control text; verify loaded identity, drag/Undo/Redo,
+1. SmartFX source now wires the tested sparse CPU renderer: logical canvas is
+   snapshotted during pre-render, max bounds are fixed to that canvas, returned
+   compact-world origins are preserved, and a None adjustment input is rendered
+   as transparent instead of leaving output untouched. The ordinary Render path
+   remains dense; Metal remains disabled. This is SOURCE-VERIFIED only until a
+   new exact candidate reproduces raster/text/Adjustment Layer chains in AE.
+2. The custom-control label now uses a taller control and a readable short Build
+   ID; full identity remains in About/diagnostics. Verify loaded identity,
+   drag/Undo/Redo,
    save/reopen/restart, actual 8/16/32-bpc alpha/HDR/ROI/PAR/MFR/cancel/aerender.
 3. Profile equal-quality Render/RAM Preview, then optimize proven costs. AE GPU
    dispatch stays disabled pending real host/Metal correctness and lifecycle QA.

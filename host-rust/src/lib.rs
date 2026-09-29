@@ -434,6 +434,8 @@ struct SmartRenderSnapshot {
     edge_mode: i32,
     quality: i32,
     time_seconds: f32,
+    canvas_width: i32,
+    canvas_height: i32,
 }
 
 impl SmartRenderSnapshot {
@@ -464,8 +466,8 @@ impl SmartRenderSnapshot {
             quality: self.quality,
             time_seconds: self.time_seconds,
             threads: 0,
-            canvas_width: 0,
-            canvas_height: 0,
+            canvas_width: self.canvas_width,
+            canvas_height: self.canvas_height,
             input_origin_x: 0,
             input_origin_y: 0,
             output_origin_x: 0,
@@ -511,6 +513,8 @@ fn smart_render_snapshot(
         0.0
     };
 
+    let (canvas_width, canvas_height) = rendered_canvas(in_data);
+
     Ok(SmartRenderSnapshot {
         grid,
         tension_radius: checked_float(params, Params::TensionRadius)? as f32,
@@ -527,6 +531,8 @@ fn smart_render_snapshot(
         edge_mode: checked_popup(params, Params::EdgeMode)?,
         quality: checked_popup(params, Params::Quality)?,
         time_seconds,
+        canvas_width,
+        canvas_height,
     })
 }
 
@@ -540,6 +546,19 @@ pub(crate) struct EgElasticParams {
 
 unsafe extern "C" {
     fn eg_render_frame(
+        input_data: *const c_void,
+        input_row_bytes: isize,
+        input_width: i32,
+        input_height: i32,
+        output_data: *mut c_void,
+        output_row_bytes: isize,
+        output_width: i32,
+        output_height: i32,
+        bit_depth: i32,
+        params: *const EgRenderParams,
+    ) -> i32;
+
+    fn eg_render_frame_sparse(
         input_data: *const c_void,
         input_row_bytes: isize,
         input_width: i32,
@@ -733,6 +752,18 @@ fn rendered_canvas(in_data: ae::InData) -> (i32, i32) {
     (w, h)
 }
 
+fn clamp_request_to_canvas(mut rect: ae::Rect, canvas_width: i32, canvas_height: i32) -> ae::Rect {
+    let cw = canvas_width.max(0);
+    let ch = canvas_height.max(0);
+    rect.left = rect.left.clamp(0, cw);
+    rect.right = rect.right.clamp(0, cw);
+    rect.top = rect.top.clamp(0, ch);
+    rect.bottom = rect.bottom.clamp(0, ch);
+    if rect.right < rect.left { rect.right = rect.left; }
+    if rect.bottom < rect.top { rect.bottom = rect.top; }
+    rect
+}
+
 fn apply_spatial_context(
     in_data: ae::InData,
     input: &ae::Layer,
@@ -765,6 +796,49 @@ fn render(
             in_layer.row_bytes(),
             in_layer.width() as i32,
             in_layer.height() as i32,
+            out_layer.data_ptr_mut().cast(),
+            out_layer.row_bytes(),
+            out_layer.width() as i32,
+            out_layer.height() as i32,
+            out_layer.bit_depth() as i32,
+            p,
+        )
+    };
+
+    match rc {
+        0 => Ok(()),
+        5 => Err(ae::Error::InterruptCancel),
+        1 | 2 | 4 => Err(ae::Error::BadCallbackParameter),
+        _ => Err(ae::Error::InternalStructDamaged),
+    }
+}
+
+fn render_sparse(
+    input: Option<&ae::Layer>,
+    out_layer: &mut ae::Layer,
+    p: &EgRenderParams,
+) -> Result<(), ae::Error> {
+    if p.canvas_width <= 0 || p.canvas_height <= 0 {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    if let Some(layer) = input {
+        if layer.bit_depth() != out_layer.bit_depth() {
+            return Err(ae::Error::BadCallbackParameter);
+        }
+    }
+
+    let (input_data, input_row_bytes, input_width, input_height) = if let Some(layer) = input {
+        (unsafe { layer.data_ptr().cast() }, layer.row_bytes(), layer.width() as i32, layer.height() as i32)
+    } else {
+        (std::ptr::null(), 0, 0, 0)
+    };
+
+    let rc = unsafe {
+        eg_render_frame_sparse(
+            input_data,
+            input_row_bytes,
+            input_width,
+            input_height,
             out_layer.data_ptr_mut().cast(),
             out_layer.row_bytes(),
             out_layer.width() as i32,
@@ -855,8 +929,8 @@ impl AdobePluginGlobal for Plugin {
         grid_state_def.set_refcon(GRID_REFCON as *mut c_void);
         params.add_customized(Params::GridState, "Grid Positions", grid_state_def, |param| {
             param.set_ui_flags(ae::ParamUIFlags::CONTROL);
-            param.set_ui_width(240);
-            param.set_ui_height(24);
+            param.set_ui_width(300);
+            param.set_ui_height(32);
             -1
         })?;
 
@@ -994,7 +1068,7 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::SmartPreRender { mut extra } => {
                 let snapshot = smart_render_snapshot(params, in_data)?;
                 let output_request = extra.output_request();
-                let (cw, ch) = rendered_canvas(in_data);
+                let (cw, ch) = (snapshot.canvas_width, snapshot.canvas_height);
 
                 // Correctness-first SmartFX checkout: a guide warp can pull
                 // pixels across cell boundaries, and bicubic filtering needs
@@ -1015,15 +1089,14 @@ impl AdobePluginGlobal for Plugin {
                 // params array because AE does not provide valid values there.
                 extra.set_pre_render_data(snapshot);
 
-                // A grid warp can redistribute content anywhere inside the fixed
-                // layer canvas, so result bounds must not be inherited from the
-                // smaller input alpha bounds. Keep current result conservative and
-                // max bounds stable across render requests.
-                extra.set_result_rect(output_request.rect.into());
-                let mut max_rect = ae::Rect { left: 0, top: 0, right: cw, bottom: ch };
-                let input_max: ae::Rect = input.max_result_rect.into();
-                max_rect.union(&input_max);
-                extra.set_max_result_rect(max_rect);
+                // A grid warp does not create pixels outside its logical layer
+                // canvas. Downstream effects may request a subset; advertise only
+                // that intersection and keep max bounds invariant across requests.
+                let canvas_rect = ae::Rect { left: 0, top: 0, right: cw, bottom: ch };
+                let requested: ae::Rect = output_request.rect.into();
+                extra.set_result_rect(clamp_request_to_canvas(requested, cw, ch));
+                extra.set_max_result_rect(canvas_rect);
+                let _ = input; // checkout establishes dependency even if AE returns compact storage
                 #[cfg(target_os = "macos")]
                 extra.set_gpu_render_possible(false);
             }
@@ -1032,16 +1105,24 @@ impl AdobePluginGlobal for Plugin {
                     .pre_render_data::<SmartRenderSnapshot>()
                     .ok_or(ae::Error::InternalStructDamaged)?;
                 let cb = extra.callbacks();
-                let Some(input) = cb.checkout_layer_pixels(0)? else {
-                    return Ok(());
-                };
-                // Never leak a SmartFX checkout on an error path. The closure
-                // captures all fallible work; checkin is performed unconditionally.
+                let input = cb.checkout_layer_pixels(0)?;
+                // checkout_layer_pixels may legitimately return None for an empty
+                // adjustment-layer source. That is transparent input, not a reason
+                // to leave AE's output buffer untouched.
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(mut output) = cb.checkout_output()? {
                         let mut p = snapshot.render_params(in_data.as_ptr() as *mut c_void);
-                        apply_spatial_context(in_data, &input, &output, &mut p);
-                        render(&input, &mut output, &p)?;
+                        p.canvas_width = snapshot.canvas_width;
+                        p.canvas_height = snapshot.canvas_height;
+                        if let Some(layer) = input.as_ref() {
+                            let origin = layer.origin();
+                            p.input_origin_x = origin.h;
+                            p.input_origin_y = origin.v;
+                        }
+                        let output_origin = output.origin();
+                        p.output_origin_x = output_origin.h;
+                        p.output_origin_y = output_origin.v;
+                        render_sparse(input.as_ref(), &mut output, &p)?;
                     }
                     Ok(())
                 })();
@@ -1171,6 +1252,8 @@ mod tests {
             edge_mode: 1,
             quality: 2,
             time_seconds: 0.0,
+            canvas_width: 640,
+            canvas_height: 360,
         };
         let p = snapshot.render_params(std::ptr::null_mut());
 
@@ -1311,6 +1394,46 @@ mod tests {
         let bytes = bincode::serde::encode_to_vec(&old_pin, bincode::config::legacy()).unwrap();
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy()).unwrap().0;
         assert_eq!(decoded.column_pins[1], 0);
+    }
+
+    #[test]
+    fn smart_render_snapshot_carries_logical_canvas() {
+        let grid = GridArb::uniform(4, 4);
+        let snapshot = SmartRenderSnapshot {
+            grid,
+            tension_radius: 3.0,
+            falloff: 2,
+            elasticity_strength: 1.0,
+            min_spacing: 0.005,
+            stretch_easing: 0.0,
+            easing_distance: 0.25,
+            wave_amplitude: 0.0,
+            wave_frequency: 1.0,
+            wave_phase: 0.0,
+            wave_speed: 0.0,
+            wave_axis: 1,
+            edge_mode: 1,
+            quality: 2,
+            time_seconds: 0.0,
+            canvas_width: 640,
+            canvas_height: 360,
+        };
+        let p = snapshot.render_params(std::ptr::null_mut());
+        assert_eq!((p.canvas_width, p.canvas_height), (640, 360));
+    }
+
+    #[test]
+    fn smart_result_rect_is_clamped_to_logical_canvas() {
+        let r = clamp_request_to_canvas(
+            ae::Rect { left: -50, top: 20, right: 900, bottom: 500 },
+            640, 360
+        );
+        assert_eq!((r.left, r.top, r.right, r.bottom), (0, 20, 640, 360));
+        let empty = clamp_request_to_canvas(
+            ae::Rect { left: 700, top: 500, right: 650, bottom: 400 },
+            640, 360
+        );
+        assert_eq!((empty.left, empty.top, empty.right, empty.bottom), (640, 360, 640, 360));
     }
 
     #[test]

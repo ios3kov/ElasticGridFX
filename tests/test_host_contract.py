@@ -56,6 +56,27 @@ class HostContract(unittest.TestCase):
         self.assertIn('const GRID_WIRE_VERSION: u16 = 3;', SOURCE)
         self.assertIn('const GRID_REFCON: u64 = 0x4547_4658_4752_4944;', SOURCE)
 
+    def test_smartfx_uses_sparse_logical_canvas_and_handles_empty_input(self):
+        smart = SOURCE.split('ae::Command::SmartRender { extra } => {', 1)[1].split(
+            '#[cfg(target_os = "macos")]', 1
+        )[0]
+        self.assertIn('eg_render_frame_sparse(', SOURCE)
+        self.assertIn('render_sparse(input.as_ref(), &mut output, &p)?;', smart)
+        self.assertIn('let input = cb.checkout_layer_pixels(0)?;', smart)
+        self.assertNotIn('let Some(input) = cb.checkout_layer_pixels(0)? else', smart)
+        self.assertIn('let checkin = cb.checkin_layer_pixels(0);', smart)
+        pre = SOURCE.split('ae::Command::SmartPreRender { mut extra } => {', 1)[1].split(
+            'ae::Command::SmartRender { extra } => {', 1
+        )[0]
+        self.assertIn('extra.set_max_result_rect(canvas_rect);', pre)
+        self.assertNotIn('max_rect.union(&input_max)', pre)
+
+    def test_custom_control_has_readable_short_build_id(self):
+        ui = (ROOT / 'host-rust/src/ui.rs').read_text()
+        self.assertIn('EGFX-{}', ui)
+        self.assertIn('raw_id[..short_len]', ui)
+        self.assertIn('param.set_ui_height(32)', SETUP)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -214,10 +214,12 @@ fn draw_effect_control(
         blue: 0.85,
         alpha: 1.0,
     })?;
-    let label = format!("{} × {} — {}", grid.columns, grid.rows, &build_identity::BUILD_ID[..17]);
+    let raw_id = build_identity::BUILD_ID.strip_prefix("EGFX-").unwrap_or(build_identity::BUILD_ID);
+    let short_len = raw_id.len().min(12);
+    let label = format!("{} × {}   EGFX-{}", grid.columns, grid.rows, &raw_id[..short_len]);
     let origin = ae::drawbot::PointF32 {
-        x: frame.left as f32 + 5.0,
-        y: frame.top as f32 + 4.0,
+        x: frame.left as f32 + 6.0,
+        y: frame.top as f32 + 9.0,
     };
     surface.draw_string(
         &brush,
