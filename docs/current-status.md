@@ -51,6 +51,16 @@ names and performance limits: sparse-render-results-2026-09-28.md.
 Read exact resulting commit's Actions/PR checkpoint for CI and macOS outcomes;
 queued jobs and hardware compile-only stages are never host/runtime PASS.
 
+## Exact fd69988 candidate
+
+Exact-head final validation, PR CI, update-safety/live-diagnostic workflows and
+macOS source/package gate have passed. The immutable macOS artifact has Build ID
+EGFX-f442513cb6528f14295d6d45 and package SHA-256
+68c135f1a2a9390a0032a31d9073c8111bff6dd43691b9222ec50fad3913982e.
+A new reversible updater is pinned specifically to installed 6d3b846 -> fd69988;
+it refuses any different current payload and retains 6d3b846 as rollback.
+This still does not constitute AE runtime PASS.
+
 ## Next gates, in order
 
 1. SmartFX source now wires the tested sparse CPU renderer: logical canvas is

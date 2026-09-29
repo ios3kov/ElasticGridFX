@@ -29,7 +29,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ElasticGridFX-mac-source-gate
-          run-id: 36461019413
+          run-id: 36542759949
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ${{ runner.temp }}/pinned-candidate
       - name: Package clean updater with byte-identical pinned candidate
@@ -41,7 +41,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ElasticGridFX-update-${{ github.sha }}
+          name: ElasticGridFX-update-fd69988-${{ github.sha }}
           if-no-files-found: error
           path: |
             ${{ runner.temp }}/update-evidence/

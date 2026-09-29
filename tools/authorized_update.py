@@ -22,8 +22,10 @@ from install_candidate import checked_path, adobe_hosts_stopped, signature, inst
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = Path('Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/ElasticGrid.plugin')
 BACKUPS = Path('Library/Application Support/ElasticGridFX/Test Backups')
-OLD_SHA = '4d21118301725178fbc6ba3ecea5e4ed053c9275accea10b6db0f51e3c657acf'
-PACKAGE_SHA = '40da0cc354833518609dc93550f5f930f7f34d299d035ddbd57710d976d13fe7'
+OLD_SHA = '4958d73bff702cbf21fa46d1aee670fa524cc99c57f2423c62a7d0cae32ebae7'
+PACKAGE_SHA = '68c135f1a2a9390a0032a31d9073c8111bff6dd43691b9222ec50fad3913982e'
+PREVIOUS_MANIFEST = 'candidate-6d3b846.json'
+CANDIDATE_MANIFEST = 'candidate-fd69988.json'
 MAX_BYTES = 32 * 1024 * 1024
 
 
@@ -283,10 +285,18 @@ def main() -> int:
     if tool.get('source_state') != 'clean' or tool.get('files') != bi.hashes(ROOT, tool['files']):
         raise ValueError('Installer files changed; download the verified package again')
     home = Path(pwd.getpwuid(os.getuid()).pw_dir)
-    manifest = json.loads((ROOT/'diagnostics/candidate-6d3b846.json').read_text())
+    previous = json.loads((ROOT/'diagnostics'/PREVIOUS_MANIFEST).read_text())
+    manifest = json.loads((ROOT/'diagnostics'/CANDIDATE_MANIFEST).read_text())
+    bi.validate_identity(previous['build'])
     bi.validate_identity(manifest['build'])
+    if previous['files']['Contents/MacOS/ElasticGrid']['sha256'] != OLD_SHA:
+        raise ValueError('Wrong authorized previous candidate')
     if manifest['package_sha256'] != PACKAGE_SHA:
         raise ValueError('Wrong authorized candidate')
+    target = checked_path(home / TARGET, directory=True)
+    if bi.payload_files(target) != previous['files'] or bi.payload_metadata(target) != previous['build']:
+        raise ValueError('Installed plugin is not the authorized 6d3b846 candidate; left untouched')
+    signature(target)
     if args.rollback:
         file, record = rollback(home, manifest)
     else:

@@ -218,6 +218,15 @@ class UpdateSafety(unittest.TestCase):
         self.assertNotEqual(result.returncode,0)
         self.assertIn('Choose --apply',result.stderr)
 
+    def test_real_transition_constants_match_pinned_manifests(self):
+        previous=json.loads((ROOT/'diagnostics/candidate-6d3b846.json').read_text())
+        candidate=json.loads((ROOT/'diagnostics/candidate-fd69988.json').read_text())
+        self.assertEqual(previous['build']['commit'],'6d3b846463410f37198fda4b625e56e4cea44c22')
+        self.assertEqual(candidate['build']['commit'],'fd69988c10b25268eb8cad6ee6ced7f6a28bee9d')
+        self.assertEqual(au.OLD_SHA,previous['files']['Contents/MacOS/ElasticGrid']['sha256'])
+        self.assertEqual(au.PACKAGE_SHA,candidate['package_sha256'])
+        self.assertNotEqual(previous['build']['build_id'],candidate['build']['build_id'])
+
 
 @unittest.skipUnless(platform.system()=='Darwin','Real directory exchange/signature requires macOS')
 class MacUpdate(unittest.TestCase):
