@@ -7,6 +7,8 @@ use std::ffi::c_void;
 mod ui;
 mod ui_projection;
 mod plane;
+#[cfg(fstr_lifecycle_probe)]
+mod lifecycle_probe;
 #[cfg(test)]
 mod plane_contract_tests;
 mod build_identity {
@@ -50,7 +52,10 @@ pub(crate) enum Params {
 }
 
 #[derive(Default)]
-struct Plugin {}
+struct Plugin {
+    #[cfg(fstr_lifecycle_probe)]
+    lifecycle_probe: lifecycle_probe::Probe,
+}
 
 ae::define_effect!(Plugin, (), Params);
 
@@ -1044,6 +1049,8 @@ impl AdobePluginGlobal for Plugin {
         mut out_data: ae::OutData,
         params: &mut ae::Parameters<Params>,
     ) -> Result<(), ae::Error> {
+        #[cfg(fstr_lifecycle_probe)]
+        self.lifecycle_probe.observe(&cmd, &in_data);
         match cmd {
             ae::Command::GlobalSetup => {
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
@@ -1052,6 +1059,9 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::About => {
                 out_data.set_return_msg(build_identity::ABOUT);
+                #[cfg(fstr_lifecycle_probe)]
+                out_data.set_return_msg(&format!("LIFECYCLE RESEARCH ONLY\r{}\r{}",
+                    build_identity::ABOUT, self.lifecycle_probe.report()));
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::PlaneMode)==Some(param_index) {

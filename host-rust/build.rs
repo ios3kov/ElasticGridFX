@@ -42,6 +42,7 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
+    println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     // The after-effects 0.4.0 macro expands these cfg names in the destination
     // crate. Register them explicitly so modern rustc check-cfg / Clippy can
     // validate the expansion without treating supported host cfgs as unknown.
