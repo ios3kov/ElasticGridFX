@@ -26,9 +26,13 @@ before mutation. Existing path/name checks remain. Node negative guards and
 positive control PASS; static audit review_required with existing workflow/test
 findings. No renderer/UI projection changes or new plugin installation this step.
 
-Next: create a fresh uniquely owned native-text fixture in a clean project and
-capture effect-canvas versus layer-plane coordinates for rotation/camera cases.
-The 3D text displacement is still unresolved; Stage 9 stays OPEN.
+Fresh owned native-text fixture now reproduces FAIL on installed 1eed79a.
+Exact live identity PASS in AE PID 36457. Host coordinate samples at zero and
+30-degree Y rotation confirm the distinction between effect-canvas and native
+layer coordinates; no fixed-offset workaround applied. See
+[coordinate baseline](stage9-text-coordinate-baseline-2026-09-30.md).
+The 3D text displacement is still unresolved; Stage 9 stays OPEN. Next gate is
+a supported shared canvas-to-layer mapping for render, overlay and inverse picking.
 
 ### Grid Positions correction requested by user
 
