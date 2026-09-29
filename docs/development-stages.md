@@ -79,7 +79,12 @@ runner 7371408, immutable plugin fd69988, same AE PID 42039, identity and
 ten-frame pixel smoke PASS. See current-status.md for hashes and scope.
 Earlier blocked reports remain historical and are not rewritten as PASS.
 
-## Stage 8 of 10 — Render / RAM Preview profiling and optimization — IN PROGRESS
+## Stage 8 of 10 — Render / RAM Preview profiling and optimization — SKIPPED BY USER
+
+2026-09-29: user explicitly requested skipping performance acceleration.
+Retain collected measurements as historical evidence; incomplete RAM Preview,
+profiling and optimization requirements are not PASS. No acceleration claim.
+This skips the dedicated optimization stage, not pixel-quality/stability checks.
 
 Research/preparation may run in parallel with Stage 7, but no performance change
 is approved before the Stage 7 pixel baseline is trustworthy.
@@ -93,7 +98,7 @@ Required:
 - Before -> Change -> After evidence for every significant optimization;
 - no hidden resolution/bit-depth/filter/precision downgrade.
 
-## Stage 9 of 10 — 2D/3D perspective deformation plane — NOT STARTED
+## Stage 9 of 10 — 2D/3D perspective deformation plane — IN PROGRESS
 
 - Four-corner projective plane with transformed grid/handles/hit-test/render.
 - 3D layer position/scale/rotation/parenting and active-camera perspective.
@@ -119,5 +124,6 @@ production release occurs without explicit user instruction.
 
 ## Current overall progress
 
-Stage-count view: 7 completed, 3 later stages open. Stage 8 profiling is next.
+Stage-count view: 7 completed, Stage 8 skipped by user (not PASS), Stage 9 in
+progress, Stage 10 open. No performance completion or release claim.
 This is a stage-count view, not a claim about remaining engineering effort.

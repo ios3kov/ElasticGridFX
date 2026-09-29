@@ -2,13 +2,30 @@
 
 2026-09-29. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 8 of 10 IN PROGRESS; Stage 7 COMPLETE for the defined target functional smoke.**
+**Production cycle: Stage 9 of 10 IN PROGRESS; Stage 8 SKIPPED BY USER, not PASS.**
 See development-stages.md. Stages 1–7 are completed for the current scope. Stage 8 is
-performance/profiling, Stage 9 is the approved 2D/3D perspective plane, Stage 10
+performance/profiling (skipped on explicit user request), Stage 9 is the approved 2D/3D perspective plane, Stage 10
 is final compatibility/release validation.
 No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
+
+### Stage 9 initial geometry foundation
+
+The user requested skipping further performance acceleration work on 2026-09-29.
+Historical Stage 8 results below remain valid only within their stated scope.
+Added standalone PlaneTransform: normalized four-corner homography and inverse,
+strict-convex validation, mirrored winding support, nonfinite/degenerate/horizon
+rejection. No renderer, Rust ABI, parameter IDs, saved state or installed plugin
+changed. This is geometry groundwork, NOT an AE perspective feature acceptance.
+Verification 2026-09-29 on target Mac: Release CMake build and all 12 CTest
+targets PASS; standalone PlaneTransform tests with AddressSanitizer and
+UndefinedBehaviorSanitizer PASS. Static scanner remains review_required for
+existing findings; no findings in the new geometry/test files. Evidence retained
+under work/stage9-core (CTest LastTest.log and code-audit.json). No AE acceptance,
+new plugin artifact, performance claim or release gate is implied.
+Next: define and implement plane-local sampling/interaction wiring, preserving
+one resampling pass and avoiding double application of AE layer/camera transforms.
 
 ### Stage 8 — initial measurements available; full performance gate open
 

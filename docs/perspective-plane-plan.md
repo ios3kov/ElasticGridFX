@@ -9,7 +9,33 @@ Reconfirmed 2026-09-29: the built-in four-corner control places the deformation
 plane itself. In 3D-layer mode the plane follows layer transforms and camera;
 moving a guide along a wall deforms along that wall, not screen-horizontal.
 Overlay, handles, pointer inversion and pixel sampling share plane coordinates.
-This remains Stage 9 work after the Stage 8 baseline, not a completed feature.
+Stage 9 started after the user explicitly skipped further Stage 8 acceleration
+work on 2026-09-29. Existing baseline retained; this is not a completed feature.
+
+## First implementation slice: shared geometry
+
+P9-1: one validated forward/inverse homography for local unit-square coordinates
+and four ordered surface corners. Corner order: top-left, top-right, bottom-right,
+bottom-left by local identity, including mirrored transforms. Strict convex quads
+only; reject nonfinite, crossed, concave, collapsed and numerically edge-on inputs.
+This is an internal validity policy, not yet the visual fallback policy in AE.
+Coordinate translation/scale normalization keeps tolerance independent of pixels.
+Tests cover identity, analytic trapezoid center, corner correspondence, mirrored
+winding, large translation, dense roundtrips and horizon/nonfinite rejection.
+
+P9-2 (next): compose local inverse grid mapping with this geometry before a
+single Final Bicubic sample; define outside/singular policy, sparse canvas,
+PAR/downsampling and bit-depth tests. Do not simply post-warp the output.
+P9-3: append compatible parameters and connect overlay/pointer inversion.
+P9-4: integrate AE layer/camera with context-correct transforms and real-host
+acceptance. Existing host-rust/src/ui.rs already uses layer_to_comp/comp_to_layer;
+do not apply camera projection twice to an ordinary transformed layer.
+SDK-derived references checked on 2026-09-29:
+https://ae-plugins.docsforadobe.dev/effect-ui-events/ui-callbacks/
+https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/
+They describe UI coordinate callbacks and PFInterface camera access; target
+thread/context applicability and exact matrix conventions still require validation.
+No new dependency, native installation or camera-support claim in P9-1.
 
 The user confirmed that “управляющий слой” means an Adjustment Layer.
 1. Fix the reported black output when Adobe Corner Pin follows ElasticGrid FX

@@ -15,6 +15,7 @@ add_library(elasticgrid_core
     src/core/GridModel.cpp
     src/core/GridCodec.cpp
     src/core/WarpMath.cpp
+    src/core/PlaneTransform.cpp
     src/core/CpuRenderer.cpp
 )
 target_include_directories(elasticgrid_core PUBLIC src)
@@ -40,6 +41,10 @@ endfunction()
 
 if(ELASTICGRID_BUILD_TESTS)
   enable_testing()
+  add_executable(elasticgrid_plane_tests tests/test_plane.cpp)
+  target_link_libraries(elasticgrid_plane_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_tests)
+  add_test(NAME elasticgrid_plane COMMAND elasticgrid_plane_tests)
   add_executable(elasticgrid_tests tests/test_core.cpp)
   target_link_libraries(elasticgrid_tests PRIVATE elasticgrid_core)
   elasticgrid_enable_test_assertions(elasticgrid_tests)
