@@ -23,6 +23,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/acceptance-evidence"
           { python3 -m unittest discover -s tests -p 'test_target_ae_acceptance.py' -v
+            python3 -m unittest discover -s tests -p 'test_acceptance_package_permissions.py' -v
             python3 -m unittest discover -s tests -p 'test_smoke_pixels.py' -v
             node tests/test_smoke_safety.js
           } 2>&1 | tee "$RUNNER_TEMP/acceptance-evidence/tests.log"
@@ -40,6 +41,19 @@ jobs:
         run: |
           set -euo pipefail
           python3 tools/package_target_ae_acceptance.py             "$RUNNER_TEMP/candidate/dist/mac/ElasticGrid.plugin.zip"             "$RUNNER_TEMP/ElasticGridFX-AE-Acceptance.zip"             | tee "$RUNNER_TEMP/acceptance-evidence/package.json"
+          mkdir "$RUNNER_TEMP/extracted-acceptance"
+          /usr/bin/ditto -x -k "$RUNNER_TEMP/ElasticGridFX-AE-Acceptance.zip" "$RUNNER_TEMP/extracted-acceptance"
+          root="$RUNNER_TEMP/extracted-acceptance/ElasticGridFX-AE-Acceptance-fd69988"
+          python3 - "$root" <<'PY'
+          import json,pathlib,sys
+          root=pathlib.Path(sys.argv[1])
+          sys.path.insert(0,str(root/'tools'))
+          import build_identity as bi
+          tool=json.loads((root/'AcceptanceToolIdentity.json').read_text())
+          if tool.get('source_state')!='clean' or tool.get('files')!=bi.hashes(root,tool['files']):
+              raise SystemExit('extracted acceptance self-integrity mismatch')
+          print('PASS: extracted acceptance hashes and execute bits match identity')
+          PY
       - name: Upload runner and evidence
         if: always()
         uses: actions/upload-artifact@v4

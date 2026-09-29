@@ -13,6 +13,29 @@ FILES=('RUN_ELASTICGRID_AE_TEST_MAC.command',
        'diagnostics/TARGET_AE_ACCEPTANCE_README_RU.txt')
 CANDIDATE_SHA='68c135f1a2a9390a0032a31d9073c8111bff6dd43691b9222ec50fad3913982e'
 
+def archive_mode(name:str, files:dict)->int:
+    if name=='AcceptanceToolIdentity.json':
+        return 0o100644
+    if name not in files:
+        raise ValueError('acceptance member missing from identity: '+name)
+    return 0o100755 if files[name]['executable'] else 0o100644
+
+def write_archive(output:Path, prefix:str, content:dict, files:dict):
+    with zipfile.ZipFile(output,'x',compression=zipfile.ZIP_DEFLATED) as z:
+        for name,data in content.items():
+            info=zipfile.ZipInfo(prefix+name,date_time=(2026,9,29,0,0,0))
+            info.create_system=3; info.compress_type=zipfile.ZIP_DEFLATED
+            info.external_attr=archive_mode(name,files)<<16
+            z.writestr(info,data)
+    with zipfile.ZipFile(output) as z:
+        if set(z.namelist())!={prefix+n for n in content}: raise ValueError('unexpected members')
+        for name,data in content.items():
+            member=prefix+name
+            if z.read(member)!=data: raise ValueError('package byte mismatch')
+            actual=bool((z.getinfo(member).external_attr>>16)&0o111)
+            expected=bool(archive_mode(name,files)&0o111)
+            if actual!=expected: raise ValueError('package execute permission mismatch: '+name)
+
 def package(candidate:Path, output:Path):
     src=bi.source_record(ROOT)
     if src['source_state']!='clean':
@@ -30,16 +53,7 @@ def package(candidate:Path, output:Path):
     content['payload/ElasticGrid.plugin.zip']=payload
     content['AcceptanceToolIdentity.json']=json.dumps(identity,indent=2,sort_keys=True).encode()+b'\n'
     prefix='ElasticGridFX-AE-Acceptance-fd69988/'
-    with zipfile.ZipFile(output,'x',compression=zipfile.ZIP_DEFLATED) as z:
-        for name,data in content.items():
-            info=zipfile.ZipInfo(prefix+name,date_time=(2026,9,29,0,0,0))
-            info.create_system=3; info.compress_type=zipfile.ZIP_DEFLATED
-            info.external_attr=(0o100755 if name.endswith('.command') else 0o100644)<<16
-            z.writestr(info,data)
-    with zipfile.ZipFile(output) as z:
-        if set(z.namelist())!={prefix+n for n in content}: raise ValueError('unexpected members')
-        for name,data in content.items():
-            if z.read(prefix+name)!=data: raise ValueError('package byte mismatch')
+    write_archive(output,prefix,content,files)
     return dict(commit=src['commit'],package_sha256=bi.digest(output.read_bytes()),
                 candidate_package_sha256=CANDIDATE_SHA,runtime='NOT RUN')
 

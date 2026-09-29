@@ -129,6 +129,20 @@ identity. A symlinked scan root is ignored only when it aliases another
 independently listed plugin root; unknown symlink targets remain blocking.
 No plugin or user state is changed by this diagnostic fix.
 
+## Acceptance delivery execute-bit defect caught before handoff
+
+The first acceptance package built after the live-path diagnostic fix was inspected
+before user delivery. Its bytes and embedded fd69988 payload were correct, but the
+ZIP writer forced Python members to mode 0644 while `AcceptanceToolIdentity.json`
+marked `tools/live_identity.py` and `tools/target_ae_acceptance.py` executable.
+That package is not distributed.
+
+The acceptance packager now preserves each member's executable bit from the
+identity manifest, validates ZIP modes after writing, includes a regression test
+for executable Python members, and on macOS CI extracts the final ZIP with
+`ditto` and re-runs the exact hashes/execute-bit comparison. The plugin payload
+remains the same immutable fd69988 candidate.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first
