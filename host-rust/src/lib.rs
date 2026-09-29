@@ -5,6 +5,8 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+#[cfg(test)]
+mod plane_contract_tests;
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
 }

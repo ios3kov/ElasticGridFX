@@ -12,7 +12,24 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Stage 9 native plane bridge
+
+Additive EgPlaneFrame/EgPlaneImage/eg_render_plane bridge compiled in Cargo and
+exercised by a real Rust-to-C++ identity/invalid-plane ABI test. Existing render
+dispatch, parameter IDs, project wire schema and installed de0becf are unchanged.
+Checks: Release CTest 17/17, Rust 20/20, Clippy and bridge ASan/UBSan PASS.
+Static audit retains existing workflow/test findings, no changed-scope findings.
+Evidence: work/stage9-core/{plane-bridge-sanitized,plane-bridge-audit.json,
+Testing/Temporary/LastTest.log}. Bridge contract and remaining modes are in
+perspective-plane-plan.md. Next: quality/edge completeness, then append the
+four-corner controls and connect immutable host snapshots/overlay/render.
+Stage 9 and real AE plane acceptance remain incomplete. No release claim.
+
 ### Persistent viewer grid request
+
+**DEFERRED BY USER** to a future version. Requirements and GridWarp reference
+are preserved in persistent-viewer-grid.md. It is no longer a blocker for the
+current 2D/3D plane and final compatibility scope. Do not implement it now.
 
 User confirmed a toggle for passive grid visibility after deselection, hidden
 during playback and absent from all rendered/cached frames. Current effect-only

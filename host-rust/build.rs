@@ -78,6 +78,10 @@ fn main() {
         .file(root.join("src/core/GridCodec.cpp"))
         .file(root.join("src/core/WarpMath.cpp"))
         .file(root.join("src/core/CpuRenderer.cpp"))
+        .file(root.join("src/core/PlaneTransform.cpp"))
+        .file(root.join("src/core/PlaneWarp.cpp"))
+        .file(root.join("src/core/PlaneRenderer.cpp"))
+        .file(root.join("src/bridge/plane_ffi.cpp"))
         .file(root.join("src/bridge/elasticgrid_ffi.cpp"));
 
     if std::env::var("PROFILE").as_deref() == Ok("release") {
@@ -122,6 +126,14 @@ fn main() {
         "src/core/WarpMath.h",
         "src/core/CpuRenderer.cpp",
         "src/core/CpuRenderer.h",
+        "src/core/PlaneTransform.cpp",
+        "src/core/PlaneTransform.h",
+        "src/core/PlaneWarp.cpp",
+        "src/core/PlaneWarp.h",
+        "src/core/PlaneRenderer.cpp",
+        "src/core/PlaneRenderer.h",
+        "src/bridge/plane_ffi.cpp",
+        "src/bridge/plane_ffi.h",
         "src/core/SimdPixelOps.h",
         "src/bridge/elasticgrid_ffi.cpp",
         "src/bridge/elasticgrid_ffi.h",

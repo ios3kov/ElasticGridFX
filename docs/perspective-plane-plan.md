@@ -82,7 +82,23 @@ and INT_MIN/INT_MAX origins. Coordinate sums/differences use int64 before bounds
 checks to prevent overflow. ASan/UBSan and the 16-target Release suite pass.
 Next: native host wiring; verify real AE pixel-center,
 downsample and PAR conventions before presenting this as supported host behavior.
-The new scalar float path is not yet compiled into the native plugin; no AE claim.
+P9-2c: additive native bridge now compiled by Cargo, with a real Rust-to-C++ test.
+EgPlaneFrame borrows an immutable, already evaluated guide snapshot (including
+any wave evaluation by the caller); corners and surface scales use explicit
+double coordinates. EgPlaneImage byte strides are validated and converted to
+element strides once. Existing EgRenderParams and saved parameter IDs are unchanged.
+Limits: 2..52 guides per axis, aligned positive strides, nonoverlapping views;
+invalid grids/views return error before rendering, invalid corners pass through
+with a report flag. Exceptions never cross the C ABI; abort returns 5 and the
+caller must discard partial output. Reports reset on entry and publish on success.
+Current bridge is explicitly Final Catmull-Rom with logical-canvas Clamp; native
+dispatch must not silently route Draft/Wrap/Mirror through it. Before enabling
+plane controls, complete those modes or explicitly agree a narrower mode contract.
+17 CTest targets, 20 Rust tests, Clippy (existing macro exceptions), bridge
+ASan/UBSan PASS. Tests include all depths, direct-core equality, ABI layouts,
+invalid-grid/depth/view handling, invalid-plane copying, empty input and abort.
+Production render dispatch is NOT connected yet; native UI and AE acceptance
+remain NOT_RUN. No installed artifact changes in this slice.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host
 acceptance. Existing host-rust/src/ui.rs already uses layer_to_comp/comp_to_layer;
