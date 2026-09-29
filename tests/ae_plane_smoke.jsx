@@ -5,6 +5,30 @@ function elasticGridPlaneSmoke(config) {
     var status="FAIL", stage="guard", message="", frames=[];
     function q(s) {return '"'+String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n")+'"';}
     function check(v,s) {if(!v) throw new Error(s);}
+    function findComp(project,name) {
+        for(var i=1;i<=project.numItems;++i) {
+            var item=project.item(i);
+            if(item && item.name===name && item.layers) return item;
+        }
+        return null;
+    }
+    function findEffect(layer) {
+        var parade=layer.property("ADBE Effect Parade");
+        if(!parade) return null;
+        for(var i=1;i<=parade.numProperties;++i) {
+            var candidate=parade.property(i);
+            if(candidate && candidate.matchName==="com.elasticgrid.fx.warp") return candidate;
+        }
+        return null;
+    }
+    function safeResetOwned() {
+        try {
+            if(owned!==null && app.project===owned) {
+                owned.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+                app.newProject();
+            }
+        } catch(e) {}
+    }
     try {
         check(/^[a-f0-9]{32}$/.test(config.run_id),"Invalid run id");
         var folder=new Folder(config.folder);
@@ -19,7 +43,8 @@ function elasticGridPlaneSmoke(config) {
         stage="fixture";
         var input=new File(folder.fsName+"/pattern.png");check(input.exists,"Missing fixture");
         var footage=owned.importFile(new ImportOptions(input));
-        var comp=owned.items.addComp("__EGFX_PLANE_"+config.run_id,128,96,1,1,30);
+        var compName="__EGFX_PLANE_"+config.run_id;
+        var comp=owned.items.addComp(compName,128,96,1,1,30);
         var layer=comp.layers.add(footage);
         var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         check(fx!==null,"Effect unavailable");
@@ -37,33 +62,66 @@ function elasticGridPlaneSmoke(config) {
             frames.push(name);
         }
         var fit=[[0,0],[127,0],[127,95],[0,95]];
+        var skew=[[10,5],[120,0],[127,85],[0,95]];
         corners(fit);
         for(var d=0;d<3;++d) {
-            var depth=[8,16,32][d];owned.bitsPerChannel=depth;stage="pixels-"+depth;
+            var depth=[8,16,32][d];owned.bitsPerChannel=depth;stage="pixels_"+depth;
             comp.resolutionFactor=[1,1];fx.property("Wave Amplitude").setValue(0);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-original");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-identity");
             fx.property("Wave Amplitude").setValue(8);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-legacy-wave");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-plane-wave");
-            corners([[10,5],[120,0],[127,85],[0,95]]);capture("d"+depth+"-skew-wave");
+            corners(skew);capture("d"+depth+"-skew-wave");
             corners([[0,0],[127,95],[127,0],[0,95]]);capture("d"+depth+"-invalid");
             corners(fit);fx.property("Wave Amplitude").setValue(0);
             comp.resolutionFactor=[2,2];capture("d"+depth+"-half-identity");
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-half-original");
         }
-        stage="save";owned.bitsPerChannel=8;comp.resolutionFactor=[1,1];
-        fx.property("Deformation Plane").setValue(2);
-        corners([[10,5],[120,0],[127,85],[0,95]]);
+
+        // Roundtrip a non-trivial plane state through a real AEP before camera checks.
+        stage="roundtrip_save";owned.bitsPerChannel=8;comp.resolutionFactor=[1,1];
+        fx.property("Deformation Plane").setValue(2);corners(skew);
         fx.property("Wave Amplitude").setValue(8);
-        var file=new File(folder.fsName+"/plane-project.aep");check(!file.exists,"Stale project");
-        owned.save(file);check(file.exists,"Project not saved");
-        // Leave this test-owned saved project open for independent identity and
-        // interaction/roundtrip checks. User work was never accepted as input.
+        capture("roundtrip-before");
+        var projectFile=new File(folder.fsName+"/plane-project.aep");check(!projectFile.exists,"Stale project");
+        owned.save(projectFile);check(projectFile.exists && owned.file!==null,"Project not saved");
+        check(owned.close(CloseOptions.DO_NOT_SAVE_CHANGES),"Could not close owned project");
+        owned=app.open(projectFile);check(owned!==null && owned.file!==null && owned.file.fsName===projectFile.fsName,"Project reopen failed");
+        comp=findComp(owned,compName);check(comp!==null,"Roundtrip composition missing");
+        layer=comp.layer(1);check(layer!==null,"Roundtrip layer missing");
+        fx=findEffect(layer);check(fx!==null,"Roundtrip effect missing");
+        check(fx.property("Deformation Plane").value===2,"Plane mode did not roundtrip");
+        check(Math.abs(fx.property("Wave Amplitude").value-8)<0.001,"Wave amplitude did not roundtrip");
+        capture("roundtrip-after");
+
+        // 3D/camera acceptance: render survives layer rotation, active camera motion
+        // and parenting. Overlay/drag remains a separate real-UI acceptance gate.
+        stage="three_d";
+        layer.threeDLayer=true;
+        var transform=layer.property("ADBE Transform Group");check(transform!==null,"Missing 3D transform");
+        var camera=comp.layers.addCamera("__EGFX_CAMERA_"+config.run_id,[64,48]);
+        check(camera!==null && comp.activeCamera===camera,"Active camera unavailable");
+        capture("3d-base");
+        var yrot=transform.property("ADBE Rotate Y");check(yrot!==null,"Missing Y rotation");
+        yrot.setValue(28);capture("3d-layer-rotate");
+        var cameraTransform=camera.property("ADBE Transform Group");
+        var cameraPosition=cameraTransform.property("ADBE Position");check(cameraPosition!==null,"Missing camera position");
+        var cv=cameraPosition.value;
+        cameraPosition.setValue([cv[0]+24,cv[1]-10,cv[2]]);capture("3d-camera-move");
+        var parent=comp.layers.addNull();check(parent!==null,"Could not add parent");
+        parent.name="__EGFX_PARENT_"+config.run_id;parent.threeDLayer=true;layer.parent=parent;
+        var parentY=parent.property("ADBE Transform Group").property("ADBE Rotate Y");check(parentY!==null,"Missing parent rotation");
+        parentY.setValue(-18);capture("3d-parent");
+
+        // Leave this exact test-owned saved project open for live-image identity.
+        // The dedicated cleanup phase closes only this path after diagnosis.
         comp.openInViewer();layer.selected=true;
         status="CAPTURED";stage="complete";
-    } catch(error) {message=String(error);}
-    finally {
+    } catch(error) {
+        message=String(error);
+        safeResetOwned();
+    } finally {
         if(suppressing) {try{app.endSuppressDialogs(false);}catch(e){status="FAIL";}}
         if(report!==null && !report.exists) {
             report.encoding="UTF-8";
@@ -75,4 +133,35 @@ function elasticGridPlaneSmoke(config) {
             }
         }
     }
+    return status==="CAPTURED" ? 0 : 1;
+}
+
+function elasticGridPlaneSmokeCleanup(config) {
+    var report=null,status="FAIL",stage="guard",message="";
+    function q(s) {return '"'+String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n")+'"';}
+    function check(v,s) {if(!v) throw new Error(s);}
+    try {
+        check(/^[a-f0-9]{32}$/.test(config.run_id),"Invalid run id");
+        var folder=new Folder(config.folder);check(folder.exists,"Missing workspace");
+        report=new File(folder.fsName+"/plane-cleanup.json");check(!report.exists,"Refusing stale cleanup report");
+        var expected=new File(folder.fsName+"/plane-project.aep");check(expected.exists,"Owned project file missing");
+        check(app.project!==null && app.project.file!==null && app.project.file.fsName===expected.fsName,
+              "Current project is not the owned plane fixture");
+        stage="close";
+        check(app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES),"Could not close owned plane fixture");
+        var fresh=app.newProject();check(fresh!==null,"Could not create fresh project");
+        var dirty=fresh.dirty;
+        check(fresh.file===null && fresh.numItems===0 &&
+              (dirty===false || (typeof dirty==="undefined" && fresh.revision===1)),
+              "Fresh project guard failed");
+        status="CLEAN";stage="complete";
+    } catch(error) {message=String(error);}
+    finally {
+        if(report!==null && !report.exists && report.open("w")) {
+            report.encoding="UTF-8";
+            report.write('{"run_id":'+q(config.run_id)+',"status":'+q(status)+',"stage":'+q(stage)+',"message":'+q(message)+'}');
+            report.close();
+        }
+    }
+    return status==="CLEAN" ? 0 : 1;
 }
