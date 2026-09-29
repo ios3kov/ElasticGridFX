@@ -55,6 +55,11 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
     std::ptrdiff_t source_stride,std::ptrdiff_t output_stride,
     const PlaneCanvasRegion& region,const PlaneWarp* warp,AbortFn abort,void* refcon) {
     using T=std::remove_cv_t<std::remove_pointer_t<decltype(src.data)>>;
+    if(!std::isfinite(region.surface_units_x) || !std::isfinite(region.surface_units_y) ||
+       region.surface_units_x<=0 || region.surface_units_y<=0 ||
+       !std::isfinite(region.surface_units_x*region.canvas_width) ||
+       !std::isfinite(region.surface_units_y*region.canvas_height))
+        throw std::invalid_argument("invalid plane raster scale");
     auto fits=[](int origin,int extent,int canvas) {
         return canvas>0 && origin>=0 && extent>=0 && origin<=canvas && extent<=canvas-origin;
     };
@@ -83,8 +88,17 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
         for(int x=0;x<dst.width;++x) {
             PlanePoint q{static_cast<double>(x+region.output_x),static_cast<double>(y+region.output_y)},p=q;
             if(warp) {
-                auto mapped=warp->sourceFor(q);
-                if(mapped.status==PlaneMapStatus::Mapped) p=*mapped.source;
+                PlanePoint surface{q.x*region.surface_units_x,q.y*region.surface_units_y};
+                auto mapped=warp->sourceFor(surface);
+                if(mapped.status==PlaneMapStatus::Mapped) {
+                    // Keep identity bit-exact despite scale multiplication/division.
+                    if(mapped.source->x!=surface.x || mapped.source->y!=surface.y) {
+                        p={mapped.source->x/region.surface_units_x,mapped.source->y/region.surface_units_y};
+                        if(!std::isfinite(p.x) || !std::isfinite(p.y)) {
+                            p=q; ++report.invalid_projection_pixels;
+                        }
+                    }
+                }
                 else if(mapped.status==PlaneMapStatus::OutsidePlane) ++report.outside_pixels;
                 else ++report.invalid_projection_pixels;
             }

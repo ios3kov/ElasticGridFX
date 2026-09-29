@@ -10,6 +10,10 @@ struct PlaneRenderReport {
 struct PlaneCanvasRegion {
     int canvas_width, canvas_height;
     int source_x = 0, source_y = 0, output_x = 0, output_y = 0;
+    // Surface units per rendered pixel. Caller supplies the same coordinate basis
+    // as plane corners (e.g. full-resolution pixels or PAR-corrected units).
+    // Positive finite diagonal scale only; camera projection is NOT applied here.
+    double surface_units_x = 1, surface_units_y = 1;
 };
 // Stored rectangles must lie inside the logical canvas. Missing source pixels
 // are transparent black, never a stretched checkout edge. A 0x0 source is valid.

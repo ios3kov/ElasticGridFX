@@ -75,4 +75,23 @@ int main() {
     rejected=false;
     try {renderPlaneRGBAfRegion(src,dst,{n,n,1,0,0,0},nullptr);}
     catch(const std::invalid_argument&) {rejected=true;} assert(rejected);
+    // Same surface under anisotropic raster scale (downsample/PAR basis).
+    for(auto scale:std::array<PlanePoint,3>{{{2,2},{2.4,3},{.75,1.25}}}) {
+        auto scaledPlane=PlaneTransform::fromCorners({{{0,0},{8*scale.x,0},
+            {8*scale.x,8*scale.y},{0,8*scale.y}}});assert(scaledPlane);
+        auto scaledWarp=PlaneWarp::prepare(*scaledPlane,{0,.75f,1},{0,.25f,1});assert(scaledWarp);
+        renderPlaneRGBAf(src,dst,&*fullwarp);
+        renderPlaneRGBAfRegion(src,{reference.data(),n,n,stride},
+            {n,n,0,0,0,0,scale.x,scale.y},&*scaledWarp);
+        for(int y=0;y<n;++y) for(int i=0;i<n*4;++i)
+            assert(std::abs(output[y*stride+i]-reference[y*stride+i])<1e-5);
+        auto unchanged=PlaneWarp::prepare(*scaledPlane,{0,.5f,1},{0,.5f,1});assert(unchanged);
+        renderPlaneRGBAfRegion(src,dst,{n,n,0,0,0,0,scale.x,scale.y},&*unchanged);
+        for(int y=0;y<n;++y) assert(!std::memcmp(&input[y*stride],&output[y*stride],n*4*sizeof(float)));
+    }
+    for(double bad:std::array<double,4>{0,-1,INFINITY,NAN}) {
+        rejected=false;
+        try {renderPlaneRGBAfRegion(src,dst,{n,n,0,0,0,0,bad,1},nullptr);}
+        catch(const std::invalid_argument&) {rejected=true;} assert(rejected);
+    }
 }

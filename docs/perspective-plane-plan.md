@@ -64,7 +64,17 @@ retain input bits (including unusual values), matching the previous copy policy.
 Acceptance: padded strides, sparse/full bit-exact equality, empty input, bad stride,
 outside/invalid copying and flat-plane Final comparison within one integer level.
 These are standalone core tests, not AE bit-depth acceptance.
-Next: expanded-canvas policy, PAR/downsampling and actual host wiring.
+Raster/surface basis is now explicit: PlaneCanvasRegion carries positive finite
+surface_units_x/y. Multiply global raster coordinates before plane mapping, then
+divide the returned source coordinate before cubic sampling. Source/output origins
+remain raster pixel indices. Identity skips the multiply/divide roundtrip for exact
+copies. Reject zero/negative/nonfinite/overflowing scale metadata before output.
+This supports a caller-defined downsample/PAR basis; it does NOT derive AE matrices,
+apply camera projection, infer pixel-center offsets or confirm AE PAR behavior.
+Tests compare scaled corners against unit-scale coordinates at (2,2), (2.4,3),
+(.75,1.25), including exact identity and invalid metadata rejection.
+Next: expanded-canvas policy and native host wiring; verify real AE pixel-center,
+downsample and PAR conventions before presenting this as supported host behavior.
 The new scalar float path is not yet compiled into the native plugin; no AE claim.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host

@@ -12,6 +12,17 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 9 initial geometry foundation
 
+Latest slice: explicit positive finite raster-to-plane surface scale per axis,
+shared by all bit-depth paths. This allows host-supplied downsample/PAR coordinate
+bases while preserving exact identity copies and applying the inverse scale before
+sampling. Uniform/anisotropic equivalence and invalid-scale rejection tests PASS;
+15/15 Release CTest targets PASS. No host Half/Quarter/PAR acceptance is claimed:
+the adapter must still establish AE coordinate conventions and avoid double camera
+or PAR transforms. Native plugin/installation remains unchanged.
+ASan/UBSan plane-render tests also PASS. Evidence retained in work/stage9-core
+(Testing/Temporary/LastTest.log, plane-scale-sanitized, plane-scale-audit.json).
+Static audit remains review_required with no findings in the changed renderer/tests.
+
 Latest slice: added 8/16-bpc plane region APIs through a shared typed sampler.
 Integer output rounds only after both Catmull-Rom axes, clamps sampled values to
 255 / AE 32768, and preserves exact pass-through bytes. Float remains unclamped.
