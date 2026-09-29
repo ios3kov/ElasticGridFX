@@ -98,7 +98,11 @@ Required:
 - Before -> Change -> After evidence for every significant optimization;
 - no hidden resolution/bit-depth/filter/precision downgrade.
 
-## Stage 9 of 10 — 2D/3D perspective deformation plane — ACCEPTED FOR TARGET SCOPE
+## Stage 9 of 10 — 2D/3D perspective deformation plane — REOPENED
+
+2026-09-30: user evidence shows displaced overlay when enabling native 3D on a
+text layer. Earlier solid-only UI acceptance is insufficient. See current-status.md.
+The acceptance statements below are historical, superseded by this regression.
 
 2026-09-30: user replied “работает” to the combined manual drag/Undo/Redo and
 legacy animated-project acceptance request. Recorded as USER-REPORTED PASS,
@@ -149,7 +153,10 @@ Installation/tooling PASS is not stage completion.
 Research may proceed in parallel; implementation begins only after the current
 functional bugfix is accepted and its performance baseline is recorded.
 
-## Stage 10 of 10 — Final compatibility / release gate — IN PROGRESS
+## Stage 10 of 10 — Final compatibility / release gate — BLOCKED
+
+Blocked by reopened Stage 9 text-layer 3D overlay regression. Existing evidence
+below remains historical and does not waive the new failure.
 
 2026-09-30: final regression started against the unchanged installed 099e492.
 See stage10-final-gate-2026-09-30.md for scoped evidence and outstanding gates.

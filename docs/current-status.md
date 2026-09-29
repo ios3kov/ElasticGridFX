@@ -2,9 +2,21 @@
 
 2026-09-30. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 10 of 10 IN PROGRESS; Stage 9 target-scope accepted; Stage 8 SKIPPED BY USER, not PASS.**
+**Production cycle: Stage 9 of 10 REOPENED; Stage 10 BLOCKED by text-layer 3D overlay regression; Stage 8 SKIPPED BY USER, not PASS.**
 
-User replied “работает” to the combined remaining manual checks on 2026-09-30.
+2026-09-30 update supersedes the acceptance below: the user supplied a screenshot
+showing the Layer Plane overlay displaced immediately after enabling 3D on a text
+layer, without rotation. Build label is EGFX-97a79761c3f9. The previous native UI
+fixture covered a solid, not text; its PASS cannot establish text-layer alignment.
+Root cause is not yet confirmed. Investigation: reconcile effect canvas coordinates
+with native layer coordinates in ui_projection.rs; do not apply guessed offsets.
+Required regression: owned text fixture, 2D -> 3D -> 2D, then rotation/camera,
+overlay and inverse picking agreement, with the solid fixture retained.
+Fresh host reproduction is BLOCKED: the open project has unsaved user changes
+(confirmed in AE title on 2026-09-30); it was neither closed nor modified.
+No replacement artifact has been built or installed for this regression.
+
+Historical acceptance: user replied “работает” to the combined remaining manual checks on 2026-09-30.
 Drag/Undo/Redo and old animated-project acceptance are USER-REPORTED PASS, not
 automated evidence. Installed candidate remains 099e492. The latest gate ledger is
 `stage10-final-gate-2026-09-30.md`; older Stage 9 OPEN statements below are historical.
