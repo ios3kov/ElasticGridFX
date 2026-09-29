@@ -35,9 +35,10 @@ def load_candidate(manifest_path: Path = MANIFEST, package_path: Path = PACKAGE)
     return manifest
 
 
-def verify_installed(bundle: Path, package: Path, manifest: dict) -> None:
+def verify_installed(bundle: Path, package: Path, manifest_path: Path) -> None:
     checked_path(bundle, directory=True)
-    bi.verify(bundle, package, manifest)
+    checked_path(manifest_path)
+    bi.verify(bundle, package, manifest_path)
     signature(bundle)
 
 
@@ -74,7 +75,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         raise ValueError('target acceptance requires Apple Silicon macOS')
     manifest = load_candidate(manifest_path, package_path)
     checked_path(ae_app, directory=True)
-    verify_installed(installed, package_path, manifest)
+    verify_installed(installed, package_path, manifest_path)
 
     checked_path(report_root)
     report_root.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -104,7 +105,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
     smoke_folder, smoke_meta = ae_smoke_runner.prepare(run/'smoke', manifest['build'])
     try:
         smoke_result = ae_smoke_runner.execute(
-            smoke_folder, smoke_meta, ae_app, installed, package_path, manifest
+            smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
         )
     except subprocess.TimeoutExpired:
         result['reason'] = 'AE smoke timeout; no process was killed and no retry was attempted'

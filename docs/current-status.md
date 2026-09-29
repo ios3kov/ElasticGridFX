@@ -63,8 +63,12 @@ This still does not constitute AE runtime PASS.
 
 ## Target-AE acceptance automation
 
-A single non-installing target runner is now implemented for fd69988. It first
-requires live-image identity PASS for the exact installed candidate, then runs
+A single non-installing target runner is implemented for fd69988. The first
+user-side attempt exposed a runner-only manifest type bug before any AE test ran:
+a decoded dict was passed to a path-based verifier. That failure is preserved as
+NOT RUN for AE functionality. The runner now keeps both the manifest path and
+decoded data distinct, with regression tests covering both verifier and smoke
+handoffs. It first requires live-image identity PASS for the exact installed candidate, then runs
 the guarded ten-frame patterned AE smoke in the same AE PID. Functional PASS
 requires all direct deformation/animation/reset checks plus Adjustment Layer ->
 ElasticGrid -> identity/moved Corner Pin pixel assertions. Its shared ZIP includes

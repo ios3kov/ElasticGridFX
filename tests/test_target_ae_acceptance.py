@@ -27,8 +27,17 @@ class Acceptance(unittest.TestCase):
     def run_case(self, identity=None, smoke=None):
         identity=self.identity if identity is None else identity
         smoke=self.smoke if smoke is None else smoke
-        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed'),              patch.object(ta.live_identity,'diagnose',return_value=identity),              patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare),              patch.object(ta.ae_smoke_runner,'execute',return_value=smoke):
-            return ta.run_acceptance(self.report,self.app,self.plugin,self.root/'m.json',self.root/'p.zip')
+        manifest_path=self.root/'m.json'
+        package_path=self.root/'p.zip'
+        def verify(bundle, package, manifest):
+            self.assertIsInstance(manifest, Path)
+            self.assertEqual(manifest, manifest_path)
+        def execute(folder, metadata, ae_app, installed, package, manifest):
+            self.assertIsInstance(manifest, Path)
+            self.assertEqual(manifest, manifest_path)
+            return smoke
+        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed',side_effect=verify),              patch.object(ta.live_identity,'diagnose',return_value=identity),              patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare),              patch.object(ta.ae_smoke_runner,'execute',side_effect=execute):
+            return ta.run_acceptance(self.report,self.app,self.plugin,manifest_path,package_path)
 
     def prepare(self, parent, build):
         folder=parent/'run'; folder.mkdir(parents=True)
@@ -36,6 +45,14 @@ class Acceptance(unittest.TestCase):
             (folder/(name+'.png')).write_bytes(b'png')
         (folder/'capture.json').write_text('{}')
         return folder, {'status':'NOT RUN'}
+
+    def test_verify_installed_passes_manifest_path_to_build_identity(self):
+        manifest_path=self.root/'manifest.json'
+        manifest_path.write_text('{}')
+        package=self.root/'payload.zip'; package.write_bytes(b'x')
+        with patch.object(ta,'checked_path'),              patch.object(ta.bi,'verify') as verify,              patch.object(ta,'signature'):
+            ta.verify_installed(self.plugin,package,manifest_path)
+        verify.assert_called_once_with(self.plugin,package,manifest_path)
 
     def test_identity_and_pixels_pass_functional_but_not_release(self):
         result, archive=self.run_case()
