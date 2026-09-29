@@ -128,10 +128,17 @@ in the viewer, remaining editable numerically. Fit Layer uses last pixel centers
 percentage corners. Full real-host origin/downsample/3D validation remains pending.
 
 Source gates: 18 CTest, 22 Rust tests, Clippy and geometry ASan/UBSan PASS on arm64.
-Fixture tests/ae_plane_smoke.jsx requires an empty owned project and captures
-identity/deformed/skew/invalid/half-resolution comparisons in all three depths.
-CAPTURED is not PASS: numeric output analysis and exact loaded identity are separate
-mandatory gates, followed by Undo/Redo/save/reopen and user-owned visual acceptance.
+Stage 9 acceptance tooling now pins exact de31498 / EGFX-0fa68430a170b3612e8d00f7
+and requires an empty owned project. tests/ae_plane_smoke.jsx captures 34 frames:
+24 identity/wave/skew/invalid/half-resolution comparisons across 8/16/32 bpc,
+two AEP save/reopen roundtrip frames, plus 3D position, scale, rotation, parenting,
+active-camera movement, camera switching and no-camera fallback. The Python
+comparator performs numeric equality/change checks and rejects flat/transparent
+evidence. The runner independently proves the loaded candidate in the same AE PID,
+re-verifies installed bytes, and requires safe cleanup to a fresh empty project.
+CAPTURED is never PASS. Source/control-flow tests are green; real target-AE
+execution remains NOT_RUN. Native viewer drag and UI Undo/Redo remain separate
+real-host interaction gates.
 
 Sources rechecked 2026-09-29:
 https://ae-plugins.docsforadobe.dev/effect-basics/parameters/
