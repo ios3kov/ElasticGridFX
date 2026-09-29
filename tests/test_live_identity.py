@@ -124,13 +124,21 @@ class LiveIdentity(unittest.TestCase):
             result=li.diagnose(self.folder,manifest,[])
             self.assertEqual(result['status'],'BLOCKED'); capture.assert_not_called()
 
-    def test_redundant_symlink_scan_root_is_accepted_only_as_duplicate(self):
+    def test_documented_root_symlink_resolves_but_inner_policy_stays_separate(self):
         real=self.folder/'real-plugins'; real.mkdir()
         alias=self.folder/'alias-plugins'; alias.symlink_to(real)
-        self.assertEqual(li.redundant_symlink_root(alias,[real,alias]),real)
-        other=self.folder/'other'; other.mkdir()
-        with self.assertRaises(ValueError):
-            li.redundant_symlink_root(alias,[other,alias])
+        actual,record=li.scan_root(alias)
+        self.assertEqual(actual,real)
+        self.assertEqual(record['root'],str(alias))
+        missing=self.folder/'missing-alias'; missing.symlink_to(self.folder/'missing')
+        with self.assertRaises(ValueError): li.scan_root(missing)
+
+    def test_installed_roots_match_documented_mac_locations(self):
+        app=Path('/Applications/Adobe After Effects 2025/Adobe After Effects 2025.app')
+        roots=li.installed_roots(app,[])
+        self.assertIn(app.parent/'Plug-ins',roots)
+        self.assertNotIn(app/'Contents/Plug-ins',roots)
+        self.assertNotIn(app/'Plug-ins',roots)
 
     def test_ps_selects_only_actual_ae_executables(self):
         text=f' 123 {EXE}\n 456 /usr/bin/aerender\n 789 /tmp/After Effects helper\n 101 {EXE} helper\n'
