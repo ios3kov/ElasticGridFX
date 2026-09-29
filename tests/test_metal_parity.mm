@@ -121,8 +121,15 @@ int main() {
                 for (int quality = 1; quality <= 2; ++quality) {
                     auto p = make_params(quality, edge, x, 5, xp, y, 4, yp, tc.wave);
                     std::vector<float> cpu(static_cast<std::size_t>(dp) * tc.dh * 4, 0.0f);
-                    assert(eg_render_frame(src.data(), src_row_bytes, tc.sw, tc.sh,
-                                           cpu.data(), dst_row_bytes, tc.dw, tc.dh, 32, &p) == 0);
+                    // Release builds define NDEBUG: never put the reference
+                    // render inside assert, which would skip it completely.
+                    const int cpu_rc = eg_render_frame(src.data(), src_row_bytes, tc.sw, tc.sh,
+                                           cpu.data(), dst_row_bytes, tc.dw, tc.dh, 32, &p);
+                    if (cpu_rc != 0) {
+                        std::cerr << "Metal parity: CPU reference failed rc=" << cpu_rc << '\n';
+                        eg_metal_destroy(state);
+                        return 6;
+                    }
 
                     const NSUInteger src_bytes = static_cast<NSUInteger>(src_row_bytes) * tc.sh;
                     const NSUInteger dst_bytes = static_cast<NSUInteger>(dst_row_bytes) * tc.dh;

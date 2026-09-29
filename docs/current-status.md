@@ -6,11 +6,21 @@
 See development-stages.md. Stages 1–7 are completed for the current scope. Stage 8 is
 performance/profiling (skipped on explicit user request), Stage 9 is the approved 2D/3D perspective plane, Stage 10
 is final compatibility/release validation.
-No main merge, new user installation or production release in this stage.
+No main merge or production release in this stage. User authorized a reversible
+test installation of the guide UI update, contingent on candidate checks and a
+safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
 ### Stage 9 requested guide UI affordances (source implementation)
+
+Installation preparation found a pre-existing Release test defect:
+test_metal_parity.mm placed the CPU reference render inside assert, so NDEBUG
+removed the render and compared Metal against zeros (max_abs 1.50966, exit 4).
+Moved the call to explicit checked execution without changing tolerance or any
+renderer code. All 18 parity cases now PASS, max_abs <= 4.76837e-7.
+Evidence: work/stage9-core/guide-install-metal-parity{,-fixed}.log.
+This is standalone Metal evidence, not AE acceptance; installation still pending.
 
 2026-09-29: markers enlarged from 5 to 10 frame units, retaining screen-space
 hit testing. Active viewer cursor uses open hand; guide capture uses closed hand
