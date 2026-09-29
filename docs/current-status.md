@@ -143,6 +143,28 @@ for executable Python members, and on macOS CI extracts the final ZIP with
 `ditto` and re-runs the exact hashes/execute-bit comparison. The plugin payload
 remains the same immutable fd69988 candidate.
 
+## Real acceptance report — effect not resident before identity sampling
+
+The returned run `EGFX-AE-549be4237ee647eabe9dba06df8c665b` proves the exact
+fd69988 payload on disk and AE 25.6.0 arm64, but `loaded_images` was empty and
+pixel status remained NOT RUN. The orchestrator sampled live process images before
+the intentionally empty project had instantiated ElasticGrid.
+
+The corrected sequence is now:
+1. guard an empty, unsaved, clean test project;
+2. create only test-owned footage/comp/layer and instantiate ElasticGrid;
+3. sample the same AE PID and prove pinned path/Mach-O UUID/Build ID;
+4. close only that exact armed test project without saving and create a fresh
+   empty project;
+5. run the existing ten deterministic pixel captures;
+6. verify the installed payload again.
+
+If ownership changes, cleanup refuses to close the project. The plugin binary is
+unchanged. Conflict scanning is also narrowed to Adobe-documented macOS roots:
+Common MediaCore plus `/Applications/Adobe After Effects [version]/Plug-ins/`.
+Only the documented root itself may be resolved when it is a symlink; inner
+symlinks remain refused.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first
