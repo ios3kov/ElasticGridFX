@@ -52,6 +52,30 @@ overlay/inverse hit testing. Do not reuse stale UI matrices during render or
 silently move only the overlay. Then build an identified candidate and verify
 the native text reproduction, rotation, camera, dragging and pixel regression.
 
+### Native projection bridge checkpoint — 2026-09-30
+
+Added `eg_render_plane_between` without changing the 152-byte frame ABI.
+Invalid source/destination quads return bad input without writing output, unlike
+the retained legacy invalid-plane pass-through. Existing sampling/bit-depth paths
+are reused. Rust State owns optional source corners, cloned with the frame
+snapshot, and routes them to the new bridge when present. The provider is NOT
+implemented: State::read still sets None; this does not fix native text yet.
+
+Verification: CTest 18/18 PASS including 8/16/32-bit bridge parity and rejection
+without output writes; Rust 24/24 PASS including real C++ linkage and frozen ABI;
+diff whitespace check PASS. Scanner text-plane-bridge-audit.json remains
+review_required, exit 1, existing workflow/test heuristic findings.
+
+Integration risk confirmed by SDK guide: AEGP threading is main-thread-only,
+while PFInterface is described as accessible to effects. This does not establish
+that the existing UI Layer suite calls are permitted during SmartPreRender/MFR.
+Do not move UI calls directly into render or use an idle/UI cache as a frame
+dependency. Required next research/prototype: supported evaluated transform
+acquisition and dependency invalidation in interactive AND aerender execution.
+Sources: https://ae-plugins.docsforadobe.dev/aegps/implementation/#threading and
+https://ae-plugins.docsforadobe.dev/effect-details/accessing-camera-light-information/ .
+No candidate package, installation or new native-AE PASS claimed.
+
 Historical acceptance: user replied “работает” to the combined remaining manual checks on 2026-09-30.
 Drag/Undo/Redo and old animated-project acceptance are USER-REPORTED PASS, not
 automated evidence. Installed candidate remains 099e492. The latest gate ledger is

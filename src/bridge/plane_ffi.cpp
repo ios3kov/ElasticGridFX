@@ -53,9 +53,10 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
         f?(static_cast<double>(f->canvas_width)-1)*f->surface_units_x:0,
         f?(static_cast<double>(f->canvas_height)-1)*f->surface_units_y:0);
 }
-int eg_render_plane_projected(const EgPlaneImage* source,const EgPlaneImage* output,
+static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
-    std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y) noexcept {
+    std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y,
+    const double* source_corners) noexcept {
     if(!report) return 1;
     *report={};
     if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
@@ -72,7 +73,15 @@ int eg_render_plane_projected(const EgPlaneImage* source,const EgPlaneImage* out
         for(int i=0;i<4;++i) corners[i]={f->corners[i*2],f->corners[i*2+1]};
         auto transform=eg::PlaneTransform::fromCorners(corners);
         std::optional<eg::PlaneWarp> warp;
-        if(transform) {
+        if(source_corners) {
+            for(int i=0;i<4;++i) corners[i]={source_corners[2*i],source_corners[2*i+1]};
+            auto source_transform=eg::PlaneTransform::fromCorners(corners);
+            if(!transform || !source_transform) return 1;
+            warp=eg::PlaneWarp::prepareBetween(*source_transform,*transform,
+                {f->columns,f->columns+f->column_count},
+                {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
+            if(!warp) return 1;
+        } else if(transform) {
             warp=eg::PlaneWarp::prepareProjected(*transform,
                 {source_extent_x,source_extent_y},
                 {f->columns,f->columns+f->column_count},
@@ -102,4 +111,16 @@ int eg_render_plane_projected(const EgPlaneImage* source,const EgPlaneImage* out
     } catch(const eg::RenderCancelled&) { return 5; }
       catch(const std::invalid_argument&) { return 1; }
       catch(...) { return 3; }
+}
+
+int eg_render_plane_projected(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y) noexcept {
+    return renderPlane(source,output,depth,f,report,quality,edge,source_extent_x,source_extent_y,nullptr);
+}
+int eg_render_plane_between(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge,const double* source_corners) noexcept {
+    if(!source_corners) {if(report) *report={};return 1;}
+    return renderPlane(source,output,depth,f,report,quality,edge,0,0,source_corners);
 }

@@ -57,3 +57,10 @@ extern "C" int eg_render_plane_sampled(const EgPlaneImage* source, const EgPlane
 extern "C" int eg_render_plane_projected(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
     std::int32_t quality, std::int32_t edge, double source_extent_x, double source_extent_y) noexcept;
+
+// Already projected input. source_corners contains eight surface coordinates,
+// TL/TR/BR/BL. Both quads must be valid; bad projections return 1 without writes.
+// Does not retain pointers or call host APIs. Existing frame ABI is unchanged.
+extern "C" int eg_render_plane_between(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge, const double* source_corners) noexcept;

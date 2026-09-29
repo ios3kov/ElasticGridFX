@@ -58,6 +58,11 @@ fn plane_abi_layout_and_identity_roundtrip() {
     assert_eq!(unsafe {eg_render_plane(&src,&dst,32,&frame,&mut report)}, 0);
     assert_eq!(output, input);
     assert_eq!(report.invalid_plane, 0);
+    let projected_source = frame.corners;
+    assert_eq!(unsafe {eg_render_plane_between(&src,&dst,32,&frame,&mut report,1,0,projected_source.as_ptr())},0);
+    assert_eq!(output,input);
+    assert_eq!(unsafe {eg_render_plane_between(&src,&dst,32,&frame,&mut report,1,0,std::ptr::null())},1);
+    assert_eq!(output,input);
     frame.corners = [0.0,0.0,2.5,0.0,2.5,2.5,0.0,2.5];
     assert_eq!(unsafe {eg_render_plane_projected(&src,&dst,32,&frame,&mut report,1,0,2.5,2.5)},0);
     for (actual,expected) in output.iter().zip(&input) {

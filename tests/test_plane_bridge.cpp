@@ -24,6 +24,13 @@ template<typename T> void verify(int depth) {
     assert(eg_render_plane(&src,&dst,depth,&frame,&report)==0);
     assert(!std::memcmp(out.data(),expected.data(),out.size()*sizeof(T)));
     assert(report.invalid_plane==0 && report.reserved==0);
+    const double inputPlane[]={0,0,8,0,8,8,0,8};
+    assert(eg_render_plane_between(&src,&dst,depth,&frame,&report,1,0,inputPlane)==0);
+    assert(!std::memcmp(out.data(),expected.data(),out.size()*sizeof(T)));
+    auto beforeBad=out;
+    const double badPlane[]={0,0,0,0,0,0,0,0};
+    assert(eg_render_plane_between(&src,&dst,depth,&frame,&report,1,0,badPlane)==1 && out==beforeBad);
+    assert(eg_render_plane_between(&src,&dst,depth,&frame,&report,1,0,nullptr)==1 && out==beforeBad);
     frame.corners[2]=0;frame.corners[3]=0; // collapsed plane preserves input
     assert(eg_render_plane(&src,&dst,depth,&frame,&report)==0 && report.invalid_plane==1);
     for(int y=0;y<n;++y) assert(!std::memcmp(&out[y*stride],&source[y*stride],n*4*sizeof(T)));
