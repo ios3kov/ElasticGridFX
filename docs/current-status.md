@@ -12,6 +12,25 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Stage 9 continuation: expanded perspective canvas
+
+User accepted the thinner guide/intersection appearance of installed de0becf
+("так лучше") and requested continuing. This accepts that UX feedback only,
+not the entire camera/plane or release matrix. Installed candidate is unchanged.
+
+Standalone PlaneRenderer now supports expanded source/output storage with signed
+origins. Outside the logical canvas is transparent zero; interior uses the same
+single Final Bicubic sample and all previous bit-depth behavior. Checked int64
+arithmetic prevents signed origin overflow. No new UI or native renderer dispatch.
+Release CTest 16/16 PASS; expanded-canvas ASan/UBSan PASS on macOS arm64.
+First test compile failed due to mixed const pointers in an initializer list;
+fixed with explicit std::array<const PlaneWarp*,3> and reran successfully.
+Static audit retains existing workflow/test findings, none in changed scope.
+Evidence: work/stage9-core/Testing/Temporary/LastTest.log,
+plane-expanded-sanitized, plane-expanded-audit.json. Real AE plane acceptance
+remains NOT_RUN. Next: connect the native plane snapshot/bridge while preserving
+existing parameter IDs, legacy renderer and saved-project compatibility.
+
 ### Stage 9 requested guide UI affordances (source implementation)
 
 Latest installed test candidate: **de0becfd770a57af458c4776360961fe9cdc3556**,

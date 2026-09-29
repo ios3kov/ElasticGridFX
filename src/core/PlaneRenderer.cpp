@@ -60,13 +60,8 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
        !std::isfinite(region.surface_units_x*region.canvas_width) ||
        !std::isfinite(region.surface_units_y*region.canvas_height))
         throw std::invalid_argument("invalid plane raster scale");
-    auto fits=[](int origin,int extent,int canvas) {
-        return canvas>0 && origin>=0 && extent>=0 && origin<=canvas && extent<=canvas-origin;
-    };
-    if(!fits(region.source_x,src.width,region.canvas_width) ||
-       !fits(region.source_y,src.height,region.canvas_height) ||
-       !fits(region.output_x,dst.width,region.canvas_width) ||
-       !fits(region.output_y,dst.height,region.canvas_height) ||
+    if(region.canvas_width<=0 || region.canvas_height<=0 ||
+       src.width<0 || src.height<0 ||
        ((src.width==0)!=(src.height==0)))
         throw std::invalid_argument("invalid plane canvas region");
     const bool empty=src.width==0;
@@ -76,17 +71,28 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
         throw std::invalid_argument("overlapping plane image views");
     const T zero[4]{};
     auto sourcePixel=[&](int x,int y)->const T* {
-        if(empty || x<region.source_x || y<region.source_y ||
-           x-region.source_x>=src.width || y-region.source_y>=src.height) return zero;
-        return src.data+static_cast<std::ptrdiff_t>(y-region.source_y)*source_stride+
-               static_cast<std::ptrdiff_t>(x-region.source_x)*4;
+        const auto sx=static_cast<std::int64_t>(x)-region.source_x;
+        const auto sy=static_cast<std::int64_t>(y)-region.source_y;
+        if(empty || x<0 || y<0 || x>=region.canvas_width || y>=region.canvas_height ||
+           sx<0 || sy<0 || sx>=src.width || sy>=src.height) return zero;
+        return src.data+static_cast<std::ptrdiff_t>(sy)*source_stride+
+               static_cast<std::ptrdiff_t>(sx)*4;
     };
     PlaneRenderReport report;report.invalid_plane=!warp;
     for(int y=0;y<dst.height;++y) {
         if(abort && abort(refcon)) throw RenderCancelled{};
         auto out=dst.data+static_cast<std::ptrdiff_t>(y)*output_stride;
         for(int x=0;x<dst.width;++x) {
-            PlanePoint q{static_cast<double>(x+region.output_x),static_cast<double>(y+region.output_y)},p=q;
+            const auto qx=static_cast<std::int64_t>(x)+region.output_x;
+            const auto qy=static_cast<std::int64_t>(y)+region.output_y;
+            auto pixel=out+static_cast<std::ptrdiff_t>(x)*4;
+            // Expanded host worlds are storage, not a larger deformation canvas.
+            // Never stretch a logical edge into these pixels, even for bad planes.
+            if(qx<0 || qy<0 || qx>=region.canvas_width || qy>=region.canvas_height) {
+                std::memcpy(pixel,zero,4*sizeof(T));
+                continue;
+            }
+            PlanePoint q{static_cast<double>(qx),static_cast<double>(qy)},p=q;
             if(warp) {
                 PlanePoint surface{q.x*region.surface_units_x,q.y*region.surface_units_y};
                 auto mapped=warp->sourceFor(surface);
@@ -102,9 +108,8 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                 else if(mapped.status==PlaneMapStatus::OutsidePlane) ++report.outside_pixels;
                 else ++report.invalid_projection_pixels;
             }
-            auto pixel=out+static_cast<std::ptrdiff_t>(x)*4;
             if(p.x==q.x && p.y==q.y) {
-                std::memcpy(pixel,sourcePixel(x+region.output_x,y+region.output_y),4*sizeof(T));
+                std::memcpy(pixel,sourcePixel(static_cast<int>(qx),static_cast<int>(qy)),4*sizeof(T));
                 continue;
             }
             auto xs=taps(p.x,region.canvas_width),ys=taps(p.y,region.canvas_height);

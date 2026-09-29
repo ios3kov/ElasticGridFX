@@ -73,7 +73,7 @@ int main() {
     renderPlaneRGBAfRegion({nullptr,0,0,0},dst,{n,n},&*fullwarp);
     for(int y=0;y<n;++y) for(int i=0;i<n*4;++i) assert(output[y*stride+i]==0);
     rejected=false;
-    try {renderPlaneRGBAfRegion(src,dst,{n,n,1,0,0,0},nullptr);}
+    try {renderPlaneRGBAfRegion(src,dst,{0,n,1,0,0,0},nullptr);}
     catch(const std::invalid_argument&) {rejected=true;} assert(rejected);
     // Same surface under anisotropic raster scale (downsample/PAR basis).
     for(auto scale:std::array<PlanePoint,3>{{{2,2},{2.4,3},{.75,1.25}}}) {

@@ -15,8 +15,11 @@ struct PlaneCanvasRegion {
     // Positive finite diagonal scale only; camera projection is NOT applied here.
     double surface_units_x = 1, surface_units_y = 1;
 };
-// Stored rectangles must lie inside the logical canvas. Missing source pixels
-// are transparent black, never a stretched checkout edge. A 0x0 source is valid.
+// Stored rectangles may extend beyond the logical canvas, including negative
+// origins. Output outside the canvas and missing source pixels are transparent
+// black, never stretched checkout edges. Source storage outside the canvas is
+// ignored. A 0x0 source is valid; strides are positive and views must not overlap.
+// Report pixel counters refer only to output pixels inside the logical canvas.
 PlaneRenderReport renderPlaneRGBAfRegion(const ConstImageRGBAf& src, const ImageRGBAf& dst,
     const PlaneCanvasRegion& region, const PlaneWarp* warp,
     AbortFn abort = nullptr, void* abort_refcon = nullptr);

@@ -52,8 +52,11 @@ origins are independent of storage dimensions; cubic taps clamp against the logi
 canvas and absent checkout pixels read transparent zero. No allocation of a full
 zero-filled canvas is needed. A 0x0 source is valid; stored rectangles must lie
 inside a positive canvas, with nonempty output and valid strides/nonoverlap.
-Expanded rectangles outside that canvas are explicitly rejected pending host
-semantics, not implicitly stretched. Dense API delegates to the same region path.
+Expanded rectangles are supported in the standalone core: negative source/output
+origins and stored pixels beyond the logical canvas are allowed. Destination
+pixels outside that canvas are transparent zero; source storage outside it is
+ignored. This matches the existing sparse bridge's canvas policy, without claiming
+that the new plane path has been wired into AE. Dense API delegates to the same region path.
 Tests require bit-exact compact/full-zero-filled equivalence for deformed,
 identity and invalid-plane states, tiled-output equivalence, padding preservation,
 empty input and malformed-region rejection.
@@ -73,7 +76,11 @@ This supports a caller-defined downsample/PAR basis; it does NOT derive AE matri
 apply camera projection, infer pixel-center offsets or confirm AE PAR behavior.
 Tests compare scaled corners against unit-scale coordinates at (2,2), (2.4,3),
 (.75,1.25), including exact identity and invalid metadata rejection.
-Next: expanded-canvas policy and native host wiring; verify real AE pixel-center,
+Expanded-canvas tests now cover 8/16/float, moved/identity/invalid planes, bit-exact
+interior equality to a dense reference, outside zero, stride padding, cancellation,
+and INT_MIN/INT_MAX origins. Coordinate sums/differences use int64 before bounds
+checks to prevent overflow. ASan/UBSan and the 16-target Release suite pass.
+Next: native host wiring; verify real AE pixel-center,
 downsample and PAR conventions before presenting this as supported host behavior.
 The new scalar float path is not yet compiled into the native plugin; no AE claim.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
