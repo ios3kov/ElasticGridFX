@@ -20,6 +20,12 @@ ECW row while Timeline Grid Positions and existing keys are still present.
 Native installation/visual verification of this correction: BLOCKED by open
 unsaved user project (Untitled Project *, image composition with animated grid).
 Do not close/discard it. Save user work before replacing/restarting AE.
+Prepared clean release candidate 1eed79aad052f144668c2ebed9426a7934f35f6b,
+Build ID EGFX-25e03a7ae1a9304311095c8e, arm64. Bundle signature, entrypoints,
+PiPL branding and sealed payload/package identity PASS. Package SHA-256:
+e25903bb11c1b1726aca5af3d90dbc0babe92ca412258ac8e3b79d395384da8b.
+Artifacts: workspace work/grid-control-1eed79a. Fresh AE check still shows
+Untitled Project *; installed build is unchanged. Runtime verification NOT RUN.
 
 ### Installed test checkpoint — 1232ad2, FSTR Stretch
 
