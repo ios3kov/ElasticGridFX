@@ -101,7 +101,7 @@ class HostContract(unittest.TestCase):
 
     def test_branding_preserves_effect_match_name(self):
         build=(ROOT/'host-rust/build.rs').read_text()
-        self.assertIn('Property::Name("FSTR ElasticGrid")',build)
+        self.assertIn('Property::Name("FSTR Stretch")',build)
         self.assertIn('Property::Category("FSTR Effects")',build)
         self.assertIn('Property::AE_Effect_Match_Name("com.elasticgrid.fx.warp")',build)
 

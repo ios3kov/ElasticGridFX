@@ -6,14 +6,21 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
-User-facing branding: **FSTR ElasticGrid**, AE category **FSTR Effects**.
+User-facing branding: **FSTR Stretch**, AE category **FSTR Effects**.
+The user selected Stretch after considering alternatives; this supersedes
+FSTR ElasticGrid. Internal match name, install path and saved IDs are retained.
+Stretch rename verification: generated PiPL contains FSTR Stretch / FSTR Effects
+and unchanged com.elasticgrid.fx.warp; Rust 24/24, host contracts 9/9 and build
+identity tests 19/19 PASS. Scanner fstr-stretch-name-audit.json remains
+review_required (exit 1), existing workflow/test findings. No new package or
+installation; installed 099e492 remains historical and still has the 3D text bug.
 PiPL display name/category and About are updated in source. Match name
 `com.elasticgrid.fx.warp`, parameter IDs and serialized grid data are unchanged.
 Grid Positions uses NO_ECW_UI (not INVISIBLE): hide the redundant diagnostic
 row in Effect Controls while retaining its Timeline animation track. Build ID
 is kept in About; it is no longer drawn by the grid-control label fallback.
 Native menu/category and animation-track verification await a new candidate.
-Generated PiPL resource contains FSTR ElasticGrid, FSTR Effects and unchanged
+Historical branding check: generated PiPL resource contained FSTR ElasticGrid, FSTR Effects and unchanged
 com.elasticgrid.fx.warp (inspected after compilation). Rust 24/24 PASS without
 the removed unused Build ID constant warning. Source contracts now require
 NO_ECW_UI and reject hiding the Timeline track; they retain the About marker.

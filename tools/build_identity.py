@@ -130,7 +130,7 @@ def generate(root, out, target, profile):
     out.mkdir(parents=True, exist_ok=True)
     dump(out / 'BuildIdentity.json', meta)
     marker = 'ElasticGridBuildID=' + meta['build_id']
-    about = ('FSTR ElasticGrid v' + meta['version'] + ' / ' + target + '\r' + marker + '\rCommit: ' + meta['commit'] +
+    about = ('FSTR Stretch v' + meta['version'] + ' / ' + target + '\r' + marker + '\rCommit: ' + meta['commit'] +
              '\rSource: ' + meta['source_state'] + ' / ' + meta['source_sha256'][:16])
     if len(about.encode()) >= 256:
         raise ValueError('About message exceeds the AE ABI buffer')
