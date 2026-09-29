@@ -127,10 +127,13 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         code = ae_smoke_runner._run_jsx(fixture, 'run.jsx', identifier)
         record = phase_record(fixture, 'plane-smoke.json', meta['run_id'], 'CAPTURED')
         result['capture'] = record
+        # CAPTURED means the script intentionally left its exact saved fixture
+        # open for identity sampling; cleanup is mandatory even if the matrix is
+        # malformed or the transport returned an unexpected code.
+        captured = True
         if code != 0 or record.get('stage') != 'complete' or tuple(record.get('frames',())) != FRAMES:
             result['reason'] = 'Stage 9 AE fixture did not complete the exact frame matrix'
         else:
-            captured = True
             meta['actual_ae_execution'] = True
 
             identity_dir = run/'identity-private'
