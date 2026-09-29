@@ -121,8 +121,11 @@ target AE 25.6 exposes a non-null `activeCamera` even though the owned comp has 
 camera layer, contrary to the scripting-guide contract; it blocked after the 24
 depth frames plus two roundtrip frames, before identity/pixel aggregation. Fix
 b327964 proves the no-camera case by owned layer topology instead of
-`activeCamera`, and passes Final Validation, PR CI and macOS source gate. A fresh
-real target-AE rerun is required. Native viewer dragging and UI Undo/Redo remain
+`activeCamera`, and passes Final Validation, PR CI and macOS source gate. The next
+34-frame run exposed host saveFrameToPng darkening at 32 bpc, independently
+reproduced without effects/import. After switching the fixture to guarded Render
+Queue PNG capture, run EGFX-PLANE-531656cd2c5243818311ac9b1dcb152e passed all
+34 frames / 26 comparisons, exact loaded identity and CLEAN cleanup. Native viewer dragging and UI Undo/Redo remain
 separate real-host interaction gates. See current-status.md for evidence.
 Installation/tooling PASS is not stage completion.
 

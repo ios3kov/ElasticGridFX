@@ -26,10 +26,9 @@ attempt the normal host guard passed; no process was killed or guard bypassed.
 - Rollback receipt: `EGFX-update-371ef6e56f92407d8b04b16af52e2c10`.
 - Previous installed de0becf is retained in that operation's backup.
 - Candidate/evidence: `work/plane-candidate-de31498/` (local, not a public release).
-- AE was not launched for this installation request. Real target-AE Stage 9
-  acceptance remains **NOT_RUN** for this candidate. Source-validated tooling now
-  automates exact loaded identity, a 34-frame plane/3D/camera pixel matrix and
-  AEP save/reopen; native viewer dragging plus UI Undo/Redo remain separate gates.
+- AE was not launched during installation. Subsequent real target-AE automated
+  acceptance is now **PASS**: 34 frames, 26 numeric checks, loaded identity PASS,
+  cleanup CLEAN. Native viewer dragging plus UI Undo/Redo remain separate gates.
 
 Implemented in this candidate: Four Corners/Existing Grid mode, four native points,
 Fit Layer reset, shared render/overlay/inverse-drag geometry, evaluated wave guides,
@@ -44,11 +43,26 @@ static workflow/test audit findings remain review items, not a release PASS.
 Overall: Stages 1–7 completed for their historical scope; Stage 8 skipped by user;
 Stage 9 in progress; Stage 10 not started. Persistent deselected viewer grid is
 deferred by user. GPU dispatch remains disabled. No main merge or release.
-Next: run the exact de31498 Stage 9 target-AE acceptance runner in the controlled
-target host, then perform the remaining native viewer drag/Undo/Redo acceptance.
+Next: remaining native viewer drag/Undo/Redo acceptance, delegated to the user.
 Installation success and source-tooling PASS do not close Stage 9.
 
-### Stage 9 target-AE acceptance tooling — SOURCE-VALIDATED, RERUN REQUIRED
+### Stage 9 automated target-AE acceptance — PASS; native interaction remains open
+
+Run `EGFX-PLANE-531656cd2c5243818311ac9b1dcb152e` on AE 25.6.0 arm64:
+34 frames, all 26 numeric comparisons PASS, exact loaded de31498 identity PASS,
+same AE process, installed payload verification and cleanup CLEAN. No plugin
+rebuild/reinstallation. Release remains BLOCKED; Stage 9 is not fully complete.
+
+The earlier 34-frame run was blocked by `saveFrameToPng`: even a native white
+solid with no import/effects exported as ~0.1 at 32 bpc, versus 1.0 via Render
+Queue at the same depth. The fixture now uses an owned one-frame Render Queue,
+verifies PNG/straight RGBA/16-bit output template settings, preserves actual
+project depth, and verifies Full/Half output resolution. No pixel normalization
+or comparator threshold reduction. Full frames are 128x96; Half frames 64x48.
+PNG comparisons do not establish HDR/negative-float fidelity.
+See `stage9-depth-probe-2026-09-29.md` for diagnosis and evidence.
+
+### Earlier tooling and attempt history
 
 The Stage 9 acceptance path is now automated around the already installed immutable
 candidate de31498; no plugin/runtime source changed after that candidate. The runner

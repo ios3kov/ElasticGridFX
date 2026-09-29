@@ -59,10 +59,40 @@ function elasticGridPlaneSmoke(config) {
             check(app.project===owned,"Project ownership changed");
             var path=folder.fsName+"/"+name+".png";
             var file=new File(path);check(!file.exists,"Stale frame");
-            comp.saveFrameToPng(0,file);
+            // AE 25.6 saveFrameToPng maps native white to ~0.1 at 32 bpc.
+            // Render at the actual project depth; export straight 16-bit RGBA.
+            // Never compensate pixels, lower thresholds or change project depth.
+            check(owned.renderQueue.numItems===0,"Unexpected render queue items");
+            var queue=owned.renderQueue.items.add(comp);
+            try {
+                var output=queue.outputModule(1);
+                output.applyTemplate("_HIDDEN X-Factor 16");
+                output=queue.outputModule(1);
+                var settings=output.getSettings(GetSettingsFormat.STRING);
+                check(settings.Format==="PNG Sequence" && settings.Channels==="RGB + Alpha" &&
+                      settings.Depth==="Trillions of Colors+" && settings.Color==="Straight (Unmatted)" &&
+                      settings.Resize==="false" && settings.Crop==="false","Unsafe PNG output template");
+                var sequence=folder.fsName+"/"+name+"-00000.png";
+                check(!(new File(sequence)).exists,"Stale sequence frame");
+                output.file=new File(folder.fsName+"/"+name+"-[#####].png");
+                queue.setSettings({"Quality":"Best","Resolution":comp.resolutionFactor[0]===2?"Half":"Full",
+                                   "Color Depth":"Current Settings","Effects":"Current Settings"});
+                var renderSettings=queue.getSettings(GetSettingsFormat.STRING);
+                check(renderSettings.Resolution===(comp.resolutionFactor[0]===2?"Half":"Full") &&
+                      renderSettings["Color Depth"]==="Current Settings","Render settings not applied");
+                queue.timeSpanStart=0;queue.timeSpanDuration=comp.frameDuration;
+                check(app.project===owned && owned.renderQueue.numItems===1,"Render ownership changed");
+                owned.renderQueue.render();
+                check(queue.status===RQItemStatus.DONE,"Render queue did not complete");
+                var rendered=new File(sequence);
+                check(rendered.exists && rendered.length>0,"Missing queue frame "+name);
+                check(rendered.rename(name+".png"),"Cannot name queue frame");
+            } finally {
+                if(app.project===owned) queue.remove();
+            }
             // Refresh ExtendScript File metadata after AE publishes the PNG.
             file=new File(path);
-            // saveFrameToPng may return before the filesystem entry/length is
+            // The filesystem entry/length may not immediately be
             // visible to ExtendScript. Match the proven Stage 7 smoke behavior:
             // bounded wait only, never retry the render or kill/restart AE.
             for(var attempt=0;(!file.exists || file.length<=0) && attempt<50;++attempt) {
@@ -163,7 +193,7 @@ function elasticGridPlaneSmoke(config) {
             report.encoding="UTF-8";
             if(report.open("w")) {
                 var names=[];for(var j=0;j<frames.length;++j) names.push(q(frames[j]));
-                report.write('{"run_id":'+q(config.run_id)+',"status":'+q(status)+',"stage":'+q(stage)+
+                report.write('{"capture_method":"render-queue-straight-rgba16","run_id":'+q(config.run_id)+',"status":'+q(status)+',"stage":'+q(stage)+
                     ',"message":'+q(message)+',"frames":['+names.join(",")+']}');
                 report.close();
             }

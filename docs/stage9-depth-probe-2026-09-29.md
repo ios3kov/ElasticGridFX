@@ -36,3 +36,37 @@ PASS. Native guide/corner dragging, Undo and Redo remain separate acceptance.
 Local evidence is retained under outputs/plane-acceptance with the above run
 identifiers, including the acceptance ZIP and six diagnostic PNGs. User projects,
 preferences, installation and main were not changed.
+
+## Follow-up: native export differential and automated acceptance PASS
+
+Native-white probe 1762851d687842ed876ceff01725cdd0 creates only a solid,
+without imported footage or effects. saveFrameToPng writes white as 1.0 at 16 bpc
+and 0.099992372 at 32 bpc. Probe 4fe194452d644e0d873d875a61ef748e additionally
+renders the same 32-bpc white through Render Queue: RGB is 1.0. Both closed only
+their owned project, cleanup true. This localizes the observed scaling to the
+saveFrameToPng capture route, not ElasticGrid. An independent first-hand report
+describes the same symptom (not Adobe confirmation of internal cause):
+https://community.adobe.com/bug-reports-528/saveframetopng-results-in-dark-images-if-project-color-is-set-to-8-bit-depth-1216145
+
+The test fixture now uses Render Queue while preserving project bitsPerChannel.
+The host-provided _HIDDEN X-Factor 16 output template is accepted only after
+verifying PNG Sequence, RGB + Alpha, Trillions of Colors+, Straight (Unmatted),
+no resize/crop. Missing or altered template blocks the test. This is a bounded
+test-only dependency, not a production dependency; revisit if AE changes template
+availability or offers a reliable supported capture API. Each queue item belongs
+to the owned fixture; foreign queue items are rejected. Full/Half resolution is
+explicit and checked. Queue items are removed on render error; no retries or host
+restart. Comparator thresholds are unchanged.
+
+Run EGFX-PLANE-531656cd2c5243818311ac9b1dcb152e: functional PASS, identity PASS,
+pixel PASS, cleanup CLEAN. 34 frames and 26 comparisons; full 128x96 and half
+64x48 confirmed. Installed immutable candidate unchanged. This is automated
+Stage 9 evidence only; native drag/Undo/Redo and final release gates remain open.
+
+Regression: capture-function mocks cover Full/Half, project-depth preservation,
+wrong format/depth/alpha/color/resize/crop rejection, foreign queues and render
+failure cleanup. They run through test_plane_smoke_safety.js in existing CI gates.
+Local Python plane tests 12/12 PASS; real AE supplies rendering evidence above.
+Static scanner exits 1 (review_required): existing workflow pinning/checkout
+credential findings and an authentication heuristic in an unchanged test. None
+is in the changed fixture/capture tests; the scanner is not a release PASS.

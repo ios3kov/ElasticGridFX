@@ -62,3 +62,4 @@ assert.ok(source.includes('never retry the render or kill/restart AE'));
 assert.ok(!source.includes('app.quit('));
 assert.ok(!source.includes('system.callSystem'));
 console.log('PASS: Stage 9 plane JSX refuses foreign project mutation (mock only)');
+require('./test_plane_capture.js');
