@@ -90,12 +90,16 @@ class HostContract(unittest.TestCase):
         self.assertIn('extra.set_max_result_rect(canvas_rect);', pre)
         self.assertNotIn('max_rect.union(&input_max)', pre)
 
-    def test_grid_diagnostics_hidden_without_hiding_animation(self):
+    def test_grid_animation_control_visible_without_diagnostic_text(self):
         ui = (ROOT / 'host-rust/src/ui.rs').read_text()
         self.assertNotIn('EGFX-{}', ui)
         grid = SETUP.split('params.add_customized(Params::GridState,',1)[1].split('})?;',1)[0]
-        self.assertIn('ae::ParamUIFlags::NO_ECW_UI',grid)
+        self.assertIn('ae::ParamUIFlags::CONTROL',grid)
+        self.assertNotIn('ae::ParamUIFlags::NO_ECW_UI',grid)
         self.assertNotIn('ae::ParamUIFlags::INVISIBLE',grid)
+        control = ui.split('fn draw_effect_control(',1)[1].split('pub fn draw(',1)[0]
+        self.assertNotIn('draw_string(',control)
+        self.assertIn('HANDLED_EVENT',control)
         identity=(ROOT/'tools/build_identity.py').read_text()
         self.assertIn('ElasticGridBuildID=',identity)
 

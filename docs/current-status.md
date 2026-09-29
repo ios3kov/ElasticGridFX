@@ -6,6 +6,21 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
+### Grid Positions correction requested by user
+
+Hiding the entire Effect Controls row was a misunderstanding. Restore its
+CONTROL flag and native animation stopwatch; remove only the custom diagnostic
+text. Keep parameter ID, arbitrary data, interpolation and saved keys unchanged.
+This supersedes NO_ECW_UI statements below. Focused source regression requires
+visible CONTROL, rejects NO_ECW_UI/INVISIBLE and requires a blank custom draw.
+Host contracts 9/9 and Rust release tests 24/24 PASS, including arbitrary
+interpolation and wire roundtrip. Scanner grid-control-audit.json retains
+review findings, not security approval. Current AE screenshot confirms missing
+ECW row while Timeline Grid Positions and existing keys are still present.
+Native installation/visual verification of this correction: BLOCKED by open
+unsaved user project (Untitled Project *, image composition with animated grid).
+Do not close/discard it. Save user work before replacing/restarting AE.
+
 ### Installed test checkpoint — 1232ad2, FSTR Stretch
 
 Candidate `1232ad2dda62c1cdf2b2667d525c71b3c409d66c`, Build ID

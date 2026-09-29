@@ -378,7 +378,7 @@ fn draw_viewer(
 }
 
 fn draw_effect_control(
-    in_data: &ae::InData,
+    _in_data: &ae::InData,
     params: &ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
@@ -388,34 +388,8 @@ fn draw_effect_control(
         return Ok(());
     }
 
-    let grid = grid_snapshot(params)?;
-    let drawbot = event.context_handle().drawing_reference()?;
-    let supplier = drawbot.supplier()?;
-    let surface = drawbot.surface()?;
-    let frame = event.current_frame();
-    let font = supplier.new_default_font(supplier.default_font_size()?)?;
-    let brush = supplier.new_brush(&ae::drawbot::ColorRgba {
-        red: 0.85,
-        green: 0.85,
-        blue: 0.85,
-        alpha: 1.0,
-    })?;
-    let plane=ViewPlane::read(in_data,params,event)?;
-    let label = if plane.invalid() {"Invalid plane: original image".to_owned()}
-        else {format!("{} × {}", grid.columns, grid.rows)};
-    let origin = ae::drawbot::PointF32 {
-        x: frame.left as f32 + 6.0,
-        y: frame.top as f32 + 9.0,
-    };
-    surface.draw_string(
-        &brush,
-        &font,
-        &label,
-        &origin,
-        ae::drawbot::TextAlignment::Left,
-        ae::drawbot::TextTruncation::End,
-        frame.width() as f32 - 10.0,
-    )?;
+    // AE owns the parameter name, stopwatch and keyframes. Leave its custom
+    // value area blank instead of hiding the entire animation control.
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
 }

@@ -958,9 +958,9 @@ impl AdobePluginGlobal for Plugin {
         grid_state_def.set_default(GridArb::default())?;
         grid_state_def.set_refcon(GRID_REFCON as *mut c_void);
         params.add_customized(Params::GridState, "Grid Positions", grid_state_def, |param| {
-            // Keep the animated arbitrary parameter and saved ID. Hide only
-            // its diagnostic ECW row, not the Timeline keyframe track.
-            param.set_ui_flags(ae::ParamUIFlags::NO_ECW_UI);
+            // Keep the native animation row/stopwatch visible. Only the custom
+            // diagnostic text is omitted by draw_effect_control.
+            param.set_ui_flags(ae::ParamUIFlags::CONTROL);
             param.set_ui_width(300);
             param.set_ui_height(32);
             -1
