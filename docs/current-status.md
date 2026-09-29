@@ -12,6 +12,22 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 8 preparation — measurements BLOCKED
 
+Instrumented aerender preflight now PASS for identity and frame count:
+`identity-probe-f3945ed06df441ab82369bb224ad43e6`, target aerendercore PID 58659,
+live UUID A7C24F56-9776-3971-9CB7-972DD1F7AF8F with pinned installed fd69988
+payload verified before/after, 60 output files, digest
+`d6c1a18e3b99af44f9c4a4cf14cef610dde66f29fc4df9086088f081519ba206`.
+Sampled peak RSS 2368389120 bytes; instrumented elapsed 36.4678 seconds is NOT
+a speed baseline. The macOS renderer is detached (PPID 1); association uses its
+exact executable, `-aerenderpid` token and unique output path, not its name alone.
+The stdout marker is absent, and `/usr/bin/time` on the launcher measures the
+wrong memory scope. `tools/aerender_identity_probe.py` records separate diagnostic
+evidence; the existing benchmark continues to fail closed rather than accepting
+an unproven Build ID. These are internal diagnostic runs, not release artifacts.
+Next: integrate render-process observation without sampler-contaminated timing,
+validate output repeatability, then collect at least five controlled samples.
+RAM Preview and optimization remain NOT RUN.
+
 Follow-up: the clean target project became available. The fixture failed at
 output_template because the exact `PNG Sequence` template is absent. A bounded
 target probe found `png`, whose observed format is PNG Sequence, with Resize

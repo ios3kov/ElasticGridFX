@@ -5,6 +5,12 @@ installed for testing: 6d3b846 / EGFX-603e9d3e4025d271e0488201).
 
 ## Required product behavior (not implemented/verified yet)
 
+Reconfirmed 2026-09-29: the built-in four-corner control places the deformation
+plane itself. In 3D-layer mode the plane follows layer transforms and camera;
+moving a guide along a wall deforms along that wall, not screen-horizontal.
+Overlay, handles, pointer inversion and pixel sampling share plane coordinates.
+This remains Stage 9 work after the Stage 8 baseline, not a completed feature.
+
 The user confirmed that “управляющий слой” means an Adjustment Layer.
 1. Fix the reported black output when Adobe Corner Pin follows ElasticGrid FX
    on the same adjustment layer. The user reports Fast Blur works in comparison.
