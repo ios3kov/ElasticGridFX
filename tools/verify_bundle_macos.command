@@ -40,7 +40,8 @@ codesign --verify --deep --strict --verbose=2 "$BUNDLE"
 codesign -dv --verbose=2 "$BUNDLE" 2>&1 | grep -E 'Identifier=|TeamIdentifier=|Signature=' || true
 
 printf '[bundle] PiPL sanity\n'
-strings "$RSRC" | grep -F 'ElasticGrid FX' >/dev/null || fail "ElasticGrid FX name not found in PiPL resource"
+strings "$RSRC" | grep -F 'FSTR Stretch' >/dev/null || fail "FSTR Stretch name not found in PiPL resource"
+strings "$RSRC" | grep -F 'FSTR Effects' >/dev/null || fail "FSTR Effects category not found in PiPL resource"
 strings "$RSRC" | grep -F 'com.elasticgrid.fx.warp' >/dev/null || fail "match name not found in PiPL resource"
 
 printf '[bundle] hashes\n'

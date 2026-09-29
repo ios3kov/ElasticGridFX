@@ -27,6 +27,8 @@ EXPECTED_COMMIT = 'de314981005606741bc75c517d8bb33798b46a1d'
 EXPECTED_BUILD = 'EGFX-0fa68430a170b3612e8d00f7'
 EXPECTED_PACKAGE_SHA = '6a43f734c7dc5fd298b356b12db75ab5986c171a2ae241ef9c85ffc0ac22ec55'
 PINNED_CANDIDATES = {
+    ('1232ad2dda62c1cdf2b2667d525c71b3c409d66c', 'EGFX-5d92143dc7e660b4f19ba4a9'):
+        'cabece0f9f9d5d4ec919d06af16d6be48b48fc63f5fdb0b102c3297e64c5752c',
     ('099e49208ebe70a81707dbe905f291e139b9eeb0', 'EGFX-97a79761c3f9f35751e06853'):
         '4c48ca09c83d764e36c2640c8aff971c0de616876fde75ee0ab0a9127773ef10',
     (EXPECTED_COMMIT, EXPECTED_BUILD): EXPECTED_PACKAGE_SHA,
@@ -130,7 +132,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         identity_status='NOT RUN', pixel_status='NOT RUN', cleanup_status='NOT RUN',
         functional_status='BLOCKED', release='BLOCKED',
         scope=('Stage 9 baseline real-AE plane pixels, same-build AEP roundtrip, 3D renders; '
-               'zero-wave projective coordinate ramp; native overlay alignment and legacy AEP migration remain separate'),
+               'perspective-region neutral identity and exterior preservation; native overlay alignment and legacy AEP migration remain separate'),
     )
 
     captured = False

@@ -6,20 +6,48 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
+### Installed test checkpoint — 1232ad2, FSTR Stretch
+
+Candidate `1232ad2dda62c1cdf2b2667d525c71b3c409d66c`, Build ID
+`EGFX-5d92143dc7e660b4f19ba4a9`, package SHA-256
+`cabece0f9f9d5d4ec919d06af16d6be48b48fc63f5fdb0b102c3297e64c5752c`.
+Clean isolated build, bundle verification and sealed package identity PASS.
+Rollback-safe installation receipt `EGFX-update-a6c9c4f36bc047c2a96a6886abb402b3`
+is INSTALLED_FOR_TEST; previous 099e492 bundle is retained as previous.plugin.
+The owned text fixture was saved before normal AE shutdown; no user project was discarded.
+
+Real AE 25.6.0 acceptance `EGFX-PLANE-2bec9679489749318662e8cf24ed4f8d`:
+exact loaded identity PASS in PID 34893, 40 frames / 32 checks PASS,
+contract perspective-region-v1, owned fixture cleanup CLEAN.
+At 8/16/32 bpc, neutral skew identity max error is 0; tested exterior samples
+remain exact while the interior changes under deformation. Same-build AEP
+roundtrip and raster-layer 3D render checks PASS. Native AE menu inspection
+confirmed Effect > FSTR Effects > FSTR Stretch.
+Report: workspace outputs/stretch-region-acceptance/EGFX-PLANE-2bec9679489749318662e8cf24ed4f8d.zip.
+The report's old scope prose still mentions a projective ramp; its comparator
+contract/results are regional. Future runner scope text is corrected; original
+evidence is preserved unchanged.
+
+This is NOT text-layer 3D overlay acceptance. That regression remains unresolved;
+Stage 9 is OPEN and release BLOCKED. Timeline animation visibility / hidden ECW
+row have source-contract coverage, not fresh native visual verification.
+Tooling plane tests: 18/18 PASS. Static scanner remains review_required, not
+security PASS. Historical installed checkpoints below are superseded by this one.
+
 User-facing branding: **FSTR Stretch**, AE category **FSTR Effects**.
 The user selected Stretch after considering alternatives; this supersedes
 FSTR ElasticGrid. Internal match name, install path and saved IDs are retained.
 Stretch rename verification: generated PiPL contains FSTR Stretch / FSTR Effects
 and unchanged com.elasticgrid.fx.warp; Rust 24/24, host contracts 9/9 and build
 identity tests 19/19 PASS. Scanner fstr-stretch-name-audit.json remains
-review_required (exit 1), existing workflow/test findings. No new package or
-installation; installed 099e492 remains historical and still has the 3D text bug.
+review_required (exit 1), existing workflow/test findings. New package and
+installation evidence is recorded above; 099e492 is now a rollback checkpoint.
 PiPL display name/category and About are updated in source. Match name
 `com.elasticgrid.fx.warp`, parameter IDs and serialized grid data are unchanged.
 Grid Positions uses NO_ECW_UI (not INVISIBLE): hide the redundant diagnostic
 row in Effect Controls while retaining its Timeline animation track. Build ID
 is kept in About; it is no longer drawn by the grid-control label fallback.
-Native menu/category and animation-track verification await a new candidate.
+Native menu/category verification passed; animation-track visual verification remains open.
 Historical branding check: generated PiPL resource contained FSTR ElasticGrid, FSTR Effects and unchanged
 com.elasticgrid.fx.warp (inspected after compilation). Rust 24/24 PASS without
 the removed unused Build ID constant warning. Source contracts now require
@@ -46,8 +74,8 @@ RGBA. Old native Corner Pin rendering remains diagnostic only, not a product
 reference. Synthetic positive and negative controls pass (10 tests). Applying
 the new comparator to retained 099e492 frames yields FAIL for neutral identity
 and regional locality at all three depths, as expected; historical reports were
-not overwritten. New native candidate verification remains required.
-New package/install/native verification: NOT RUN. 3D text host integration is
+not overwritten. New native regional verification passed as recorded above.
+New package/install/native regional verification: PASS. 3D text host integration is
 still incomplete; no claim that this change resolves its overlay displacement.
 
 Local verification: CMake/CTest 18/18 PASS; Rust 24/24 PASS. New real bridge
