@@ -145,6 +145,7 @@ function elasticGridSmokeDisarm(config) {
 // Called by the runner with a fresh configuration; opening this file alone does nothing.
 function elasticGridSmoke(config) {
     var owned = null, comp = null, chainComp = null, footage = null, initialBpc = null;
+    var solidSource = null, solidFolder = null, initialSpace = null, initialLinearize = null;
     var resultFile = null, suppressing = false;
     var result = {run_id: config.run_id, status: "FAIL", stage: "guard", ae_version: "", loaded_build_id: null,
                   guard:"NOT_CHECKED",project_revision:"NOT_CHECKED"};
@@ -196,6 +197,10 @@ function elasticGridSmoke(config) {
         app.beginSuppressDialogs(); suppressing = true;
         initialBpc = app.project.bitsPerChannel;
         owned = app.project;
+        initialSpace = owned.workingSpace;
+        initialLinearize = owned.linearizeWorkingSpace;
+        owned.workingSpace = "";
+        owned.linearizeWorkingSpace = false;
         owned.bitsPerChannel = 32;
         if (owned.bitsPerChannel !== 32) throw new Error("Project depth was not applied");
         result.stage = "fixture";
@@ -233,6 +238,8 @@ function elasticGridSmoke(config) {
         chainComp.resolutionFactor = [1, 1];
         chainComp.layers.add(footage);
         var adjustment = chainComp.layers.addSolid([0,0,0], "__EGFX_ADJUSTMENT__", 319, 241, 1.0, 2.0);
+        solidSource = adjustment.source;
+        solidFolder = solidSource.parentFolder;
         adjustment.adjustmentLayer = true;
         var chainFx = adjustment.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         if (chainFx === null || chainFx.matchName !== "com.elasticgrid.fx.warp") throw new Error("Chain effect unavailable");
@@ -267,9 +274,13 @@ function elasticGridSmoke(config) {
                 try {
                     // Delete only objects this script created; never close user projects.
                     if (chainComp !== null) chainComp.remove();
+                    if (solidSource !== null) solidSource.remove();
+                    if (solidFolder !== null && solidFolder !== owned.rootFolder && solidFolder.numItems === 0) solidFolder.remove();
                     if (comp !== null) comp.remove();
                     if (footage !== null) footage.remove();
                     owned.bitsPerChannel = initialBpc;
+                    owned.workingSpace = initialSpace;
+                    owned.linearizeWorkingSpace = initialLinearize;
                 } catch (cleanupError) { result.status = "FAIL"; result.stage = "cleanup"; }
             }
         }

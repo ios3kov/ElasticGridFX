@@ -27,7 +27,8 @@ function run(options = {}) {
     }};
     const footage = {remove() {calls.removed++; if (options.cleanupError) throw Error('cleanup');}};
     const layer = {source:footage, property() {return parade;}};
-    const adjustment = {adjustmentLayer:false, property(){return parade;}};
+    const solidFolder={numItems:0,remove(){calls.removed++;}};
+    const adjustment = {source:{parentFolder:solidFolder,remove(){calls.removed++;}},adjustmentLayer:false, property(){return parade;}};
     const comp = {resolutionFactor:[1,1], layers:{add() {return layer;},addSolid() {return adjustment;}},
         remove() {calls.removed++; if (options.cleanupError) throw Error('cleanup');},
         saveFrameToPng(time,file) {
@@ -104,7 +105,7 @@ for (const options of [
     assert.equal(calls.frames[2].speed,0);
     assert.equal(calls.frames[4].speed,0.5);
     assert.equal(calls.frames[6].amplitude,0);
-    assert.equal(calls.removed,3); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
+    assert.equal(calls.removed,5); assert.equal(calls.closed,0); assert.equal(calls.dialogs,0);
 }
 {
     const {app,calls,capture}=run({unknownDirty:true,revision:1});
