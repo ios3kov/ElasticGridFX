@@ -23,8 +23,20 @@ Coordinate translation/scale normalization keeps tolerance independent of pixels
 Tests cover identity, analytic trapezoid center, corner correspondence, mirrored
 winding, large translation, dense roundtrips and horizon/nonfinite rejection.
 
-P9-2 (next): compose local inverse grid mapping with this geometry before a
-single Final Bicubic sample; define outside/singular policy, sparse canvas,
+P9-2a implemented in standalone core: PlaneWarp composes the existing inverse
+grid calculation with H^-1 and H and returns the source coordinate before any
+image sampling. It owns validated evaluated guide vectors (strictly increasing,
+finite, endpoint-anchored), with no mutable per-frame shared state. Exact uniform
+grids return original destination coordinates without roundtrip drift. Outside
+points and invalid projections are distinct results without usable source values;
+the caller must explicitly choose a visual policy rather than silently sample (0,0).
+Tests use an analytic slanted projective plane: moving a column changes both
+screen coordinates, and local guide .75 samples the old .5 guide. Dense identity,
+existing easing equivalence, snapshot ownership, invalid grids and horizon checks
+are included. This does not yet sample pixels or integrate AE.
+
+P9-2b (next): connect this coordinate mapping to a single Final Bicubic sample;
+define outside/singular policy, sparse canvas,
 PAR/downsampling and bit-depth tests. Do not simply post-warp the output.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host

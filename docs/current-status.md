@@ -12,6 +12,15 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 9 initial geometry foundation
 
+Follow-up: standalone PlaneWarp now composes plane projection with the existing
+inverse grid/easing calculation. Analytic test proves column motion follows a
+slanted plane rather than screen-horizontal motion. Exact identity is retained;
+invalid projection and outside-plane states are explicit, not fabricated source
+pixels. Owned immutable evaluated guides reject malformed/nonfinite input.
+All 13 Release CTest targets PASS on 2026-09-29, including new plane-warp tests.
+Pixel sampling, sparse/PAR/downsample integration, AE controls and camera binding
+remain NOT RUN/not implemented for this path; no installed plugin change.
+
 The user requested skipping further performance acceleration work on 2026-09-29.
 Historical Stage 8 results below remain valid only within their stated scope.
 Added standalone PlaneTransform: normalized four-corner homography and inverse,
