@@ -40,6 +40,19 @@ int main() {
         assert(same.source->x==q->x && same.source->y==q->y);
     }
     auto unit=PlaneTransform::fromCorners({{{0,0},{1,0},{1,1},{0,1}}});assert(unit);
+    // Continuously rasterized input is already projected by AE. Sampling must
+    // map through that source projection, not a rectangular source extent.
+    auto sourcePlane=PlaneTransform::fromCorners({{{320,200},{600,220},{560,410},{300,390}}});assert(sourcePlane);
+    auto between=PlaneWarp::prepareBetween(*sourcePlane,*plane,{0,.75f,1},{0,.5f,1});assert(between);
+    assert(between->projectsSource());
+    near(*between->sourceFor(*destination).source,*sourcePlane->toSurface({.5,.5}));
+    assert(between->sourceFor(*plane->toSurface({1.1,.5})).status==PlaneMapStatus::OutsidePlane);
+    auto betweenIdentity=PlaneWarp::prepareBetween(*sourcePlane,*plane,{0,.5f,1},{0,.5f,1});assert(betweenIdentity);
+    for(int i=0;i<=20;++i) for(int j=0;j<=20;++j) {
+        auto local=PlanePoint{i/20.0,j/20.0};
+        near(*betweenIdentity->sourceFor(*plane->toSurface(local)).source,*sourcePlane->toSurface(local));
+    }
+    assert(!PlaneWarp::prepareBetween(*sourcePlane,*plane,{0,0,1},{0,1}));
     for(float easing:{0.f,.5f,1.f}) {
         auto flat=PlaneWarp::prepare(*unit,{0,.75f,1},{0,.25f,1},easing);assert(flat);
         for(int i=0;i<=20;++i) for(int j=0;j<=20;++j) {

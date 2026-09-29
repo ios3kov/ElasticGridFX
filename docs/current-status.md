@@ -29,6 +29,29 @@ position would not establish rotated/camera-aligned deformation. Next work must
 reconcile render-space and UI-space contracts, not only move the drawn overlay.
 No replacement artifact has been built or installed for this regression.
 
+### Direct native text decision and core work — 2026-09-30
+
+User explicitly selected direct native 3D text support, not precomposition.
+Core `PlaneWarp::prepareBetween(source, destination, ...)` now composes
+`Hsource(gridInverse(HdestinationInverse(pixel)))` in one sampling pass.
+It handles already projected input independently from the destination quad;
+legacy rectangular-source and regional paths remain unchanged. This is core
+groundwork ONLY: no AE host caller, new package or installed fix yet.
+
+Evidence: new mapping test failed to compile before the API existed; after
+implementation CMake build and CTest 18/18 PASS, including projective source
+mapping, nonuniform guides, transparent destination exterior and float sampling.
+`git diff --check` PASS. Scanner `work/text-plane-dual-projection-audit.json`
+returns review_required (exit 1): existing workflow pinning/credential findings
+and test-auth heuristic; not a security certification.
+
+Remaining required work: obtain an evaluated source/destination projection
+snapshot through supported AE calls, establish render-thread safety and camera/
+layer cache dependencies, bridge it to the core and use the same geometry for
+overlay/inverse hit testing. Do not reuse stale UI matrices during render or
+silently move only the overlay. Then build an identified candidate and verify
+the native text reproduction, rotation, camera, dragging and pixel regression.
+
 Historical acceptance: user replied “работает” to the combined remaining manual checks on 2026-09-30.
 Drag/Undo/Redo and old animated-project acceptance are USER-REPORTED PASS, not
 automated evidence. Installed candidate remains 099e492. The latest gate ledger is

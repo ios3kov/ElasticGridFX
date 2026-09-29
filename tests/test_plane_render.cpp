@@ -26,6 +26,15 @@ int main() {
     assert(std::abs(output[4*stride+5*4+3]-.25f)<1e-6);
     assert(output[0]==input[0]);
     assert(std::abs(output[4*stride+4*4]+2.f/3)<2e-6); // fractional, negative float sample
+    // Already transformed text input: destination guide (5,4) samples the
+    // independent source plane at its midpoint (3,3), not destination (4,4).
+    auto textSource=PlaneTransform::fromCorners({{{1,1},{5,1},{5,5},{1,5}}});assert(textSource);
+    auto textWarp=PlaneWarp::prepareBetween(*textSource,*plane,{0,.75f,1},{0,.5f,1});assert(textWarp);
+    renderPlaneRGBAf(src,dst,&*textWarp);
+    assert(std::abs(output[4*stride+5*4]+1)<1e-6);
+    assert(std::abs(output[4*stride+5*4+1]-5)<1e-6);
+    assert(std::abs(output[4*stride+5*4+3]-.25f)<1e-6);
+    assert(output[0]==0 && output[3]==0); // transparent outside destination
     // Compare the new nonseparable sampler to existing Final on a flat full plane.
     auto full=PlaneTransform::fromCorners({{{0,0},{8,0},{8,8},{0,8}}});assert(full);
     auto fullwarp=PlaneWarp::prepare(*full,{0,.75f,1},{0,.25f,1});assert(fullwarp);
