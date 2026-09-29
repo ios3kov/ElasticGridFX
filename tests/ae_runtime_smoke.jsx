@@ -167,6 +167,14 @@ function elasticGridSmoke(config) {
         targetComp.saveFrameToPng(time, file);
         // Refresh ExtendScript's File metadata after the host writes the PNG.
         file = new File(config.folder + "/" + name + ".png");
+        // AE may finish publishing the file shortly after the host call returns.
+        // Bound the wait; pixel decoding remains the independent external gate.
+        for (var attempt = 0; (!file.exists || file.length <= 0) && attempt < 50; attempt++) {
+            if (typeof $ === "undefined" || typeof $.sleep !== "function") break;
+            $.sleep(100);
+            own();
+            file = new File(config.folder + "/" + name + ".png");
+        }
         if (!file.exists || file.length <= 0) throw new Error("Frame missing");
     }
     app.exitCode = 90;
