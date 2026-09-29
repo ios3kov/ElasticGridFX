@@ -115,7 +115,10 @@ function elasticGridPlaneSmoke(config) {
         stage="three_d";
         layer.threeDLayer=true;
         var transform=layer.property("ADBE Transform Group");check(transform!==null,"Missing 3D transform");
-        check(comp.activeCamera===null,"Unexpected camera before camera-layer creation");
+        // The test owns this composition. Prove there is no explicit camera
+        // layer by topology, not by CompItem.activeCamera: AE 25.6 on the target
+        // host exposed a non-null camera-like value here despite no camera layer.
+        check(comp.numLayers===1 && comp.layer(1)===layer,"Unexpected pre-camera layers");
         capture("3d-no-camera");
 
         var camera=comp.layers.addCamera("__EGFX_CAMERA_A_"+config.run_id,[64,48]);
