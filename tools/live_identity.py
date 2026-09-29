@@ -299,11 +299,27 @@ def verify_disk(bundle: Path, manifest: dict) -> dict:
 
 
 def installed_roots(app: Path | None, additional: list[Path]) -> list[Path]:
+    # Adobe-documented macOS roots: Common MediaCore and the app-specific
+    # sibling Plug-ins directory. Do not invent package-internal scan roots.
     roots = [Path('/Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore'),
              Path.home()/'Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore']
     if app is not None:
-        roots += [app/'Contents/Plug-ins', app/'Plug-ins', app.parent/'Plug-ins']
+        roots.append(app.parent/'Plug-ins')
     return list(dict.fromkeys(roots+additional))
+
+
+def scan_root(root: Path) -> tuple[Path, dict | None]:
+    """Resolve only the explicitly documented root itself; inner symlinks stay refused."""
+    root = root.absolute()
+    if root.is_symlink():
+        try:
+            target = root.resolve(strict=True)
+        except (OSError, RuntimeError) as error:
+            raise ValueError('unresolvable documented plugin root') from error
+        if not target.is_dir():
+            raise ValueError('documented plugin root target is not a directory')
+        return target, {'root': str(root), 'resolved': str(target)}
+    return root, None
 
 
 def running_ae() -> list[dict]:
@@ -369,11 +385,10 @@ def diagnose(folder: Path, manifest: dict, additional: list[Path]) -> dict:
         found: set[Path] = set()
         for root in roots:
             try:
-                alias = redundant_symlink_root(root, roots)
+                actual_root, alias = scan_root(root)
                 if alias is not None:
-                    result['scan_aliases'].append({'root': str(root), 'same_as': str(alias)})
-                    continue
-                found.update(discover([root]))
+                    result['scan_aliases'].append(alias)
+                found.update(discover([actual_root]))
             except (OSError, ValueError) as error:
                 result['scan_errors'].append({'root': str(root), 'kind': type(error).__name__})
         for candidate in sorted(found):
