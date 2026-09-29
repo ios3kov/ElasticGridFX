@@ -63,3 +63,4 @@ assert.ok(!source.includes('app.quit('));
 assert.ok(!source.includes('system.callSystem'));
 console.log('PASS: Stage 9 plane JSX refuses foreign project mutation (mock only)');
 require('./test_plane_capture.js');
+require('./test_plane_probe_safety.js');

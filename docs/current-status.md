@@ -22,8 +22,43 @@ are recorded in `stage9-user-corrections.md`. New core implementation is in
 development; installed candidate is now 099e492 (test-only, baseline pixel gate PASS). UI source includes
 square-pixel 3D camera projection/inverse hit-testing, Layer Plane naming,
 mode-dependent corner disabling and reordered controls with Render Quality last.
-Live alignment, native target hiding, non-square projection and legacy AEP loading
-remain unverified. Stage 9 remains OPEN.
+Visual alignment and mode-dependent targets are now verified in the owned square-pixel
+scene; historical static AEP values survive loading/save/reopen. Drag/Undo, old
+keyframed AEP migration and non-square projection remain unverified. Stage 9 remains OPEN.
+
+### Consolidated target-AE verification — 2026-09-29
+
+Installed 099e492 remains unchanged. Controlled-color run
+`EGFX-PLANE-9a2ea8679da941f4855d9ea42bd1be20`: exact loaded identity PASS,
+40 frames / 29 plugin checks PASS, cleanup CLEAN. The inherited project was
+`sRGB IEC61966-2.1`, linearize=true. Setting ONLY the owned fixture project to
+None / linearize=false reduced 8-bpc coordinate error from ~0.024958 to
+0.001974; 16/32 bpc ~0.0000242. Thresholds unchanged. This establishes color-context
+dependence, not full linear/OCIO/HDR certification. Historical failures retained.
+
+Owned visual scene `outputs/plane-ui/EGFX-plane-833892011d9e4898844914c13837b054`:
+AE screenshots inspected in this chat show grid/handles aligned to a 640x480 solid
+at 75% scale / Y rotation 35 degrees, first with default camera, then Z-rotated
+parent (15 degrees) and shifted explicit camera (+80,-35). Layer Plane has disabled
+corner/reset fields and no corner targets; Four Corners enables fields/targets.
+Render Quality is last; displayed Build ID matches installed candidate.
+Visual verification only, not numeric alignment tolerance or drag verification.
+Mouse drag automation failed with `noWindowsAvailable`; no success inferred.
+An initial follow-up script refused a canonicalized path different from the exact
+owned path (Foreign project). Reusing the original exact path succeeded; ownership
+guard not weakened. Cleanup report CLEAN. No user project modified.
+
+Historical migration: copied de31498-owned AEP from run
+`EGFX-PLANE-531656cd2c5243818311ac9b1dcb152e` to fresh output directory;
+`outputs/plane-migration/d46bf522cf0b4423938d757bf3e2faf2/migration.json` PASS,
+cleanup_clean=true. Plane mode, four corner values, wave amplitude, grid dimensions
+and quality preserved through load/save/reopen with 099e492. Original unchanged;
+source AEP hash and installed identity recorded alongside report. This historical
+fixture has no corner keyframes, so old animation migration remains NOT RUN.
+
+Remaining Stage 9 acceptance: native guide drag/Undo/Redo and legacy keyframed AEP.
+Stage 10 final compatibility gate is not closed. No additional features or
+performance work added. New probe safety mocks reject foreign-project mutation.
 
 ### Current installed checkpoint — 099e492; baseline pixel gate PASS
 

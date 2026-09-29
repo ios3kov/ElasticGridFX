@@ -2,7 +2,7 @@
 // live identity is independently checked. Never closes or edits user work.
 function elasticGridPlaneSmoke(config) {
     var owned=null, suppressing=false, report=null;
-    var status="FAIL", stage="guard", message="", frames=[];
+    var status="FAIL", stage="guard", message="", frames=[], colorBefore=null, colorApplied=null;
     function q(s) {return '"'+String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n")+'"';}
     function check(v,s) {if(!v) throw new Error(s);}
     function findComp(project,name) {
@@ -40,6 +40,13 @@ function elasticGridPlaneSmoke(config) {
         check(dirty===false || (typeof dirty==="undefined" && app.project.revision===1),"Unsafe project state");
         owned=app.project;
         app.beginSuppressDialogs();suppressing=true;
+        stage="color_context";
+        colorBefore={space:String(owned.workingSpace),linearize:owned.linearizeWorkingSpace===true};
+        // Only the owned empty fixture project; never application preferences.
+        owned.workingSpace="";owned.linearizeWorkingSpace=false;
+        check((owned.workingSpace==="" || owned.workingSpace==="None") && owned.linearizeWorkingSpace===false,
+              "Fixture color state was not applied");
+        colorApplied={space:String(owned.workingSpace),linearize:owned.linearizeWorkingSpace===true};
         stage="fixture";
         var input=new File(folder.fsName+"/pattern.png");check(input.exists,"Missing fixture");
         var footage=owned.importFile(new ImportOptions(input));
@@ -203,7 +210,9 @@ function elasticGridPlaneSmoke(config) {
             report.encoding="UTF-8";
             if(report.open("w")) {
                 var names=[];for(var j=0;j<frames.length;++j) names.push(q(frames[j]));
+                function colorJSON(value) {return value===null?"null":'{"working_space":'+q(value.space)+',"linearize":'+String(value.linearize)+'}';}
                 report.write('{"capture_method":"render-queue-straight-rgba16","run_id":'+q(config.run_id)+',"status":'+q(status)+',"stage":'+q(stage)+
+                    ',"color_before":'+colorJSON(colorBefore)+',"color_applied":'+colorJSON(colorApplied)+
                     ',"message":'+q(message)+',"frames":['+names.join(",")+']}');
                 report.close();
             }
