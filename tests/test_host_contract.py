@@ -6,10 +6,12 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = (ROOT / 'host-rust/src/lib.rs').read_text()
 SETUP = SOURCE.split('    fn params_setup(', 1)[1].split('    fn handle_command(', 1)[0]
-EXPECTED = ['Columns', 'Rows', 'GridState', 'TensionRadius', 'Falloff',
-            'ElasticityStrength', 'MinSpacing', 'StretchEasing', 'EasingDistance',
-            'WaveEnabled', 'WaveAmplitude', 'WaveFrequency', 'WavePhase', 'WaveSpeed',
-            'WaveAxis', 'EdgeMode', 'Quality']
+LEGACY = ['Columns', 'Rows', 'GridState', 'TensionRadius', 'Falloff',
+          'ElasticityStrength', 'MinSpacing', 'StretchEasing', 'EasingDistance',
+          'WaveEnabled', 'WaveAmplitude', 'WaveFrequency', 'WavePhase', 'WaveSpeed',
+          'WaveAxis', 'EdgeMode', 'Quality']
+STAGE9_APPEND = ['PlaneMode', 'PlaneTopLeft', 'PlaneTopRight',
+                 'PlaneBottomRight', 'PlaneBottomLeft', 'ResetPlane']
 
 
 def block(name):
@@ -19,10 +21,15 @@ def block(name):
 
 
 class HostContract(unittest.TestCase):
-    def test_parameter_ids_order_and_count_stay_frozen(self):
+    def test_parameter_ids_keep_legacy_prefix_and_approved_append(self):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
-        self.assertEqual(re.findall(r'\b(\w+)\s*,', variants), EXPECTED)
-        self.assertEqual(re.findall(r'params\.add\w*\(Params::(\w+),', SETUP), EXPECTED)
+        self.assertEqual(re.findall(r'\b(\w+)\s*,', variants), LEGACY + STAGE9_APPEND)
+
+        # Existing saved IDs must remain the exact prefix. Stage 9 may only append.
+        direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
+        self.assertEqual(direct, LEGACY + ['PlaneMode', 'ResetPlane'])
+        for name in STAGE9_APPEND[1:-1]:
+            self.assertIn(f'(Params::{name},', SETUP)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
         self.assertIn('["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]', block('Falloff'))
