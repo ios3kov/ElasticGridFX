@@ -9,7 +9,7 @@ function run(options={}){
  const comp={resolutionFactor:[1,1],layers:{add(){return layer;}}};
  const om={templates:options.noPng?[]:['PNG Sequence'],applyTemplate(){},file:null,getSettings(){return {Format:'PNG Sequence'};}};
  const rq={templates:options.noBest?[]:['Best Settings'],applyTemplate(){},timeSpanStart:0,timeSpanDuration:0,skipFrames:0,render:false,outputModule(){return om;}};
- const project=options.project||{file:null,numItems:0,dirty:false,bitsPerChannel:16,
+ const project=Object.prototype.hasOwnProperty.call(options,'project') ? options.project : {file:null,numItems:0,dirty:false,bitsPerChannel:16,
    importFile(){calls.import++;return{};},items:{addComp(){calls.comp++;return comp;}},
    renderQueue:{items:{add(){return rq;}}},
    save(file){calls.save++;this.file=file;this.dirty=false;files[file.fsName]='AEP';},
