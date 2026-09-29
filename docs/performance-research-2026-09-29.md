@@ -158,3 +158,25 @@ Stage 8 is complete only when:
 - documentation records Before -> Change -> After.
 
 Research alone does not advance Stage 8 to PASS.
+
+## Prepared benchmark tooling
+
+Source-only benchmark tooling is now available for the future Stage 8 target run:
+`tools/aerender_benchmark.py` and `tools/perf_compare.py`.
+
+The harness:
+- refuses to run without a pinned fixture manifest and project hash;
+- requires the fixture project to live inside an explicit controlled workspace;
+- never edits the AEP, preferences or caches;
+- creates a fresh unique output directory per aerender run and never deletes old
+  output;
+- requires Final Bicubic and 8/16/32-bpc fixture metadata;
+- observes the actual runtime `ElasticGridBuildID=...` marker from aerender;
+- uses macOS `/usr/bin/time -l` plus independent wall clock;
+- records peak RSS, user/sys time, output hashes and retained local raw logs;
+- requires at least five measured samples after optional warmups;
+- comparison refuses different fixture/MFR settings and never upgrades timing
+  evidence into a quality claim.
+
+CI exercises parser/safety/comparison contracts only. Actual aerender measurements
+remain NOT RUN until Stage 7 passes and a controlled target fixture is generated.
