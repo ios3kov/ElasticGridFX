@@ -1,3 +1,90 @@
+// Phase 1: instantiate ElasticGrid in a strictly empty test project so the native
+// image is resident before Python performs live-image identity sampling.
+function elasticGridSmokeArm(config) {
+    var resultFile = null, suppressing = false;
+    var result = {run_id:config.run_id,status:"FAIL",stage:"guard",ae_version:""};
+    function q(s){return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n") + '"';}
+    app.exitCode=91;
+    try {
+        if (!/^[a-f0-9]{32}$/.test(config.run_id)) throw new Error("Invalid run identifier");
+        var folder=new Folder(config.folder);
+        if (!folder.exists) throw new Error("Run workspace does not exist");
+        resultFile=new File(config.folder+"/arm.json");
+        if (resultFile.exists) { resultFile=null; throw new Error("Refusing old arm result"); }
+        var input=new File(config.folder+"/pattern.png");
+        if (!input.exists) throw new Error("Input fixture is missing");
+        if (app.project===null || app.project.file!==null || app.project.numItems!==0 ||
+            typeof app.project.dirty!=="boolean" || app.project.dirty)
+            throw new Error("Requires an empty, unsaved, non-dirty test project");
+        app.beginSuppressDialogs(); suppressing=true;
+        result.ae_version=app.version;
+        var footage=app.project.importFile(new ImportOptions(input));
+        footage.name="__EGFX_ARM_FOOTAGE_"+config.run_id;
+        var comp=app.project.items.addComp("__EGFX_ARM_COMP_"+config.run_id,64,64,1.0,1.0,30.0);
+        var layer=comp.layers.add(footage); layer.name="__EGFX_ARM_LAYER_"+config.run_id;
+        var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
+        if (fx===null || fx.matchName!=="com.elasticgrid.fx.warp") throw new Error("Effect unavailable");
+        if (fx.property("Columns")===null) throw new Error("Effect parameter unavailable");
+        result.status="ARMED"; result.stage="armed";
+    } catch(error) {
+        result.status="FAIL";
+    } finally {
+        if (suppressing) { try{app.endSuppressDialogs(false);}catch(e){result.status="FAIL";result.stage="dialogs";} }
+        if (resultFile!==null) {
+            try {
+                resultFile.encoding="UTF-8";
+                if (resultFile.exists || !resultFile.open("w")) throw new Error("Result unavailable");
+                resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+',"ae_version":'+q(result.ae_version)+'}');
+                resultFile.close();
+            } catch(e) { result.status="FAIL"; }
+        }
+        app.exitCode=result.status==="ARMED"?0:91;
+    }
+    return app.exitCode;
+}
+
+function elasticGridSmokeDisarm(config) {
+    var resultFile=null, result={run_id:config.run_id,status:"FAIL",stage:"guard"};
+    function q(s){return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"') + '"';}
+    app.exitCode=93;
+    try {
+        var folder=new Folder(config.folder);
+        if (!folder.exists || app.project===null || app.project.file!==null || app.project.numItems!==2)
+            throw new Error("Armed project ownership unavailable");
+        var comp=null, footage=null;
+        for (var i=1;i<=app.project.numItems;i++) {
+            var item=app.project.item(i);
+            if (item.name==="__EGFX_ARM_COMP_"+config.run_id) comp=item;
+            else if (item.name==="__EGFX_ARM_FOOTAGE_"+config.run_id) footage=item;
+            else throw new Error("Foreign project item detected");
+        }
+        if (comp===null || footage===null || comp.numLayers!==1) throw new Error("Armed objects missing");
+        var layer=comp.layer(1);
+        if (layer.name!=="__EGFX_ARM_LAYER_"+config.run_id) throw new Error("Foreign layer detected");
+        var parade=layer.property("ADBE Effect Parade");
+        if (parade===null || parade.numProperties!==1 || parade.property(1).matchName!=="com.elasticgrid.fx.warp")
+            throw new Error("Armed effect state changed");
+        if (!app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES)) throw new Error("Owned project close failed");
+        app.newProject();
+        if (app.project===null || app.project.file!==null || app.project.numItems!==0 ||
+            typeof app.project.dirty!=="boolean" || app.project.dirty)
+            throw new Error("Fresh empty project unavailable");
+        result.status="CLEAN"; result.stage="clean";
+    } catch(error) {
+        result.status="FAIL";
+    } finally {
+        resultFile=new File(config.folder+"/disarm.json");
+        try {
+            resultFile.encoding="UTF-8";
+            if (resultFile.exists || !resultFile.open("w")) throw new Error("Result unavailable");
+            resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+'}');
+            resultFile.close();
+        } catch(e) { result.status="FAIL"; }
+        app.exitCode=result.status==="CLEAN"?0:93;
+    }
+    return app.exitCode;
+}
+
 // Called by the runner with a fresh configuration; opening this file alone does nothing.
 function elasticGridSmoke(config) {
     var owned = null, comp = null, chainComp = null, footage = null, initialBpc = null;
