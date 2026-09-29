@@ -51,6 +51,10 @@ function load(options={}) {
 assert.ok(source.includes('app.project.file===null && app.project.numItems===0'));
 assert.ok(source.includes('app.project.file.fsName===expected.fsName'));
 assert.ok(source.includes('CloseOptions.DO_NOT_SAVE_CHANGES'));
+assert.ok(source.includes('file=new File(path);'));
+assert.ok(source.includes('attempt<50'));
+assert.ok(source.includes('$.sleep(100)'));
+assert.ok(source.includes('never retry the render or kill/restart AE'));
 assert.ok(!source.includes('app.quit('));
 assert.ok(!source.includes('system.callSystem'));
 console.log('PASS: Stage 9 plane JSX refuses foreign project mutation (mock only)');

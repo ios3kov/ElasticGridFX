@@ -57,8 +57,21 @@ function elasticGridPlaneSmoke(config) {
         }
         function capture(name) {
             check(app.project===owned,"Project ownership changed");
-            var file=new File(folder.fsName+"/"+name+".png");check(!file.exists,"Stale frame");
-            comp.saveFrameToPng(0,file);check(file.exists && file.length>0,"Missing frame "+name);
+            var path=folder.fsName+"/"+name+".png";
+            var file=new File(path);check(!file.exists,"Stale frame");
+            comp.saveFrameToPng(0,file);
+            // Refresh ExtendScript File metadata after AE publishes the PNG.
+            file=new File(path);
+            // saveFrameToPng may return before the filesystem entry/length is
+            // visible to ExtendScript. Match the proven Stage 7 smoke behavior:
+            // bounded wait only, never retry the render or kill/restart AE.
+            for(var attempt=0;(!file.exists || file.length<=0) && attempt<50;++attempt) {
+                if(typeof $==="undefined" || typeof $.sleep!=="function") break;
+                $.sleep(100);
+                check(app.project===owned,"Project ownership changed");
+                file=new File(path);
+            }
+            check(file.exists && file.length>0,"Missing frame "+name);
             frames.push(name);
         }
         var fit=[[0,0],[127,0],[127,95],[0,95]];
