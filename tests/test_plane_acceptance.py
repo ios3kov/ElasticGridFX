@@ -15,7 +15,7 @@ class PlaneAcceptance(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(prefix='egfx-plane-runner-')
         self.addCleanup(self.tmp.cleanup)
-        self.root = Path(self.tmp.name)
+        self.root = Path(self.tmp.name).resolve()
 
     def test_prepare_is_unique_and_not_run(self):
         a, meta_a = pa.prepare(self.root/'runs', {'build_id':pa.EXPECTED_BUILD})
