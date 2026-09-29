@@ -67,6 +67,26 @@ A new reversible updater is pinned specifically to installed 6d3b846 -> fd69988;
 it refuses any different current payload and retains 6d3b846 as rollback.
 This still does not constitute AE runtime PASS.
 
+## fd69988 updater delivery integrity defect
+
+The first attempt to run the fd69988 updater on the target Mac stopped before
+any plugin replacement with `Installer files changed; download the verified
+package again`.
+
+The delivered ZIP was re-inspected byte-for-byte. Its embedded fd69988 plugin
+payload is intact and still hashes to
+`68c135f1a2a9390a0032a31d9073c8111bff6dd43691b9222ec50fad3913982e`.
+The updater packaging layer was wrong: `InstallToolIdentity.json` correctly
+recorded `tools/authorized_update.py` as executable, but the ZIP writer forced
+every non-`.command` member to mode 0644. The updater's own self-integrity
+check therefore rejected the package before touching the installed plugin.
+
+The packaging fix preserves each member's executable bit from the identity
+manifest, validates ZIP member modes after writing, adds a regression test for
+an executable Python tool, and on macOS CI extracts the final ZIP with `ditto`
+then re-runs the exact hashes/execute-bit identity comparison. The failed
+delivery remains BLOCKED evidence and is not reused.
+
 ## Target-Mac acceptance attempt — installed candidate mismatch
 
 A corrected target acceptance launch on 2026-09-29 stopped before live-image
