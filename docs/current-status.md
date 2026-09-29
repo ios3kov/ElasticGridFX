@@ -1,6 +1,12 @@
 # Current development / release status
 
-2026-09-28. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
+2026-09-29. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
+
+**Production cycle: Stage 7 of 10 — target After Effects functional acceptance.**
+See development-stages.md. Stages 1–6 are completed for the current scope; Stage 7
+is blocked only on the corrected real target-Mac acceptance run. Stage 8 is
+performance/profiling, Stage 9 is the approved 2D/3D perspective plane, Stage 10
+is final compatibility/release validation.
 No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
