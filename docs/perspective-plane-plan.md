@@ -35,9 +35,20 @@ screen coordinates, and local guide .75 samples the old .5 guide. Dense identity
 existing easing equivalence, snapshot ownership, invalid grids and horizon checks
 are included. This does not yet sample pixels or integrate AE.
 
-P9-2b (next): connect this coordinate mapping to a single Final Bicubic sample;
-define outside/singular policy, sparse canvas,
-PAR/downsampling and bit-depth tests. Do not simply post-warp the output.
+P9-2b: user approved outside-plane exact pass-through and invalid-plane original
+image plus diagnostics. Initial standalone dense float CPU implementation now
+performs one Catmull-Rom sample of the original input at the composed coordinate.
+Null/invalid plane returns an invalid_plane flag; per-pixel projection failures
+pass through with a counter. Outside-plane pixels and unchanged mapped coordinates
+copy all four channels bit-for-bit. No alert/dialog in rendering. Source/destination
+must be distinct nonoverlapping same-size dense canvases with positive valid strides.
+Sampling clamps at canvas edges; alpha and HDR/negative float channels are not clamped.
+Cancellation is checked per row and can leave partial output, which callers must
+discard on RenderCancelled. The old separable renderer is unchanged.
+Tests: Final equivalence on a flat plane, fractional negative/HDR values, alpha,
+outside/invalid/identity copying, padding preservation, alias rejection and cancellation.
+Next: sparse canvas, PAR/downsampling, 8/16-bit adapters and actual host wiring.
+The new scalar float path is not yet compiled into the native plugin; no AE claim.
 P9-3: append compatible parameters and connect overlay/pointer inversion.
 P9-4: integrate AE layer/camera with context-correct transforms and real-host
 acceptance. Existing host-rust/src/ui.rs already uses layer_to_comp/comp_to_layer;
@@ -97,8 +108,8 @@ edge-on planes, near-camera clipping/behind-camera cases; winding/back face;
 negative/zero scales; pixel aspect ratio; downsampling; collapsed transforms;
 which camera drives rendering versus nonactive views. “Any rotation” requires
 stable defined handling at singular views, not division by zero or black output.
-The desired singular/outside-plane visual policy is still a design decision;
-do not silently claim it was specified by the user.
+The user subsequently confirmed the singular/outside-plane pass-through policy
+above. Camera near-plane and occlusion semantics still need explicit host validation.
 
 Keep existing saved parameter IDs, types, popup ordinals and wire state. New
 controls require explicit schema/migration tests; do not reinterpret old keys.

@@ -12,6 +12,20 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 9 initial geometry foundation
 
+Latest slice: user approved outside/invalid-plane pass-through. Added standalone
+dense 32-bit float PlaneRenderer: a single Catmull-Rom sample after coordinate
+composition; exact copy outside/identity/invalid plane, structured fallback
+diagnostics, stride/overlap validation and row-level cancellation. No channel clamp.
+This new path is not wired into Cargo/native host. Sparse/PAR/downsample, 8/16-bpc,
+overlay/handles/camera and real-AE acceptance remain open. Existing renderer and
+installed fd69988 remain unchanged. Final-filter comparison and safety tests are
+part of the new plane-render CTest target; this is not full Stage 9 completion.
+Verification: Release build and 14/14 CTest targets PASS; plane-render test under
+AddressSanitizer/UndefinedBehaviorSanitizer PASS. Flat-plane output agrees with
+existing Final Bicubic within 1e-5 on the HDR/impulse fixture. Static audit remains
+review_required (existing findings), not release PASS. Evidence is retained in
+work/stage9-core/Testing/Temporary/LastTest.log and plane-render-audit.json.
+
 Follow-up: standalone PlaneWarp now composes plane projection with the existing
 inverse grid/easing calculation. Analytic test proves column motion follows a
 slanted plane rather than screen-horizontal motion. Exact identity is retained;
