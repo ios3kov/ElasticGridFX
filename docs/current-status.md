@@ -26,9 +26,10 @@ attempt the normal host guard passed; no process was killed or guard bypassed.
 - Rollback receipt: `EGFX-update-371ef6e56f92407d8b04b16af52e2c10`.
 - Previous installed de0becf is retained in that operation's backup.
 - Candidate/evidence: `work/plane-candidate-de31498/` (local, not a public release).
-- AE was not launched for this installation request. Loaded identity, 24-frame
-  plane smoke, native corner dragging, Undo/Redo/save/reopen and 3D/camera
-  acceptance remain **NOT_RUN** for this candidate.
+- AE was not launched for this installation request. Real target-AE Stage 9
+  acceptance remains **NOT_RUN** for this candidate. Source-validated tooling now
+  automates exact loaded identity, a 34-frame plane/3D/camera pixel matrix and
+  AEP save/reopen; native viewer dragging plus UI Undo/Redo remain separate gates.
 
 Implemented in this candidate: Four Corners/Existing Grid mode, four native points,
 Fit Layer reset, shared render/overlay/inverse-drag geometry, evaluated wave guides,
@@ -43,9 +44,34 @@ static workflow/test audit findings remain review items, not a release PASS.
 Overall: Stages 1–7 completed for their historical scope; Stage 8 skipped by user;
 Stage 9 in progress; Stage 10 not started. Persistent deselected viewer grid is
 deferred by user. GPU dispatch remains disabled. No main merge or release.
-Next: independently confirm loaded de31498, run the prepared plane fixture and
-analyze pixels, then verify native interaction and layer/camera cases. Installation
-success does not close Stage 9 or substitute for target-AE functional acceptance.
+Next: run the exact de31498 Stage 9 target-AE acceptance runner in the controlled
+target host, then perform the remaining native viewer drag/Undo/Redo acceptance.
+Installation success and source-tooling PASS do not close Stage 9.
+
+### Stage 9 target-AE acceptance tooling — SOURCE-VALIDATED, REAL AE NOT RUN
+
+The Stage 9 acceptance path is now automated around the already installed immutable
+candidate de31498; no plugin/runtime source changed after that candidate. The runner
+pins commit `de314981005606741bc75c517d8bb33798b46a1d` and Build ID
+`EGFX-0fa68430a170b3612e8d00f7`, verifies the installed payload/signature and the
+live loaded image in the same AE process, and refuses unsafe/saved user projects.
+
+The owned fixture captures **34 frames**: 24 comparisons across 8/16/32 bpc for
+Existing Grid vs Four Corners identity, wave, skew, invalid-plane and half-resolution
+behavior; two AEP save/reopen roundtrip frames; and eight 3D cases covering layer
+position, scale, rotation, parenting, active-camera movement, camera switching and
+no-camera fallback. `tools/plane_smoke_pixels.py` performs numeric comparisons;
+`CAPTURED` alone is never PASS. The runner closes only its exact saved test project
+and must prove a fresh empty project after cleanup.
+
+Source/control-flow evidence: Final Validation PASS (196 Python/source tests plus
+18/18 CTest), PR CI PASS (GCC, Clang, TSan, ASan/UBSan, static analysis), and the
+macOS fast acceptance-tooling regression PASS. Full macOS source/preflight gate for
+the current tooling checkpoint is still running at this documentation update.
+The real de31498 AE runner has **NOT_RUN** status; no 3D/camera runtime claim is made
+until that target execution passes. Native viewer corner/guide dragging and UI
+Undo/Redo remain the final manual interaction checks because they require real host
+UI event semantics rather than scripted parameter assignment.
 
 ### Stage 9 native four-corner source integration
 
@@ -57,10 +83,10 @@ corner grips and invalid-plane diagnostics/pass-through. No second camera
 projection is applied to ordinary layer-space rendering. See the P9-3 coordinate
 contract in perspective-plane-plan.md; host-coordinate assumptions need AE tests.
 18 CTest, 22 Rust tests, Clippy and geometry ASan/UBSan PASS. Existing static audit
-findings remain outside changed scope. The internal ae_plane_smoke.jsx captures
-24 comparison frames but is NOT_RUN until a clean, identified candidate is tested.
-Installed de0becf remains unchanged at this source checkpoint. Stage 9/10 are
-not complete and no artifact is ready for user acceptance on source tests alone.
+findings remain outside changed scope. The Stage 9 fixture/runner now covers the
+34-frame matrix described above, but real target-AE execution remains NOT_RUN.
+The installed runtime candidate is still immutable de31498; all later changes are
+tests/tools/workflows/docs only. Stage 9/10 are not complete.
 
 ### Stage 9 perspective sampling modes
 
