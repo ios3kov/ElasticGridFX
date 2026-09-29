@@ -95,24 +95,44 @@ function elasticGridPlaneSmoke(config) {
         check(Math.abs(fx.property("Wave Amplitude").value-8)<0.001,"Wave amplitude did not roundtrip");
         capture("roundtrip-after");
 
-        // 3D/camera acceptance: render survives layer rotation, active camera motion
-        // and parenting. Overlay/drag remains a separate real-UI acceptance gate.
+        // 3D/camera acceptance: independently exercise layer position, scale,
+        // rotation, parenting, active-camera movement, camera switching and
+        // no-camera fallback. Overlay/drag remains a separate real-UI gate.
         stage="three_d";
         layer.threeDLayer=true;
         var transform=layer.property("ADBE Transform Group");check(transform!==null,"Missing 3D transform");
-        var camera=comp.layers.addCamera("__EGFX_CAMERA_"+config.run_id,[64,48]);
-        check(camera!==null && comp.activeCamera===camera,"Active camera unavailable");
+        var camera=comp.layers.addCamera("__EGFX_CAMERA_A_"+config.run_id,[64,48]);
+        check(camera!==null && comp.activeCamera!==null && comp.activeCamera.index===camera.index,"Active camera unavailable");
         capture("3d-base");
+
+        var position=transform.property("ADBE Position");check(position!==null,"Missing 3D position");
+        var pv=position.value;position.setValue([pv[0]+14,pv[1]-9,pv[2]]);capture("3d-position");
+
+        var scale=transform.property("ADBE Scale");check(scale!==null,"Missing 3D scale");
+        scale.setValue([86,112,100]);capture("3d-scale");
+
         var yrot=transform.property("ADBE Rotate Y");check(yrot!==null,"Missing Y rotation");
         yrot.setValue(28);capture("3d-layer-rotate");
+
         var cameraTransform=camera.property("ADBE Transform Group");
         var cameraPosition=cameraTransform.property("ADBE Position");check(cameraPosition!==null,"Missing camera position");
         var cv=cameraPosition.value;
         cameraPosition.setValue([cv[0]+24,cv[1]-10,cv[2]]);capture("3d-camera-move");
+
         var parent=comp.layers.addNull();check(parent!==null,"Could not add parent");
         parent.name="__EGFX_PARENT_"+config.run_id;parent.threeDLayer=true;layer.parent=parent;
         var parentY=parent.property("ADBE Transform Group").property("ADBE Rotate Y");check(parentY!==null,"Missing parent rotation");
         parentY.setValue(-18);capture("3d-parent");
+
+        var cameraB=comp.layers.addCamera("__EGFX_CAMERA_B_"+config.run_id,[64,48]);check(cameraB!==null,"Second camera unavailable");
+        var cameraBPosition=cameraB.property("ADBE Transform Group").property("ADBE Position");check(cameraBPosition!==null,"Missing second camera position");
+        var cvb=cameraBPosition.value;cameraBPosition.setValue([cvb[0]-32,cvb[1]+14,cvb[2]]);
+        check(comp.activeCamera!==null && comp.activeCamera.index===cameraB.index,"Camera switch did not become active");
+        capture("3d-camera-switch");
+
+        cameraB.enabled=false;camera.enabled=false;
+        check(comp.activeCamera===null,"No-camera state not reached");
+        capture("3d-no-camera");
 
         // Leave this exact test-owned saved project open for live-image identity.
         // The dedicated cleanup phase closes only this path after diagnosis.
