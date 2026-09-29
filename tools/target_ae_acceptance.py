@@ -131,7 +131,7 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
         result['reason'] = 'one or more deterministic pixel checks failed'
         return result, write_report(run, result, smoke_folder)
 
-    verify_installed(installed, package_path, manifest)
+    verify_installed(installed, package_path, manifest_path)
     result['functional_status'] = 'PASS'
     result['reason'] = 'loaded fd69988 and all deterministic AE pixel checks passed in one process'
     return result, write_report(run, result, smoke_folder)
