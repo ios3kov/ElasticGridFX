@@ -19,13 +19,36 @@ Four Corners does not project the image and the overlay does not follow the 3D
 layer. Therefore the historical automated PASS below does not establish the
 intended plane behavior. Requirements, five UX corrections and remaining tasks
 are recorded in `stage9-user-corrections.md`. New core implementation is in
-development; installed candidate is now f842e8d (test-only, failed Half Resolution gate). UI source includes
+development; installed candidate is now 099e492 (test-only, baseline pixel gate PASS). UI source includes
 square-pixel 3D camera projection/inverse hit-testing, Layer Plane naming,
 mode-dependent corner disabling and reordered controls with Render Quality last.
 Live alignment, native target hiding, non-square projection and legacy AEP loading
 remain unverified. Stage 9 remains OPEN.
 
-### Current installed checkpoint — f842e8d; functional FAIL
+### Current installed checkpoint — 099e492; baseline pixel gate PASS
+
+2026-09-29: half-resolution source endpoint correction rebuilt from clean commit
+`099e49208ebe70a81707dbe905f291e139b9eeb0`, installed through the same atomic
+updater after normal AE/Dynamic Link exit (no force kill). Previous f842e8d retained.
+
+- Build ID: `EGFX-97a79761c3f9f35751e06853`.
+- ZIP SHA-256: `4c48ca09c83d764e36c2640c8aff971c0de616876fde75ee0ab0a9127773ef10`.
+- Receipt: `EGFX-update-ce1f0338f91f4d7e8c4bb8c5fdb2ca45`, INSTALLED_FOR_TEST.
+- Clean build, bundle signature/payload, 18 CTest, 24 Rust, 201 Python,
+  Clippy and bridge ASan/UBSan PASS. Scanner findings unchanged (review required).
+- Real AE run: `EGFX-PLANE-9acd8e0934084142ba899906bbab8724`.
+  Exact loaded identity PASS; 34 frames / 26 comparisons PASS; cleanup CLEAN.
+- Half identity vs effect-off: max/mean difference **0** at 8/16/32 bpc.
+  Existing comparator thresholds unchanged. Full-resolution identity also PASS.
+- Evidence: local `outputs/plane-acceptance/EGFX-PLANE-9acd8e0934084142ba899906bbab8724.zip`.
+- CI at last inspection: five workflows PASS, macOS source gate queued; not
+  presented as all-green CI for this candidate.
+
+Stage 9 remains OPEN: native 3D overlay alignment/hit testing, native corner target
+visibility, legacy AEP migration and explicit zero-wave skew validation remain.
+Baseline 3D image-change checks are not overlay evidence. No release/main merge.
+
+### Historical installed checkpoint — f842e8d; functional FAIL
 
 2026-09-29: user authorized installation. AE exited normally; Dynamic Link
 exited subsequently without force termination. Atomic replacement completed
