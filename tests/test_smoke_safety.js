@@ -114,9 +114,7 @@ for (const options of [
     assert.equal(capture.guard,'DIRTY_UNAVAILABLE');
     assert.equal(capture.project_revision,'1');
 }
-// Publication is checked externally after JSX returns, not via cached File data.
-assert.equal(run({noOutput:true}).capture.status,'CAPTURED');
-for (const options of [{missingParameter:true},{cornerUnavailable:true},{cleanupError:true},{writeFailure:true},{staleFrame:true}]) {
+for (const options of [{missingParameter:true},{cornerUnavailable:true},{noOutput:true},{cleanupError:true},{writeFailure:true},{staleFrame:true}]) {
     const {app,capture}=run(options);
     assert.notEqual(app.exitCode,0);
     assert.notEqual(capture?.status,'PASS');
