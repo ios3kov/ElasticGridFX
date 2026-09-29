@@ -184,6 +184,22 @@ revision remain blocking. These historical reports remain `BLOCKED`; a new
 same-PID identity plus ten-frame target-AE result is still required to close
 Stage 7.
 
+## Latest target-AE run — occupied project
+
+The revised acceptance runner from `fa7be425ce78083519f4a812a4f3689fe151df90`
+was executed on the target AE 25.6x101. Report
+`EGFX-AE-065fc56488584561ac00fd7ddd4936cb` (SHA-256
+`fb9c9967af76f1b2e6bbcebeae6a18b8699640d50653b639f21922d1fa91fa0f`)
+reached the JSX arm phase and returned `guard: OCCUPIED`, revision `32` before
+any test-owned object was created. The script exit `91` is correctly reported as
+that guard refusal, not as an AppleScript transport failure.
+
+No live image was sampled and no pixel frames were captured; both statuses remain
+`NOT RUN`, functional status remains `BLOCKED`, and this report is not renderer
+evidence. The only condition for a safe retry is a newly created empty unsaved
+AE project. The runner will continue to refuse rather than close or alter an
+occupied user project.
+
 ## Target-AE acceptance automation
 
 A single non-installing target runner is implemented for fd69988. The first
