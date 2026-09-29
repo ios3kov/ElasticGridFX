@@ -25,6 +25,7 @@ MANIFEST = CANDIDATE/'ElasticGrid.artifact.json'
 PACKAGE = CANDIDATE/'ElasticGrid.plugin.zip'
 EXPECTED_COMMIT = 'de314981005606741bc75c517d8bb33798b46a1d'
 EXPECTED_BUILD = 'EGFX-0fa68430a170b3612e8d00f7'
+EXPECTED_PACKAGE_SHA = '6a43f734c7dc5fd298b356b12db75ab5986c171a2ae241ef9c85ffc0ac22ec55'
 
 
 def load_candidate(manifest_path: Path, package_path: Path) -> dict:
@@ -36,8 +37,10 @@ def load_candidate(manifest_path: Path, package_path: Path) -> dict:
     build = bi.validate_identity(manifest['build'])
     if build.get('commit') != EXPECTED_COMMIT or build.get('build_id') != EXPECTED_BUILD:
         raise ValueError('Stage 9 runner requires exact de31498 candidate identity')
-    if manifest.get('package_sha256') != bi.digest(package_path.read_bytes()):
-        raise ValueError('de31498 candidate package hash mismatch')
+    if manifest.get('package_sha256') != EXPECTED_PACKAGE_SHA:
+        raise ValueError('Stage 9 manifest is not pinned to the exact de31498 package SHA-256')
+    if bi.digest(package_path.read_bytes()) != EXPECTED_PACKAGE_SHA:
+        raise ValueError('Stage 9 package bytes do not match the exact de31498 SHA-256')
     return manifest
 
 
