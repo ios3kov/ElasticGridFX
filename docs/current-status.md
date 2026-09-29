@@ -91,6 +91,23 @@ render, kills/restarts AE or touches user work. Final Validation PASS, PR CI PAS
 and macOS source gate run `36620529285` PASS for this fix. The installed/runtime
 candidate remains immutable de31498; no `src/` or `host-rust/` file changed.
 
+Second real Stage 9 target-AE attempt: report
+`EGFX-PLANE-814b2dbd8b67486c8f657c0d6ca1855c` captured **33 of 34**
+frames successfully: the complete 8/16/32-bpc plane matrix, AEP save/reopen,
+3D layer position/scale/rotation/parenting, camera movement and camera switching.
+The fixture then blocked only at its final synthetic no-camera assertion
+(`No-camera state not reached`) after disabling already-created camera layers.
+Identity/pixel aggregation therefore remained **NOT RUN** and this is not a
+plugin/render FAIL.
+
+Tooling fix `e6dbc26409644f2202a6349ecf2124ae01f31b8a` now captures the
+no-camera/Default Camera fallback **before any camera layer is created**, then
+creates cameras for the remaining 3D cases. Frame ordering and the external
+comparator were updated together; the old disable-cameras assumption was removed.
+Final Validation PASS, PR CI PASS, and macOS source gate run `36623152320` PASS.
+The installed/runtime candidate remains immutable de31498; no `src/` or
+`host-rust/` file changed.
+
 A fresh controlled target-AE rerun is still required before any 2D/3D/camera
 runtime PASS claim. Native viewer corner/guide dragging and UI Undo/Redo remain
 the final manual interaction checks because they require real host UI event

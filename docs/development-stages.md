@@ -112,9 +112,13 @@ by safe cleanup. The first real target-AE attempt was BLOCKED before the first
 numeric frame because the fixture checked stale ExtendScript File metadata directly
 after `saveFrameToPng`; identity/pixels remained NOT RUN, so this was not a plugin
 FAIL. Tooling fix 724001c adds the same bounded file-publication wait used by the
-proven Stage 7 smoke; Final Validation, PR CI and macOS source gate PASS. A fresh
-real target-AE rerun is required. Native viewer dragging and UI Undo/Redo remain
-separate real-host interaction gates. See current-status.md for evidence.
+proven Stage 7 smoke; Final Validation, PR CI and macOS source gate PASS.
+The second real run then captured 33/34 frames and blocked only on the fixture's
+post-disable no-camera assertion; identity/pixel aggregation remained NOT RUN.
+Fix e6dbc26 captures Default Camera before creating camera layers and passes
+Final Validation, PR CI and macOS source gate. A fresh real target-AE rerun is
+required. Native viewer dragging and UI Undo/Redo remain separate real-host
+interaction gates. See current-status.md for evidence.
 Installation/tooling PASS is not stage completion.
 
 - Four-corner projective plane with transformed grid/handles/hit-test/render.
