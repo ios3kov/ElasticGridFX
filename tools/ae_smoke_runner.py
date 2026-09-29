@@ -28,6 +28,8 @@ def prepare(parent: Path, build: dict) -> tuple[Path, dict]:
     pattern(folder / 'pattern.png')
     source = (ROOT / 'tests/ae_runtime_smoke.jsx').read_text()
     config = dict(run_id=run_id, folder=str(folder.resolve()))
+    (folder / 'arm.jsx').write_text(source + '\nelasticGridSmokeArm(' + json.dumps(config) + ');\n')
+    (folder / 'disarm.jsx').write_text(source + '\nelasticGridSmokeDisarm(' + json.dumps(config) + ');\n')
     (folder / 'run.jsx').write_text(source + '\nelasticGridSmoke(' + json.dumps(config) + ');\n')
     metadata = dict(schema=1, run_id=run_id, expected_build=build, status='NOT RUN',
                     loaded_build_id=None, actual_ae_execution=False,
@@ -56,9 +58,7 @@ def inspect_capture(folder: Path, metadata: dict) -> dict:
     return result
 
 
-def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
-            package: Path, manifest: Path) -> dict:
-    # Exact on-disk payload/signature checks, not a claim of a loaded Build ID.
+def _transport_context(metadata: dict, ae_app: Path, installed: Path, package: Path, manifest: Path):
     checked_path(ae_app, directory=True)
     checked_path(installed, directory=True)
     bi.verify(installed, package, manifest)
@@ -70,14 +70,14 @@ def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
     identifier = app_info['CFBundleIdentifier']
     if not re.fullmatch(r'com\.adobe\.[A-Za-z0-9_.-]+', identifier, re.I) or 'aftereffects' not in identifier.lower():
         raise ValueError('selected application is not identified as After Effects')
-    # Bundle IDs may be shared across installed AE versions. Require one exact
-    # running executable, rather than letting LaunchServices pick another app.
     expected_executable = ae_app / 'Contents/MacOS' / app_info['CFBundleExecutable']
     hosts = running_ae()
     if len(hosts) != 1 or Path(hosts[0]['executable']) != expected_executable:
         raise ValueError('require exactly one running AE process at the selected app path')
-    metadata['target_pid'] = hosts[0]['pid']
-    # argv carries the path, not interpolated AppleScript or shell code.
+    return identifier, hosts[0]['pid']
+
+
+def _run_jsx(folder: Path, script_name: str, identifier: str, timeout_seconds: int = 125) -> None:
     apple = '''on run argv
 set jsxText to read POSIX file (item 1 of argv) as «class utf8»
 if not (running of application id "IDENTIFIER") then error "Selected test AE is not running"
@@ -89,13 +89,44 @@ end timeout
 return resultCode
 end run
 '''.replace('IDENTIFIER', identifier)
-    metadata['ae_execution_attempted'] = True
-    result = subprocess.run(['/usr/bin/osascript', '-', str(folder/'run.jsx')], input=apple,
-                            capture_output=True, text=True, timeout=125)
-    # Keep output private in the per-run folder; no global log scraping.
-    (folder/'transport.log').write_text(result.stdout + '\n' + result.stderr)
+    result = subprocess.run(['/usr/bin/osascript', '-', str(folder/script_name)], input=apple,
+                            capture_output=True, text=True, timeout=timeout_seconds)
+    (folder/(script_name+'.transport.log')).write_text(result.stdout + '\n' + result.stderr)
     if result.returncode or result.stdout.strip() != '0':
-        raise ValueError('AE transport/capture failed; see retained transport log')
+        raise ValueError('AE transport failed for '+script_name+'; see retained transport log')
+
+
+def arm(folder: Path, metadata: dict, ae_app: Path, installed: Path, package: Path, manifest: Path) -> dict:
+    identifier, pid = _transport_context(metadata, ae_app, installed, package, manifest)
+    _run_jsx(folder, 'arm.jsx', identifier)
+    data = json.loads(bi.safe_file(folder, 'arm.json').read_text(encoding='utf-8-sig'))
+    if data.get('run_id') != metadata['run_id'] or data.get('status') != 'ARMED':
+        raise ValueError('AE arm phase did not complete')
+    metadata['target_pid'] = pid
+    metadata['arm_status'] = 'ARMED'
+    return metadata
+
+
+def disarm(folder: Path, metadata: dict, ae_app: Path, installed: Path, package: Path, manifest: Path) -> dict:
+    identifier, pid = _transport_context(metadata, ae_app, installed, package, manifest)
+    if metadata.get('target_pid') != pid:
+        raise ValueError('AE process changed before arm cleanup')
+    _run_jsx(folder, 'disarm.jsx', identifier)
+    data = json.loads(bi.safe_file(folder, 'disarm.json').read_text(encoding='utf-8-sig'))
+    if data.get('run_id') != metadata['run_id'] or data.get('status') != 'CLEAN':
+        raise ValueError('AE arm cleanup did not complete')
+    metadata['disarm_status'] = 'CLEAN'
+    return metadata
+
+
+def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
+            package: Path, manifest: Path) -> dict:
+    identifier, pid = _transport_context(metadata, ae_app, installed, package, manifest)
+    if metadata.get('target_pid') is not None and metadata.get('target_pid') != pid:
+        raise ValueError('AE process changed before pixel capture')
+    metadata['target_pid'] = pid
+    metadata['ae_execution_attempted'] = True
+    _run_jsx(folder, 'run.jsx', identifier)
     pixels = inspect_capture(folder, metadata)
     metadata['actual_ae_execution'] = True
     metadata['pixels'] = pixels
