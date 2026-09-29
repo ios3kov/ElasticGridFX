@@ -53,8 +53,12 @@ Installation success and source-tooling PASS do not close Stage 9.
 The Stage 9 acceptance path is now automated around the already installed immutable
 candidate de31498; no plugin/runtime source changed after that candidate. The runner
 pins commit `de314981005606741bc75c517d8bb33798b46a1d` and Build ID
-`EGFX-0fa68430a170b3612e8d00f7`, verifies the installed payload/signature and the
-live loaded image in the same AE process, and refuses unsafe/saved user projects.
+`EGFX-0fa68430a170b3612e8d00f7`, and immutable ZIP SHA-256
+`6a43f734c7dc5fd298b356b12db75ab5986c171a2ae241ef9c85ffc0ac22ec55`.
+It verifies the installed payload/signature and the live loaded image in the same
+AE process, and refuses unsafe/saved user projects. The executable launcher
+`RUN_ELASTICGRID_PLANE_AE_TEST_MAC.command` performs no install/replacement and
+requires one empty unsaved target-AE project.
 
 The owned fixture captures **34 frames**: 24 comparisons across 8/16/32 bpc for
 Existing Grid vs Four Corners identity, wave, skew, invalid-plane and half-resolution
@@ -64,12 +68,13 @@ no-camera fallback. `tools/plane_smoke_pixels.py` performs numeric comparisons;
 `CAPTURED` alone is never PASS. The runner closes only its exact saved test project
 and must prove a fresh empty project after cleanup.
 
-Source/control-flow evidence: Final Validation PASS (196 Python/source tests plus
+Source/control-flow evidence: Final Validation PASS (199 Python/source tests plus
 18/18 CTest), PR CI PASS (GCC, Clang, TSan, ASan/UBSan, static analysis), and
 macOS source gate PASS, including the fast acceptance-tooling regression, Apple
 toolchain/Metal compilation, full preflight and signed install-free bundle.
-Validated tooling checkpoint: `dea905fd94a5cb8cff02f5fcb211ebe8d2e3f3d2`,
-macOS workflow run `36612177417`.
+The acceptance regression now refuses both an altered candidate ZIP and a manifest
+whose package digest is not the known de31498 SHA-256. Validated tooling checkpoint:
+`0291bb807daa8f7df689831d3c6e00c7ac84908b`; macOS workflow run `36616083315`.
 The real de31498 AE runner has **NOT_RUN** status; no 3D/camera runtime claim is made
 until that target execution passes. Native viewer corner/guide dragging and UI
 Undo/Redo remain the final manual interaction checks because they require real host

@@ -103,8 +103,10 @@ Required:
 Current installed test candidate: de31498 / EGFX-0fa68430a170b3612e8d00f7.
 Four-corner native controls and render/overlay/drag integration are implemented;
 portable/native ABI checks and installed payload verification pass. Stage 9 target
-AE tooling is source-validated and pins this exact candidate. It automates loaded
-identity, 34 pixel frames across 8/16/32 bpc, AEP save/reopen and 3D position,
+AE tooling is source-validated and pins the exact candidate commit, Build ID and
+ZIP SHA-256. The executable Stage 9 launcher is non-installing and fail-closed.
+It automates loaded identity, 34 pixel frames across 8/16/32 bpc, AEP save/reopen
+and 3D position,
 scale, rotation, parenting, camera movement/switch and no-camera fallback, followed
 by safe cleanup. The real target-AE run remains NOT_RUN; native viewer dragging and
 UI Undo/Redo remain separate real-host interaction gates. See current-status.md
