@@ -1,8 +1,13 @@
 # Current development / release status
 
-2026-09-29. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
+2026-09-30. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 9 of 10 IN PROGRESS; Stage 8 SKIPPED BY USER, not PASS.**
+**Production cycle: Stage 10 of 10 IN PROGRESS; Stage 9 target-scope accepted; Stage 8 SKIPPED BY USER, not PASS.**
+
+User replied “работает” to the combined remaining manual checks on 2026-09-30.
+Drag/Undo/Redo and old animated-project acceptance are USER-REPORTED PASS, not
+automated evidence. Installed candidate remains 099e492. The latest gate ledger is
+`stage10-final-gate-2026-09-30.md`; older Stage 9 OPEN statements below are historical.
 See development-stages.md. Stages 1–7 are completed for the current scope. Stage 8 is
 performance/profiling (skipped on explicit user request), Stage 9 is the approved 2D/3D perspective plane, Stage 10
 is final compatibility/release validation.

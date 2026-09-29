@@ -98,7 +98,18 @@ Required:
 - Before -> Change -> After evidence for every significant optimization;
 - no hidden resolution/bit-depth/filter/precision downgrade.
 
-## Stage 9 of 10 — 2D/3D perspective deformation plane — IN PROGRESS
+## Stage 9 of 10 — 2D/3D perspective deformation plane — ACCEPTED FOR TARGET SCOPE
+
+2026-09-30: user replied “работает” to the combined manual drag/Undo/Redo and
+legacy animated-project acceptance request. Recorded as USER-REPORTED PASS,
+not instrumented automation. Current installed candidate is 099e492 /
+EGFX-97a79761c3f9f35751e06853. Controlled square-pixel AE 2025 tests: 40 frames,
+29 checks PASS, exact loaded identity PASS, cleanup CLEAN. Native visual scene
+confirms layer/parent/camera alignment, mode-dependent targets and panel order;
+old static AEP load/save/reopen PASS. See current-status.md for run identities.
+Non-square 3D UI and broad color/platform compatibility are not implied.
+
+### Historical Stage 9 development record
 
 Current installed test candidate: de31498 / EGFX-0fa68430a170b3612e8d00f7.
 Four-corner native controls and render/overlay/drag integration are implemented;
@@ -138,7 +149,10 @@ Installation/tooling PASS is not stage completion.
 Research may proceed in parallel; implementation begins only after the current
 functional bugfix is accepted and its performance baseline is recorded.
 
-## Stage 10 of 10 — Final compatibility / release gate — NOT STARTED
+## Stage 10 of 10 — Final compatibility / release gate — IN PROGRESS
+
+2026-09-30: final regression started against the unchanged installed 099e492.
+See stage10-final-gate-2026-09-30.md for scoped evidence and outstanding gates.
 
 Required as applicable:
 - clean install/update/rollback/restart;
@@ -153,6 +167,6 @@ production release occurs without explicit user instruction.
 
 ## Current overall progress
 
-Stage-count view: 7 completed, Stage 8 skipped by user (not PASS), Stage 9 in
-progress, Stage 10 open. No performance completion or release claim.
+Stage-count view: 8 accepted/completed for their recorded scope, Stage 8 skipped
+by user (not PASS), Stage 10 in progress. No performance completion or release claim.
 This is a stage-count view, not a claim about remaining engineering effort.
