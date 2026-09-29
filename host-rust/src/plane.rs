@@ -18,9 +18,6 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
 #[derive(Clone, Debug, Default)]
 pub(crate) struct State {
     pub corners: Option<[f64; 8]>,
-    pub source_extent: [f64; 2],
-    // Owned per-frame projection; never a reference to UI state or host handles.
-    pub source_corners: Option<[f64; 8]>,
 }
 impl State {
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
@@ -39,13 +36,7 @@ impl State {
             corners[2*i] = value.x - origin.h as f64;
             corners[2*i+1] = value.y - origin.v as f64;
         }
-        // Preserve the same scaled endpoint convention as AE point parameters.
-        // The rounded checkout raster width minus one is not this endpoint.
-        let source_extent = [
-            (in_data.width().max(1)-1) as f64 * f64::from(f32::from(in_data.downsample_x())),
-            (in_data.height().max(1)-1) as f64 * f64::from(f32::from(in_data.downsample_y())),
-        ];
-        Ok(Self {corners: Some(corners), source_extent, source_corners: None})
+        Ok(Self {corners: Some(corners)})
     }
     pub fn geometry(&self) -> Option<Geometry> {
         self.corners.and_then(|corners| Geometry::new(&corners))
@@ -94,9 +85,13 @@ unsafe extern "C" {
     #[cfg(test)]
     pub(crate) fn eg_render_plane_sampled(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    #[cfg(test)]
     pub(crate) fn eg_render_plane_projected(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32,
                        source_extent_x: f64, source_extent_y: f64) -> i32;
+    pub(crate) fn eg_render_plane_region(src: *const Image, dst: *const Image, depth: i32,
+                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    #[cfg(test)]
     pub(crate) fn eg_render_plane_between(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32,
                        source_corners: *const f64) -> i32;
@@ -136,12 +131,8 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     let dst = Image {pixels: unsafe {output.data_ptr_mut()}.cast(), row_bytes: output.row_bytes(),
                      width: output.width() as i32, height: output.height() as i32};
     let mut report = Report::default();
-    let rc = if let Some(source_corners) = &state.source_corners {
-        unsafe {eg_render_plane_between(&src, &dst, output.bit_depth() as i32,
-            &frame, &mut report, p.quality - 1, p.edge_mode - 1, source_corners.as_ptr())}
-    } else {unsafe {eg_render_plane_projected(&src, &dst, output.bit_depth() as i32,
-                         &frame, &mut report, p.quality - 1, p.edge_mode - 1,
-                         state.source_extent[0], state.source_extent[1])}};
+    let rc = unsafe {eg_render_plane_region(&src, &dst, output.bit_depth() as i32,
+                         &frame, &mut report, p.quality - 1, p.edge_mode - 1)};
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
     match rc {
         0 => Ok(()), 5 => Err(ae::Error::InterruptCancel),

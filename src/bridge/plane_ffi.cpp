@@ -56,7 +56,7 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
 static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y,
-    const double* source_corners) noexcept {
+    const double* source_corners,bool regional=false) noexcept {
     if(!report) return 1;
     *report={};
     if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
@@ -73,7 +73,12 @@ static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
         for(int i=0;i<4;++i) corners[i]={f->corners[i*2],f->corners[i*2+1]};
         auto transform=eg::PlaneTransform::fromCorners(corners);
         std::optional<eg::PlaneWarp> warp;
-        if(source_corners) {
+        if(regional && transform) {
+            warp=eg::PlaneWarp::prepare(*transform,
+                {f->columns,f->columns+f->column_count},
+                {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
+            if(!warp) return 1;
+        } else if(source_corners) {
             for(int i=0;i<4;++i) corners[i]={source_corners[2*i],source_corners[2*i+1]};
             auto source_transform=eg::PlaneTransform::fromCorners(corners);
             if(!transform || !source_transform) return 1;
@@ -123,4 +128,9 @@ int eg_render_plane_between(const EgPlaneImage* source,const EgPlaneImage* outpu
     std::int32_t quality,std::int32_t edge,const double* source_corners) noexcept {
     if(!source_corners) {if(report) *report={};return 1;}
     return renderPlane(source,output,depth,f,report,quality,edge,0,0,source_corners);
+}
+int eg_render_plane_region(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge) noexcept {
+    return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true);
 }

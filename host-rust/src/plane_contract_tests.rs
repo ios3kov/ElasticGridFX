@@ -58,6 +58,10 @@ fn plane_abi_layout_and_identity_roundtrip() {
     assert_eq!(unsafe {eg_render_plane(&src,&dst,32,&frame,&mut report)}, 0);
     assert_eq!(output, input);
     assert_eq!(report.invalid_plane, 0);
+    frame.corners=[0.2,0.3,1.8,0.0,1.9,1.8,0.1,1.7];
+    assert_eq!(unsafe {eg_render_plane_region(&src,&dst,32,&frame,&mut report,1,0)},0);
+    assert_eq!(output,input); // neutral skewed region is exact pass-through
+    frame.corners=[0.0,0.0,2.0,0.0,2.0,2.0,0.0,2.0];
     let projected_source = frame.corners;
     assert_eq!(unsafe {eg_render_plane_between(&src,&dst,32,&frame,&mut report,1,0,projected_source.as_ptr())},0);
     assert_eq!(output,input);

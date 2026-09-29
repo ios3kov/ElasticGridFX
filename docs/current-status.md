@@ -4,6 +4,30 @@
 
 **Production cycle: Stage 9 of 10 REOPENED; Stage 10 BLOCKED by text-layer 3D overlay regression; Stage 8 SKIPPED BY USER, not PASS.**
 
+## Latest product decision — perspective REGION, 2026-09-30
+
+User explicitly withdrew full-image Corner Pin projection. Four Corners now
+defines only the perspective region for guide deformation: neutral guides are
+exact identity; non-neutral guides warp within the plane; exterior stays intact.
+Direct native 3D text remains required. This supersedes older projection claims
+and the former zero-wave projection acceptance oracle below.
+
+Implementation: additive eg_render_plane_region reuses PlaneWarp::prepare and
+the existing 8/16/32-bit samplers. Rust Four Corners render calls this regional
+entry, not projected/between. Removed unused source projection snapshot fields;
+old additive core/ABI APIs remain for compatibility tests, not product behavior.
+Native acceptance runner still contains the OLD projection oracle: it must be
+revised before testing a new candidate; its old PASS is not region acceptance.
+New package/install/native verification: NOT RUN. 3D text host integration is
+still incomplete; no claim that this change resolves its overlay displacement.
+
+Local verification: CMake/CTest 18/18 PASS; Rust 24/24 PASS. New real bridge
+checks cover skewed neutral identity for all depths, both qualities/all edge
+modes, unchanged exterior under guide movement, and preserved row padding.
+Rust-to-C++ test confirms neutral skew identity through the new ABI.
+Scanner perspective-region-audit.json: review_required, exit 1, existing
+workflow pinning/credential and test-auth heuristic findings. Not security PASS.
+
 2026-09-30 update supersedes the acceptance below: the user supplied a screenshot
 showing the Layer Plane overlay displaced immediately after enabling 3D on a text
 layer, without rotation. Build label is EGFX-97a79761c3f9. The previous native UI

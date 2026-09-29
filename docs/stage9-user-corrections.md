@@ -8,11 +8,12 @@ Historical 34-frame/26-check PASS verifies that matrix only, not these requireme
 
 1. Rename Existing Grid to Layer Plane (same numeric mode). Hide native corner
    targets in the viewer and disable corner/reset controls outside Four Corners.
-2. Four Corners maps the complete layer image into the destination quadrilateral,
-   even with uniform guides and zero wave. It must not merely transform a region
-   in which an otherwise stationary image is distorted. Source rectangle and
-   destination plane are distinct. Outside the valid destination quad is
-   transparent; invalid-quad fallback remains original image until specified otherwise.
+2. Superseded by explicit user confirmation on 2026-09-30: Four Corners defines
+   a perspective deformation REGION, not image projection. Uniform guides and
+   zero wave preserve every input pixel regardless of corner placement. Moving
+   guides deforms within the region in plane coordinates; outside is unchanged.
+   Invalid-quad fallback remains original image. The earlier requirement to fit
+   the whole source image into the quad and clear its exterior is withdrawn.
 3. On a 3D layer the overlay, corner handles and inverse pointer mapping coincide
    with the actual transformed layer plane and active camera, including parenting.
    Validate positions numerically and visually, not just changed rendered frames.

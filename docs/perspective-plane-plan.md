@@ -1,5 +1,11 @@
 # Perspective plane and effect-chain contract
 
+2026-09-30 requirement update (takes precedence over historical projection
+requirements): Four Corners is a perspective deformation region. Neutral grid
+is exact identity; non-neutral deformation acts only inside the quad, following
+its perspective. Exterior pixels are unchanged. Native 3D text support remains
+required, without precomposition. See stage9-user-corrections.md.
+
 Confirmed by the user on 2026-09-28. Source baseline: a871596 (native plugin
 installed for testing: 6d3b846 / EGFX-603e9d3e4025d271e0488201).
 

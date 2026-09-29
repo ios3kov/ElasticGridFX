@@ -64,3 +64,9 @@ extern "C" int eg_render_plane_projected(const EgPlaneImage* source, const EgPla
 extern "C" int eg_render_plane_between(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
     std::int32_t quality, std::int32_t edge, const double* source_corners) noexcept;
+
+// Perspective deformation region, not image projection. Neutral guides and
+// pixels outside the quad preserve input exactly. Same frame ABI and sampler.
+extern "C" int eg_render_plane_region(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge) noexcept;

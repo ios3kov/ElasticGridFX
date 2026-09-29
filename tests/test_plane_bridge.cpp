@@ -53,7 +53,35 @@ template<typename T> void verify(int depth) {
     for(int y=0;y<n;++y) for(int x=0;x<n*4;++x) assert(out[y*stride+x]==0);
     assert(eg_render_plane(nullptr,&dst,depth,&frame,&report)==1);
 }
+template<typename T> void verifyRegion(int depth) {
+    constexpr int n=9,stride=40;
+    std::vector<T> source(n*stride),out(n*stride,T(77));
+    for(int i=0;i<n*stride;++i) source[i]=T(i%101);
+    float columns[]={0,.5f,1},rows[]={0,.5f,1};
+    EgPlaneFrame frame{{1,1,7,2,6,7,2,6},columns,rows,3,3,1,1,n,n,0,0,0,0,0,.25f,nullptr,nullptr};
+    EgPlaneImage src{source.data(),stride*sizeof(T),n,n},dst{out.data(),stride*sizeof(T),n,n};
+    EgPlaneReport report{};
+    for(int quality=0;quality<2;++quality) for(int edge=0;edge<3;++edge) {
+        assert(eg_render_plane_region(&src,&dst,depth,&frame,&report,quality,edge)==0);
+        for(int y=0;y<n;++y) {
+            assert(!std::memcmp(&out[y*stride],&source[y*stride],n*4*sizeof(T)));
+            for(int i=n*4;i<stride;++i)assert(out[y*stride+i]==T(77));
+        }
+    }
+    columns[1]=.75f;
+    assert(eg_render_plane_region(&src,&dst,depth,&frame,&report,1,0)==0);
+    auto plane=PlaneTransform::fromCorners({{{1,1},{7,2},{6,7},{2,6}}});assert(plane);
+    bool changed=false;
+    for(int y=0;y<n;++y) for(int x=0;x<n;++x) {
+        auto local=plane->toLocal({double(x),double(y)});
+        bool same=!std::memcmp(&out[y*stride+x*4],&source[y*stride+x*4],4*sizeof(T));
+        if(!local || local->x<0 || local->x>1 || local->y<0 || local->y>1) assert(same);
+        else changed|=!same;
+    }
+    assert(changed);
+}
 int main(){
+    verifyRegion<std::uint8_t>(8);verifyRegion<std::uint16_t>(16);verifyRegion<float>(32);
     verify<std::uint8_t>(8);verify<std::uint16_t>(16);verify<float>(32);
     // AE scales the full-resolution endpoint (127 -> 63.5), not
     // the rounded raster endpoint (64 - 1). A fit plane must stay identity.
