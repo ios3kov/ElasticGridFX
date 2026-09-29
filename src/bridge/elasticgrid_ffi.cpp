@@ -174,17 +174,7 @@ PreparedBridge& reusable_bridge_state() {
     return state;
 }
 
-int prepare_bridge(std::int32_t input_width,
-                   std::int32_t input_height,
-                   std::int32_t output_width,
-                   std::int32_t output_height,
-                   const EgRenderParams* p,
-                   PreparedBridge& out,
-                   bool force_sampling_plan = false) {
-    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0) {
-        return 1;
-    }
-
+int prepare_grid(const EgRenderParams* p, PreparedBridge& out) {
     // Num Columns/Rows in the original are counts of INTERNAL guides.
     // The working axis therefore has N+2 points including implicit 0/1 bounds.
     const int columns = std::clamp<int>(p->columns, 1, 50);
@@ -223,6 +213,19 @@ int prepare_bridge(std::int32_t input_width,
     const float time_seconds = finite_or(p->time_seconds, 0.0f);
     out.gx.evaluatedInto(out.x_lines, wave, time_seconds, min_spacing, wave_x);
     out.gy.evaluatedInto(out.y_lines, wave, time_seconds, min_spacing, wave_y);
+    return 0;
+}
+
+int prepare_bridge(std::int32_t input_width,
+                   std::int32_t input_height,
+                   std::int32_t output_width,
+                   std::int32_t output_height,
+                   const EgRenderParams* p,
+                   PreparedBridge& out,
+                   bool force_sampling_plan = false) {
+    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0) return 1;
+    const int grid_result = prepare_grid(p, out);
+    if (grid_result != 0) return grid_result;
 
     const float easing = std::clamp(finite_or(p->stretch_easing, 0.0f), 0.0f, 1.0f);
     const float easing_distance = std::clamp(finite_or(p->easing_distance, 0.25f), 0.0f, 1.0f);
@@ -342,6 +345,20 @@ bool valid_sparse_span(std::ptrdiff_t stride, int width, int height, std::size_t
 }
 
 } // namespace
+
+int eg_evaluate_grid(const EgRenderParams* p, float* columns, int column_capacity,
+                     float* rows, int row_capacity) noexcept {
+    if(!p || !columns || !rows || p->columns<1 || p->columns>50 || p->rows<1 || p->rows>50 ||
+       column_capacity<p->columns+2 || row_capacity<p->rows+2) return 1;
+    try {
+        PreparedBridge state; // owned invocation; no UI/render shared mutable buffers
+        const int result=prepare_grid(p,state);
+        if(result!=0) return result;
+        std::copy(state.x_lines.begin(),state.x_lines.end(),columns);
+        std::copy(state.y_lines.begin(),state.y_lines.end(),rows);
+        return 0;
+    } catch(...) {return 3;}
+}
 
 int eg_drag_axis(
     float* lines,

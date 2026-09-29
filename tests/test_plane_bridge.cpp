@@ -45,4 +45,21 @@ template<typename T> void verify(int depth) {
     for(int y=0;y<n;++y) for(int x=0;x<n*4;++x) assert(out[y*stride+x]==0);
     assert(eg_render_plane(nullptr,&dst,depth,&frame,&report)==1);
 }
-int main(){verify<std::uint8_t>(8);verify<std::uint16_t>(16);verify<float>(32);}
+int main(){
+    verify<std::uint8_t>(8);verify<std::uint16_t>(16);verify<float>(32);
+    const double corners[]={10,20,180,35,130,160,-15,115};
+    auto* geometry=eg_plane_geometry_create(corners);assert(geometry);
+    for(int y=0;y<=20;++y) for(int x=0;x<=20;++x) {
+        double surface[2],local[2];
+        assert(eg_plane_geometry_map(geometry,0,x/20.,y/20.,surface)==0);
+        assert(eg_plane_geometry_map(geometry,1,surface[0],surface[1],local)==0);
+        assert(std::abs(local[0]-x/20.)<1e-10 && std::abs(local[1]-y/20.)<1e-10);
+    }
+    double output[]={7,8};
+    assert(eg_plane_geometry_map(geometry,2,0,0,output)==1 && output[0]==7 && output[1]==8);
+    assert(eg_plane_geometry_map(nullptr,0,0,0,output)==1);
+    eg_plane_geometry_destroy(geometry);eg_plane_geometry_destroy(nullptr);
+    const double invalid[8]{};
+    assert(eg_plane_geometry_create(invalid)==nullptr);
+    assert(eg_plane_geometry_create(nullptr)==nullptr);
+}

@@ -1,35 +1,39 @@
 //! Real Rust-to-C++ ABI checks; not AE host/render acceptance.
-use std::ffi::c_void;
-#[repr(C)]
-struct Frame {
-    corners: [f64; 8],
-    columns: *const f32,
-    rows: *const f32,
-    column_count: i32,
-    row_count: i32,
-    surface_units_x: f64,
-    surface_units_y: f64,
-    canvas_width: i32,
-    canvas_height: i32,
-    source_x: i32,
-    source_y: i32,
-    output_x: i32,
-    output_y: i32,
-    easing: f32,
-    easing_distance: f32,
-    abort_fn: Option<unsafe extern "C" fn(*mut c_void) -> i32>,
-    abort_refcon: *mut c_void,
+use super::plane::*;
+
+#[test]
+fn shared_geometry_roundtrip_and_owned_snapshot() {
+    let mut state=State {corners:Some([10.0,20.0,180.0,35.0,130.0,160.0,-15.0,115.0])};
+    let snapshot=state.clone();
+    let geometry=snapshot.geometry().unwrap();
+    state.corners=Some([0.0;8]);
+    assert!(state.geometry().is_none());
+    for y in 0..=20 {for x in 0..=20 {
+        let local=(x as f64/20.0,y as f64/20.0);
+        let screen=geometry.map(false,local.0,local.1).unwrap();
+        let roundtrip=geometry.map(true,screen.0,screen.1).unwrap();
+        assert!((roundtrip.0-local.0).abs()<1e-10);
+        assert!((roundtrip.1-local.1).abs()<1e-10);
+    }}
+    assert!(geometry.map(false,f64::NAN,0.0).is_none());
+    assert!(State::default().corners.is_none());
 }
-#[repr(C)]
-struct Image { pixels: *mut c_void, row_bytes: isize, width: i32, height: i32 }
-#[repr(C)]
-#[derive(Default)]
-struct Report { invalid_plane: i32, reserved: i32, outside_pixels: u64, invalid_projection_pixels: u64 }
-unsafe extern "C" {
-    fn eg_render_plane(src: *const Image, dst: *const Image, depth: i32,
-                       frame: *const Frame, report: *mut Report) -> i32;
-    fn eg_render_plane_sampled(src: *const Image, dst: *const Image, depth: i32,
-                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+
+#[test]
+fn saved_parameter_names_and_order_are_append_only() {
+    use super::Params::*;
+    let legacy=[Columns,Rows,GridState,TensionRadius,Falloff,ElasticityStrength,
+        MinSpacing,StretchEasing,EasingDistance,WaveEnabled,WaveAmplitude,
+        WaveFrequency,WavePhase,WaveSpeed,WaveAxis,EdgeMode,Quality];
+    let names=["Columns","Rows","GridState","TensionRadius","Falloff","ElasticityStrength",
+        "MinSpacing","StretchEasing","EasingDistance","WaveEnabled","WaveAmplitude",
+        "WaveFrequency","WavePhase","WaveSpeed","WaveAxis","EdgeMode","Quality"];
+    for (index,(param,name)) in legacy.into_iter().zip(names).enumerate() {
+        assert_eq!(format!("{param:?}"),name); // host derives saved ID from this name
+        assert_eq!(param as usize,index);
+    }
+    assert_eq!(PlaneMode as usize,17);
+    assert_eq!(super::plane::CORNERS,[PlaneTopLeft,PlaneTopRight,PlaneBottomRight,PlaneBottomLeft]);
 }
 
 #[test]

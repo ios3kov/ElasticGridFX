@@ -3,7 +3,7 @@
 Confirmed by the user on 2026-09-28. Source baseline: a871596 (native plugin
 installed for testing: 6d3b846 / EGFX-603e9d3e4025d271e0488201).
 
-## Required product behavior (not implemented/verified yet)
+## Required product behavior (partly implemented; real-host acceptance pending)
 
 Reconfirmed 2026-09-29: the built-in four-corner control places the deformation
 plane itself. In 3D-layer mode the plane follows layer transforms and camera;
@@ -101,9 +101,42 @@ in 8/16/32 bpc, including off-canvas mapping, HDR, sparse input and row padding.
 17 CTest targets, 20 Rust tests, Clippy (existing macro exceptions), bridge
 ASan/UBSan PASS. Tests include all depths, direct-core equality, ABI layouts,
 invalid-grid/depth/view handling, invalid-plane copying, empty input and abort.
-Production render dispatch is NOT connected yet; native UI and AE acceptance
-remain NOT_RUN. No installed artifact changes in this slice.
-P9-3: append compatible parameters and connect overlay/pointer inversion.
+At the bridge-only slice, production dispatch was not connected. This is
+superseded by P9-3 below; real AE acceptance is still required.
+
+P9-3 source implementation: append PlaneMode, four native Point parameters and
+ResetPlane (Fit Layer). Default Existing Grid retains the previous dispatch and
+saved state. Four Corners snapshots every point during SmartPreRender; SmartRender
+never reads UI parameters. Legacy render also dispatches to the same plane path.
+The grid/wave evaluator is shared with the existing renderer; tests require
+bit-exact legacy output when rendering the evaluated axes without wave a second
+time. UI owns a validated native geometry through a Rust RAII wrapper, so forward
+draw and inverse drag use the renderer's PlaneTransform implementation. Corner
+grips remain draggable for invalid quads; guide interaction is disabled and the
+ECP reports original-image fallback. Corner changes use native change flags.
+Plane guides display evaluated wave positions; drag compensates their current
+offset while retaining the existing spacing/elasticity constraints.
+
+Coordinate contract: native Point values arrive in input-buffer coordinates,
+already adjusted by AE for downsampling/PAR. Frame snapshots subtract the reported
+pre-effect source origin once. UI never reads that frame-only field. UI callbacks
+handle layer/comp/view conversion; don't apply the camera a second time to an
+ordinary 3D layer's already-projected result. Failed/singular UI transforms do not
+mutate controls. Coordinates outside the legacy 16.16 callback range are skipped
+in the viewer, remaining editable numerically. Fit Layer uses last pixel centers
+(width-1,height-1), matching the old raster domain; point defaults use AE's standard
+percentage corners. Full real-host origin/downsample/3D validation remains pending.
+
+Source gates: 18 CTest, 22 Rust tests, Clippy and geometry ASan/UBSan PASS on arm64.
+Fixture tests/ae_plane_smoke.jsx requires an empty owned project and captures
+identity/deformed/skew/invalid/half-resolution comparisons in all three depths.
+CAPTURED is not PASS: numeric output analysis and exact loaded identity are separate
+mandatory gates, followed by Undo/Redo/save/reopen and user-owned visual acceptance.
+
+Sources rechecked 2026-09-29:
+https://ae-plugins.docsforadobe.dev/effect-basics/parameters/
+https://ae-plugins.docsforadobe.dev/effect-details/pixel-aspect-ratio/
+https://ae-plugins.docsforadobe.dev/effect-ui-events/ui-callbacks/
 P9-4: integrate AE layer/camera with context-correct transforms and real-host
 acceptance. Existing host-rust/src/ui.rs already uses layer_to_comp/comp_to_layer;
 do not apply camera projection twice to an ordinary transformed layer.

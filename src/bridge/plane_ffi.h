@@ -1,6 +1,15 @@
 #pragma once
 #include "bridge/elasticgrid_ffi.h"
 
+// UI-owned immutable geometry. Create once per event, destroy on every exit.
+// No host calls, no mutable shared state. Null creation means invalid corners.
+struct EgPlaneGeometry;
+extern "C" EgPlaneGeometry* eg_plane_geometry_create(const double* corners) noexcept;
+extern "C" void eg_plane_geometry_destroy(EgPlaneGeometry* geometry) noexcept;
+// inverse=0 local->surface, inverse=1 surface->local. No output on failure.
+extern "C" int eg_plane_geometry_map(const EgPlaneGeometry* geometry, int inverse,
+    double x, double y, double* output_xy) noexcept;
+
 // Separate additive ABI: existing EgRenderParams and project IDs are untouched.
 // Host supplies an immutable, already evaluated (including wave) guide snapshot.
 // Corners are TL,TR,BR,BL in surface coordinates; row bytes are positive bytes.

@@ -49,6 +49,31 @@ int main() {
     constexpr int h = 32;
 
     {
+        // Plane overlay/render must evaluate the same immutable wave axes as
+        // the legacy renderer, not a second approximation or shared UI state.
+        std::vector<float> src(w*h*4),expected(src.size()),actual(src.size());
+        for(std::size_t i=0;i<src.size();++i) src[i]=float(i%101)/25.f-1;
+        for(int axis=1;axis<=3;++axis) for(int quality=1;quality<=2;++quality) {
+            auto p=defaults();p.wave_enabled=1;p.wave_amplitude=.12f;
+            p.wave_axis=axis;p.wave_speed=.7f;p.time_seconds=1.25f;p.quality=quality;
+            float columns[6],rows[6];
+            assert(eg_evaluate_grid(&p,columns,6,rows,6)==0);
+            assert(columns[0]==0 && columns[5]==1 && rows[0]==0 && rows[5]==1);
+            assert(eg_render_frame(src.data(),w*16,w,h,expected.data(),w*16,w,h,32,&p)==0);
+            p.wave_enabled=0;p.column_lines=columns;p.row_lines=rows;
+            p.column_line_count=p.row_line_count=6;
+            assert(eg_render_frame(src.data(),w*16,w,h,actual.data(),w*16,w,h,32,&p)==0);
+            assert(actual==expected);
+            const auto before=std::vector<float>(columns,columns+6);
+            assert(eg_evaluate_grid(&p,columns,5,rows,6)==1);
+            assert(std::equal(before.begin(),before.end(),columns));
+            p.column_line_count=5;
+            assert(eg_evaluate_grid(&p,columns,6,rows,6)==4);
+            assert(std::equal(before.begin(),before.end(),columns));
+        }
+    }
+
+    {
         // Direct-guide ABI: grabbed line follows the pointer, neighbors move,
         // endpoints remain pinned and ordering is preserved.
         float lines[] = {0.0f, 0.25f, 0.5f, 0.75f, 1.0f};

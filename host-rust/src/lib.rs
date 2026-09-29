@@ -5,6 +5,7 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod plane;
 #[cfg(test)]
 mod plane_contract_tests;
 mod build_identity {
@@ -39,6 +40,12 @@ pub(crate) enum Params {
     WaveAxis,
     EdgeMode,
     Quality,
+    PlaneMode,
+    PlaneTopLeft,
+    PlaneTopRight,
+    PlaneBottomRight,
+    PlaneBottomLeft,
+    ResetPlane,
 }
 
 #[derive(Default)]
@@ -422,6 +429,7 @@ struct EgRenderParams {
 #[derive(Clone, Debug)]
 struct SmartRenderSnapshot {
     grid: GridArb,
+    plane: plane::State,
     tension_radius: f32,
     falloff: i32,
     elasticity_strength: f32,
@@ -519,6 +527,7 @@ fn smart_render_snapshot(
 
     Ok(SmartRenderSnapshot {
         grid,
+        plane: plane::State::read(params, &in_data, true, true)?,
         tension_radius: checked_float(params, Params::TensionRadius)? as f32,
         falloff: checked_popup(params, Params::Falloff)?,
         elasticity_strength: checked_float(params, Params::ElasticityStrength)? as f32 / 100.0,
@@ -996,6 +1005,24 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }))?;
 
+        // Append only: old saved IDs, types and popup ordinals are unchanged.
+        params.add(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
+            f.set_options(&["Existing Grid", "Four Corners"]);
+            f.set_default(1); f.set_value(1);
+        }))?;
+        for (id, name, point) in [
+            (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
+            (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
+            (Params::PlaneBottomRight, "Plane Bottom Right", (100.0, 100.0)),
+            (Params::PlaneBottomLeft, "Plane Bottom Left", (0.0, 100.0)),
+        ] {
+            params.add(id, name, ae::PointDef::setup(|f| {
+                f.set_default(point); f.set_restrict_bounds(false);
+            }))?;
+        }
+        params.add(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
+            f.set_label("Fit Layer");
+        }))?;
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(
                 ae::CustomEventFlags::COMP |
@@ -1023,6 +1050,18 @@ impl AdobePluginGlobal for Plugin {
                 out_data.set_return_msg(build_identity::ABOUT);
             }
             ae::Command::UserChangedParam { param_index } => {
+                if params.index(Params::ResetPlane) == Some(param_index) {
+                    // Layer-space last pixel centers match the legacy raster
+                    // grid domain. UI command: never consult frame-only origin.
+                    let w=in_data.width().saturating_sub(1).max(0) as f32;
+                    let h=in_data.height().saturating_sub(1).max(0) as f32;
+                    for (id,point) in plane::CORNERS.into_iter().zip([(0.0,0.0),(w,0.0),(w,h),(0.0,h)]) {
+                        let mut param=params.get_mut(id)?;
+                        param.as_point_mut()?.set_value(point);
+                        param.set_value_changed();
+                    }
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
+                }
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {
@@ -1066,7 +1105,10 @@ impl AdobePluginGlobal for Plugin {
                 let grid = grid_snapshot(params)?;
                 let mut p = evaluated_params(params, in_data, &grid)?;
                 apply_spatial_context(in_data, &in_layer, &out_layer, &mut p);
-                render(&in_layer, &mut out_layer, &p)?;
+                let plane = plane::State::read(params, &in_data, false, true)?;
+                if plane.corners.is_some() {
+                    plane::render(Some(&in_layer), &mut out_layer, &p, &plane)?;
+                } else { render(&in_layer, &mut out_layer, &p)?; }
             }
             ae::Command::SmartPreRender { mut extra } => {
                 let snapshot = smart_render_snapshot(params, in_data)?;
@@ -1125,7 +1167,9 @@ impl AdobePluginGlobal for Plugin {
                         let output_origin = output.origin();
                         p.output_origin_x = output_origin.h;
                         p.output_origin_y = output_origin.v;
-                        render_sparse(input.as_ref(), &mut output, &p)?;
+                        if snapshot.plane.corners.is_some() {
+                            plane::render(input.as_ref(), &mut output, &p, &snapshot.plane)?;
+                        } else { render_sparse(input.as_ref(), &mut output, &p)?; }
                     }
                     Ok(())
                 })();
@@ -1241,6 +1285,7 @@ mod tests {
 
         let snapshot = SmartRenderSnapshot {
             grid: grid.clone(),
+            plane: plane::State::default(),
             tension_radius: 3.0,
             falloff: 2,
             elasticity_strength: 1.0,
@@ -1404,6 +1449,7 @@ mod tests {
         let grid = GridArb::uniform(4, 4);
         let snapshot = SmartRenderSnapshot {
             grid,
+            plane: plane::State::default(),
             tension_radius: 3.0,
             falloff: 2,
             elasticity_strength: 1.0,

@@ -2,12 +2,31 @@
 #include "core/PlaneRenderer.h"
 #include <cmath>
 #include <stdexcept>
+#include <new>
 
 namespace eg = elasticgrid;
 static_assert(sizeof(EgPlaneFrame)==152);
 static_assert(offsetof(EgPlaneFrame,abort_fn)==136);
 static_assert(sizeof(EgPlaneImage)==24);
 static_assert(sizeof(EgPlaneReport)==24);
+
+struct EgPlaneGeometry { eg::PlaneTransform transform; };
+EgPlaneGeometry* eg_plane_geometry_create(const double* values) noexcept {
+    if(!values) return nullptr;
+    std::array<eg::PlanePoint,4> corners{};
+    for(int i=0;i<4;++i) corners[i]={values[2*i],values[2*i+1]};
+    auto transform=eg::PlaneTransform::fromCorners(corners);
+    return transform?new(std::nothrow) EgPlaneGeometry{*transform}:nullptr;
+}
+void eg_plane_geometry_destroy(EgPlaneGeometry* geometry) noexcept {delete geometry;}
+int eg_plane_geometry_map(const EgPlaneGeometry* geometry,int inverse,
+    double x,double y,double* output) noexcept {
+    if(!geometry || !output || (inverse!=0 && inverse!=1)) return 1;
+    const auto point=inverse?geometry->transform.toLocal({x,y}):geometry->transform.toSurface({x,y});
+    if(!point) return 1;
+    output[0]=point->x;output[1]=point->y;
+    return 0;
+}
 
 namespace {
 bool axisValid(const float* values,int count) {

@@ -6,6 +6,49 @@ const GUIDE_GAP: f32 = 12.0;
 const DRAG_NONE: isize = 0;
 const DRAG_COLUMNS: isize = 1;
 const DRAG_ROWS: isize = 2;
+const DRAG_CORNER: isize = 3;
+
+struct ViewPlane {
+    state: plane::State,
+    geometry: Option<plane::Geometry>,
+    width: f32,
+    height: f32,
+}
+impl ViewPlane {
+    fn read(in_data: &ae::InData, params: &ae::Parameters<Params>) -> Result<Self, ae::Error> {
+        let state = plane::State::read(params, in_data, false, false)?;
+        let geometry = state.geometry();
+        Ok(Self {state, geometry, width: in_data.width().max(1) as f32,
+            height: in_data.height().max(1) as f32})
+    }
+    fn invalid(&self) -> bool { self.state.corners.is_some() && self.geometry.is_none() }
+    fn local(&self, x: f32, y: f32) -> Option<(f32, f32)> {
+        if let Some(geometry) = &self.geometry {
+            geometry.map(true, x as f64, y as f64).map(|(x,y)| (x as f32,y as f32))
+        } else if self.invalid() { None }
+        else { Some((x / self.width, y / self.height)) }
+    }
+}
+
+fn grid_to_frame(in_data: &ae::InData, event: &ae::EventExtra, plane: &ViewPlane,
+                 x: f32, y: f32) -> Result<ae::drawbot::PointF32, ae::Error> {
+    let (x,y) = if let Some(geometry) = &plane.geometry {
+        let (x,y) = geometry.map(false, (x/plane.width) as f64, (y/plane.height) as f64)
+            .ok_or(ae::Error::BadCallbackParameter)?;
+        (x as f32,y as f32)
+    } else {(x,y)};
+    layer_to_frame(in_data,event,x,y)
+}
+
+fn displayed_grid(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
+    -> Result<GridArb, ae::Error> {
+    let mut grid = grid_snapshot(params)?;
+    if plane.state.corners.is_some() {
+        let p = evaluated_params(params, *in_data, &grid)?;
+        (grid.column_lines,grid.row_lines) = plane::evaluated_axes(&p)?;
+    }
+    Ok(grid)
+}
 
 thread_local! {
     static GUIDE_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
@@ -86,9 +129,9 @@ fn guide_segments(a: ae::drawbot::PointF32, b: ae::drawbot::PointF32,
 }
 
 fn column_crossings(in_data: &ae::InData, event: &ae::EventExtra,
-                    grid: &GridArb, x: f32) -> Result<Vec<ae::drawbot::PointF32>, ae::Error> {
+                    plane: &ViewPlane, grid: &GridArb, x: f32) -> Result<Vec<ae::drawbot::PointF32>, ae::Error> {
     grid.row_lines.iter().skip(1).take(grid.row_lines.len().saturating_sub(2))
-        .map(|y| layer_to_frame(in_data, event, x, y * in_data.height().max(1) as f32))
+        .map(|y| grid_to_frame(in_data, event, plane, x, y * in_data.height().max(1) as f32))
         .collect()
 }
 
@@ -98,14 +141,21 @@ fn layer_to_frame(
     x: f32,
     y: f32,
 ) -> Result<ae::drawbot::PointF32, ae::Error> {
+    let unavailable=ae::drawbot::PointF32 {x:f32::NAN,y:f32::NAN};
+    // AE's legacy UI conversion uses 16.16. Never saturate oversized corners
+    // into a false on-screen position. Such points remain editable in the ECP.
+    if !x.is_finite() || !y.is_finite() || x.abs()>32767.0 || y.abs()>32767.0 {
+        return Ok(unavailable);
+    }
     let mut p = ae::sys::PF_FixedPoint {
         x: ae::Fixed::from(x).as_fixed(),
         y: ae::Fixed::from(y).as_fixed(),
     };
-    if event.window_type() == ae::WindowType::Comp {
-        event.callbacks().layer_to_comp(in_data.current_time(), in_data.time_scale(), &mut p)?;
+    if event.window_type() == ae::WindowType::Comp &&
+        event.callbacks().layer_to_comp(in_data.current_time(), in_data.time_scale(), &mut p).is_err() {
+        return Ok(unavailable);
     }
-    event.callbacks().source_to_frame(&mut p)?;
+    if event.callbacks().source_to_frame(&mut p).is_err() {return Ok(unavailable);}
     Ok(ae::drawbot::PointF32 {
         x: ae::Fixed::from_fixed(p.x).as_f32(),
         y: ae::Fixed::from_fixed(p.y).as_f32(),
@@ -149,6 +199,7 @@ fn point_segment_distance(px: f32, py: f32, a: ae::drawbot::PointF32, b: ae::dra
 fn hit_test(
     in_data: &ae::InData,
     grid: &GridArb,
+    plane: &ViewPlane,
     event: &ae::EventExtra,
     mouse: ae::Point,
 ) -> Result<Option<(isize, usize)>, ae::Error> {
@@ -159,14 +210,24 @@ fn hit_test(
     let height = in_data.height().max(1) as f32;
     let mut best: Option<(f32, isize, usize)> = None;
 
+    if let Some(corners) = plane.state.corners {
+        for i in 0..4 {
+            let p = layer_to_frame(in_data,event,corners[2*i] as f32,corners[2*i+1] as f32)?;
+            let d = ((mouse.h as f32-p.x).powi(2)+(mouse.v as f32-p.y).powi(2)).sqrt();
+            if d <= HIT_SLOP && best.map(|v| d<v.0).unwrap_or(true) {best=Some((d,DRAG_CORNER,i));}
+        }
+        if best.is_some() {return Ok(best.map(|(_,axis,index)| (axis,index)));}
+    }
+    if plane.invalid() {return Ok(None);}
+
     for i in 1..grid.column_lines.len().saturating_sub(1) {
         if grid.column_pins.get(i).copied().unwrap_or(0) != 0 {
             continue;
         }
         let x = grid.column_lines[i] * width;
-        let a = layer_to_frame(in_data, event, x, 0.0)?;
-        let b = layer_to_frame(in_data, event, x, height)?;
-        let crossings = column_crossings(in_data, event, grid, x)?;
+        let a = grid_to_frame(in_data, event, plane, x, 0.0)?;
+        let b = grid_to_frame(in_data, event, plane, x, height)?;
+        let crossings = column_crossings(in_data, event, plane, grid, x)?;
         let (segments, _) = guide_segments(a, b, &crossings,
             grid.column_lines.len().max(grid.row_lines.len()) <= 34);
         let d = segments.into_iter().map(|(a, b)|
@@ -181,8 +242,8 @@ fn hit_test(
             continue;
         }
         let y = grid.row_lines[i] * height;
-        let a = layer_to_frame(in_data, event, 0.0, y)?;
-        let b = layer_to_frame(in_data, event, width, y)?;
+        let a = grid_to_frame(in_data, event, plane, 0.0, y)?;
+        let b = grid_to_frame(in_data, event, plane, width, y)?;
         let d = point_segment_distance(mouse.h as f32, mouse.v as f32, a, b);
         if d <= HIT_SLOP && best.map(|v| d < v.0).unwrap_or(true) {
             best = Some((d, DRAG_ROWS, i));
@@ -198,6 +259,7 @@ fn draw_segment(
     a: ae::drawbot::PointF32,
     b: ae::drawbot::PointF32,
 ) -> Result<(), ae::Error> {
+    if !a.x.is_finite() || !a.y.is_finite() || !b.x.is_finite() || !b.y.is_finite() {return Ok(());}
     let mut path = supplier.new_path()?;
     path.move_to(a.x, a.y)?;
     path.line_to(b.x, b.y)?;
@@ -207,13 +269,14 @@ fn draw_segment(
 
 fn draw_viewer(
     in_data: &ae::InData,
-    params: &ae::Parameters<Params>,
+    params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
     if event.in_flags().contains(ae::EventInFlags::DONT_DRAW) {
         return Ok(());
     }
-    let grid = grid_snapshot(params)?;
+    let plane = ViewPlane::read(in_data, params)?;
+    let grid = displayed_grid(in_data,params,&plane)?;
     let drawbot = event.context_handle().drawing_reference()?;
     let supplier = drawbot.supplier()?;
     let surface = drawbot.surface()?;
@@ -232,12 +295,29 @@ fn draw_viewer(
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
 
+    if let Some(corners) = plane.state.corners {
+        for i in 0..4 {
+            let p=layer_to_frame(in_data,event,corners[2*i] as f32,corners[2*i+1] as f32)?;
+            // Four visible, frame-sized corner grips, including invalid quads so
+            // the user can repair them. Native point controls remain available.
+            let pts=[(p.x-5.0,p.y-5.0),(p.x+5.0,p.y-5.0),(p.x+5.0,p.y+5.0),(p.x-5.0,p.y+5.0)];
+            for j in 0..4 {
+                stroke(ae::drawbot::PointF32{x:pts[j].0,y:pts[j].1},
+                    ae::drawbot::PointF32{x:pts[(j+1)%4].0,y:pts[(j+1)%4].1})?;
+            }
+        }
+    }
+    if plane.invalid() {
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
+        return Ok(());
+    }
+
     // Border keeps the overlay visually tied to the source layer even when the
     // layer itself is scaled/rotated in a Comp viewer.
-    let p00 = layer_to_frame(in_data, event, 0.0, 0.0)?;
-    let p10 = layer_to_frame(in_data, event, width, 0.0)?;
-    let p11 = layer_to_frame(in_data, event, width, height)?;
-    let p01 = layer_to_frame(in_data, event, 0.0, height)?;
+    let p00 = grid_to_frame(in_data, event, &plane, 0.0, 0.0)?;
+    let p10 = grid_to_frame(in_data, event, &plane, width, 0.0)?;
+    let p11 = grid_to_frame(in_data, event, &plane, width, height)?;
+    let p01 = grid_to_frame(in_data, event, &plane, 0.0, height)?;
     stroke(p00, p10)?;
     stroke(p10, p11)?;
     stroke(p11, p01)?;
@@ -246,9 +326,9 @@ fn draw_viewer(
     let draw_handles = grid.column_lines.len().max(grid.row_lines.len()) <= 34;
     for i in 1..grid.column_lines.len().saturating_sub(1) {
         let x = grid.column_lines[i] * width;
-        let a = layer_to_frame(in_data, event, x, 0.0)?;
-        let b = layer_to_frame(in_data, event, x, height)?;
-        let crossings = column_crossings(in_data, event, &grid, x)?;
+        let a = grid_to_frame(in_data, event, &plane, x, 0.0)?;
+        let b = grid_to_frame(in_data, event, &plane, x, height)?;
+        let crossings = column_crossings(in_data, event, &plane, &grid, x)?;
         let (lines, grips) = guide_segments(a, b, &crossings,
             draw_handles && grid.column_pins.get(i).copied().unwrap_or(0) == 0);
         for (a, b) in lines { stroke(a, b)?; }
@@ -259,8 +339,8 @@ fn draw_viewer(
     }
     for i in 1..grid.row_lines.len().saturating_sub(1) {
         let y = grid.row_lines[i] * height;
-        let a = layer_to_frame(in_data, event, 0.0, y)?;
-        let b = layer_to_frame(in_data, event, width, y)?;
+        let a = grid_to_frame(in_data, event, &plane, 0.0, y)?;
+        let b = grid_to_frame(in_data, event, &plane, width, y)?;
         let (lines, grips) = guide_segments(a, b, &[],
             draw_handles && grid.row_pins.get(i).copied().unwrap_or(0) == 0);
         for (a, b) in lines { stroke(a, b)?; }
@@ -275,6 +355,7 @@ fn draw_viewer(
 }
 
 fn draw_effect_control(
+    in_data: &ae::InData,
     params: &ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
@@ -298,7 +379,9 @@ fn draw_effect_control(
     })?;
     let raw_id = build_identity::BUILD_ID.strip_prefix("EGFX-").unwrap_or(build_identity::BUILD_ID);
     let short_len = raw_id.len().min(12);
-    let label = format!("{} × {}   EGFX-{}", grid.columns, grid.rows, &raw_id[..short_len]);
+    let plane=ViewPlane::read(in_data,params)?;
+    let label = if plane.invalid() {"Invalid plane: original image".to_owned()}
+        else {format!("{} × {}   EGFX-{}", grid.columns, grid.rows, &raw_id[..short_len])};
     let origin = ae::drawbot::PointF32 {
         x: frame.left as f32 + 6.0,
         y: frame.top as f32 + 9.0,
@@ -323,7 +406,7 @@ pub fn draw(
 ) -> Result<(), ae::Error> {
     match event.window_type() {
         ae::WindowType::Comp | ae::WindowType::Layer => draw_viewer(in_data, params, event),
-        ae::WindowType::Effect => draw_effect_control(params, event),
+        ae::WindowType::Effect => draw_effect_control(in_data, params, event),
     }
 }
 
@@ -335,8 +418,9 @@ pub fn click(
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }
-    let grid = grid_snapshot(params)?;
-    if let Some((axis, index)) = hit_test(in_data, &grid, event, event.screen_point())? {
+    let plane=ViewPlane::read(in_data,params)?;
+    let grid=displayed_grid(in_data,params,&plane)?;
+    if let Some((axis, index)) = hit_test(in_data, &grid, &plane, event, event.screen_point())? {
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
         event.set_send_drag(true);
@@ -367,24 +451,38 @@ fn drag_inner(
 ) -> Result<(), ae::Error> {
     let axis = event.continue_refcon(0);
     let index = event.continue_refcon(1) as usize;
-    if axis == DRAG_NONE || (axis != DRAG_COLUMNS && axis != DRAG_ROWS) {
+    if axis == DRAG_NONE || (axis != DRAG_COLUMNS && axis != DRAG_ROWS && axis != DRAG_CORNER) {
         event.set_send_drag(false);
         return Ok(());
     }
     set_drag_cursor(true);
 
-    let (layer_x, layer_y) = frame_to_layer(in_data, event, event.screen_point())?;
-    let width = in_data.width().max(1) as f32;
-    let height = in_data.height().max(1) as f32;
+    let Ok((layer_x, layer_y)) = frame_to_layer(in_data, event, event.screen_point()) else {
+        event.set_send_drag(false);return Ok(());
+    };
+    if axis == DRAG_CORNER {
+        if index>=4 {event.set_send_drag(false);return Ok(());}
+        let mut param=params.get_mut(plane::CORNERS[index])?;
+        param.as_point_mut()?.set_value((layer_x,layer_y));
+        param.set_value_changed();
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
+        event.set_send_drag(!event.last_time());
+        return Ok(());
+    }
+    let plane=ViewPlane::read(in_data,params)?;
+    let Some((local_x,local_y))=plane.local(layer_x,layer_y) else {
+        event.set_send_drag(false);return Ok(());
+    };
     let mut grid = grid_snapshot(params)?;
     let elastic = elastic_params(params)?;
+    let displayed=displayed_grid(in_data,params,&plane)?;
 
     let rc = if axis == DRAG_COLUMNS {
         if index == 0 || index + 1 >= grid.column_lines.len() {
             event.set_send_drag(false);
             return Ok(());
         }
-        let target = layer_x / width;
+        let target = local_x - (displayed.column_lines[index]-grid.column_lines[index]);
         unsafe {
             eg_drag_axis(
                 grid.column_lines.as_mut_ptr(),
@@ -400,7 +498,7 @@ fn drag_inner(
             event.set_send_drag(false);
             return Ok(());
         }
-        let target = layer_y / height;
+        let target = local_y - (displayed.row_lines[index]-grid.row_lines[index]);
         unsafe {
             eg_drag_axis(
                 grid.row_lines.as_mut_ptr(),
@@ -442,8 +540,9 @@ pub fn adjust_cursor(
     }
     let dragging = GUIDE_DRAGGING.get();
     if !dragging {
-        let grid = grid_snapshot(params)?;
-        if hit_test(in_data, &grid, event, event.screen_point())?.is_none() {
+        let plane=ViewPlane::read(in_data,params)?;
+        let grid=displayed_grid(in_data,params,&plane)?;
+        if hit_test(in_data, &grid, &plane, event, event.screen_point())?.is_none() {
             // Documented AdjustCursor handoff; never call PF_SetCursor(NONE).
             // Do not mark handled, so AE can use the currently selected tool.
             return Ok(());

@@ -12,6 +12,21 @@ safe AE restart (never discard unsaved work).
 
 ## User-machine evidence now received
 
+### Stage 9 native four-corner source integration
+
+Appended native Four Corners/Existing mode, four points and Fit Layer. Existing
+mode is the default and retains old parameter IDs, wire schema and rendering.
+Four Corners is now wired to both render callbacks with owned SmartFX snapshots,
+shared wave evaluation, common geometry for drawing and inverse dragging, native
+corner grips and invalid-plane diagnostics/pass-through. No second camera
+projection is applied to ordinary layer-space rendering. See the P9-3 coordinate
+contract in perspective-plane-plan.md; host-coordinate assumptions need AE tests.
+18 CTest, 22 Rust tests, Clippy and geometry ASan/UBSan PASS. Existing static audit
+findings remain outside changed scope. The internal ae_plane_smoke.jsx captures
+24 comparison frames but is NOT_RUN until a clean, identified candidate is tested.
+Installed de0becf remains unchanged at this source checkpoint. Stage 9/10 are
+not complete and no artifact is ready for user acceptance on source tests alone.
+
 ### Stage 9 perspective sampling modes
 
 Plane core and additive `eg_render_plane_sampled` now support Draft Bilinear and

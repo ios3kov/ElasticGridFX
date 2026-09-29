@@ -67,6 +67,11 @@ typedef struct EgGpuCubicSample {
     float weight[4];
 } EgGpuCubicSample;
 
+// Evaluates immutable destination guides, including wave, using the legacy path.
+// Output capacities must cover columns+2 and rows+2; no retained pointers.
+int eg_evaluate_grid(const EgRenderParams* params, float* columns, int column_capacity,
+                     float* rows, int row_capacity) noexcept;
+
 // Mutates one normalized guide axis in place using the same clean-room
 // elasticity/no-crossing implementation used by the render core.
 // `line_count` includes the two boundary lines. Returns 0 on success.
