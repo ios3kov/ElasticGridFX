@@ -88,21 +88,34 @@ def run_acceptance(report_root: Path, ae_app: Path, installed: Path,
                   identity_status='NOT RUN', pixel_status='NOT RUN',
                   functional_status='BLOCKED', release='BLOCKED',
                   scope='real AE functional smoke only; not release/performance/Metal acceptance')
-    smoke_folder = None
+    smoke_folder, smoke_meta = ae_smoke_runner.prepare(run/'smoke', manifest['build'])
+    try:
+        smoke_meta = ae_smoke_runner.arm(
+            smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
+        )
+    except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+        result['reason'] = 'AE arm phase blocked: ' + str(error)
+        return result, write_report(run, result, smoke_folder)
+
     identity = live_identity.diagnose(identity_dir, manifest, [])
     result['identity'] = identity
     result['identity_status'] = identity.get('loaded_image_status', 'NOT RUN')
-    if identity.get('status') != 'PASS' or identity.get('loaded_image_status') != 'PASS':
-        result['reason'] = 'loaded candidate identity was not proven'
+    identity_ok = (identity.get('status') == 'PASS'
+                   and identity.get('loaded_image_status') == 'PASS'
+                   and identity.get('observed_build_id') == manifest['build']['build_id']
+                   and Path(identity.get('ae',{}).get('path','')) == ae_app
+                   and identity.get('ae',{}).get('pid') == smoke_meta.get('target_pid'))
+    try:
+        smoke_meta = ae_smoke_runner.disarm(
+            smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
+        )
+    except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+        result['reason'] = 'AE arm cleanup blocked: ' + str(error)
         return result, write_report(run, result, smoke_folder)
-    if identity.get('observed_build_id') != manifest['build']['build_id']:
-        result['reason'] = 'observed Build ID mapping differs from candidate'
-        return result, write_report(run, result, smoke_folder)
-    if Path(identity['ae']['path']) != ae_app:
-        result['reason'] = 'running AE is not the selected target app'
+    if not identity_ok:
+        result['reason'] = 'loaded candidate identity was not proven after controlled effect instantiation'
         return result, write_report(run, result, smoke_folder)
 
-    smoke_folder, smoke_meta = ae_smoke_runner.prepare(run/'smoke', manifest['build'])
     try:
         smoke_result = ae_smoke_runner.execute(
             smoke_folder, smoke_meta, ae_app, installed, package_path, manifest_path
