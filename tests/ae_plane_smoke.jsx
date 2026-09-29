@@ -108,12 +108,16 @@ function elasticGridPlaneSmoke(config) {
         check(Math.abs(fx.property("Wave Amplitude").value-8)<0.001,"Wave amplitude did not roundtrip");
         capture("roundtrip-after");
 
-        // 3D/camera acceptance: independently exercise layer position, scale,
-        // rotation, parenting, active-camera movement, camera switching and
-        // no-camera fallback. Overlay/drag remains a separate real-UI gate.
+        // 3D/camera acceptance: independently exercise the Default Camera
+        // fallback before any camera layer exists, then layer position, scale,
+        // rotation, parenting, active-camera movement and camera switching.
+        // Overlay/drag remains a separate real-UI gate.
         stage="three_d";
         layer.threeDLayer=true;
         var transform=layer.property("ADBE Transform Group");check(transform!==null,"Missing 3D transform");
+        check(comp.activeCamera===null,"Unexpected camera before camera-layer creation");
+        capture("3d-no-camera");
+
         var camera=comp.layers.addCamera("__EGFX_CAMERA_A_"+config.run_id,[64,48]);
         check(camera!==null && comp.activeCamera!==null && comp.activeCamera.index===camera.index,"Active camera unavailable");
         capture("3d-base");
@@ -142,10 +146,6 @@ function elasticGridPlaneSmoke(config) {
         var cvb=cameraBPosition.value;cameraBPosition.setValue([cvb[0]-32,cvb[1]+14,cvb[2]]);
         check(comp.activeCamera!==null && comp.activeCamera.index===cameraB.index,"Camera switch did not become active");
         capture("3d-camera-switch");
-
-        cameraB.enabled=false;camera.enabled=false;
-        check(comp.activeCamera===null,"No-camera state not reached");
-        capture("3d-no-camera");
 
         // Leave this exact test-owned saved project open for live-image identity.
         // The dedicated cleanup phase closes only this path after diagnosis.

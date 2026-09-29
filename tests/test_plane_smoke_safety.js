@@ -54,6 +54,8 @@ assert.ok(source.includes('CloseOptions.DO_NOT_SAVE_CHANGES'));
 assert.ok(source.includes('file=new File(path);'));
 assert.ok(source.includes('attempt<50'));
 assert.ok(source.includes('$.sleep(100)'));
+assert.ok(source.indexOf('capture("3d-no-camera")') < source.indexOf('addCamera("__EGFX_CAMERA_A_'));
+assert.ok(!source.includes('cameraB.enabled=false;camera.enabled=false'));
 assert.ok(source.includes('never retry the render or kill/restart AE'));
 assert.ok(!source.includes('app.quit('));
 assert.ok(!source.includes('system.callSystem'));

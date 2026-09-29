@@ -12,8 +12,8 @@ DEPTH_FRAMES = (
 )
 EXTRA_FRAMES = (
     'roundtrip-before', 'roundtrip-after',
-    '3d-base', '3d-position', '3d-scale', '3d-layer-rotate',
-    '3d-camera-move', '3d-parent', '3d-camera-switch', '3d-no-camera',
+    '3d-no-camera', '3d-base', '3d-position', '3d-scale', '3d-layer-rotate',
+    '3d-camera-move', '3d-parent', '3d-camera-switch',
 )
 FRAMES = tuple(f'd{depth}-{name}' for depth in DEPTHS for name in DEPTH_FRAMES) + EXTRA_FRAMES
 
