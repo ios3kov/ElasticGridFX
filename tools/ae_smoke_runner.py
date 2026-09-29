@@ -13,6 +13,7 @@ import uuid
 
 import build_identity as bi
 from install_candidate import checked_path, signature
+from live_identity import running_ae
 from smoke_pixels import FRAMES, pattern, validate_frames
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,11 +73,10 @@ def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
     # Bundle IDs may be shared across installed AE versions. Require one exact
     # running executable, rather than letting LaunchServices pick another app.
     expected_executable = ae_app / 'Contents/MacOS' / app_info['CFBundleExecutable']
-    processes = subprocess.check_output(['/bin/ps', '-axo', 'pid=,comm='], text=True, timeout=10)
-    hosts = [line.strip().split(None, 1) for line in processes.splitlines() if 'after effects' in line.lower()]
-    if len(hosts) != 1 or len(hosts[0]) != 2 or hosts[0][1] != str(expected_executable):
+    hosts = running_ae()
+    if len(hosts) != 1 or Path(hosts[0]['executable']) != expected_executable:
         raise ValueError('require exactly one running AE process at the selected app path')
-    metadata['target_pid'] = hosts[0][0]
+    metadata['target_pid'] = hosts[0]['pid']
     # argv carries the path, not interpolated AppleScript or shell code.
     apple = '''on run argv
 set jsxText to read POSIX file (item 1 of argv) as «class utf8»

@@ -61,6 +61,16 @@ A new reversible updater is pinned specifically to installed 6d3b846 -> fd69988;
 it refuses any different current payload and retains 6d3b846 as rollback.
 This still does not constitute AE runtime PASS.
 
+## Target-AE acceptance automation
+
+A single non-installing target runner is now implemented for fd69988. It first
+requires live-image identity PASS for the exact installed candidate, then runs
+the guarded ten-frame patterned AE smoke in the same AE PID. Functional PASS
+requires all direct deformation/animation/reset checks plus Adjustment Layer ->
+ElasticGrid -> identity/moved Corner Pin pixel assertions. Its shared ZIP includes
+only sanitized summary and synthetic frames; raw process sample remains private.
+Release status stays BLOCKED even when this functional gate passes.
+
 ## Next gates, in order
 
 1. SmartFX source now wires the tested sparse CPU renderer: logical canvas is
