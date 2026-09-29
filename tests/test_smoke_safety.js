@@ -57,8 +57,9 @@ function run(options = {}) {
         beginSuppressDialogs() {calls.dialogs++;},endSuppressDialogs() {calls.dialogs--;}};
     function File(name) {
         this.fsName=name;
-        Object.defineProperty(this,'exists',{get:()=>Object.hasOwn(files,name)});
-        Object.defineProperty(this,'length',{get:()=>files[name]?.length || 0});
+        const snapshotExists=Object.hasOwn(files,name), snapshotLength=files[name]?.length || 0;
+        Object.defineProperty(this,'exists',{get:()=>options.cachedMetadata ? snapshotExists : Object.hasOwn(files,name)});
+        Object.defineProperty(this,'length',{get:()=>options.cachedMetadata ? snapshotLength : files[name]?.length || 0});
         this.open=()=>!options.writeFailure;
         this.write=text=>{files[name]=text;}; this.close=()=>{};
         this.remove=()=>{calls.removed++; delete files[name];};
@@ -70,6 +71,12 @@ function run(options = {}) {
     let capture=null;
     try {capture=JSON.parse(files[folder+'/capture.json']);} catch {}
     return {app,calls,files,capture};
+}
+{
+    const {app,calls,capture}=run({cachedMetadata:true});
+    assert.equal(app.exitCode,0);
+    assert.equal(calls.frames.length,10);
+    assert.equal(capture.status,'CAPTURED');
 }
 for (const options of [
     {saved:true},{occupied:true},{dirty:true},{dirtyThrows:true},

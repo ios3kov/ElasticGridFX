@@ -165,6 +165,8 @@ function elasticGridSmoke(config) {
         var file = new File(config.folder + "/" + name + ".png");
         if (file.exists) throw new Error("Refusing old frame");
         targetComp.saveFrameToPng(time, file);
+        // Refresh ExtendScript's File metadata after the host writes the PNG.
+        file = new File(config.folder + "/" + name + ".png");
         if (!file.exists || file.length <= 0) throw new Error("Frame missing");
     }
     app.exitCode = 90;
