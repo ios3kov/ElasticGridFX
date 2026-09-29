@@ -44,11 +44,16 @@ class PlanePixels(unittest.TestCase):
             p = f'd{depth}-'
             frames[p+'original'] = self.base
             frames[p+'identity'] = self.base
-            frames[p+'skew-identity'] = projected
+            frames[p+'skew-identity'] = self.base
             frames[p+'native-skew'] = projected
             frames[p+'legacy-wave'] = a
             frames[p+'plane-wave'] = a
-            frames[p+'skew-wave'] = b
+            regional=sp.Image(128,96,array('f',self.base.pixels))
+            for x,y,u,v in pp.perspective_coordinates():
+                if 0<=u<=127 and 0<=v<=95:
+                    k=(y*128+x)*4
+                    regional.pixels[k:k+4]=b.pixels[k:k+4]
+            frames[p+'skew-wave'] = regional
             frames[p+'invalid'] = self.base
             frames[p+'half-identity'] = self.base
             frames[p+'half-original'] = self.base
@@ -72,7 +77,23 @@ class PlanePixels(unittest.TestCase):
         result = self.validate(self.frames())
         self.assertEqual(result['status'], 'PASS')
         self.assertEqual(result['frames'], len(pp.FRAMES))
-        self.assertEqual(len(result['checks']), 29)
+        self.assertEqual(len(result['checks']), 32)
+        self.assertEqual(result['contract'],'perspective-region-v1')
+
+    def test_old_corner_pin_projection_is_rejected(self):
+        frames=self.frames()
+        frames['d8-skew-identity']=frames['d8-native-skew']
+        self.assertEqual(self.validate(frames)['checks']['d8-neutral_region_identity']['status'],'FAIL')
+
+    def test_region_exterior_changes_are_rejected(self):
+        frames=self.frames()
+        frames['d8-skew-wave']=self.shifted(self.base,13)
+        self.assertEqual(self.validate(frames)['checks']['d8-region_locality']['status'],'FAIL')
+
+    def test_region_no_deformation_is_rejected(self):
+        frames=self.frames()
+        frames['d8-skew-wave']=self.base
+        self.assertEqual(self.validate(frames)['checks']['d8-region_locality']['status'],'FAIL')
 
     def test_zero_wave_stationary_image_and_mask_are_rejected(self):
         self.assertEqual(pp.check_zero_wave_projection(self.base,self.base)['status'],'FAIL')

@@ -156,8 +156,8 @@ fn main() {
 
     pipl::plugin_build(vec![
         Property::Kind(PIPLType::AEEffect),
-        Property::Name("ElasticGrid FX"),
-        Property::Category("ElasticGrid FX"),
+        Property::Name("FSTR ElasticGrid"),
+        Property::Category("FSTR Effects"),
 
         #[cfg(target_os = "windows")]
         Property::CodeWin64X86("EffectMain"),

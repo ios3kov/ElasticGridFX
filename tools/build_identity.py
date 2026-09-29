@@ -130,13 +130,12 @@ def generate(root, out, target, profile):
     out.mkdir(parents=True, exist_ok=True)
     dump(out / 'BuildIdentity.json', meta)
     marker = 'ElasticGridBuildID=' + meta['build_id']
-    about = ('ElasticGrid FX v' + meta['version'] + ' / ' + target + '\r' + marker + '\rCommit: ' + meta['commit'] +
+    about = ('FSTR ElasticGrid v' + meta['version'] + ' / ' + target + '\r' + marker + '\rCommit: ' + meta['commit'] +
              '\rSource: ' + meta['source_state'] + ' / ' + meta['source_sha256'][:16])
     if len(about.encode()) >= 256:
         raise ValueError('About message exceeds the AE ABI buffer')
     # Values are validated ASCII; JSON escaping is also valid Rust for these strings.
-    rust = 'pub const BUILD_ID: &str = ' + json.dumps(meta['build_id']) + ';\n'
-    rust += 'pub const ABOUT: &str = ' + json.dumps(about) + ';\n'
+    rust = 'pub const ABOUT: &str = ' + json.dumps(about) + ';\n'
     (out / 'build_identity.rs').write_text(rust)
     for name in record['files']:
         print('cargo:rerun-if-changed=' + str(root / name))

@@ -78,6 +78,31 @@ def _nonflat(name: str, image: Image) -> None:
         raise ValueError('fully transparent frame cannot prove plane behavior: ' + name)
 
 
+def check_region(original: Image, warped: Image) -> dict:
+    """Perspective-region contract: changed interior, unchanged exterior RGBA.
+
+    Tests locality, not the exact guide displacement or native 3D alignment.
+    A margin excludes rasterized boundary ambiguity; thresholds match _check.
+    """
+    if (original.width, original.height, warped.width, warped.height) != (128,96,128,96):
+        raise ValueError('unexpected perspective fixture dimensions')
+    interior, exterior = [], []
+    for x,y,u,v in perspective_coordinates():
+        k=(y*128+x)*4
+        delta=[abs(original.pixels[k+c]-warped.pixels[k+c]) for c in range(4)]
+        if 3<=u<=123 and 3<=v<=91:
+            interior.extend(delta)
+        elif u < -2 or u > 129 or v < -2 or v > 97:
+            exterior.extend(delta)
+    maximum=max(exterior,default=1)
+    mean=sum(interior)/len(interior) if interior else 0
+    passed=len(interior)>4000 and len(exterior)>400 and maximum<=1/255+1e-7 and mean>=0.0005
+    return dict(status='PASS' if passed else 'FAIL',
+                expected='changed perspective interior; unchanged exterior RGBA',
+                max_exterior_error=maximum, mean_interior_change=mean,
+                interior_samples=len(interior)//4, exterior_samples=len(exterior)//4)
+
+
 def _check(images: dict[str, Image], a: str, b: str, should_change: bool) -> dict:
     diff = difference(images[a], images[b])
     if should_change:
@@ -95,7 +120,8 @@ def validate_plane_frames(folder: Path) -> dict:
     checks = {}
     for depth in DEPTHS:
         prefix = f'd{depth}-'
-        checks[prefix+'zero_wave_projection'] = check_zero_wave_projection(images[prefix+'original'], images[prefix+'skew-identity'])
+        checks[prefix+'neutral_region_identity'] = _check(images,prefix+'original',prefix+'skew-identity',False)
+        checks[prefix+'region_locality'] = check_region(images[prefix+'original'],images[prefix+'skew-wave'])
         pairs = (
             ('original', 'identity', False),
             ('identity', 'plane-wave', True),
@@ -120,11 +146,12 @@ def validate_plane_frames(folder: Path) -> dict:
     status = 'PASS' if all(item['status'] == 'PASS' for item in checks.values()) else 'FAIL'
     return dict(
         status=status,
+        contract='perspective-region-v1',
         checks=checks,
         frames=len(images),
         native_reference_diagnostics={str(depth): check_zero_wave_projection(
             images[f'd{depth}-original'], images[f'd{depth}-native-skew']) for depth in DEPTHS},
-        scope=('AE PNG plane pixels: 8/16/32 bpc identity/wave/skew/invalid/half-res, '
+        scope=('AE PNG region pixels: 8/16/32 bpc neutral skew identity/interior change/exterior preservation/wave/invalid/half-res, '
                'AEP save-reopen, 3D position/scale/rotation/parenting, active-camera motion/switch and no-camera fallback; '
                'not native guide drag/Undo/Redo or GPU parity'),
     )

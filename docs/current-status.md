@@ -6,6 +6,23 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
+User-facing branding: **FSTR ElasticGrid**, AE category **FSTR Effects**.
+PiPL display name/category and About are updated in source. Match name
+`com.elasticgrid.fx.warp`, parameter IDs and serialized grid data are unchanged.
+Grid Positions uses NO_ECW_UI (not INVISIBLE): hide the redundant diagnostic
+row in Effect Controls while retaining its Timeline animation track. Build ID
+is kept in About; it is no longer drawn by the grid-control label fallback.
+Native menu/category and animation-track verification await a new candidate.
+Generated PiPL resource contains FSTR ElasticGrid, FSTR Effects and unchanged
+com.elasticgrid.fx.warp (inspected after compilation). Rust 24/24 PASS without
+the removed unused Build ID constant warning. Source contracts now require
+NO_ECW_UI and reject hiding the Timeline track; they retain the About marker.
+Scanner fstr-branding-region-audit.json: existing workflow/test review items,
+review_required (exit 1), not a release approval.
+Full Python suite after updating the obsolete short-Build-ID UI assertion:
+207/207 PASS. Previous run's failure was that superseded UI requirement; the
+replacement verifies hidden ECW diagnostics, retained animation and branding.
+
 User explicitly withdrew full-image Corner Pin projection. Four Corners now
 defines only the perspective region for guide deformation: neutral guides are
 exact identity; non-neutral guides warp within the plane; exterior stays intact.
@@ -16,8 +33,13 @@ Implementation: additive eg_render_plane_region reuses PlaneWarp::prepare and
 the existing 8/16/32-bit samplers. Rust Four Corners render calls this regional
 entry, not projected/between. Removed unused source projection snapshot fields;
 old additive core/ABI APIs remain for compatibility tests, not product behavior.
-Native acceptance runner still contains the OLD projection oracle: it must be
-revised before testing a new candidate; its old PASS is not region acceptance.
+Native pixel comparator now identifies its contract as perspective-region-v1:
+neutral skew equals original; wave changes the interior but preserves exterior
+RGBA. Old native Corner Pin rendering remains diagnostic only, not a product
+reference. Synthetic positive and negative controls pass (10 tests). Applying
+the new comparator to retained 099e492 frames yields FAIL for neutral identity
+and regional locality at all three depths, as expected; historical reports were
+not overwritten. New native candidate verification remains required.
 New package/install/native verification: NOT RUN. 3D text host integration is
 still incomplete; no claim that this change resolves its overlay displacement.
 

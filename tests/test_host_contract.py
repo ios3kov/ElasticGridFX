@@ -90,11 +90,20 @@ class HostContract(unittest.TestCase):
         self.assertIn('extra.set_max_result_rect(canvas_rect);', pre)
         self.assertNotIn('max_rect.union(&input_max)', pre)
 
-    def test_custom_control_has_readable_short_build_id(self):
+    def test_grid_diagnostics_hidden_without_hiding_animation(self):
         ui = (ROOT / 'host-rust/src/ui.rs').read_text()
-        self.assertIn('EGFX-{}', ui)
-        self.assertIn('raw_id[..short_len]', ui)
-        self.assertIn('param.set_ui_height(32)', SETUP)
+        self.assertNotIn('EGFX-{}', ui)
+        grid = SETUP.split('params.add_customized(Params::GridState,',1)[1].split('})?;',1)[0]
+        self.assertIn('ae::ParamUIFlags::NO_ECW_UI',grid)
+        self.assertNotIn('ae::ParamUIFlags::INVISIBLE',grid)
+        identity=(ROOT/'tools/build_identity.py').read_text()
+        self.assertIn('ElasticGridBuildID=',identity)
+
+    def test_branding_preserves_effect_match_name(self):
+        build=(ROOT/'host-rust/build.rs').read_text()
+        self.assertIn('Property::Name("FSTR ElasticGrid")',build)
+        self.assertIn('Property::Category("FSTR Effects")',build)
+        self.assertIn('Property::AE_Effect_Match_Name("com.elasticgrid.fx.warp")',build)
 
 
 if __name__ == '__main__':
