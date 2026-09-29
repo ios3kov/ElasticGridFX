@@ -12,6 +12,30 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 8 preparation — measurements BLOCKED
 
+#### Initial serial end-to-end baseline measured (Stage 8 still open)
+
+Series `fbf5afad5a214b2a877167af9c50d4c0`: one warmup plus five measured
+fresh-process runs of the same pinned 1080p/32bpc/Final Bicubic animated AEP,
+60 frames, MFR OFF, max CPU argument 100. Apple M1 Pro, 8 physical/logical cores,
+16 GiB RAM, macOS 26.6.2, AE 25.6x101. No cache purge or sampler was used.
+The mapped text-file list proved the unique ElasticGrid binary path in each
+owned aerendercore; exact installed payload/signature checked before and after.
+Per-run runtime UUID is not sampled; the separate preflight established it.
+All six runs produced 60 correctly sized PNGs with identical aggregate digest
+`d6c1a18e3b99af44f9c4a4cf14cef610dde66f29fc4df9086088f081519ba206`.
+
+Measured full-process seconds: 38.6251985, 38.6976323, 38.3036168, 42.6839684,
+42.5909023. Median 38.6976323; nearest-rank p95 42.6839684; sampled maximum RSS
+2450243584 bytes. Startup, PNG encoding, process/file observation overhead and
+shutdown are included. This is not per-frame render latency, exact OS peak RSS,
+cold-cache evidence, HDR fidelity or RAM Preview. Fixture color metadata was
+inherited rather than separately recorded, so compare only this exact AEP until
+an explicit color-settings fixture is generated. The spread is material; do not
+claim small speed improvements against a single run. No optimization performed.
+Raw logs, output frames and series.json are retained in the controlled workspace.
+Next: explicit environment/fixture color record, frame-level timings, MFR pair,
+controlled cache scenarios, and separately observed RAM Preview lifecycle.
+
 Instrumented aerender preflight now PASS for identity and frame count:
 `identity-probe-f3945ed06df441ab82369bb224ad43e6`, target aerendercore PID 58659,
 live UUID A7C24F56-9776-3971-9CB7-972DD1F7AF8F with pinned installed fd69988
