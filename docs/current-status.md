@@ -6,6 +6,21 @@
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
+### Automatic 3D requirement (supersedes proposed binding button)
+
+User requires automatic behavior when the layer's 3D switch changes. No Bind
+button, manual expression setup or precomposition requirement is acceptable.
+Grid Positions keys must survive both directions of the transition.
+Owned expression-coordinate probe now covers 2D -> 3D -> Y30 -> 2D without
+rewriting expressions during transitions. Real AE evaluation PASS, final 2D
+quad matches initial within 0.0001 pixels. Evidence: auto-switch-probe.txt in
+outputs/text-plane-3d-restore-20260930. Restoration tests PASS.
+This only validates coordinate reevaluation, not automatic installation of
+bindings, keyframe persistence, rendering or picking. Those remain NOT RUN.
+UpdateParamsUi allows cosmetic updates only; do not install expressions/change
+parameter values from that callback. Initial automatic binding lifecycle remains
+unresolved. Installed plugin unchanged; Stage 9 remains OPEN.
+
 ### Current installation and text-fixture safety checkpoint
 
 Installed candidate is now **1eed79aad052f144668c2ebed9426a7934f35f6b**,

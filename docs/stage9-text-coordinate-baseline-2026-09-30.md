@@ -79,3 +79,17 @@ A production approach would need separate internal parameters, explicit setup
 and ownership/migration rules, and a shared UI/render mapping. Neither that
 architecture nor extra parameters are implemented. Camera/parent, aerender,
 MFR, cache invalidation, undo and native picking remain NOT RUN for this mechanism.
+
+Automatic-switch extension: same four expressions evaluated without rewrites
+at 2D, 3D zero rotation, 3D Y30, then 2D. Both zero-rotation states and restored
+2D coordinates agree within 0.0001 pixels; rotated values match the prior
+experiment. Real AE transport 0, result auto-switch-probe.txt. Research code
+restores starting 3D state/rotation/corner values. This does not test Grid
+Positions keyframe persistence or solve binding installation for old projects.
+
+The requested product UX is fully automatic; a binding button was explicitly
+rejected. Do not use UpdateParamsUi to mutate bindings: the SDK callback is
+cosmetic-only (also documented in after-effects 0.4.0 pf/command.rs).
+See https://ae-plugins.docsforadobe.dev/effect-basics/command-selectors/ .
+Do not substitute render-thread AEGP calls or a stale UI cache for proper
+host dependencies. No production integration accepted yet.
