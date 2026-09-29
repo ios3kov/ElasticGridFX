@@ -2,14 +2,37 @@
 
 2026-09-29. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 7 of 10 — target After Effects functional acceptance.**
-See development-stages.md. Stages 1–6 are completed for the current scope; Stage 7
-is blocked only on the corrected real target-Mac acceptance run. Stage 8 is
+**Production cycle: Stage 7 of 10 COMPLETE for the defined target functional smoke; Stage 8 next.**
+See development-stages.md. Stages 1–7 are completed for the current scope. Stage 8 is
 performance/profiling, Stage 9 is the approved 2D/3D perspective plane, Stage 10
 is final compatibility/release validation.
 No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
+
+### Stage 7 target acceptance PASS — latest evidence
+
+Run `EGFX-AE-dbcc0ec13f7e48b387f55aa749c623a6` completed with exit 0 and
+functional PASS on AE 25.6.0 arm64, PID 42039. The immutable loaded candidate
+is fd69988 / EGFX-f442513cb6528f14295d6d45, proven by live path/UUID plus exact
+installed payload/signature before and after execution. All ten frames were
+captured; seven relational comparisons and per-frame dynamic-range/alpha coverage
+checks PASS. Static and moved Corner Pin PNGs were also visually inspected:
+no black output or bright streaks observed in this fixture.
+
+Runner: `73714087703e645d84dca51cf5c592e0c97c458f`.
+Runner ZIP SHA-256: `6ed14e1cddc4cffde3c2f276f8039ebaca093d7dab7e390b2b42b61774127b7c`.
+Evidence ZIP SHA-256: `65dfdf4ea8543eae4a70f21cc618393b80ead3f52ebc7ac95cadc13857635a70`.
+The observed None working-space sentinel is the string `None`, not empty text;
+linearizeWorkingSpace=false is independently verified. Initial color settings
+and bit depth are restored; test comps, footage, solid and empty folder removed.
+Regression: 179 Python tests plus JSX ownership/capture suites PASS.
+Scope is the controlled 32bpc-host/SDR-PNG smoke, not HDR fidelity, arbitrary
+user grids, GPU, performance or full compatibility. The nested generic smoke
+record still lists broader release requirements; top-level functional PASS is
+the scoped Stage 7 verdict. Release remains BLOCKED. Stage 8 profiling is next.
+
+All entries below are historical evidence, including superseded blockers.
 
 ### Fixture calibration and Corner Pin oracle
 

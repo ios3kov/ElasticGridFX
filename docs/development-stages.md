@@ -59,7 +59,7 @@ This stage does not mean the current fd69988 runtime has passed functional QA.
 Exit evidence: fd69988 exact source/CI/macOS gates PASS.
 Real host confirmation belongs to Stage 7.
 
-## Stage 7 of 10 — Target After Effects functional acceptance — IN PROGRESS
+## Stage 7 of 10 — Target After Effects functional acceptance — COMPLETE
 
 Goal: prove the exact loaded fd69988 fixes the reported visual/chain defects in
 After Effects 2025 on the target Mac.
@@ -74,10 +74,10 @@ Required PASS in one controlled run:
 - moved Corner Pin changes pixels;
 - test-owned cleanup succeeds.
 
-The first runner attempt failed before AE execution due a runner manifest-type bug.
-That is retained as NOT RUN. Corrected runner source 0147755 passed its macOS
-safety/package gate and final validation. Stage remains open until its returned
-target report is inspected.
+Exit evidence: target run EGFX-AE-dbcc0ec13f7e48b387f55aa749c623a6,
+runner 7371408, immutable plugin fd69988, same AE PID 42039, identity and
+ten-frame pixel smoke PASS. See current-status.md for hashes and scope.
+Earlier blocked reports remain historical and are not rewritten as PASS.
 
 ## Stage 8 of 10 — Render / RAM Preview profiling and optimization — NOT STARTED
 
@@ -119,7 +119,5 @@ production release occurs without explicit user instruction.
 
 ## Current overall progress
 
-Stage-count view: 6 completed, Stage 7 active, 3 later stages open.
-This corresponds to roughly 65–70% of the full production cycle, not 70% of the
-current bugfix. The current SmartFX/Corner Pin bugfix itself is much closer to
-completion but remains unverified in the real target AE until Stage 7 passes.
+Stage-count view: 7 completed, 3 later stages open. Stage 8 profiling is next.
+This is a stage-count view, not a claim about remaining engineering effort.
