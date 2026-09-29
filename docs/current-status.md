@@ -65,9 +65,11 @@ no-camera fallback. `tools/plane_smoke_pixels.py` performs numeric comparisons;
 and must prove a fresh empty project after cleanup.
 
 Source/control-flow evidence: Final Validation PASS (196 Python/source tests plus
-18/18 CTest), PR CI PASS (GCC, Clang, TSan, ASan/UBSan, static analysis), and the
-macOS fast acceptance-tooling regression PASS. Full macOS source/preflight gate for
-the current tooling checkpoint is still running at this documentation update.
+18/18 CTest), PR CI PASS (GCC, Clang, TSan, ASan/UBSan, static analysis), and
+macOS source gate PASS, including the fast acceptance-tooling regression, Apple
+toolchain/Metal compilation, full preflight and signed install-free bundle.
+Validated tooling checkpoint: `dea905fd94a5cb8cff02f5fcb211ebe8d2e3f3d2`,
+macOS workflow run `36612177417`.
 The real de31498 AE runner has **NOT_RUN** status; no 3D/camera runtime claim is made
 until that target execution passes. Native viewer corner/guide dragging and UI
 Undo/Redo remain the final manual interaction checks because they require real host
