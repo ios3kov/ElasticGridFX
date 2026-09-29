@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sys
 import tempfile
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -12,6 +13,14 @@ import aerender_benchmark as ab
 
 
 class BenchmarkTool(unittest.TestCase):
+    def test_mfr_command_includes_required_cpu_percentage(self):
+        fixture={'project_path':self.project,'rqindex':1,'output_pattern':'frame_[#####].png'}
+        result=subprocess.CompletedProcess([],0,'ElasticGridBuildID=EGFX-'+'a'*24,
+            ' 1.0 real 0.5 user 0.1 sys\n 12345 maximum resident set size\n')
+        with patch.object(ab.subprocess,'run',return_value=result) as run, patch.object(ab,'output_manifest',return_value=([{'size':1}],'digest')):
+            ab.run_once(1,'sample',self.root,Path('/test/aerender'),fixture,'EGFX-'+'a'*24,'on',60)
+        self.assertEqual(run.call_args.args[0][-3:],['-mfr','ON','100'])
+
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory(prefix='egfx-perf-')
         self.addCleanup(self.tmp.cleanup)

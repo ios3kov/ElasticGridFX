@@ -185,7 +185,7 @@ def run_once(index: int, kind: str, workspace: Path, aerender: Path, fixture: di
            '-rqindex',str(fixture['rqindex']),'-output',str(output_path),
            '-v','ERRORS_AND_PROGRESS']
     if mfr != 'inherit':
-        cmd += ['-mfr', mfr.upper()]
+        cmd += ['-mfr', mfr.upper(), '100']
     started = time.perf_counter()
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     wall = time.perf_counter() - started

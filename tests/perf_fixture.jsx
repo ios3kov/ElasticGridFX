@@ -47,18 +47,22 @@ function elasticGridPerfFixture(config) {
 
         result.stage="render_queue";
         var rq=owned.renderQueue.items.add(comp);
+        result.stage="render_template";
         if (!hasTemplate(rq.templates,"Best Settings")) throw new Error("Best Settings template unavailable");
         rq.applyTemplate("Best Settings");
         rq.timeSpanStart=0.0; rq.timeSpanDuration=config.duration; rq.skipFrames=0; rq.render=true;
         var om=rq.outputModule(1);
+        result.stage="output_template";
         if (!hasTemplate(om.templates,"PNG Sequence")) throw new Error("PNG Sequence template unavailable");
         om.applyTemplate("PNG Sequence");
         // OutputModule objects may be invalidated by settings changes; reacquire.
         om=rq.outputModule(1);
+        result.stage="output_path";
         var outputFolder=new Folder(config.folder+"/fixture-output");
         if (outputFolder.exists || !outputFolder.create()) throw new Error("Fixture output directory collision/failure");
         om.file=new File(config.folder+"/fixture-output/frame_[#####].png");
         var settings=om.getSettings(GetSettingsFormat.STRING);
+        result.stage="output_format";
         if (!settings || String(settings.Format)!=="PNG Sequence") throw new Error("Output format is not PNG Sequence");
 
         result.stage="save";
@@ -75,6 +79,8 @@ function elasticGridPerfFixture(config) {
         result.output_format="PNG Sequence"; result.output_pattern="frame_[#####].png";
     } catch (error) {
         result.status="FAIL";
+        result.error_number=typeof error.number==='number' ? error.number : null;
+        result.error_line=typeof error.line==='number' ? error.line : null;
     } finally {
         if (owned!==null) {
             if (app.project!==owned) { result.status="FAIL"; result.stage="foreign_project"; }
@@ -82,10 +88,10 @@ function elasticGridPerfFixture(config) {
                 try {
                     // This project was empty/unsaved before ownership was acquired.
                     // Close only this owned synthetic/test project; never a user project.
+                    owned.bitsPerChannel=initialBpc;
                     if (!owned.close(CloseOptions.DO_NOT_SAVE_CHANGES)) throw new Error("Owned project close failed");
                     app.newProject();
                     if (app.project===null) throw new Error("New empty project unavailable");
-                    app.project.bitsPerChannel=initialBpc;
                 } catch (cleanupError) { result.status="FAIL"; result.stage="cleanup"; }
             }
         }
@@ -104,7 +110,9 @@ function elasticGridPerfFixture(config) {
                     ',"output_template":'+q(result.output_template||"")+
                     ',"output_format":'+q(result.output_format||"")+
                     ',"output_pattern":'+q(result.output_pattern||"")+
-                    ',"saved":'+(saved?"true":"false")+'}');
+                    ',"saved":'+(saved?"true":"false")+
+                    ',"error_number":'+(result.error_number==null?'null':result.error_number)+
+                    ',"error_line":'+(result.error_line==null?'null':result.error_line)+'}');
                 resultFile.close();
             } catch (writeError) { result.status="FAIL"; }
         }

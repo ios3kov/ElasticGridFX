@@ -79,7 +79,7 @@ runner 7371408, immutable plugin fd69988, same AE PID 42039, identity and
 ten-frame pixel smoke PASS. See current-status.md for hashes and scope.
 Earlier blocked reports remain historical and are not rewritten as PASS.
 
-## Stage 8 of 10 — Render / RAM Preview profiling and optimization — NOT STARTED
+## Stage 8 of 10 — Render / RAM Preview profiling and optimization — IN PROGRESS
 
 Research/preparation may run in parallel with Stage 7, but no performance change
 is approved before the Stage 7 pixel baseline is trustworthy.

@@ -2,13 +2,33 @@
 
 2026-09-29. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 7 of 10 COMPLETE for the defined target functional smoke; Stage 8 next.**
+**Production cycle: Stage 8 of 10 IN PROGRESS; Stage 7 COMPLETE for the defined target functional smoke.**
 See development-stages.md. Stages 1–7 are completed for the current scope. Stage 8 is
 performance/profiling, Stage 9 is the approved 2D/3D perspective plane, Stage 10
 is final compatibility/release validation.
 No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
+
+### Stage 8 preparation — measurements BLOCKED
+
+Authoritative rules fully re-read on 2026-09-29. Local aerender 25.6x101 help
+confirms `-mfr ON|OFF max_cpu_percent`; the prepared harness omitted that
+required third argument. It now supplies 100, with a command-contract test.
+The first real synthetic 1080p/32bpc fixture attempt
+`697e395cad7347bc93454d245a3b6720` failed at render_queue before save.
+No timing baseline was collected. Per-operation stage and numeric host error
+diagnostics now distinguish template, output path, output format and save errors.
+Depth restoration is moved before owned-project close to avoid dirtying the
+replacement project. A later read-only guard found a saved non-test project
+with six items, revision 3091. It was preserved; authorization to discard an
+empty test project does not cover it. Further target runs require an idle
+empty unsaved project. Offline tooling checks can continue independently.
+An additional audit finding remains open: the aerender harness expects a stdout
+Build ID marker, while the native build embeds the marker in its binary. Actual
+emission is unverified; use observed live-image identity in the render process
+if stdout lacks the marker, without weakening the gate. RAM Preview, cold/warm
+timings, peak memory and optimization remain NOT RUN. No speed claim is made.
 
 ### Stage 7 target acceptance PASS — latest evidence
 
