@@ -6,6 +6,7 @@ use super::*;
 pub(crate) struct Probe {
     id: Option<ae::aegp::PluginId>,
     records: Vec<String>,
+    journal_entries: u8,
 }
 
 #[cfg(target_os = "macos")]
@@ -30,8 +31,23 @@ impl Probe {
             Ok(n) => format!("main: streams={n}"),
             Err(e) => format!("main: {e:?}"),
         }};
+        let record = format!("{label} {result}");
+        // Research only, bounded to four non-overwriting, private temp files.
+        // No project names, contents, handles or coordinates are recorded.
+        #[cfg(target_os = "macos")]
+        if self.journal_entries < 4 {
+            use std::io::Write;
+            use std::os::unix::fs::OpenOptionsExt;
+            let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{}.txt",
+                std::process::id(), self.journal_entries));
+            self.journal_entries += 1;
+            if let Ok(mut f) = std::fs::OpenOptions::new().write(true).create_new(true)
+                .mode(0o600).open(path) {
+                let _ = writeln!(f, "{}\n{}", build_identity::ABOUT, record);
+            }
+        }
         if self.records.len() == 4 { self.records.remove(0); }
-        self.records.push(format!("{label} {result}"));
+        self.records.push(record);
     }
 
     fn inspect(&mut self, cmd: &ae::Command, input: &ae::InData) -> Result<i32, ae::Error> {
