@@ -14,6 +14,21 @@ safe AE restart (never discard unsaved work).
 
 ### Stage 9 requested guide UI affordances (source implementation)
 
+Latest scope: elongated grips/gaps matching the user reference, hover-only hand,
+and white/black outlined guides. See guide-ui-v0.5.md for criteria and research.
+Source implementation complete; Rust release tests 17/17 and Clippy PASS (existing
+documented macro lint exceptions). Static scan requires review for existing
+workflow/test findings, none in this UI change. Rust strip warning is the known
+toolchain libLLVM lookup issue, not a passed packaging gate.
+New real-AE acceptance is BLOCKED: the open baseline project has unsaved user
+changes; no discard/restart attempted. Installed baseline is 7c421ab,
+Build ID EGFX-3b99c0fe65c3192ed33a8baf,
+package SHA-256 f8190bb652af2daaa1da45bc5b5b71ab0fec53f7d73b917ec062bb33b6e5d10e.
+The user reports preliminary success with this baseline; not a complete matrix PASS.
+Release remains blocked; no new installation in this source-edit step.
+
+Historical records below describe prior candidates, not the latest installed state.
+
 Real AE 25.6 test of installed efa9bf2 displayed the larger markers but exposed
 a modal `PF_CursorType invalid (0)` warning on deactivation. Acceptance FAIL.
 PF_SetCursor must not receive NONE on this target: reset now requests Arrow,
