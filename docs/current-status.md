@@ -11,6 +11,27 @@ No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
 
+### Target capture evidence after authorized project reset
+
+The user authorized discarding the empty unsaved test state on 2026-09-29.
+Runner `76e3f21cb50b0b873cbf8329db474db2637cb60c`, package SHA-256
+`29ee2cd9ec55ec6b3365af0eb6c5ca00bb152be7eb83ef7e98944d90fbc2bce2`,
+produced report `EGFX-AE-0ac17ad731d24d3e9cea4bdd9c2198e5`.
+Identity PASS, JSX CAPTURED all ten PNGs, functional acceptance BLOCKED:
+the comparator rejects low dynamic range even in bypass (red 0.00096–0.07912).
+This is not yet localized to a host color configuration or fixture issue.
+The moved Corner Pin also has legitimate transparent exterior pixels while
+the current comparator demands opaque alpha everywhere. Review this oracle
+against geometric coverage; do not broadly relax alpha or brightness thresholds.
+Bounded PNG publication wait was necessary: immediate File checks failed
+before the host completed writing. Removing the wait was reverted after reading
+the successful capture record. The pixel cleanup leaves the addSolid-created
+source item, so the next safe cleanup must verify that test-owned object before
+resetting the project. No general occupied-project reset is authorized.
+Next: control and record the fixture color configuration, fix owned-solid cleanup,
+and validate the Corner Pin exterior against an explicit coverage expectation.
+Stage 7 stays open; this is neither renderer PASS nor renderer failure evidence.
+
 ### Stage 7 runner path fixes — 2026-09-29
 
 Report `EGFX-AE-fd8177e566514d90b6227201607a6a6e` reached ARMED from
