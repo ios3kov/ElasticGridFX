@@ -10,6 +10,22 @@ No main merge, new user installation or production release in this stage.
 
 ## User-machine evidence now received
 
+### Stage 9 requested guide UI affordances (source implementation)
+
+2026-09-29: markers enlarged from 5 to 10 frame units, retaining screen-space
+hit testing. Active viewer cursor uses open hand; guide capture uses closed hand
+on Mac via a main-thread-checked AppKit shim and AE CUSTOM cursor protocol.
+Mouse release/error/invalid topology and context exit/deactivation clear state.
+Details and required live scenarios: guide-ui-v0.5.md.
+
+Local arm64 release build PASS; Rust tests 15/15 and CTest 15/15 PASS.
+Use explicit Rust 1.98.1 compiler path: default PATH Cargo/rustc 1.80.1 cannot
+build edition 2024 (initial attempts failed, corrected without changing tools).
+Static audit: review_required, existing workflow findings and test-auth heuristic;
+no findings in changed UI/shim/build files. Report: work/stage9-core/guide-ui-audit.json.
+Real AE visual/cursor acceptance NOT_RUN: installed immutable fd69988 unchanged.
+No installable artifact is published and Stage 9 remains IN PROGRESS.
+
 ### Stage 9 initial geometry foundation
 
 Latest slice: explicit positive finite raster-to-plane surface scale per axis,

@@ -1,9 +1,41 @@
 use super::*;
 
 const HIT_SLOP: f32 = 9.0;
+const HANDLE_SIZE: f32 = 10.0;
 const DRAG_NONE: isize = 0;
 const DRAG_COLUMNS: isize = 1;
 const DRAG_ROWS: isize = 2;
+
+thread_local! {
+    static GUIDE_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+fn hand_cursor(dragging: bool) -> ae::CursorType {
+    #[cfg(target_os = "macos")]
+    {
+        unsafe extern "C" { fn eg_set_hand_cursor(dragging: bool) -> bool; }
+        // The shim checks the UI thread before touching AppKit.
+        if unsafe { eg_set_hand_cursor(dragging) } {
+            return ae::CursorType::Custom;
+        }
+    }
+    // Built-in fallback on other hosts; exact closed-hand appearance is Mac-only.
+    if dragging { ae::CursorType::Pan } else { ae::CursorType::Hand }
+}
+
+fn set_drag_cursor(dragging: bool) {
+    GUIDE_DRAGGING.set(dragging);
+    if let Ok(app) = ae::pf::suites::App::new() {
+        let _ = app.set_cursor(hand_cursor(dragging));
+    }
+}
+
+pub fn release_cursor() {
+    GUIDE_DRAGGING.set(false);
+    if let Ok(app) = ae::pf::suites::App::new() {
+        let _ = app.set_cursor(ae::CursorType::None);
+    }
+}
 
 fn overlay_color(in_data: &ae::InData) -> ae::drawbot::ColorRgba {
     let fallback = ae::drawbot::ColorRgba {
@@ -164,10 +196,10 @@ fn draw_viewer(
         draw_segment(&supplier, &surface, &pen, a, b)?;
         if draw_handles {
             let mid = ae::drawbot::RectF32 {
-                left: (a.x + b.x) * 0.5 - 2.5,
-                top: (a.y + b.y) * 0.5 - 2.5,
-                width: 5.0,
-                height: 5.0,
+                left: (a.x + b.x) * 0.5 - HANDLE_SIZE * 0.5,
+                top: (a.y + b.y) * 0.5 - HANDLE_SIZE * 0.5,
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
             };
             surface.paint_rect(&color, &mid)?;
         }
@@ -179,10 +211,10 @@ fn draw_viewer(
         draw_segment(&supplier, &surface, &pen, a, b)?;
         if draw_handles {
             let mid = ae::drawbot::RectF32 {
-                left: (a.x + b.x) * 0.5 - 2.5,
-                top: (a.y + b.y) * 0.5 - 2.5,
-                width: 5.0,
-                height: 5.0,
+                left: (a.x + b.x) * 0.5 - HANDLE_SIZE * 0.5,
+                top: (a.y + b.y) * 0.5 - HANDLE_SIZE * 0.5,
+                width: HANDLE_SIZE,
+                height: HANDLE_SIZE,
             };
             surface.paint_rect(&color, &mid)?;
         }
@@ -258,6 +290,7 @@ pub fn click(
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
         event.set_send_drag(true);
+        set_drag_cursor(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
     }
     Ok(())
@@ -268,11 +301,27 @@ pub fn drag(
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
+    let result = drag_inner(in_data, params, event);
+    if result.is_err() || event.last_time() || !event.send_drag() {
+        event.set_continue_refcon(0, DRAG_NONE as _);
+        event.set_send_drag(false);
+        set_drag_cursor(false);
+    }
+    result
+}
+
+fn drag_inner(
+    in_data: &ae::InData,
+    params: &mut ae::Parameters<Params>,
+    event: &mut ae::EventExtra,
+) -> Result<(), ae::Error> {
     let axis = event.continue_refcon(0);
     let index = event.continue_refcon(1) as usize;
     if axis == DRAG_NONE || (axis != DRAG_COLUMNS && axis != DRAG_ROWS) {
+        event.set_send_drag(false);
         return Ok(());
     }
+    set_drag_cursor(true);
 
     let (layer_x, layer_y) = frame_to_layer(in_data, event, event.screen_point())?;
     let width = in_data.width().max(1) as f32;
@@ -282,6 +331,7 @@ pub fn drag(
 
     let rc = if axis == DRAG_COLUMNS {
         if index == 0 || index + 1 >= grid.column_lines.len() {
+            event.set_send_drag(false);
             return Ok(());
         }
         let target = layer_x / width;
@@ -297,6 +347,7 @@ pub fn drag(
         }
     } else {
         if index == 0 || index + 1 >= grid.row_lines.len() {
+            event.set_send_drag(false);
             return Ok(());
         }
         let target = layer_y / height;
@@ -332,17 +383,35 @@ pub fn drag(
 }
 
 pub fn adjust_cursor(
-    in_data: &ae::InData,
-    params: &mut ae::Parameters<Params>,
+    _in_data: &ae::InData,
+    _params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }
-    let grid = grid_snapshot(params)?;
-    if hit_test(in_data, &grid, event, event.screen_point())?.is_some() {
-        event.set_cursor(ae::CursorType::Crosshairs);
-        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
-    }
+    event.set_cursor(hand_cursor(GUIDE_DRAGGING.get()));
+    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
+}
+
+#[cfg(test)]
+mod cursor_tests {
+    use super::*;
+
+    #[test]
+    fn enlarged_marker_fits_existing_screen_space_pick_radius() {
+        assert_eq!(HANDLE_SIZE, 10.0);
+        assert!(HANDLE_SIZE * 0.5 * 2.0_f32.sqrt() <= HIT_SLOP);
+    }
+
+    #[test]
+    fn drag_cursor_state_starts_idle_and_can_be_cleared_without_host() {
+        GUIDE_DRAGGING.set(false);
+        assert!(!GUIDE_DRAGGING.get());
+        GUIDE_DRAGGING.set(true);
+        assert!(GUIDE_DRAGGING.get());
+        GUIDE_DRAGGING.set(false);
+        assert!(!GUIDE_DRAGGING.get());
+    }
 }

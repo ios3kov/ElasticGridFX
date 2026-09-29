@@ -100,6 +100,7 @@ fn main() {
             .include(root.join("src"))
             .include(&out_dir)
             .file(root.join("src/gpu/metal_backend.mm"))
+            .file(root.join("src/bridge/hand_cursor.mm"))
             .flag_if_supported("-fobjc-arc")
             .flag_if_supported("-fvisibility=hidden")
             .warnings(true);
@@ -109,6 +110,7 @@ fn main() {
         metal.compile("elasticgrid_metal");
         println!("cargo:rustc-link-lib=framework=Metal");
         println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=AppKit");
     }
 
     for path in [
@@ -123,6 +125,7 @@ fn main() {
         "src/core/SimdPixelOps.h",
         "src/bridge/elasticgrid_ffi.cpp",
         "src/bridge/elasticgrid_ffi.h",
+        "src/bridge/hand_cursor.mm",
         "src/gpu/warp.metal",
         "src/gpu/metal_backend.mm",
     ] {

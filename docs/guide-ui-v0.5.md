@@ -23,6 +23,25 @@ all guide positions continuously.
 
 ## Rendering path
 
+### Stage 9 viewer affordances — 2026-09-29
+
+User request: larger guide markers, open hand with active effect viewer UI,
+closed hand while dragging. Markers are now 10x10 frame-coordinate units (was
+5x5), independent of layer zoom. Existing 9-unit line hit radius covers them;
+pinned/boundary lines and dense-grid marker suppression retain their behavior.
+On macOS a main-thread-only AppKit shim selects openHandCursor/closedHandCursor;
+AE is told CUSTOM using AdjustCursor, or App suite during click/drag (never the
+wrong event union). No push/pop stack, dependencies, render or installed changes.
+Release, drag errors, invalidated topology, deactivation, context close and exit
+clear dragging. Non-Mac uses native Hand/Pan as a fallback, not a verified exact
+closed-hand appearance. AE owns delivery of active effect UI events.
+
+Acceptance still requires live AE: selected/deselected effect, hover/click/drag/
+release, exit/re-entry, cancellation, multiple effects, pinned guides, zoom
+25/100/200%, and drag undo. Source tests/build cannot close this visual gate.
+References: Apple NSCursor openHand/closedHand and AE PF_AppSuite PF_SetCursor,
+PF_Event_ADJUST_CURSOR. Installation remains separately gated.
+
 `eg_render_frame` now accepts optional host-supplied guide arrays. When present, those guides are validated,
 loaded into the same `AxisGrid` model used by the drag logic, then evaluated for Wave and converted into
 inverse LUTs. This closes the previous v0.4 gap where elasticity controls existed in UI but could not affect
