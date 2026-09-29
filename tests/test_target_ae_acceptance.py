@@ -36,7 +36,7 @@ class Acceptance(unittest.TestCase):
             self.assertIsInstance(manifest, Path)
             self.assertEqual(manifest, manifest_path)
             return smoke
-        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed',side_effect=verify),              patch.object(ta.live_identity,'diagnose',return_value=identity),              patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare),              patch.object(ta.ae_smoke_runner,'execute',side_effect=execute):
+        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed',side_effect=verify),              patch.object(ta.live_identity,'diagnose',return_value=identity),              patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare),              patch.object(ta.ae_smoke_runner,'arm',side_effect=lambda f,m,*a: dict(m,target_pid=42,arm_status='ARMED')),              patch.object(ta.ae_smoke_runner,'disarm',side_effect=lambda f,m,*a: dict(m,disarm_status='CLEAN')),              patch.object(ta.ae_smoke_runner,'execute',side_effect=execute):
             return ta.run_acceptance(self.report,self.app,self.plugin,manifest_path,package_path)
 
     def prepare(self, parent, build):
@@ -60,11 +60,13 @@ class Acceptance(unittest.TestCase):
         self.assertEqual(result['release'],'BLOCKED')
         self.assertTrue(archive.is_file())
 
-    def test_identity_blocked_never_runs_smoke(self):
+    def test_identity_blocked_cleans_arm_and_never_runs_pixel_smoke(self):
         blocked=dict(self.identity,status='BLOCKED',loaded_image_status='NOT RUN')
-        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed'),              patch.object(ta.live_identity,'diagnose',return_value=blocked),              patch.object(ta.ae_smoke_runner,'prepare') as prepare:
+        with patch.object(ta.platform,'system',return_value='Darwin'),              patch.object(ta.platform,'machine',return_value='arm64'),              patch.object(ta,'load_candidate',return_value=self.manifest),              patch.object(ta,'verify_installed'),              patch.object(ta.live_identity,'diagnose',return_value=blocked),              patch.object(ta.ae_smoke_runner,'prepare',side_effect=self.prepare),              patch.object(ta.ae_smoke_runner,'arm',side_effect=lambda f,m,*a: dict(m,target_pid=42,arm_status='ARMED')),              patch.object(ta.ae_smoke_runner,'disarm',side_effect=lambda f,m,*a: dict(m,disarm_status='CLEAN')) as disarm,              patch.object(ta.ae_smoke_runner,'execute') as execute:
             result,_=ta.run_acceptance(self.report,self.app,self.plugin,self.root/'m',self.root/'p')
-        self.assertEqual(result['functional_status'],'BLOCKED'); prepare.assert_not_called()
+        self.assertEqual(result['functional_status'],'BLOCKED')
+        disarm.assert_called_once()
+        execute.assert_not_called()
 
     def test_pixel_failure_is_fail_not_pass(self):
         smoke=dict(self.smoke,pixels={'status':'FAIL'})
