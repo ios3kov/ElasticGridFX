@@ -53,8 +53,9 @@ function elasticGridPerfFixture(config) {
         rq.timeSpanStart=0.0; rq.timeSpanDuration=config.duration; rq.skipFrames=0; rq.render=true;
         var om=rq.outputModule(1);
         result.stage="output_template";
-        if (!hasTemplate(om.templates,"PNG Sequence")) throw new Error("PNG Sequence template unavailable");
-        om.applyTemplate("PNG Sequence");
+        var outputTemplate=hasTemplate(om.templates,"PNG Sequence") ? "PNG Sequence" : (hasTemplate(om.templates,"png") ? "png" : null);
+        if (outputTemplate===null) throw new Error("PNG Sequence template unavailable");
+        om.applyTemplate(outputTemplate);
         // OutputModule objects may be invalidated by settings changes; reacquire.
         om=rq.outputModule(1);
         result.stage="output_path";
@@ -64,6 +65,7 @@ function elasticGridPerfFixture(config) {
         var settings=om.getSettings(GetSettingsFormat.STRING);
         result.stage="output_format";
         if (!settings || String(settings.Format)!=="PNG Sequence") throw new Error("Output format is not PNG Sequence");
+        if (String(settings.Resize)!=="false" || String(settings.Crop)!=="false") throw new Error("Output geometry changed");
 
         result.stage="save";
         owned.save(projectFile);
@@ -75,7 +77,7 @@ function elasticGridPerfFixture(config) {
         result.width=config.width; result.height=config.height; result.fps=config.fps;
         result.duration=config.duration; result.bit_depth=config.bit_depth; result.mode=config.mode;
         result.composition="EGFX_PERF"; result.rqindex=1;
-        result.render_template="Best Settings"; result.output_template="PNG Sequence";
+        result.render_template="Best Settings"; result.output_template=outputTemplate;
         result.output_format="PNG Sequence"; result.output_pattern="frame_[#####].png";
     } catch (error) {
         result.status="FAIL";

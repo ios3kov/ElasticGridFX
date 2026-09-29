@@ -12,6 +12,18 @@ No main merge, new user installation or production release in this stage.
 
 ### Stage 8 preparation — measurements BLOCKED
 
+Follow-up: the clean target project became available. The fixture failed at
+output_template because the exact `PNG Sequence` template is absent. A bounded
+target probe found `png`, whose observed format is PNG Sequence, with Resize
+and Crop false. The generator now accepts that explicitly observed template
+and verifies PNG format and unchanged output geometry. Mock tests reject resize.
+Fixture `EGFX-perf-160f855b30cc4ba3a4d609139a168e85` was then PREPARED in real
+AE: 1920x1080, 32bpc, Final Bicubic, animated, 60 frames. No timings yet.
+The temporary exploratory template probe emitted an uncaught JavaScript dialog;
+its broad settings traversal was replaced with primitive-only named fields and
+guarded error/cleanup handling. The production fixture generator completed with
+exit 0; this probe error is not evidence of a native renderer failure.
+
 Authoritative rules fully re-read on 2026-09-29. Local aerender 25.6x101 help
 confirms `-mfr ON|OFF max_cpu_percent`; the prepared harness omitted that
 required third argument. It now supplies 100, with a command-contract test.

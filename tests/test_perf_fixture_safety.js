@@ -7,7 +7,7 @@ function run(options={}){
  const params={};const fx={matchName:'com.elasticgrid.fx.warp',property(n){return params[n]||=( {value:0,setValue(v){this.value=v;}} );}};
  const layer={property(){return {addProperty(){return options.noEffect?null:fx;}}}};
  const comp={resolutionFactor:[1,1],layers:{add(){return layer;}}};
- const om={templates:options.noPng?[]:['PNG Sequence'],applyTemplate(){},file:null,getSettings(){return {Format:'PNG Sequence'};}};
+ const om={templates:options.noPng?[]:[options.localPng?'png':'PNG Sequence'],applyTemplate(){},file:null,getSettings(){return {Format:'PNG Sequence',Resize:options.resize?'true':'false',Crop:'false'};}};
  const rq={templates:options.noBest?[]:['Best Settings'],applyTemplate(){},timeSpanStart:0,timeSpanDuration:0,skipFrames:0,render:false,outputModule(){return om;}};
  const project=Object.prototype.hasOwnProperty.call(options,'project') ? options.project : {file:null,numItems:0,dirty:false,bitsPerChannel:16,
    importFile(){calls.import++;return{};},items:{addComp(){calls.comp++;return comp;}},
@@ -34,7 +34,7 @@ for(const project of [
  const {calls,app}=run({project});
  assert.notEqual(app.exitCode,0);assert.equal(calls.save+calls.close+calls.newProject,0,'unsafe project untouched');
 }
-for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true}]){
+for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true}]){
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');
 }
 {
@@ -44,4 +44,5 @@ for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true}])
  assert.ok(Object.hasOwn(files,'/owned/EGFX_PERF.aep'));assert.equal(paramsUndefined(),true);
 }
 function paramsUndefined(){return true;}
+assert.equal(run({localPng:true}).capture.output_template,'png');
 console.log('PASS: perf fixture ownership/template/save control-flow cases (mock only)');

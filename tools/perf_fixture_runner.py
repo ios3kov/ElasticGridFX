@@ -51,7 +51,7 @@ def inspect(folder:Path,meta:dict)->dict:
         if data.get(key)!=cfg[key]: raise ValueError('fixture capture configuration mismatch')
     if data.get('fps')!=30 or data.get('duration')!=2 or data.get('composition')!='EGFX_PERF' or data.get('rqindex')!=1:
         raise ValueError('fixture render configuration mismatch')
-    if data.get('render_template')!='Best Settings' or data.get('output_template')!='PNG Sequence' or data.get('output_format')!='PNG Sequence':
+    if data.get('render_template')!='Best Settings' or data.get('output_template') not in ('PNG Sequence','png') or data.get('output_format')!='PNG Sequence':
         raise ValueError('required render/output templates were not applied')
     if data.get('output_pattern')!='frame_[#####].png':
         raise ValueError('unexpected fixture output pattern')
