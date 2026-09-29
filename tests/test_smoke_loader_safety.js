@@ -12,7 +12,7 @@ function env(options={}){
   const project=options.unsafe?{file:{fsName:'/user.aep'},numItems:1,dirty:false}:{
     file:null,numItems:0,dirty:false,
     importFile(){this.numItems++;this._footage=footage;return footage;},
-    items:{addComp(){project.numItems++;project._comp=comp;return comp;}},
+    items:{addComp(name){comp.name=name;project.numItems++;project._comp=comp;return comp;}},
     item(i){return i===1?this._footage:this._comp;},
     close(){calls.close++;if(options.closeFail)return false;app.project=null;return true;}
   };
