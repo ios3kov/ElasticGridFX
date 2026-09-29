@@ -14,6 +14,20 @@ safe AE restart (never discard unsaved work).
 
 ### Stage 9 requested guide UI affordances (source implementation)
 
+Latest installed test candidate: **de0becfd770a57af458c4776360961fe9cdc3556**,
+Build ID **EGFX-69dc027b98ab5b10bf9222fd**, package SHA-256
+`56bbd5d791118cc0c13f143aeb43517544bcef59d7af70300190f58c88d65bac`.
+Clean offline arm64 build, bundle signature/manifest checks and postcommit 19/19
+Rust tests PASS. User authorized interrupting AE for replacement; saved their
+open project, quit normally, and atomic updater returned INSTALLED_FOR_TEST.
+Rollback receipt: EGFX-update-7dde400314364ea1989cebf37d511531 (previous d26419c).
+Runtime loaded identity and visual acceptance remain NOT_RUN, explicitly left
+to the user per their request. No release/Stage 9 PASS is claimed.
+Evidence: work/guide-candidate-de0becf/{build.log,tests.log,verification.log,
+ElasticGrid.artifact.json}; source and packaging checks are not AE visual QA.
+
+Historical follow-up preparation:
+
 Follow-up: d26419c was installed with rollback retained (Build ID
 EGFX-7726b4f7add8cb5e7329ee90; package SHA-256
 fff53c06678ca531fba80789b404ce2fb1b4d384f215e39ae77ee6ebfaa0800c).
