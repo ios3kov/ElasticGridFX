@@ -33,6 +33,11 @@ layer coordinates; no fixed-offset workaround applied. See
 [coordinate baseline](stage9-text-coordinate-baseline-2026-09-30.md).
 The 3D text displacement is still unresolved; Stage 9 stays OPEN. Next gate is
 a supported shared canvas-to-layer mapping for render, overlay and inverse picking.
+Coordinate feasibility experiment now PASS: temporary host expressions on owned
+fixture corners evaluate the text plane at Y=0/30 degrees and restore state.
+Research harness and restoration tests added; production expression integration,
+render/picking alignment and camera/parent acceptance remain NOT RUN. No new
+plugin build or installation; details in the coordinate baseline document.
 
 ### Grid Positions correction requested by user
 

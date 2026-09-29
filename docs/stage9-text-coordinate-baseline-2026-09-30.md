@@ -52,3 +52,30 @@ neutral identity. Do not call general AEGP Layer APIs from MFR/render callbacks
 without a documented threading contract. UI-only state cannot drive renders.
 
 Installed artifact remains unchanged. No fix or Stage 9 acceptance claimed.
+
+## Expression-backed coordinate experiment
+
+Same owned fixture/current installed candidate. Temporarily applied expressions
+to the four existing plane point parameters, using sourceRectAtTime and toComp
+on thisLayer. Evaluated at Y rotation 0 and 30 degrees; all four values finite,
+no expression errors, transport returned 0. Corners and rotation restored in
+finally. Evidence: expression-probe.txt and expression-probe.jsx in the run folder.
+
+At 0 degrees TL=(160.342895507812,135.44921875),
+TR=(482.098510742188,135.44921875).
+At 30 degrees TL=(193.126991294881,144.064876060526),
+TR=(474.465671864278,124.959806473857).
+Thus host-evaluated point parameters can carry the perspective quad; no render
+thread AEGP calls are needed to obtain these tested values.
+
+Research harness extracted into tests/ae_text_plane_expression_probe.jsx.
+Node tests cover normal/error restoration and refusal of keyed corner inputs.
+Static audit text-expression-probe-audit.json: review_required (existing
+workflow pinning/credentials and auth-test heuristic), not security PASS.
+
+This is a coordinate feasibility test, not a production integration. Existing
+Four Corners controls must NOT be overwritten with expressions in user projects.
+A production approach would need separate internal parameters, explicit setup
+and ownership/migration rules, and a shared UI/render mapping. Neither that
+architecture nor extra parameters are implemented. Camera/parent, aerender,
+MFR, cache invalidation, undo and native picking remain NOT RUN for this mechanism.
