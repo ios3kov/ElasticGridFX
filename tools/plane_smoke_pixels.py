@@ -12,7 +12,8 @@ DEPTH_FRAMES = (
 )
 EXTRA_FRAMES = (
     'roundtrip-before', 'roundtrip-after',
-    '3d-base', '3d-layer-rotate', '3d-camera-move', '3d-parent',
+    '3d-base', '3d-position', '3d-scale', '3d-layer-rotate',
+    '3d-camera-move', '3d-parent', '3d-camera-switch', '3d-no-camera',
 )
 FRAMES = tuple(f'd{depth}-{name}' for depth in DEPTHS for name in DEPTH_FRAMES) + EXTRA_FRAMES
 
@@ -57,9 +58,13 @@ def validate_plane_frames(folder: Path) -> dict:
             checks[key] = _check(images, prefix + a, prefix + b, changed)
 
     checks['roundtrip'] = _check(images, 'roundtrip-before', 'roundtrip-after', False)
-    checks['3d_layer_rotation'] = _check(images, '3d-base', '3d-layer-rotate', True)
+    checks['3d_position'] = _check(images, '3d-base', '3d-position', True)
+    checks['3d_scale'] = _check(images, '3d-position', '3d-scale', True)
+    checks['3d_rotation'] = _check(images, '3d-scale', '3d-layer-rotate', True)
     checks['3d_camera_motion'] = _check(images, '3d-layer-rotate', '3d-camera-move', True)
     checks['3d_parent_motion'] = _check(images, '3d-camera-move', '3d-parent', True)
+    checks['3d_camera_switch'] = _check(images, '3d-parent', '3d-camera-switch', True)
+    checks['3d_no_camera'] = _check(images, '3d-camera-switch', '3d-no-camera', True)
 
     status = 'PASS' if all(item['status'] == 'PASS' for item in checks.values()) else 'FAIL'
     return dict(
@@ -67,6 +72,6 @@ def validate_plane_frames(folder: Path) -> dict:
         checks=checks,
         frames=len(images),
         scope=('AE PNG plane pixels: 8/16/32 bpc identity/wave/skew/invalid/half-res, '
-               'AEP save-reopen, 3D layer rotation, active-camera motion and 3D parenting; '
+               'AEP save-reopen, 3D position/scale/rotation/parenting, active-camera motion/switch and no-camera fallback; '
                'not native guide drag/Undo/Redo or GPU parity'),
     )
