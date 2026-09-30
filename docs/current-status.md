@@ -9,11 +9,15 @@
 ### Automatic 3D requirement (supersedes proposed binding button)
 
 Latest checkpoint: direct SequenceSetup stream access returned Parameter error;
-do not use it for automatic binding. A bounded, read-only deferred idle probe
-is built from 8932480, EGFX-5263b63fcc6d802626046b97. Compilation, bundle/identity
-checks and harness guards PASS; native run BLOCKED by locked Mac. It is not
-installed. Ordinary 1eed79a payload remains unchanged and verified. See
-[lifecycle research](stage9-lifecycle-probe.md). This is research, not a 3D fix.
+do not use it for automatic binding. Initial deferred probe 8932480 crashed:
+its idle callback lacked the Rust wrapper's suite context. Corrected clean
+90abb51 / EGFX-f368dadd63178676c10f44d2 passed native add -> idle read of 24
+streams -> remove in AE 25.6.0, PID 49089. Exact live identity PASS. Test fixture
+closed without saving; diagnostic rolled back and ordinary 1eed79a payload
+reverified. See [lifecycle research](stage9-lifecycle-probe.md). This establishes
+read-only deferred access, not automatic binding or a 3D fix. Next gate is an
+idempotent hidden-parameter binding transaction with Undo/deletion safety and
+non-interactive first-render handling; Grid Positions must remain untouched.
 
 User requires automatic behavior when the layer's 3D switch changes. No Bind
 button, manual expression setup or precomposition requirement is acceptable.

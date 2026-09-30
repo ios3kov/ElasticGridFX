@@ -97,3 +97,31 @@ context from the host-global SPBasicSuite pointer, checks null, and restores
 the prior context on exit. No effect or PF_InData pointers are retained.
 This is a likely crash mechanism, not stack-trace-confirmed causality. Repeat
 native run required; default build still excludes the experiment entirely.
+
+## Suite-context correction: native result
+
+Clean source 90abb51eb1a90ba5986f53e8f38dbbe595fb38eb,
+Build EGFX-f368dadd63178676c10f44d2, package SHA-256
+02b1b36354d57b5053d76646dd88d163d7f4982ff6c9289c467e85a18b5f9605.
+AE 25.6.0 arm64, PID 49089, owned fixture only:
+
+- Add in separate JSX invocation: PASS, two effects observed.
+- Deferred main-thread journal: `idle main: Ok(24)`.
+- Removal in later invocation: PASS, one effect remains; AE responsive.
+- Exact live UUID/path/payload identity: PASS, same PID.
+- Close owned modified fixture without saving: PASS; normal AE shutdown.
+- Rollback receipt EGFX-update-bc106b38a72d4b1e8b21ebd076caae07: ROLLED_BACK;
+  original 1eed79a installed payload reverified.
+
+Evidence folder: outputs/lifecycle-context-evidence-90abb51 (PID journals and
+live-identity.json); context-add/remove-result.txt in the owned fixture folder.
+Build/signature/sealed identity PASS; harness Node guards PASS. Static audit
+still review_required, existing workflow/test findings, not security approval.
+
+This establishes the bounded read-only deferred-access experiment only.
+It does not establish safe expression writes, undo ownership, initialization
+before a non-interactive first render, automatic migration or 3D alignment.
+Next implementation gate: a separately testable, idempotent binding transaction
+on dedicated hidden parameters, with cancellation on deletion/Undo and no
+changes to Grid Positions or user-authored corner expressions. Do not generalize
+this fixture-name/active-layer research filter into production targeting.
