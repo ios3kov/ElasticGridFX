@@ -8,6 +8,7 @@ mod ui;
 mod control_grid;
 mod ui_projection;
 mod plane;
+mod fit_layer;
 #[cfg(fstr_lifecycle_probe)]
 mod lifecycle_probe;
 #[cfg(test)]
@@ -1033,16 +1034,9 @@ impl AdobePluginGlobal for Plugin {
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ResetPlane) == Some(param_index) {
-                    // Layer-space last pixel centers match the legacy raster
-                    // grid domain. UI command: never consult frame-only origin.
-                    let w=in_data.width().saturating_sub(1).max(0) as f32;
-                    let h=in_data.height().saturating_sub(1).max(0) as f32;
-                    for (id,point) in plane::CORNERS.into_iter().zip([(0.0,0.0),(w,0.0),(w,h),(0.0,h)]) {
-                        let mut param=params.get_mut(id)?;
-                        param.as_point_mut()?.set_value(point);
-                        param.set_value_changed();
+                    if fit_layer::apply(&in_data, params)? {
+                        out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                     }
-                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                 }
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
