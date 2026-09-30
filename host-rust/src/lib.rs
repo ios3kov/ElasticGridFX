@@ -17,6 +17,8 @@ mod binding_transaction;
 mod binding_probe;
 #[cfg(all(fstr_binding_probe, not(fstr_lifecycle_probe)))]
 compile_error!("Binding research requires lifecycle research context");
+#[cfg(all(fstr_auto_binding,not(fstr_binding_probe)))]
+compile_error!("Automatic binding requires binding parameters");
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
 }

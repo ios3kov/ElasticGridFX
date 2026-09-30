@@ -108,6 +108,11 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
     Ok(())
 }
 
+#[cfg(fstr_auto_binding)]
+pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Outcome,String>{
+    binding_transaction::install(&mut Adapter{id,effect,layer,basic},&expressions()).map_err(|e|format!("{e:?}"))
+}
+
 // The wrapper locks even a null GetExpression result. Query explicitly and
 // never lock/free a null handle; a successful null result means no expression.
 fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,

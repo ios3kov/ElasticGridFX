@@ -8,6 +8,20 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Shared render checkpoint: cec5773 / EGFX-f9b7337802910afe93ef578b installed
+internally (receipt EGFX-update-a631be43e534453088b4ea8118752da4). Live identity
+PASS. Native 8bpc text X=-20/Y=30: neutral max error 0, region exterior max
+error 0, 6816 changed interior pixels PASS. Evidence outputs/plane-render-integration
+original/neutral/deformed-v3.png and live-identity.json; independent checker
+tools/check_native_text_region.py. This tests locality/identity, not exact guide
+direction or all bit depths. Initial capture harness checked stale File metadata;
+refresh/bounded publishing wait corrected it. No renderer failure inferred from
+those initial missing-frame reports. 37 Rust tests and marker schema tests PASS.
+Next experiment adds fstr_auto_binding: no active-selection/fixture-name target;
+bounded project scan at deferred main-thread idle, exact schema/match-name and
+conflict protection, no handles retained across callbacks. Real generic creation,
+native Undo and saved reload gates remain NOT RUN. Still research, not release.
+
 Render integration in progress: a fifth hidden scalar is installed last with
 the four projected points. Kind 0 means unbound research legacy, 1 layer-local,
 2 native 3D text comp-space. UI and SmartFX now read the same `plane::State`;

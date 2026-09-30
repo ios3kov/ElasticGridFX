@@ -19,7 +19,7 @@ struct Deferred {
 }
 impl Deferred {
     fn observe(&mut self) {
-        if self.consumed || !main_thread() || !self.pending.swap(false, Ordering::AcqRel) { return; }
+        if (self.consumed && !cfg!(fstr_auto_binding)) || !main_thread() || !self.pending.swap(false, Ordering::AcqRel) { return; }
         self.consumed = true;
         // Non-AEGP hook wrapper does not establish the crate's thread-local
         // suite context. EffectMain's guard has already been dropped at idle.
@@ -29,6 +29,7 @@ impl Deferred {
         let result = self.inspect();
         journal("idle", &format!("idle main: {result:?}"));
     }
+    #[cfg(not(fstr_auto_binding))]
     fn inspect(&self) -> Result<i32, ae::Error> {
         let layers = ae::aegp::suites::Layer::new()?;
         let layer = layers.active_layer()?.ok_or(ae::Error::BadCallbackParameter)?;
@@ -59,6 +60,53 @@ impl Deferred {
         })();
         let disposed = effects.dispose_effect(effect);
         match (result, disposed) { (Ok(n), Ok(())) => Ok(n), (Err(e), _) | (_, Err(e)) => Err(e) }
+    }
+
+    // No active selection dependency and no effect handles retained across idle.
+    // Only exact match-name/schema streams are writable; conflicts remain intact.
+    #[cfg(fstr_auto_binding)]
+    fn inspect(&self) -> Result<i32,ae::Error> {
+        let projects=ae::aegp::suites::Project::new()?;
+        let items=ae::aegp::suites::Item::new()?;
+        let comps=ae::aegp::suites::Comp::new()?;
+        let layers=ae::aegp::suites::Layer::new()?;
+        let effects=ae::aegp::suites::Effect::new()?;
+        let mut installed=0;
+        let mut visited=0;
+        let mut failed=false;
+        for index in 0..projects.num_projects()? {
+            let project=projects.project_by_index(index)?;
+            let mut next=Some(items.first_proj_item(&project)?);
+            while let Some(item)=next {
+                visited+=1;
+                if visited>50000 {return Err(ae::Error::BadCallbackParameter);}
+                next=items.next_proj_item(&project,item)?;
+                if items.item_type(item)?!=ae::aegp::ItemType::Comp {continue;}
+                let Some(comp)=comps.comp_from_item(item)? else {continue;};
+                for li in 0..layers.comp_num_layers(comp)? {
+                    let layer=layers.comp_layer_by_index(comp,li)?;
+                    if layers.layer_flags(layer)?.contains(ae::aegp::LayerFlags::LOCKED) {continue;}
+                    for ei in 0..effects.layer_num_effects(layer)? {
+                        visited+=1;
+                        if visited>50000 {return Err(ae::Error::BadCallbackParameter);}
+                        let effect=effects.layer_effect_by_index(layer,self.id,ei)?;
+                        let result=(|| ->Result<(),ae::Error>{
+                            let key=effects.installed_key_from_layer_effect(effect)?;
+                            if effects.effect_match_name(key)?!="com.elasticgrid.fx.warp" {return Ok(());}
+                            match binding_probe::bind(self.id,effect,layer,self.basic) {
+                                Ok(binding_transaction::Outcome::Installed)=>installed+=1,
+                                Ok(binding_transaction::Outcome::AlreadyInstalled)=>{},
+                                Err(_)=>failed=true,
+                            }
+                            Ok(())
+                        })();
+                        let disposed=effects.dispose_effect(effect);
+                        result?;disposed?;
+                    }
+                }
+            }
+        }
+        if failed {Err(ae::Error::BadCallbackParameter)} else {Ok(installed)}
     }
 }
 
@@ -94,7 +142,10 @@ impl Probe {
         else if matches!(cmd, ae::Command::SequenceSetup) {
             self.pending.store(true, Ordering::Release);
             "main: deferred; no AEGP calls".to_owned()
-        } else { match self.inspect(cmd, input) {
+        } else {
+            #[cfg(fstr_auto_binding)]
+            if matches!(cmd,ae::Command::SequenceResetup) {self.pending.store(true,Ordering::Release);}
+            match self.inspect(cmd, input) {
             Ok(n) => format!("main: streams={n}"),
             Err(e) => format!("main: {e:?}"),
         }};
