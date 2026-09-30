@@ -1,4 +1,4 @@
-//! Host-independent transaction contract; not wired into the shipping plugin.
+//! Host-independent transaction contract for native-plane dependencies.
 //! Adapter must reacquire/validate the exact effect and dedicated hidden streams.
 //! Never pass Grid Positions or public Four Corners streams to this interface.
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -1,6 +1,5 @@
-//! Opt-in lifecycle experiment. Never shipped in the default build.
-//! Read-only unless the separate fstr_binding_probe write experiment is enabled.
-//! Enable with RUSTFLAGS='--cfg fstr_lifecycle_probe' (recorded in build identity).
+//! Main-thread lifecycle bridge for the default native-plane feature.
+//! Legacy module/cfg names retain reproducible opt-in research baselines.
 use super::*;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 
@@ -245,5 +244,6 @@ impl Probe {
         match (result, disposed) { (Ok(n), Ok(())) => Ok(n), (Err(e), _) | (_, Err(e)) => Err(e) }
     }
 
+    #[cfg(not(feature="native-plane"))]
     pub fn report(&self) -> String { self.records.join("\r") }
 }

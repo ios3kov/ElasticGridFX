@@ -1075,7 +1075,7 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::About => {
                 out_data.set_return_msg(build_identity::ABOUT);
-                #[cfg(fstr_lifecycle_probe)]
+                #[cfg(all(fstr_lifecycle_probe,not(feature="native-plane")))]
                 out_data.set_return_msg(&format!("LIFECYCLE RESEARCH ONLY\r{}\r{}",
                     build_identity::ABOUT, self.lifecycle_probe.report()));
             }

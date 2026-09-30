@@ -8,6 +8,17 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Completion candidate: `native-plane` is now the default Cargo feature. Normal
+builds include the exact automatic binding/render/UI path tested under the
+earlier cfg flags; no special RUSTFLAGS or user binding action is required.
+Opt-out `--no-default-features` exists only for reproducing legacy baselines.
+0d7db55 native validation: the saved unbound raster initializes automatically;
+a subsequent new raster effect in a different comp also initializes (idle
+records Ok(1), Ok(1)); 2D/3D raster neutral error 0 with substantial deformation.
+Repeated 8/16/32 text matrix PASS (same exact numerical results as 9cbc28c).
+Default-feature final immutable artifact still requires installation and repeat
+acceptance before handoff. This supersedes the earlier experimental-only status.
+
 Finalization in progress: Four Corners native-text baseline cb790f6 FAIL,
 full-domain Layer Plane versus Four Corners differs in 39719 channel samples
 (max error 1.0). Source now projects the existing effect-canvas parameter domain

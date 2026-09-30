@@ -9,6 +9,10 @@ build = "build.rs"
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+default = ["native-plane"]
+native-plane = []
+
 [dependencies]
 after-effects = "=0.4.0"
 serde = { version = "=1.0.229", features = ["derive"] }

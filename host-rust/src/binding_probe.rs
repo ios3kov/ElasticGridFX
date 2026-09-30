@@ -1,4 +1,4 @@
-//! Write experiment, opt-in only. Dedicated hidden streams on owned fixture.
+//! Automatic native-plane dependencies in dedicated append-only hidden streams.
 use super::*;
 use binding_transaction::{Host, Snapshot, Outcome};
 const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL", "__FSTR Plane Kind"];

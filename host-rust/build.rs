@@ -45,6 +45,14 @@ fn main() {
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_auto_binding)");
+    // The verified automatic plane is part of normal builds. The old cfg names
+    // remain as internal module gates so research/no-default builds can still
+    // reproduce earlier baselines without renaming persistent parameter IDs.
+    if std::env::var_os("CARGO_FEATURE_NATIVE_PLANE").is_some() {
+        for name in ["fstr_lifecycle_probe","fstr_binding_probe","fstr_auto_binding"] {
+            println!("cargo:rustc-cfg={name}");
+        }
+    }
     // The after-effects 0.4.0 macro expands these cfg names in the destination
     // crate. Register them explicitly so modern rustc check-cfg / Clippy can
     // validate the expansion without treating supported host cfgs as unknown.
