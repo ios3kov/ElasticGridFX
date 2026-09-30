@@ -43,22 +43,6 @@ impl Drop for IdleWake {
     fn drop(&mut self){unsafe {(self.release)(ae::sys::kAEGPUtilitySuite.as_ptr().cast(),ae::sys::kAEGPUtilitySuiteVersion6 as i32);}}
 }
 
-#[cfg(test)] mod wake_tests {
-    use super::*;
-    use std::sync::atomic::AtomicUsize;
-    static CALLS:AtomicUsize=AtomicUsize::new(0);
-    static RELEASES:AtomicUsize=AtomicUsize::new(0);
-    unsafe extern "C" fn call()->ae::sys::A_Err {CALLS.fetch_add(1,Ordering::SeqCst);0}
-    unsafe extern "C" fn release(_: *const std::ffi::c_char,_:i32)->ae::sys::SPErr {RELEASES.fetch_add(1,Ordering::SeqCst);0}
-    #[test] fn cached_wake_is_worker_callable_and_suite_released_once(){
-        let wake=IdleWake {call,release};
-        std::thread::scope(|s| {s.spawn(||wake.request()).join().unwrap();});
-        assert_eq!(CALLS.load(Ordering::SeqCst),1);
-        assert_eq!(RELEASES.load(Ordering::SeqCst),0);
-        drop(wake);assert_eq!(RELEASES.load(Ordering::SeqCst),1);
-    }
-}
-
 // One deferred observation per process. No PF effect handle crosses callbacks.
 struct Deferred {
     id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool,
@@ -246,4 +230,20 @@ impl Probe {
 
     #[cfg(not(feature="native-plane"))]
     pub fn report(&self) -> String { self.records.join("\r") }
+}
+
+#[cfg(test)] mod wake_tests {
+    use super::*;
+    use std::sync::atomic::AtomicUsize;
+    static CALLS:AtomicUsize=AtomicUsize::new(0);
+    static RELEASES:AtomicUsize=AtomicUsize::new(0);
+    unsafe extern "C" fn call()->ae::sys::A_Err {CALLS.fetch_add(1,Ordering::SeqCst);0}
+    unsafe extern "C" fn release(_: *const std::ffi::c_char,_:i32)->ae::sys::SPErr {RELEASES.fetch_add(1,Ordering::SeqCst);0}
+    #[test] fn cached_wake_is_worker_callable_and_suite_released_once(){
+        let wake=IdleWake {call,release};
+        std::thread::scope(|s| {s.spawn(||wake.request()).join().unwrap();});
+        assert_eq!(CALLS.load(Ordering::SeqCst),1);
+        assert_eq!(RELEASES.load(Ordering::SeqCst),0);
+        drop(wake);assert_eq!(RELEASES.load(Ordering::SeqCst),1);
+    }
 }

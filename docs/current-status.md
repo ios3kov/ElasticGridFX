@@ -39,6 +39,14 @@ certification: non-square pixels and per-character 3D are outside this gate.
 Release/merge/main remain untouched. CI results must be associated with their
 exact source head, not inferred from this runtime matrix.
 
+CI follow-up: 3e21df4 passed CI, final validation, live-image diagnostic,
+authorized-update safety and acceptance package. macOS source gate found two
+Clippy style errors in the newly default-enabled modules. Follow-up replaces
+the expression-size range comparison with equivalent RangeInclusive::contains
+and moves a test module after production items. These are source-only cleanup;
+they do not replace or relabel the installed cbe6da1 artifact. The new exact-head
+macOS workflow must complete before declaring the repository release gate green.
+
 ## Historical investigation (not current installation status)
 
 ## Latest product decision — perspective REGION, 2026-09-30

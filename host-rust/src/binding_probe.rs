@@ -149,7 +149,7 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
         let memory=ae::aegp::suites::Memory::new().map_err(err)?;
         let read=(|| {
             let bytes=memory.mem_handle_size(handle).map_err(err)?;
-            if bytes<2 || bytes>1024*1024 || bytes%2!=0 {return Err("Invalid expression size".into());}
+            if !(2..=1024*1024).contains(&bytes) || bytes%2!=0 {return Err("Invalid expression size".into());}
             let data=memory.lock_mem_handle(handle).map_err(err)?;
             let decoded=if data.is_null() {Err("Null expression data".into())} else {
                 let units=unsafe {std::slice::from_raw_parts(data.cast::<u16>(),bytes/2)};
