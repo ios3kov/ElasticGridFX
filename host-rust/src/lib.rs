@@ -1081,7 +1081,7 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::PlaneMode)==Some(param_index) {
-                    plane::update_ui(&in_data,params,false)?;
+                    plane::update_ui(&in_data,params)?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ResetPlane) == Some(param_index) {
@@ -1103,7 +1103,7 @@ impl AdobePluginGlobal for Plugin {
 
                 }
             }
-            ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params,false)?,
+            ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params)?,
             ae::Command::QueryDynamicFlags => {
                 // Wave animation uses current_time even when no parameter has a
                 // keyframe. Tell AE only when that time dependency is active,
@@ -1130,10 +1130,7 @@ impl AdobePluginGlobal for Plugin {
                         }
                     }
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
-                    ae::Event::Draw(_) => {
-                        plane::update_ui(&in_data,params,true)?;
-                        ui::draw(&in_data, params, &mut extra)?;
-                    }
+                    ae::Event::Draw(_) => ui::draw(&in_data, params, &mut extra)?,
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra)?,
                     ae::Event::Deactivate | ae::Event::CloseContext | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}

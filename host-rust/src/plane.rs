@@ -23,18 +23,15 @@ fn ui_disabled(three_d:bool, mode:i32)->(bool,bool) {
     (three_d,three_d || mode!=2)
 }
 
-pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>, only_if_changed:bool) -> Result<(), ae::Error> {
-    let three_d=ui_layer_is_3d(input)?;
+pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
+    // During effect construction AE may not yet have an owning layer for the
+    // UI instance. Leave the setup defaults until the next host UI callback.
+    let three_d=match ui_layer_is_3d(input) {
+        Ok(value)=>value,
+        Err(ae::Error::BadCallbackParameter)=>return Ok(()),
+        Err(error)=>return Err(error),
+    };
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
-    // DRAW is also delivered when the layer's external 3D switch changes.
-    // Avoid issuing cosmetic updates on every unchanged draw (redraw loop).
-    if only_if_changed {
-        let mut matches=params.get(Params::PlaneMode)?.ui_flags().contains(ae::ParamUIFlags::DISABLED)==mode_disabled;
-        for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
-            matches &= params.get(id)?.ui_flags().contains(ae::ParamUIFlags::DISABLED)==corners_disabled;
-        }
-        if matches {return Ok(());}
-    }
     let mut mode=(*params.get(Params::PlaneMode)?).clone();
     mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
     // Keep the serialized 2D selection/keyframes untouched. Both stored
