@@ -1,5 +1,16 @@
 # Current development / release status
 
+## Stage 10 — authorized release preparation, 2026-09-30
+
+User explicitly authorized merge/release and confirmed retargeting PR #5 to main.
+PR is ready for review, base main; no conflicts, merge tree matches branch tree.
+Source candidate 36a04e3 and package identity below remain unchanged. Five
+f98f855 workflows PASS; full macOS source run 36708080816 remains pending at
+this record. Merge/publication must wait for its result. Earlier prohibitions
+below are historical, superseded by this explicit authorization, not by CI.
+Release scope/install/rollback: docs/release-0.9.0.md. No other repository is
+included in this authorization. No notarization or untested-platform claims.
+
 ## User acceptance update: 3D mode lock
 
 2026-09-30: user accepted perspective guide deformation, Grid Positions animation/
