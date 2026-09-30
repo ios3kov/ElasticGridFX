@@ -22,6 +22,7 @@ struct Adapter {
     id:ae::aegp::PluginId,
     effect:ae::aegp::EffectRefHandle,
     layer:ae::aegp::LayerHandle,
+    basic:*const ae::sys::SPBasicSuite,
 }
 impl Adapter {
     fn stream(&mut self,i:usize)->Result<ae::aegp::StreamReferenceHandle,String>{
@@ -52,7 +53,7 @@ impl Host for Adapter {
         let stream=self.stream(i)?;let suite=ae::aegp::suites::Stream::new().map_err(err)?;
         let keys=ae::aegp::suites::Keyframe::new().map_err(err)?.stream_num_kfs(&stream).map_err(err)?;
         if keys<0 {return Err("Hidden stream cannot animate".into());}
-        Ok(Snapshot {expression:suite.expression_string(&stream,self.id).map_err(err)?,
+        Ok(Snapshot {expression:read_expression(self.basic,self.id,&stream)?,
             enabled:suite.expression_state(&stream,self.id).map_err(err)?,keys:keys as usize})
     }
     fn begin_undo(&mut self)->Result<(),String>{ae::aegp::suites::Utility::new().map_err(err)?.start_undo_group("FSTR research binding").map_err(err)}
@@ -66,11 +67,83 @@ impl Host for Adapter {
 }
 // Caller has already restricted the operation to the owned fixture's newly
 // added second effect, on the main thread, with a valid scoped suite context.
-pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle)->Result<(),String>{
-    let mut host=Adapter{id,effect,layer};let e=expressions();
+pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<(),String>{
+    let mut host=Adapter{id,effect,layer,basic};let e=expressions();
     let first=binding_transaction::install(&mut host,&e).map_err(|x|format!("{x:?}"))?;
     if first!=Outcome::Installed {return Err("Expected pristine research target".into());}
     let repeat=binding_transaction::install(&mut host,&e).map_err(|x|format!("{x:?}"))?;
     if repeat!=Outcome::AlreadyInstalled {return Err("Idempotency failed".into());}
     Ok(())
+}
+
+// The wrapper locks even a null GetExpression result. Query explicitly and
+// never lock/free a null handle; a successful null result means no expression.
+fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
+    stream:&ae::aegp::StreamReferenceHandle)->Result<String,String>{
+    if basic.is_null() {return Err("Missing basic suite".into());}
+    let mut ptr: *const c_void=std::ptr::null();
+    let name=ae::sys::kAEGPStreamSuite.as_ptr().cast();
+    let version=ae::sys::kAEGPStreamSuiteVersion6 as i32;
+    let basic=unsafe {&*basic};
+    let acquire=basic.AcquireSuite.ok_or("No AcquireSuite")?;
+    let release=basic.ReleaseSuite.ok_or("No ReleaseSuite")?;
+    let code=unsafe {acquire(name,version,&mut ptr)};
+    if code!=0 {return Err(format!("Acquire StreamSuite: {code}"));}
+    let result=(|| {
+        if ptr.is_null() {return Err("Null StreamSuite".into());}
+        let suite=unsafe {&*ptr.cast::<ae::sys::AEGP_StreamSuite6>()};
+        let get=suite.AEGP_GetExpression.ok_or("No GetExpression")?;
+        let mut handle=std::ptr::null_mut();
+        let code=unsafe {get(id,stream.as_ptr(),&mut handle)};
+        if code!=0 {return Err(format!("GetExpression: {code}"));}
+        if handle.is_null() {return Ok(String::new());}
+        let memory=ae::aegp::suites::Memory::new().map_err(err)?;
+        let read=(|| {
+            let bytes=memory.mem_handle_size(handle).map_err(err)?;
+            if bytes<2 || bytes>1024*1024 || bytes%2!=0 {return Err("Invalid expression size".into());}
+            let data=memory.lock_mem_handle(handle).map_err(err)?;
+            let decoded=if data.is_null() {Err("Null expression data".into())} else {
+                let units=unsafe {std::slice::from_raw_parts(data.cast::<u16>(),bytes/2)};
+                match units.iter().position(|v|*v==0) {
+                    Some(end)=>String::from_utf16(&units[..end]).map_err(|_|"Invalid expression UTF16".into()),
+                    None=>Err("Unterminated expression".into()),
+                }
+            };
+            let unlock=memory.unlock_mem_handle(handle).map_err(err);
+            match (decoded,unlock) {(Ok(s),Ok(()))=>Ok(s),(Err(e),_)|(_,Err(e))=>Err(e)}
+        })();
+        let free=memory.free_mem_handle(handle).map_err(err);
+        match (read,free) {(Ok(s),Ok(()))=>Ok(s),(Err(e),_)|(_,Err(e))=>Err(e)}
+    })();
+    let code=unsafe {release(name,version)};
+    if code!=0 {return Err(format!("Release StreamSuite: {code}"));}
+    result
+}
+
+#[cfg(test)] mod tests {
+    use super::*;
+    use std::sync::{OnceLock,atomic::{AtomicUsize,Ordering}};
+    static RELEASES:AtomicUsize=AtomicUsize::new(0);
+    unsafe extern "C" fn empty(_:i32,_:ae::sys::AEGP_StreamRefH,out:*mut ae::sys::AEGP_MemHandle)->i32 {
+        unsafe {*out=std::ptr::null_mut();} 0
+    }
+    unsafe extern "C" fn acquire(_: *const std::ffi::c_char,version:i32,out:*mut *const c_void)->i32 {
+        if version!=ae::sys::kAEGPStreamSuiteVersion6 as i32 {return 1;}
+        static SUITE:OnceLock<ae::sys::AEGP_StreamSuite6>=OnceLock::new();
+        let suite=SUITE.get_or_init(|| {
+            // ABI struct contains only nullable function pointers.
+            let mut s:ae::sys::AEGP_StreamSuite6=unsafe {std::mem::zeroed()};
+            s.AEGP_GetExpression=Some(empty);s
+        });
+        unsafe {*out=(suite as *const ae::sys::AEGP_StreamSuite6).cast();} 0
+    }
+    unsafe extern "C" fn release(_: *const std::ffi::c_char,_:i32)->i32 {RELEASES.fetch_add(1,Ordering::SeqCst);0}
+    #[test] fn successful_null_expression_never_acquires_memory_or_locks_null(){
+        let mut basic:ae::sys::SPBasicSuite=unsafe {std::mem::zeroed()};
+        basic.AcquireSuite=Some(acquire);basic.ReleaseSuite=Some(release);
+        let stream=ae::aegp::StreamReferenceHandle::from_raw(std::ptr::null_mut());
+        assert!(read_expression(std::ptr::null(),1,&stream).is_err());
+        assert_eq!(read_expression(&basic,1,&stream),Ok(String::new()));
+        assert_eq!(RELEASES.load(Ordering::SeqCst),1);
+    }
 }

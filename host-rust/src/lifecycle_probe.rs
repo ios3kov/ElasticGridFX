@@ -51,7 +51,7 @@ impl Deferred {
                 return Err(ae::Error::BadCallbackParameter);
             }
             #[cfg(fstr_binding_probe)] {
-                let binding = binding_probe::run(self.id,effect,layer);
+                let binding = binding_probe::run(self.id,effect,layer,self.basic);
                 journal("binding", &format!("binding main: {binding:?}"));
                 if binding.is_err() { return Err(ae::Error::BadCallbackParameter); }
             }

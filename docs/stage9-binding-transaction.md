@@ -74,3 +74,13 @@ Native acceptance: automatic binding readback and expression evaluation,
 idempotency, one native Undo clears all four expressions, Redo restores them,
 remove second effect, close fixture unsaved, verify rollback to ordinary build.
 Host check compiles; native acceptance is NOT RUN until separately recorded.
+
+d5e8a32 / EGFX-6fd53cd4be4b6b47eb276759 native attempt (AE PID 51936):
+add PASS, binding FAIL with Struct error and AE "bad tracked memory ID (23::34)".
+Undo/Redo NOT RUN. Owned fixture closed without saving; receipt
+EGFX-update-5d6795d913b243ebbda58be502e3f5a0 ROLLED_BACK, ordinary payload verified.
+No successful write is evidenced. Wrapper GetExpression locks an unchecked
+returned memory handle. Follow-up explicitly handles a successful null result,
+bounds UTF16 decoding and balances non-null memory and suite calls. A mocked
+null-result ABI regression and all research-config tests PASS (34/34). Native
+repeat required; null handling is a hypothesis for this specific host error.
