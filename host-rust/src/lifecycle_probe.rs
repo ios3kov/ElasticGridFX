@@ -10,6 +10,54 @@ pub(crate) struct Probe {
     records: Vec<String>,
     journal_entries: u8,
     pending: Arc<AtomicBool>,
+    wake:Option<IdleWake>,
+}
+
+// Adobe explicitly permits this cached function on worker threads, but not
+// suite acquisition there. Keep the suite acquired for the global lifetime.
+struct IdleWake {
+    call:unsafe extern "C" fn()->ae::sys::A_Err,
+    release:unsafe extern "C" fn(*const std::ffi::c_char,i32)->ae::sys::SPErr,
+}
+impl IdleWake {
+    fn new(input:&ae::InData)->Result<Self,ae::Error>{
+        let basic=input.pica_basic_suite_ptr();
+        if basic.is_null() || !main_thread() {return Err(ae::Error::BadCallbackParameter);}
+        let basic=unsafe {&*basic};
+        let acquire=basic.AcquireSuite.ok_or(ae::Error::MissingSuite)?;
+        let release=basic.ReleaseSuite.ok_or(ae::Error::MissingSuite)?;
+        let mut ptr:*const c_void=std::ptr::null();
+        let code=unsafe {acquire(ae::sys::kAEGPUtilitySuite.as_ptr().cast(),ae::sys::kAEGPUtilitySuiteVersion6 as i32,&mut ptr)};
+        if code!=0 {return Err(ae::Error::MissingSuite);}
+        let call=if ptr.is_null() {None} else {unsafe {(*ptr.cast::<ae::sys::AEGP_UtilitySuite6>()).AEGP_CauseIdleRoutinesToBeCalled}};
+        if let Some(call)=call {Ok(Self{call,release})} else {
+            unsafe {release(ae::sys::kAEGPUtilitySuite.as_ptr().cast(),ae::sys::kAEGPUtilitySuiteVersion6 as i32)};
+            Err(ae::Error::MissingSuite)
+        }
+    }
+    fn request(&self){
+        let code=unsafe {(self.call)()};
+        if code!=0 {journal("wake-error",&format!("Idle wake failed: {code}"));}
+    }
+}
+impl Drop for IdleWake {
+    fn drop(&mut self){unsafe {(self.release)(ae::sys::kAEGPUtilitySuite.as_ptr().cast(),ae::sys::kAEGPUtilitySuiteVersion6 as i32);}}
+}
+
+#[cfg(test)] mod wake_tests {
+    use super::*;
+    use std::sync::atomic::AtomicUsize;
+    static CALLS:AtomicUsize=AtomicUsize::new(0);
+    static RELEASES:AtomicUsize=AtomicUsize::new(0);
+    unsafe extern "C" fn call()->ae::sys::A_Err {CALLS.fetch_add(1,Ordering::SeqCst);0}
+    unsafe extern "C" fn release(_: *const std::ffi::c_char,_:i32)->ae::sys::SPErr {RELEASES.fetch_add(1,Ordering::SeqCst);0}
+    #[test] fn cached_wake_is_worker_callable_and_suite_released_once(){
+        let wake=IdleWake {call,release};
+        std::thread::scope(|s| {s.spawn(||wake.request()).join().unwrap();});
+        assert_eq!(CALLS.load(Ordering::SeqCst),1);
+        assert_eq!(RELEASES.load(Ordering::SeqCst),0);
+        drop(wake);assert_eq!(RELEASES.load(Ordering::SeqCst),1);
+    }
 }
 
 // One deferred observation per process. No PF effect handle crosses callbacks.
@@ -146,6 +194,7 @@ impl Probe {
         // Do not enqueue worker resetup: MFR uses it for render-side copies.
         if matches!(cmd,ae::Command::SequenceSetup) {
             self.pending.store(true,Ordering::Release);
+            if let Some(wake)=&self.wake {wake.request();}
         }
         // Never acquire AEGP suites off the main thread, including resetup.
         let result = if !main_thread() { "worker: no AEGP calls".to_owned() }
@@ -154,7 +203,10 @@ impl Probe {
             "main: deferred; no AEGP calls".to_owned()
         } else {
             #[cfg(fstr_auto_binding)]
-            if matches!(cmd,ae::Command::SequenceResetup) {self.pending.store(true,Ordering::Release);}
+            if matches!(cmd,ae::Command::SequenceResetup) {
+                self.pending.store(true,Ordering::Release);
+                if let Some(wake)=&self.wake {wake.request();}
+            }
             match self.inspect(cmd, input) {
             Ok(n) => format!("main: streams={n}"),
             Err(e) => format!("main: {e:?}"),
@@ -173,6 +225,7 @@ impl Probe {
 
     fn inspect(&mut self, cmd: &ae::Command, input: &ae::InData) -> Result<i32, ae::Error> {
         if matches!(cmd, ae::Command::GlobalSetup) {
+            self.wake=Some(IdleWake::new(input)?);
             self.id = Some(ae::aegp::suites::Utility::new()?
                 .register_with_aegp("com.elasticgrid.fx.warp")?);
             let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;

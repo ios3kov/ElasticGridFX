@@ -33,6 +33,11 @@ all five streams empty): final handoff remains blocked, not a raster PASS.
 Investigation schedules creation notifications even when SequenceSetup arrives
 on a worker, with AEGP access remaining exclusively at deferred main-thread idle;
 bounded per-process diagnostic records now retain later observations.
+The idle hook is sporadic, not a guaranteed next-turn callback. Initialization
+now requests the documented AEGP_CauseIdleRoutinesToBeCalled wakeup, caching its
+function on main during GlobalSetup and retaining the Utility suite until
+global teardown. No suite acquisition or project writes occur on workers.
+SDK reference: https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/#aegp_utilitysuite6
 
 Current internal installation: **cb790f6 / EGFX-7e9615eeec72bb7594d9bcdb**,
 receipt EGFX-update-2befc7083a0648ccbc2d67bb970bd176, INSTALLED_FOR_TEST.
