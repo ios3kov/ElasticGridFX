@@ -98,7 +98,17 @@ Required:
 - Before -> Change -> After evidence for every significant optimization;
 - no hidden resolution/bit-depth/filter/precision downgrade.
 
-## Stage 9 of 10 — 2D/3D perspective deformation plane — REOPENED
+## Stage 9 of 10 — 2D/3D perspective deformation plane — ACCEPTED IN RELEASE SCOPE
+
+Current: 0.9.1 includes the accepted native-text plane, 3D mode lock, panel
+refresh and perimeter corrections. See release-0.9.1.md and current-status.md
+for exact artifact identity and evidence. Four Corners is a bounded 2D
+deformation region, disabled in 3D. This is not broad platform/PAR certification.
+
+### Historical regression and acceptance checkpoints
+
+The following REOPENED state and candidate identities describe earlier builds,
+not the installed/published 0.9.1 candidate.
 
 2026-09-30: user evidence shows displaced overlay when enabling native 3D on a
 text layer. Earlier solid-only UI acceptance is insufficient. See current-status.md.
@@ -153,7 +163,14 @@ Installation/tooling PASS is not stage completion.
 Research may proceed in parallel; implementation begins only after the current
 functional bugfix is accepted and its performance baseline is recorded.
 
-## Stage 10 of 10 — Final compatibility / release gate — BLOCKED
+## Stage 10 of 10 — Release PUBLISHED; full gate INCOMPLETE
+
+Current: v0.9.1 is published following explicit user authorization. Release
+identity and scoped checks are recorded in release-0.9.1.md. Separate target-host
+RAM Preview and render-cancellation evidence remains outstanding; publication
+does not retroactively pass these checks. See stage10-final-gate-2026-09-30.md.
+
+### Historical pre-release checkpoint
 
 Blocked by reopened Stage 9 text-layer 3D overlay regression. Existing evidence
 below remains historical and does not waive the new failure.
@@ -174,6 +191,7 @@ production release occurs without explicit user instruction.
 
 ## Current overall progress
 
-Stage-count view: 8 accepted/completed for their recorded scope, Stage 8 skipped
-by user (not PASS), Stage 10 in progress. No performance completion or release claim.
-This is a stage-count view, not a claim about remaining engineering effort.
+Stages 1–7 retain their recorded evidence; Stage 9 is accepted within the
+documented release scope. Stage 8 is skipped by user (not PASS).
+Stage 10: publication complete, full process closure incomplete pending the
+two host-evidence checks above. No percentage or performance-completion claim.

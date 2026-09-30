@@ -36,6 +36,13 @@ Ad-hoc signed, not Developer ID signed or notarized. Do not bypass macOS
 security protections. If macOS blocks the downloaded bundle, stop and use the
 supported security-review process.
 
+## Remaining process evidence
+
+Publication is verified, but separate target-host RAM Preview and render-cancellation
+evidence remains outstanding. Aerender parity does not close these checks.
+See [the reconciled final gate](stage10-final-gate-2026-09-30.md).
+This documentation update does not modify the published archive or its hash.
+
 ## Install / rollback
 
 Save projects and quit all Adobe hosts. Back up the old ElasticGrid.plugin

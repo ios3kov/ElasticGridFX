@@ -1,35 +1,55 @@
-# ElasticGrid FX
+# FSTR Stretch
 
-Native After Effects separable column/row grid warp, with a C++ renderer and Rust
-host. **0.9.0 development; not ready for release.** Draft PR #5 / fix/final-validation.
+Native After Effects grid deformation effect, listed under **FSTR Effects**.
+Repository/internal name: ElasticGridFX. C++ CPU renderer with a Rust AE host.
 
-## Current priorities
+## Current release: 0.9.1
 
-Repair bright streaks and the reported Adjustment Layer -> ElasticGrid -> Corner
-Pin black output. Then add four-corner placement of the deformation plane and
-layer/camera-driven 3D perspective. Grid interaction and pixels must agree.
-Render and RAM Preview must be extremely fast without hidden quality degradation.
+[Download the published macOS Apple Silicon release](https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.1).
+See [release evidence and installation/rollback](docs/release-0.9.1.md).
 
-- [Approved plane/chain requirements](docs/perspective-plane-plan.md)
-- [Performance and quality contract](docs/performance-quality-contract.md)
-- [Current status and remaining gates](docs/current-status.md)
+- **Layer Plane:** grid interaction and deformation follow the layer plane,
+  including ordinary native 3D text/raster layers and camera perspective.
+- **Four Corners (2D only):** defines a perspective deformation region; it does
+  not corner-pin the entire source image. In 3D, Layer Plane is enforced and
+  corner controls are disabled; saved 2D values are preserved.
+- **Grid Positions:** keyframe animation and Undo/Redo remain available.
+- **Final (Bicubic):** CPU rendering with 8/16/32-bpc paths. GPU dispatch is disabled.
+- 0.9.1 fixes live 3D panel refresh and undeformed native-text perimeter fringes.
 
-## Latest source work
+Verified target: AE 2025 **25.6.0**, macOS Apple Silicon, square pixels and
+ordinary flat text/raster layers. This is not Windows/Intel, other AE versions,
+per-character 3D or universal HDR/OCIO certification. The bundle is ad-hoc signed,
+not Developer ID signed or notarized; do not bypass macOS security protections.
 
-Added an explicit sparse CPU rendering entry: missing compact-world pixels are
-transparent on a known full logical canvas, not stretched edge pixels. Regression
-compares sparse storage against an explicitly zero-filled full image at 8/16/32
-bpc. Dense/GPU interfaces and saved parameter schema remain unchanged.
+Publication does not mean every development gate is closed. Separate target-host
+RAM Preview and render-cancellation evidence remains outstanding. Performance
+optimization was skipped by the user, not passed. Persistent grid display while
+the effect/layer is unselected is deferred.
 
-**The new entry is not connected to the AE host yet.** Current installation
-6d3b846 is unchanged. Corner Pin, actual host coordinates and clipped Grid
-Positions text remain open; planned 2D/3D modes are not implemented.
+## Artifact identity
 
-Local GCC/Clang Release: 11/11 each; ASan/UBSan/LeakSanitizer: 11/11; TSan: 3/3.
-[Stage acceptance](docs/sparse-render-stage-plan.md) and
-[results/limitations](docs/sparse-render-results-2026-09-28.md) preserve the failing
-baseline and distinguish portable checks from actual AE/Metal acceptance.
-Exact-commit CI results are recorded in PR checkpoints.
+- Plugin source: `e1848d5348c8059c0307c5d8c1241163ffd92ab1`
+- Build ID: `EGFX-879b31e5a95527a385827c24`
+- Release ZIP SHA-256: `23b75997e310e0acbefcde69570e177199c23d415f67abf00ee064d28efe4d2a`
+
+The release contains the tested archive, not a rebuilt documentation checkpoint.
+The root `SHA256SUMS.txt` covers tracked repository files except itself; it is
+**not** the release archive manifest. Verify it from the repository root with
+`shasum -a 256 -c SHA256SUMS.txt`. Regenerate it after tracked-file changes,
+excluding itself, using sorted repository-relative paths.
+
+## Development and evidence
+
+- [Current status and open checks](docs/current-status.md)
+- [Ten-stage map](docs/development-stages.md)
+- [Final gate: current verdict and historical evidence](docs/stage10-final-gate-2026-09-30.md)
+- [Architecture](docs/architecture.md) and [approved plane requirements](docs/perspective-plane-plan.md)
+- [Development rules](DEVELOPMENT_RULES.md)
+
+Dated reports and candidate-specific diagnostics are retained for traceability.
+Their old PASS/BLOCKED states describe those candidates, not the current release.
+Do not use historical pinned installers to install 0.9.1.
 
 ## Developer verification
 
@@ -42,18 +62,6 @@ node tests/test_ae_project_safety.js
 node tests/test_smoke_safety.js
 ```
 
-macOS preflight includes the new sparse regression. Hosted Metal stages may be
-compile-only; actual AE GPU dispatch is disabled pending host verification.
-Final quality remains Catmull-Rom Bicubic; no silent lower-quality speed fallback.
-
-## Safe operation
-
-Build scripts do not install implicitly. Inspection is read-only by default.
-The separately authorized updater is limited to the previously approved copy and
-preserves its original for rollback; it is not permission for broad replacements.
-No new binary is delivered by this source stage. User receipt confirmed the prior
-test installation; installed-file success is not full render or release approval.
-
-Read [DEVELOPMENT_RULES.md](DEVELOPMENT_RULES.md) before each significant stage.
-[Architecture](docs/architecture.md), historical dated evidence and third-party
-notices remain available. Historical PASS reports never certify a newer artifact.
+Portable checks do not replace real AE verification. Hosted Metal tests can be
+compile-only. Preserve artifact identity, user projects and rollback backups;
+build scripts do not implicitly authorize installation or release.

@@ -19,11 +19,21 @@ rotations; cold/warm and restart parity; 8/16/32-bpc project exports;
 old cache without manual purge. User accepted the underlying correction.
 
 Scope: docs/release-0.9.1.md. Ad-hoc signed/not notarized, macOS arm64 only.
-Earlier release/preparation entries below are history, not current blockers.
+Release publication is confirmed; full process closure remains INCOMPLETE.
+Separate target-host RAM Preview and render-cancellation evidence has not been
+located. Stage 8 optimization was SKIPPED BY USER, not PASS; this does not waive
+functional preview/cancellation verification. No new host checks were performed
+during the documentation reconciliation. See stage10-final-gate-2026-09-30.md.
+
+## Historical record boundary
+
+All sections below describe earlier checkpoints. Their references to “current”,
+installed candidates, pending CI or authorization apply only to those entries.
+They do not supersede the 0.9.1 status and remaining evidence gaps above.
 
 ## RELEASED — FSTR Stretch 0.9.0, 2026-09-30
 
-Authoritative current status: PR #5 merged to main as
+Historical 0.9.0 publication: PR #5 merged to main as
 `c3d28b14d3ea0ac6b241db50f4847a9487f22318`; release `v0.9.0` published:
 https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.0
 
