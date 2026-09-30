@@ -16,6 +16,7 @@ pub(crate) struct Probe {
 struct Deferred {
     id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool,
     basic: *const ae::sys::SPBasicSuite,
+    observations:u8,
 }
 impl Deferred {
     fn observe(&mut self) {
@@ -27,7 +28,10 @@ impl Deferred {
         if self.basic.is_null() { journal("idle", "idle: missing suite context"); return; }
         let _context = ae::PicaBasicSuite::from_sp_basic_suite_raw(self.basic);
         let result = self.inspect();
-        journal("idle", &format!("idle main: {result:?}"));
+        if self.observations<16 {
+            journal(&format!("idle-{}",self.observations), &format!("idle main: {result:?}"));
+            self.observations+=1;
+        }
     }
     #[cfg(not(fstr_auto_binding))]
     fn inspect(&self) -> Result<i32, ae::Error> {
@@ -137,6 +141,12 @@ impl Probe {
             ae::Command::SequenceResetup => "resetup",
             _ => return,
         };
+        // Host creation can arrive on a worker. Scheduling is just an atomic
+        // notification; only the later main-thread idle callback uses AEGP.
+        // Do not enqueue worker resetup: MFR uses it for render-side copies.
+        if matches!(cmd,ae::Command::SequenceSetup) {
+            self.pending.store(true,Ordering::Release);
+        }
         // Never acquire AEGP suites off the main thread, including resetup.
         let result = if !main_thread() { "worker: no AEGP calls".to_owned() }
         else if matches!(cmd, ae::Command::SequenceSetup) {
@@ -153,7 +163,7 @@ impl Probe {
         // Research only, bounded to four non-overwriting, private temp files.
         // No project names, contents, handles or coordinates are recorded.
         #[cfg(target_os = "macos")]
-        if self.journal_entries < 4 {
+        if self.journal_entries < 16 {
             journal(&self.journal_entries.to_string(), &record);
             self.journal_entries += 1;
         }
@@ -169,7 +179,7 @@ impl Probe {
             ae::aegp::suites::RegisterNonAegp::new()?.register_idle_hook(id,
                 Box::new(|state: &mut Deferred, _| { state.observe(); Ok(()) }),
                 Deferred { id, pending: self.pending.clone(), consumed: false,
-                    basic: input.pica_basic_suite_ptr() })?;
+                    basic: input.pica_basic_suite_ptr(),observations:0 })?;
             return Ok(0);
         }
         let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;

@@ -22,6 +22,18 @@ keys; saved/reopened/background rendering and native UI follow-up are required.
 The binding state machine is pristine -> pending idle -> ready; a project saved
 before initialization must fail explicitly, not render a legacy substitute.
 
+9cbc28c native Four Corners matrix PASS: 8/16/32 bpc neutral/full-domain
+parity/exterior errors all zero; changed interior pixels 4717/4778/6110.
+Camera/parent Layer Plane and Four Corners PNG SHA256 agree exactly.
+Saved/reopened Grid Positions two keys and animated wave preserved. Eight MFR
+ON/OFF frames match byte-for-byte (8 unique animation frames, first agrees with
+UI). Extended 120-frame aerender live-image identity PASS PID 69219. However a
+later raster effect in the same multi-item project remained unbound (kind 0,
+all five streams empty): final handoff remains blocked, not a raster PASS.
+Investigation schedules creation notifications even when SequenceSetup arrives
+on a worker, with AEGP access remaining exclusively at deferred main-thread idle;
+bounded per-process diagnostic records now retain later observations.
+
 Current internal installation: **cb790f6 / EGFX-7e9615eeec72bb7594d9bcdb**,
 receipt EGFX-update-2befc7083a0648ccbc2d67bb970bd176, INSTALLED_FOR_TEST.
 Previous automatic candidate 499157e was rolled back before replacement.
