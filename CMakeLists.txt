@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(ElasticGridFXCore VERSION 0.9.0 LANGUAGES CXX)
+project(ElasticGridFXCore VERSION 0.9.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -42,6 +42,10 @@ function(elasticgrid_enable_test_assertions target)
 endfunction()
 
 if(ELASTICGRID_BUILD_TESTS)
+  add_executable(elasticgrid_plane_perimeter_tests tests/test_plane_perimeter.cpp src/bridge/plane_ffi.cpp)
+  target_link_libraries(elasticgrid_plane_perimeter_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_perimeter_tests)
+  add_test(NAME elasticgrid_plane_perimeter COMMAND elasticgrid_plane_perimeter_tests)
   enable_testing()
   add_executable(elasticgrid_plane_sampling_tests tests/test_plane_sampling.cpp src/bridge/plane_ffi.cpp)
   target_link_libraries(elasticgrid_plane_sampling_tests PRIVATE elasticgrid_core)

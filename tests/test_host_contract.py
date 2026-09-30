@@ -73,10 +73,12 @@ class HostContract(unittest.TestCase):
         plane = (ROOT / 'host-rust/src/plane.rs').read_text()
         update = plane.split('pub(crate) fn update_ui', 1)[1].split('#[derive', 1)[0]
         self.assertIn('Params::PlaneMode', update)
-        self.assertIn('ae::ParamUIFlags::DISABLED,!enabled', update)
+        self.assertIn('ui_layer_is_3d(input)', update)
+        self.assertIn('ae::ParamUIFlags::DISABLED,mode_disabled', update)
+        self.assertIn('ae::ParamUIFlags::DISABLED,corners_disabled', update)
         self.assertIn('definition.update_param_ui()', update)
         self.assertNotIn('set_value(', update)
-        self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(params)?', SOURCE)
+        self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params)?', SOURCE)
 
     def test_smartfx_uses_sparse_logical_canvas_and_handles_empty_input(self):
         smart = SOURCE.split('ae::Command::SmartRender { extra } => {', 1)[1].split(

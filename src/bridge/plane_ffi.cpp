@@ -56,7 +56,7 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
 static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y,
-    const double* source_corners,bool regional=false) noexcept {
+    const double* source_corners,bool regional=false,bool layer=false) noexcept {
     if(!report) return 1;
     *report={};
     if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
@@ -74,7 +74,8 @@ static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
         auto transform=eg::PlaneTransform::fromCorners(corners);
         std::optional<eg::PlaneWarp> warp;
         if(regional && transform) {
-            warp=eg::PlaneWarp::prepare(*transform,
+            const auto prepare=layer?eg::PlaneWarp::prepareLayer:eg::PlaneWarp::prepare;
+            warp=prepare(*transform,
                 {f->columns,f->columns+f->column_count},
                 {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
             if(!warp) return 1;
@@ -133,4 +134,9 @@ int eg_render_plane_region(const EgPlaneImage* source,const EgPlaneImage* output
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge) noexcept {
     return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true);
+}
+int eg_render_plane_layer(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge) noexcept {
+    return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true,true);
 }

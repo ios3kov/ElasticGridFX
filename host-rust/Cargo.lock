@@ -210,7 +210,7 @@ checksum = "252afb9ae5eaa683babdc6a068b3f5726eb19e05070c731f9b2a23a7c3e8ed34"
 
 [[package]]
 name = "elasticgrid_ae"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "after-effects",
  "bincode",

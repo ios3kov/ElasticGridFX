@@ -5,11 +5,54 @@ use std::ptr::NonNull;
 pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopRight,
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
 
-pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
-    let three_d=layer_is_3d(params,false)?;
-    let enabled=!three_d && params.get(Params::PlaneMode)?.as_popup()?.value()==2;
+// UI callbacks only. Do not evaluate the hidden expression during
+// UPDATE_PARAMS_UI (recursive checkout is forbidden there), or use its
+// potentially stale PF snapshot to decide the current layer switch state.
+fn ui_layer_is_3d(input: &ae::InData) -> Result<bool, ae::Error> {
+    #[cfg(target_os="macos")]
+    {
+        unsafe extern "C" { fn pthread_main_np() -> i32; }
+        if unsafe { pthread_main_np() } == 0 { return Err(ae::Error::BadCallbackParameter); }
+    }
+    let layer=ae::aegp::suites::PFInterface::new()?.effect_layer(input.effect_ref())?;
+    Ok(ae::aegp::suites::Layer::new()?.layer_flags(layer)?
+        .contains(ae::aegp::LayerFlags::LAYER_IS_3D))
+}
+
+fn ui_disabled(three_d:bool, mode:i32)->(bool,bool) {
+    (three_d,three_d || mode!=2)
+}
+
+// PF events permit DISABLED changes, not popup definition reconstruction.
+// External layer switches cause a draw without necessarily UPDATE_PARAMS_UI.
+pub(crate) fn sync_event_ui(input:&ae::InData,params:&ae::Parameters<Params>)->Result<(),ae::Error>{
+    let three_d=match ui_layer_is_3d(input){
+        Ok(v)=>v,Err(ae::Error::BadCallbackParameter)=>return Ok(()),Err(e)=>return Err(e),
+    };
+    let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
+    for id in [Params::PlaneMode].into_iter().chain(CORNERS).chain([Params::ResetPlane]) {
+        let current=params.get(id)?;
+        let disabled=if id==Params::PlaneMode {mode_disabled}else{corners_disabled};
+        if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=disabled {
+            let mut definition=(*current).clone();
+            definition.set_ui_flag(ae::ParamUIFlags::DISABLED,disabled);
+            definition.update_param_ui()?;
+        }
+    }
+    Ok(())
+}
+
+pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
+    // During effect construction AE may not yet have an owning layer for the
+    // UI instance. Leave the setup defaults until the next host UI callback.
+    let three_d=match ui_layer_is_3d(input) {
+        Ok(value)=>value,
+        Err(ae::Error::BadCallbackParameter)=>return Ok(()),
+        Err(error)=>return Err(error),
+    };
+    let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
     let mut mode=(*params.get(Params::PlaneMode)?).clone();
-    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,three_d);
+    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
     // Keep the serialized 2D selection/keyframes untouched. Both stored
     // ordinals display the effective plane while the entire selector is locked.
     // PopupDef::set_options owns a temporary CString; dynamic UI definitions
@@ -21,10 +64,20 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
         let mut definition=(*current).clone();
-        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,!enabled);
+        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,corners_disabled);
         definition.update_param_ui()?;
     }
     Ok(())
+}
+
+#[cfg(test)] mod ui_state_tests {
+    use super::ui_disabled;
+    #[test] fn layer_switch_locks_both_stored_modes_and_restores_2d_controls() {
+        for mode in [1,2] {
+            assert_eq!(ui_disabled(true,mode),(true,true));
+            assert_eq!(ui_disabled(false,mode),(false,mode!=2));
+        }
+    }
 }
 fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
     #[cfg(fstr_binding_probe)]
@@ -171,6 +224,8 @@ unsafe extern "C" {
                        source_extent_x: f64, source_extent_y: f64) -> i32;
     pub(crate) fn eg_render_plane_region(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    pub(crate) fn eg_render_plane_layer(src: *const Image, dst: *const Image, depth: i32,
+                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     #[cfg(test)]
     pub(crate) fn eg_render_plane_between(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32,
@@ -211,7 +266,10 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     let dst = Image {pixels: unsafe {output.data_ptr_mut()}.cast(), row_bytes: output.row_bytes(),
                      width: output.width() as i32, height: output.height() as i32};
     let mut report = Report::default();
-    let rc = unsafe {eg_render_plane_region(&src, &dst, output.bit_depth() as i32,
+    let render_plane=if state.comp_space && !state.editable_corners {
+        eg_render_plane_layer
+    }else{eg_render_plane_region};
+    let rc = unsafe {render_plane(&src, &dst, output.bit_depth() as i32,
                          &frame, &mut report, p.quality - 1, p.edge_mode - 1)};
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
     match rc {
