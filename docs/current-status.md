@@ -8,6 +8,18 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Render integration in progress: a fifth hidden scalar is installed last with
+the four projected points. Kind 0 means unbound research legacy, 1 layer-local,
+2 native 3D text comp-space. UI and SmartFX now read the same `plane::State`;
+render checks out dependencies and removes pre-effect source origin once.
+No general AEGP calls in render. Public Four Corners behavior is unchanged.
+User deformation reproduction preserved separately as
+outputs/plane-render-integration/user-reproduction.aep; original not overwritten.
+Acceptance required before handoff: native neutral identity, deformation in
+rotated plane, region exterior preservation, type transitions, inverse picking,
+save/reload and automatic non-fixture binding. All new native gates NOT RUN.
+The current integration remains behind research flags until those gates pass.
+
 Latest installation override: user explicitly requested hands-on inspection.
 The exact c132d87 research package was reinstalled, receipt
 EGFX-update-594f4233fecd4d669de595791079bef1 INSTALLED_FOR_TEST.

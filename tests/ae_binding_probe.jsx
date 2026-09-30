@@ -9,8 +9,8 @@ function EGFXBindingProbe(config, enabled) {
     if(l.name!=='__EGFX_TEST_TEXT' || !l.property('ADBE Text Properties') || effects.numProperties!==2)
         throw Error('Wrong text fixture');
     var fx=effects.property(2),names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL'];
-    if(fx.matchName!=='com.elasticgrid.fx.warp' || fx.numProperties!==28 ||
-       fx.property(28).matchName!=='ADBE Effect Built In Params') throw Error('Wrong research schema');
+    if(fx.matchName!=='com.elasticgrid.fx.warp' || fx.numProperties!==29 ||
+       fx.property(29).matchName!=='ADBE Effect Built In Params') throw Error('Wrong research schema');
     var result=[];
     for(var i=0;i<4;i++) {
         var q=fx.property(24+i);
@@ -21,8 +21,12 @@ function EGFXBindingProbe(config, enabled) {
         if(!isFinite(v[0]) || !isFinite(v[1])) throw Error('Nonfinite coordinate');
         result.push(v);
     }
+    var kind=fx.property(28);
+    if(kind.name!=='__FSTR Plane Kind'||kind.numKeys!==0||kind.expressionEnabled!==enabled||
+       (enabled&&(kind.expressionError!==''||kind.value!==(l.threeDLayer?2:1)))||
+       (!enabled&&kind.expression!==''))throw Error('Kind binding mismatch');
     // The original effect must retain pristine hidden streams: target isolation.
     var original=effects.property(1);
-    for(var i=0;i<4;i++) if(original.property(24+i).expression!=='') throw Error('Original effect was modified');
+    for(var i=0;i<5;i++) if(original.property(24+i).expression!=='') throw Error('Original effect was modified');
     return 'PASS enabled='+enabled+' corners='+result.toSource();
 }

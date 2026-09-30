@@ -32,16 +32,16 @@ impl From<String> for Failure {
     fn from(cause: String) -> Self { Self {cause, rollback_failed:false, undo_close_failed:false} }
 }
 
-fn read_all(host: &mut impl Host) -> Result<Vec<Snapshot>, String> {
-    (0..4).map(|i| host.read(i)).collect()
+fn read_all(host: &mut impl Host, count:usize) -> Result<Vec<Snapshot>, String> {
+    (0..count).map(|i| host.read(i)).collect()
 }
 
-pub fn install(host: &mut impl Host, expected: &[String; 4]) -> Result<Outcome, Failure> {
-    if expected.iter().any(|s| s.is_empty() || s.contains('\0')) {
+pub fn install(host: &mut impl Host, expected: &[String]) -> Result<Outcome, Failure> {
+    if expected.is_empty() || expected.len()>16 || expected.iter().any(|s| s.is_empty() || s.contains('\0')) {
         return Err("Invalid binding expressions".to_owned().into());
     }
     host.validate_target()?;
-    let before = read_all(host)?;
+    let before = read_all(host,expected.len())?;
     if before.iter().zip(expected).all(|(s,e)| s.keys==0 && s.enabled && s.expression==*e) {
         return Ok(Outcome::AlreadyInstalled);
     }
@@ -53,14 +53,14 @@ pub fn install(host: &mut impl Host, expected: &[String; 4]) -> Result<Outcome, 
     let mut touched = 0;
     let operation = (|| -> Result<(), String> {
         host.validate_target()?;
-        if read_all(host)? != before { return Err("Target changed before writes".to_owned()); }
+        if read_all(host,expected.len())? != before { return Err("Target changed before writes".to_owned()); }
         for (i, expression) in expected.iter().enumerate() {
             // Include a setter that fails after modifying host state in rollback.
             touched = i+1;
             host.expression(i, expression)?;
             host.enable(i, true)?;
         }
-        let after = read_all(host)?;
+        let after = read_all(host,expected.len())?;
         if !after.iter().zip(expected).all(|(s,e)| s.keys==0 && s.enabled && s.expression==*e) {
             return Err("Binding readback mismatch".to_owned());
         }
@@ -81,7 +81,7 @@ pub fn install(host: &mut impl Host, expected: &[String; 4]) -> Result<Outcome, 
                 if host.expression(i, &before[i].expression).is_err() { rollback_failed=true; }
                 if host.enable(i, before[i].enabled).is_err() { rollback_failed=true; }
             }
-            if read_all(host).as_ref() != Ok(&before) { rollback_failed=true; }
+            if read_all(host,expected.len()).as_ref() != Ok(&before) { rollback_failed=true; }
         }
     }
     // Attempt closing exactly once, even after failed writes or rollback.
@@ -139,6 +139,20 @@ pub fn install(host: &mut impl Host, expected: &[String; 4]) -> Result<Outcome, 
         assert_eq!((h.writes,h.begins,h.ends),(8,1,1));
         assert_eq!(install(&mut h,&expressions()),Ok(Outcome::AlreadyInstalled));
         assert_eq!((h.writes,h.begins,h.ends),(8,1,1));
+    }
+    #[test] fn five_stream_marker_transaction_rolls_back_all_partial_writes(){
+        let expected:Vec<String>=(0..5).map(|i|format!("owned-{i}")).collect();
+        for fail in 1..=10 {
+            let mut h=Mock {states:vec![blank();5],fail_write:Some(fail),..Mock::default()};
+            let error=install(&mut h,&expected).unwrap_err();
+            assert!(!error.rollback_failed && !error.undo_close_failed);
+            assert_eq!(h.states,vec![blank();5]);
+        }
+        let mut h=Mock {states:vec![blank();5],..Mock::default()};
+        assert_eq!(install(&mut h,&expected),Ok(Outcome::Installed));
+        assert_eq!(install(&mut h,&expected),Ok(Outcome::AlreadyInstalled));
+        assert_eq!(h.writes,10);
+        assert!(install(&mut h,&[]).is_err());
     }
     #[test] fn every_partial_setter_failure_rolls_back_even_if_setter_mutated(){
         for fail in 1..=8 {

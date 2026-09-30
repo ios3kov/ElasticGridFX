@@ -23,12 +23,7 @@ impl ViewPlane {
     }
     fn read(in_data: &ae::InData, params: &ae::Parameters<Params>, event: &ae::EventExtra) -> Result<Self, ae::Error> {
         let state = plane::State::read(params, in_data, false, false)?;
-        #[cfg(fstr_binding_probe)]
-        let derived = binding_probe::viewer_plane(in_data,params)?;
-        #[cfg(not(fstr_binding_probe))]
-        let derived: Option<plane::State> = None;
-        let comp_space=derived.is_some();
-        let state=derived.unwrap_or(state);
+        let comp_space=state.comp_space;
         let geometry = state.geometry();
         let (projection,projection_unavailable)=if comp_space {
             // Comp-space text overlay is not yet supported in the Layer viewer.
@@ -571,7 +566,7 @@ mod cursor_tests {
         let state=plane::State {corners:Some([
             193.126991294881,144.064876060526,474.465671864278,124.959806473857,
             474.465671864278,621.680710828136,193.126991294881,558.293851707426
-        ]),editable_corners:false};
+        ]),editable_corners:false,comp_space:true};
         let p=ViewPlane {geometry:state.geometry(),state,width:640.0,height:480.0,
             projection:None,projection_unavailable:false,comp_space:true};
         assert!(!p.needs_layer_conversion(ae::WindowType::Comp));

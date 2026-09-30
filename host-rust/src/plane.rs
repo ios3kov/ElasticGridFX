@@ -21,6 +21,7 @@ pub(crate) struct State {
     // Geometry alone does not grant permission to edit public corner parameters.
     // Automatically derived regions must keep this false.
     pub editable_corners: bool,
+    pub comp_space: bool,
 }
 impl State {
     pub fn corner_controls(&self) -> Option<[f64; 8]> {
@@ -29,7 +30,11 @@ impl State {
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
         let mode = if checkout { checked_popup(params, Params::PlaneMode)? }
                    else { params.get(Params::PlaneMode)?.as_popup()?.value() };
-        if mode == 1 { return Ok(Self::default()); }
+        if mode == 1 {
+            #[cfg(fstr_binding_probe)]
+            if let Some(derived)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {return Ok(derived);}
+            return Ok(Self::default());
+        }
         if mode != 2 { return Err(ae::Error::BadCallbackParameter); }
         let mut corners = [0.0; 8];
         // pre_effect_source_origin is valid only in frame selectors, not UI.
@@ -42,7 +47,7 @@ impl State {
             corners[2*i] = value.x - origin.h as f64;
             corners[2*i+1] = value.y - origin.v as f64;
         }
-        Ok(Self {corners: Some(corners), editable_corners: true})
+        Ok(Self {corners: Some(corners), editable_corners: true,comp_space:false})
     }
     pub fn geometry(&self) -> Option<Geometry> {
         self.corners.and_then(|corners| Geometry::new(&corners))

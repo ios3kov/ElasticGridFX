@@ -1,35 +1,33 @@
 //! Write experiment, opt-in only. Dedicated hidden streams on owned fixture.
 use super::*;
 use binding_transaction::{Host, Snapshot, Outcome};
-const NAMES: [&str;4] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL"];
+const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL", "__FSTR Plane Kind"];
 
-// UI experiment only: never invoke these AEGP queries from a render selector.
-// Native text is deliberately distinct from raster footage, whose effect input
-// is layer-local. Hidden points are host-evaluated comp coordinates.
-pub fn viewer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>)
+// Shared UI/render snapshot. No AEGP calls: all dependencies are PF parameters.
+// Native 3D text is distinct from raster footage's layer-local effect input.
+pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
-    if params.get(Params::PlaneMode)?.as_popup()?.value()!=1 {return Ok(None);}
-    let layer=ae::aegp::suites::PFInterface::new()?.effect_layer(in_data.effect_ref())?;
-    let layers=ae::aegp::suites::Layer::new()?;
-    if !layers.is_layer_3d(layer)? ||
-        layers.layer_object_type(layer)?!=ae::aegp::ObjectType::Text {return Ok(None);}
-    let comp=layers.layer_parent_comp(layer)?;
-    let item=ae::aegp::suites::Comp::new()?.item_from_comp(comp)?;
+    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
+        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    // 0 is unbound research/legacy; 1 is bound layer-local; 2 is 3D text comp-space.
+    // The marker is installed last and checked out with the four points.
+    if kind==0.0 || kind==1.0 {return Ok(None);}
+    if kind!=2.0 {return Err(ae::Error::BadCallbackParameter);}
     let par=in_data.pixel_aspect_ratio();
-    let comp_par=ae::aegp::suites::Item::new()?.item_pixel_aspect_ratio(item)?;
-    if par.num<=0 || comp_par.num<=0 || i64::from(par.num)!=i64::from(par.den) ||
-        i64::from(comp_par.num)!=i64::from(comp_par.den) {
-        return Ok(Some(plane::State {corners:Some([0.0;8]),editable_corners:false}));
+    if par.num<=0 || i64::from(par.num)!=i64::from(par.den) {
+        return Err(ae::Error::BadCallbackParameter);
     }
     let mut corners=[0.0;8];
+    let origin=if frame_context {in_data.pre_effect_source_origin()} else {ae::Point {h:0,v:0}};
     for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
         Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate(){
-        let p=params.get(id)?.as_point()?.float_value()?;
-        corners[2*i]=p.x;corners[2*i+1]=p.y;
+        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?}
+            else {params.get(id)?.as_point()?.float_value()?};
+        corners[2*i]=p.x-origin.h as f64;corners[2*i+1]=p.y-origin.v as f64;
     }
-    // An unbound/degenerate quad hides the experimental overlay rather than
-    // drawing a misleading legacy grid. No public corner controls are exposed.
-    Ok(Some(plane::State {corners:Some(corners),editable_corners:false}))
+    // Degenerate geometry follows the core's exact pass-through contract.
+    // No public corner controls are exposed for an automatically derived plane.
+    Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true}))
 }
 
 pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
@@ -39,12 +37,17 @@ pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
             f.set_default((0.0,0.0));f.set_restrict_bounds(false);
         }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     }
+    params.add_with_flags(Params::ResearchPlaneKind,NAMES[4],ae::FloatSliderDef::setup(|f| {
+        setup_float(f,(0.0,2.0),(0.0,2.0),0.0,0,false);
+    }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     Ok(())
 }
-fn expressions()->[String;4]{
-    [(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|format!(
+fn expressions()->Vec<String>{
+    let mut values:Vec<String>=[(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|format!(
         "// FSTR research plane v1\nvar r=thisLayer.sourceRectAtTime(time,false);\nvar p=thisLayer.toComp([r.left{},r.top{},0]);\n[p[0],p[1]];",
-        if right {"+r.width"} else {""},if bottom {"+r.height"} else {""}))
+        if right {"+r.width"} else {""},if bottom {"+r.height"} else {""})).into();
+    values.push("// FSTR research plane v1\nvar k=1;try{var t=thisLayer.text.sourceText.value;if(thisLayer.transform.position.value.length===3)k=2;}catch(e){}\nk;".into());
+    values
 }
 fn err(e:ae::Error)->String{format!("{e:?}")}
 struct Adapter {
@@ -56,11 +59,11 @@ struct Adapter {
 impl Adapter {
     fn stream(&mut self,i:usize)->Result<ae::aegp::StreamReferenceHandle,String>{
         self.validate_target()?;
-        if i>=4 {return Err("Invalid hidden stream".into());}
+        if i>=5 {return Err("Invalid hidden stream".into());}
         let suite=ae::aegp::suites::Stream::new().map_err(err)?;
         let stream=suite.new_effect_stream_by_index(self.effect,self.id,24+i as i32).map_err(err)?;
         if suite.stream_name(&stream,self.id,true).map_err(err)?!=NAMES[i] ||
-            suite.stream_type(&stream).map_err(err)?!=ae::aegp::StreamType::TwoDSpatial {
+            suite.stream_type(&stream).map_err(err)?!=if i==4 {ae::aegp::StreamType::OneD} else {ae::aegp::StreamType::TwoDSpatial} {
             return Err("Hidden schema mismatch".into());
         }
         Ok(stream)
@@ -73,7 +76,7 @@ impl Host for Adapter {
         let effects=ae::aegp::suites::Effect::new().map_err(err)?;
         let key=effects.installed_key_from_layer_effect(self.effect).map_err(err)?;
         if effects.effect_match_name(key).map_err(err)?!="com.elasticgrid.fx.warp" ||
-            ae::aegp::suites::Stream::new().map_err(err)?.effect_num_param_streams(self.effect).map_err(err)?!=28 {
+            ae::aegp::suites::Stream::new().map_err(err)?.effect_num_param_streams(self.effect).map_err(err)?!=29 {
             return Err("Wrong effect schema".into());
         }
         Ok(())

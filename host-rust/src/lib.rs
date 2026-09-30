@@ -59,6 +59,7 @@ pub(crate) enum Params {
     #[cfg(fstr_binding_probe)] ResearchPlaneTR,
     #[cfg(fstr_binding_probe)] ResearchPlaneBR,
     #[cfg(fstr_binding_probe)] ResearchPlaneBL,
+    #[cfg(fstr_binding_probe)] ResearchPlaneKind,
 }
 
 #[derive(Default)]
