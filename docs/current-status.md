@@ -2,7 +2,44 @@
 
 2026-09-30. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
-**Production cycle: Stage 9 of 10 REOPENED; Stage 10 BLOCKED by text-layer 3D overlay regression; Stage 8 SKIPPED BY USER, not PASS.**
+**Stage 9 of 10: implementation and automated target-host acceptance PASS for the scope below; final manual interaction acceptance pending. Stage 10 release NOT AUTHORIZED. Stage 8 SKIPPED BY USER, not PASS.**
+
+## Current installed candidate — 2026-09-30 final handoff
+
+This section supersedes all historical installation/gate statements below.
+FSTR Stretch, category FSTR Effects; standard default-feature release build
+`cbe6da1dfa96dc48759ad3c4e91c2ef644142c12`, Build ID
+`EGFX-45fd7294308f8685e9c42beb`. Installed rollback-safely, receipt
+`EGFX-update-825f2c5f654540d3b03e1871cc7bd0f4`, INSTALLED_FOR_TEST.
+Package SHA256 `ae23a49f04118f0b2ca0c94f2f5d04e2b8834aac185b2d3fa9618021d71b4410`.
+No experimental RUSTFLAGS; no manual binding action required.
+
+Exact-candidate evidence: `outputs/FSTR-Stretch-acceptance/` in the local task.
+AE 25.6.0 arm64, square pixels, ordinary flat native text and raster layers.
+
+- Native 8/16/32 bpc: neutral image error 0; full-domain Layer Plane/Four Corners
+  parity error 0; custom-region exterior error 0; changed interior pixels
+  4717 / 4778 / 6110. Four Corners defines a region, not a content corner-pin.
+- Camera + transformed parent: Layer Plane/Four Corners exact PNG parity.
+- MFR ON/OFF: 8 pairwise byte-identical frames, 8 distinct animation frames;
+  first frame equals the UI reference. Extended background render: 120 frames.
+- Live image identity PASS: GUI PID 72899 and render PID 4101, UUID
+  `4FBC7124-743D-3617-9932-B64E57D7AE45`, verified installed payload.
+- Subsequent raster effect initializes automatically in the same project;
+  2D and 3D neutral pixels identical to original, deformation changes pixels.
+- Saved/reopened native project: five bindings valid, native marker 2,
+  two Grid Positions keys preserved. Test fixture left open for user acceptance.
+- Default Rust unit tests 40 PASS; Python tests 207 PASS. Test-only descendant
+  `3e21df4` updates the exact append-only schema assertion for five approved
+  hidden dependency parameters; installed plugin remains immutable cbe6da1.
+
+Manual guide/corner dragging and cursor feel still require user acceptance;
+native UI drag automation is unavailable. This is not universal compatibility
+certification: non-square pixels and per-character 3D are outside this gate.
+Release/merge/main remain untouched. CI results must be associated with their
+exact source head, not inferred from this runtime matrix.
+
+## Historical investigation (not current installation status)
 
 ## Latest product decision — perspective REGION, 2026-09-30
 
