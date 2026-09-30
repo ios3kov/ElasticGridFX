@@ -1,0 +1,328 @@
+diff --git a/.github/workflows/first-application-regression.yml b/.github/workflows/first-application-regression.yml
+index 2c058bd..b007ea6 100644
+--- a/.github/workflows/first-application-regression.yml
++++ b/.github/workflows/first-application-regression.yml
+@@ -6 +6 @@ on:
+-    branches: [fix/first-application-516]
++    branches: [fix/first-application-516, fix/grid-density-preserve-animation]
+diff --git a/.github/workflows/macos-source-gate.yml b/.github/workflows/macos-source-gate.yml
+index f102b9b..d768922 100644
+--- a/.github/workflows/macos-source-gate.yml
++++ b/.github/workflows/macos-source-gate.yml
+@@ -6 +6 @@ on:
+-    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation, fix/first-application-516]
++    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation, fix/first-application-516, fix/grid-density-preserve-animation]
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d63fd30..1b21ca2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2 +2 @@ cmake_minimum_required(VERSION 3.20)
+-project(ElasticGridFXCore VERSION 0.9.1 LANGUAGES CXX)
++project(ElasticGridFXCore VERSION 0.9.2 LANGUAGES CXX)
+@@ -44,0 +45,5 @@ if(ELASTICGRID_BUILD_TESTS)
++  add_executable(elasticgrid_control_density_tests tests/test_control_density.cpp
++      src/bridge/control_grid_ffi.cpp src/bridge/elasticgrid_ffi.cpp)
++  target_link_libraries(elasticgrid_control_density_tests PRIVATE elasticgrid_core)
++  elasticgrid_enable_test_assertions(elasticgrid_control_density_tests)
++  add_test(NAME elasticgrid_control_density COMMAND elasticgrid_control_density_tests)
+diff --git a/docs/current-status.md b/docs/current-status.md
+index 4ad9a54..9514e81 100644
+--- a/docs/current-status.md
++++ b/docs/current-status.md
+@@ -2,0 +3,17 @@
++## Development: animation-preserving control density — 2026-09-30
++
++Stage 10 remains incomplete. Branch `fix/grid-density-preserve-animation`,
++based on 7f72201 / PR #10. User supersedes the reset-on-count-change policy.
++Columns/Rows now select visible controls over the retained animated deformation;
++count changes do not write Grid Positions or resize/reset render snapshots.
++The default stored lattice and wire format remain unchanged. New handles edit
++that retained curve through interpolation/elastic influence, not through a
++lossy conversion of old keys. Fewer visible lines do not discard hidden detail.
++
++Source implements the requirement; exact native AE UI/key metadata checks are
++NOT RUN here. See [acceptance and evidence](grid-density-preserve-animation-2026-09-30.md).
++Version is 0.9.2 development; the AE effect version is bumped to invalidate old
++render caches. This is not a published release. `FSTR Stretch.plugin` is retained.
++
++## Historical static-count/package checkpoint
++
+diff --git a/docs/static-grid-counts-2026-09-30.md b/docs/static-grid-counts-2026-09-30.md
+index 6413001..2f455e0 100644
+--- a/docs/static-grid-counts-2026-09-30.md
++++ b/docs/static-grid-counts-2026-09-30.md
+@@ -2,0 +3,2 @@
++Historical reset behavior below is superseded by [animation-preserving density](grid-density-preserve-animation-2026-09-30.md). Static flags remain; the new count handler does not reset or write Grid Positions.
++
+diff --git a/host-rust/Cargo.lock b/host-rust/Cargo.lock
+index a2f9fd6..5d3f1b4 100644
+--- a/host-rust/Cargo.lock
++++ b/host-rust/Cargo.lock
+@@ -213 +213 @@ name = "elasticgrid_ae"
+-version = "0.9.1"
++version = "0.9.2"
+diff --git a/host-rust/Cargo.toml b/host-rust/Cargo.toml
+index d2261ec..5aee5dc 100644
+--- a/host-rust/Cargo.toml
++++ b/host-rust/Cargo.toml
+@@ -3 +3 @@ name = "elasticgrid_ae"
+-version = "0.9.1"
++version = "0.9.2"
+diff --git a/host-rust/build.rs b/host-rust/build.rs
+index ee8420b..333ae74 100644
+--- a/host-rust/build.rs
++++ b/host-rust/build.rs
+@@ -96 +96,2 @@ fn main() {
+-        .file(root.join("src/bridge/elasticgrid_ffi.cpp"));
++        .file(root.join("src/bridge/elasticgrid_ffi.cpp"))
++        .file(root.join("src/bridge/control_grid_ffi.cpp"));
+@@ -188 +189 @@ fn main() {
+-            bugversion: 1,
++            bugversion: 2,
+diff --git a/host-rust/src/binding_probe.rs b/host-rust/src/binding_probe.rs
+index 5a8478a..db56d50 100644
+--- a/host-rust/src/binding_probe.rs
++++ b/host-rust/src/binding_probe.rs
+@@ -87,3 +86,0 @@ fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<
+-    let slider=|id| ->Result<i32,ae::Error>{
+-        if checkout {checked_slider(params,id)} else {Ok(params.get(id)?.as_slider()?.value())}
+-    };
+@@ -95 +91,0 @@ fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<
+-    let topology=(slider(Params::Columns)?,slider(Params::Rows)?);
+@@ -99,3 +95,4 @@ fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<
+-    // Read the original arbitrary value: grid_snapshot/resized may repair bad
+-    // state and therefore cannot establish the exact-identity precondition.
+-    let matches=|grid:&GridArb|initial_identity_values(grid,topology,mode,wave,easing,spacing);
++    // Density controls are not render dependencies. Prove identity using only
++    // the original stored lattice; do not sanitize or resize invalid data.
++    let matches=|grid:&GridArb|initial_identity_values(
++        grid,(i32::from(grid.columns),i32::from(grid.rows)),mode,wave,easing,spacing);
+diff --git a/host-rust/src/lib.rs b/host-rust/src/lib.rs
+index d14e239..259921a 100644
+--- a/host-rust/src/lib.rs
++++ b/host-rust/src/lib.rs
+@@ -7,0 +8 @@ mod ui;
++mod control_grid;
+@@ -347,22 +347,0 @@ impl GridArb {
+-    fn resized(&self, columns: usize, rows: usize) -> Self {
+-        let columns = columns.clamp(1, MAX_GUIDES);
+-        let rows = rows.clamp(1, MAX_GUIDES);
+-        if !self.is_valid() {
+-            return Self::uniform(columns, rows);
+-        }
+-        if self.columns as usize == columns && self.rows as usize == rows {
+-            return self.clone();
+-        }
+-
+-        // Original GridWarp does not preserve/resample deformation when
+-        // Num Columns/Rows changes. Only the changed axis is reset uniformly.
+-        let column_lines = if self.columns as usize == columns {
+-            self.column_lines.clone()
+-        } else {
+-            Self::axis_uniform(columns).0
+-        };
+-        let row_lines = if self.rows as usize == rows {
+-            self.row_lines.clone()
+-        } else {
+-            Self::axis_uniform(rows).0
+-        };
+@@ -370,11 +348,0 @@ impl GridArb {
+-        let mut out = Self {
+-            columns: columns as u16,
+-            rows: rows as u16,
+-            column_lines,
+-            row_lines,
+-            column_pins: Vec::new(),
+-            row_pins: Vec::new(),
+-        };
+-        out.canonicalize_pins();
+-        out
+-    }
+@@ -510,5 +477,0 @@ impl SmartRenderSnapshot {
+-fn checked_slider(params: &ae::Parameters<Params>, param: Params) -> Result<i32, ae::Error> {
+-    let checked = params.checkout(param)?;
+-    Ok(checked.as_slider()?.value())
+-}
+-
+@@ -532,2 +494,0 @@ fn smart_render_snapshot(
+-    let columns = checked_slider(params, Params::Columns)?.clamp(1, MAX_GUIDES as i32) as usize;
+-    let rows = checked_slider(params, Params::Rows)?.clamp(1, MAX_GUIDES as i32) as usize;
+@@ -537 +498 @@ fn smart_render_snapshot(
+-        (*value).resized(columns, rows)
++        retained_grid(&value)?
+@@ -603,0 +565 @@ unsafe extern "C" {
++    #[cfg(test)]
+@@ -693,5 +655,4 @@ fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
+-fn topology(params: &ae::Parameters<Params>) -> Result<(usize, usize), ae::Error> {
+-    Ok((
+-        params.get(Params::Columns)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
+-        params.get(Params::Rows)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
+-    ))
++// Display density is deliberately absent from both render snapshots.
++fn retained_grid(grid: &GridArb) -> Result<GridArb, ae::Error> {
++    if !grid.is_valid() { return Err(ae::Error::BadCallbackParameter); }
++    Ok(grid.clone())
+@@ -701 +661,0 @@ pub(crate) fn grid_snapshot(params: &ae::Parameters<Params>) -> Result<GridArb,
+-    let (columns, rows) = topology(params)?;
+@@ -703,15 +663 @@ pub(crate) fn grid_snapshot(params: &ae::Parameters<Params>) -> Result<GridArb,
+-    Ok((*grid).resized(columns, rows))
+-}
+-
+-fn sync_grid_topology(params: &mut ae::Parameters<Params>) -> Result<(), ae::Error> {
+-    let (columns, rows) = topology(params)?;
+-    let current = {
+-        let grid = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
+-        (*grid).clone()
+-    };
+-    if current.columns as usize == columns && current.rows as usize == rows && current.is_valid() {
+-        return Ok(());
+-    }
+-    let next = current.resized(columns, rows);
+-    params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(next)?;
+-    Ok(())
++    retained_grid(&grid)
+@@ -959 +905 @@ impl AdobePluginGlobal for Plugin {
+-        // Keep SUPERVISE so manual edits retain the existing grid/Undo path.
++        // SUPERVISE requests a redraw only; it never writes the animated stream.
+@@ -1104 +1050,3 @@ impl AdobePluginGlobal for Plugin {
+-                    sync_grid_topology(params)?;
++                    // Only request the viewer update. Never touch Grid Positions:
++                    // a setter here would create/overwrite a key at the playhead.
++                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
+@@ -1423,16 +1370,0 @@ mod tests {
+-    #[test]
+-    fn grid_resize_resets_changed_axes_like_original() {
+-        let mut g = GridArb::uniform(4, 4);
+-        g.column_lines[1] = 0.18;
+-        g.row_lines[1] = 0.16;
+-        let r = g.resized(9, 4);
+-        assert_eq!(r.column_lines.len(), 11);
+-        assert_eq!(r.row_lines.len(), 6);
+-        // Changed X topology resets to uniform positions.
+-        for (i, value) in r.column_lines.iter().enumerate() {
+-            assert!((*value - i as f32 / 10.0).abs() < 1.0e-6);
+-        }
+-        // Unchanged Y topology preserves its deformation.
+-        assert!((r.row_lines[1] - 0.16).abs() < 1.0e-6);
+-    }
+-
+diff --git a/host-rust/src/ui.rs b/host-rust/src/ui.rs
+index 1137b09..87835d5 100644
+--- a/host-rust/src/ui.rs
++++ b/host-rust/src/ui.rs
+@@ -57,9 +56,0 @@ fn grid_to_frame(in_data: &ae::InData, event: &ae::EventExtra, plane: &ViewPlane
+-fn displayed_grid(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
+-    -> Result<GridArb, ae::Error> {
+-    let mut grid = grid_snapshot(params)?;
+-    if plane.state.corners.is_some() {
+-        let p = evaluated_params(params, *in_data, &grid)?;
+-        (grid.column_lines,grid.row_lines) = plane::evaluated_axes(&p)?;
+-    }
+-    Ok(grid)
+-}
+@@ -311 +302,2 @@ fn draw_viewer(
+-    let grid = displayed_grid(in_data,params,&plane)?;
++    let controls = control_grid::read(in_data,params)?;
++    let grid = controls.grid;
+@@ -426,2 +418,3 @@ pub fn click(
+-    let grid=displayed_grid(in_data,params,&plane)?;
+-    if let Some((axis, index)) = hit_test(in_data, &grid, &plane, event, event.screen_point())? {
++    let controls=control_grid::read(in_data,params)?;
++    let grid=&controls.grid;
++    if let Some((axis, index)) = hit_test(in_data, grid, &plane, event, event.screen_point())? {
+@@ -429,0 +423,2 @@ pub fn click(
++        event.set_continue_refcon(2, grid.columns as _);
++        event.set_continue_refcon(3, grid.rows as _);
+@@ -485,0 +481 @@ fn drag_inner(
++    let before = grid.clone();
+@@ -487,18 +483,9 @@ fn drag_inner(
+-    let displayed=displayed_grid(in_data,params,&plane)?;
+-
+-    let rc = if axis == DRAG_COLUMNS {
+-        if index == 0 || index + 1 >= grid.column_lines.len() {
+-            event.set_send_drag(false);
+-            return Ok(());
+-        }
+-        let target = local_x - (displayed.column_lines[index]-grid.column_lines[index]);
+-        unsafe {
+-            eg_drag_axis(
+-                grid.column_lines.as_mut_ptr(),
+-                grid.column_pins.as_mut_ptr(),
+-                grid.column_lines.len() as i32,
+-                index as i32,
+-                target,
+-                &elastic,
+-            )
+-        }
++    let displayed = control_grid::read(in_data,params)?;
++    // A reentrant density change must not redirect an in-flight drag to another handle.
++    if event.continue_refcon(2) != displayed.grid.columns as isize ||
++        event.continue_refcon(3) != displayed.grid.rows as isize {
++        event.set_send_drag(false); return Ok(());
++    }
++    let (positions,refs,lines,pins,target) = if axis == DRAG_COLUMNS {
++        (&displayed.grid.column_lines,&displayed.column_refs,
++         &mut grid.column_lines,&grid.column_pins,local_x)
+@@ -506,15 +493,2 @@ fn drag_inner(
+-        if index == 0 || index + 1 >= grid.row_lines.len() {
+-            event.set_send_drag(false);
+-            return Ok(());
+-        }
+-        let target = local_y - (displayed.row_lines[index]-grid.row_lines[index]);
+-        unsafe {
+-            eg_drag_axis(
+-                grid.row_lines.as_mut_ptr(),
+-                grid.row_pins.as_mut_ptr(),
+-                grid.row_lines.len() as i32,
+-                index as i32,
+-                target,
+-                &elastic,
+-            )
+-        }
++        (&displayed.grid.row_lines,&displayed.row_refs,
++         &mut grid.row_lines,&grid.row_pins,local_y)
+@@ -522,2 +496,6 @@ fn drag_inner(
+-
+-    if rc == 0 {
++    if index == 0 || index+1 >= positions.len() {
++        event.set_send_drag(false); return Ok(());
++    }
++    control_grid::drag(lines,pins,refs[index],target-positions[index],&elastic)?;
++    // Only a real deformation edit may write the animated arbitrary parameter.
++    if grid != before {
+@@ -553,2 +531,3 @@ pub fn adjust_cursor(
+-        let grid=displayed_grid(in_data,params,&plane)?;
+-        if hit_test(in_data, &grid, &plane, event, event.screen_point())?.is_none() {
++        let controls=control_grid::read(in_data,params)?;
++    let grid=&controls.grid;
++        if hit_test(in_data, grid, &plane, event, event.screen_point())?.is_none() {
+diff --git a/tests/test_first_application_contract.py b/tests/test_first_application_contract.py
+index ddd152f..6405985 100644
+--- a/tests/test_first_application_contract.py
++++ b/tests/test_first_application_contract.py
+@@ -18 +18 @@ class FirstApplicationContracts(unittest.TestCase):
+-        for token in ['checked_slider(params,id)', 'checked_float(params,id)',
++        for token in ['checked_float(params,id)',
+@@ -20 +20 @@ class FirstApplicationContracts(unittest.TestCase):
+-                      'Params::Columns','Params::Rows','Params::WaveAmplitude',
++                      'i32::from(grid.columns)','i32::from(grid.rows)','Params::WaveAmplitude',
+@@ -22,0 +23,2 @@ class FirstApplicationContracts(unittest.TestCase):
++        self.assertNotIn('Params::Columns',proof)
++        self.assertNotIn('Params::Rows',proof)
+diff --git a/tests/test_host_contract.py b/tests/test_host_contract.py
+index 67711df..0a29d3b 100644
+--- a/tests/test_host_contract.py
++++ b/tests/test_host_contract.py
+@@ -83 +83 @@ class HostContract(unittest.TestCase):
+-    def test_manual_topology_change_still_uses_existing_grid_sync(self):
++    def test_manual_density_change_requests_redraw_without_grid_sync(self):
+@@ -88 +88,2 @@ class HostContract(unittest.TestCase):
+-        self.assertIn('sync_grid_topology(params)?;', handler)
++        self.assertNotIn('sync_grid_topology', handler)
++        self.assertIn('out_data.set_out_flag(ae::OutFlags::ForceRerender, true)', handler)
+diff --git a/tools/static_analysis.command b/tools/static_analysis.command
+index 0e2a6aa..7373045 100755
+--- a/tools/static_analysis.command
++++ b/tools/static_analysis.command
+@@ -10,0 +11 @@ FILES=(
++  "$ROOT/src/bridge/control_grid_ffi.cpp"
