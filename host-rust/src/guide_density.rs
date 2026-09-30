@@ -116,3 +116,7 @@ pub(crate) fn drag_control(grid:&mut GridArb,evaluated:&GridArb,request:Drag,set
 #[cfg(test)]
 #[path = "guide_density_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "detail_contract_tests.rs"]
+mod contracts;

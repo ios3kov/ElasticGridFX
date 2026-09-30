@@ -1,0 +1,50 @@
+name: Finalize density regression checksums
+on:
+  push:
+    branches: [feat/grid-density-independent]
+    paths: ['.github/workflows/density-checksum-finalize.yml']
+permissions:
+  contents: read
+jobs:
+  finalize:
+    if: github.repository == 'ios3kov/ElasticGridFX' && github.ref == 'refs/heads/feat/grid-density-independent'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: true
+      - name: Verify complete source and regenerate checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,os,pathlib,shutil,subprocess,tempfile
+          helper='.github/workflows/density-checksum-finalize.yml'
+          def git(*args):return subprocess.check_output(['git',*args])
+          assert os.environ['GITHUB_REPOSITORY']=='ios3kov/ElasticGridFX'
+          assert os.environ['GITHUB_REF']=='refs/heads/feat/grid-density-independent'
+          assert git('rev-parse','HEAD').decode().strip()==os.environ['GITHUB_SHA']
+          assert not git('status','--porcelain')
+          names=[p.decode() for p in git('ls-files','-z').split(b'\0') if p]
+          data=''.join(hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()+'  '+p+'\n' for p in sorted(names) if p not in ['SHA256SUMS.txt',helper])
+          pathlib.Path('SHA256SUMS.txt').write_text(data);git('add','SHA256SUMS.txt')
+          with tempfile.TemporaryDirectory() as temp:
+              index=pathlib.Path(temp)/'index';shutil.copyfile('.git/index',index)
+              env=dict(os.environ,GIT_INDEX_FILE=str(index))
+              subprocess.run(['git','update-index','--force-remove',helper],check=True,env=env)
+              tree=subprocess.check_output(['git','write-tree'],env=env).decode().strip()
+              assert tree=='e7e6c9ac169d8592d588e9f975abd75cc9e80414',tree
+          assert git('diff','--cached','--name-only').decode().splitlines()==['SHA256SUMS.txt']
+          git('diff','--cached','--check')
+          print('Final source tree verified:',tree)
+          PY
+          test "$(git ls-remote origin refs/heads/feat/grid-density-independent | cut -f1)" = "$GITHUB_SHA"
+          git config user.name 'FSTR Development'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'test: synchronize exact density regression source checksums'
+          git push origin HEAD:refs/heads/feat/grid-density-independent
+          git rev-parse HEAD
