@@ -467,6 +467,11 @@ fn drag_inner(
     };
     if axis == DRAG_CORNER {
         if index>=4 || plane.state.corner_controls().is_none() {event.set_send_drag(false);return Ok(());}
+        let (layer_x,layer_y)=if let Some(basis)=plane.state.parameter_basis {
+            let Some((x,y))=plane::parameter_point(&basis,layer_x as f64,layer_y as f64,
+                plane.width as f64,plane.height as f64) else {event.set_send_drag(false);return Ok(());};
+            (x as f32,y as f32)
+        } else {(layer_x,layer_y)};
         let mut param=params.get_mut(plane::CORNERS[index])?;
         param.as_point_mut()?.set_value((layer_x,layer_y));
         param.set_value_changed();
@@ -566,7 +571,7 @@ mod cursor_tests {
         let state=plane::State {corners:Some([
             193.126991294881,144.064876060526,474.465671864278,124.959806473857,
             474.465671864278,621.680710828136,193.126991294881,558.293851707426
-        ]),editable_corners:false,comp_space:true};
+        ]),editable_corners:false,comp_space:true,parameter_basis:None};
         let p=ViewPlane {geometry:state.geometry(),state,width:640.0,height:480.0,
             projection:None,projection_unavailable:false,comp_space:true};
         assert!(!p.needs_layer_conversion(ae::WindowType::Comp));

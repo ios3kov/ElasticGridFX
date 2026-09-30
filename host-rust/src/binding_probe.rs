@@ -26,7 +26,7 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
     }
     // Degenerate geometry follows the core's exact pass-through contract.
     // No public corner controls are exposed for an automatically derived plane.
-    Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true}))
+    Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true,parameter_basis:None}))
 }
 
 // Pending initialization may hide the UI plane, but must not silently use the
@@ -110,6 +110,7 @@ impl Host for Adapter {
 }
 // Caller has already restricted the operation to the owned fixture's newly
 // added second effect, on the main thread, with a valid scoped suite context.
+#[cfg(not(fstr_auto_binding))]
 pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<(),String>{
     let mut host=Adapter{id,effect,layer,basic};let e=expressions();
     let first=binding_transaction::install(&mut host,&e).map_err(|x|format!("{x:?}"))?;

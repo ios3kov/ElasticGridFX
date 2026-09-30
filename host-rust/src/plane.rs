@@ -22,6 +22,10 @@ pub(crate) struct State {
     // Automatically derived regions must keep this false.
     pub editable_corners: bool,
     pub comp_space: bool,
+    // Native text Four Corners uses the existing effect-canvas coordinates as
+    // a normalized domain on the layer plane. Retain the unedited basis for
+    // inverse corner picking, including repair of a degenerate user quad.
+    pub parameter_basis: Option<[f64;8]>,
 }
 impl State {
     pub fn corner_controls(&self) -> Option<[f64; 8]> {
@@ -47,10 +51,58 @@ impl State {
             corners[2*i] = value.x - origin.h as f64;
             corners[2*i+1] = value.y - origin.v as f64;
         }
-        Ok(Self {corners: Some(corners), editable_corners: true,comp_space:false})
+        #[cfg(fstr_binding_probe)]
+        if let Some(base)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {
+            let basis=base.corners.ok_or(ae::Error::BadCallbackParameter)?;
+            let (width,height)=if frame_context {rendered_canvas(*in_data)}
+                else {(in_data.width(),in_data.height())};
+            let mapped=if Geometry::new(&basis).is_none() {basis}
+                else {project_parameters(&basis,&corners,width as f64,height as f64)
+                    .ok_or(ae::Error::BadCallbackParameter)?};
+            return Ok(Self {corners:Some(mapped),editable_corners:true,comp_space:true,
+                parameter_basis:Some(basis)});
+        }
+        Ok(Self {corners: Some(corners), editable_corners: true,comp_space:false,parameter_basis:None})
     }
     pub fn geometry(&self) -> Option<Geometry> {
         self.corners.and_then(|corners| Geometry::new(&corners))
+    }
+}
+
+fn project_parameters(basis:&[f64;8],points:&[f64;8],width:f64,height:f64)->Option<[f64;8]>{
+    if width<=0.0 || height<=0.0 {return None;}
+    let geometry=Geometry::new(basis)?;
+    let mut projected=[0.0;8];
+    for i in 0..4 {
+        let p=geometry.map(false,points[2*i]/width,points[2*i+1]/height)?;
+        projected[2*i]=p.0;projected[2*i+1]=p.1;
+    }
+    Some(projected)
+}
+
+pub(crate) fn parameter_point(basis:&[f64;8],x:f64,y:f64,width:f64,height:f64)->Option<(f64,f64)>{
+    let uv=Geometry::new(basis)?.map(true,x,y)?;
+    Some((uv.0*width,uv.1*height))
+}
+
+#[cfg(test)] mod parameter_tests {
+    use super::*;
+    #[test] fn projected_public_corners_and_inverse_drag_share_basis(){
+        let basis=[100.0,80.0,430.0,50.0,510.0,400.0,60.0,360.0];
+        let full=[0.0,0.0,640.0,0.0,640.0,480.0,0.0,480.0];
+        let actual=project_parameters(&basis,&full,640.0,480.0).unwrap();
+        for (a,b) in actual.iter().zip(basis) {assert!((a-b).abs()<1e-8);}
+        let custom=[60.0,30.0,500.0,65.0,570.0,390.0,90.0,440.0];
+        let projected=project_parameters(&basis,&custom,640.0,480.0).unwrap();
+        for i in 0..4 {
+            let p=parameter_point(&basis,projected[2*i],projected[2*i+1],640.0,480.0).unwrap();
+            assert!((p.0-custom[2*i]).abs()<1e-8 && (p.1-custom[2*i+1]).abs()<1e-8);
+        }
+        let half_basis=basis.map(|v|v/2.0);
+        let half=project_parameters(&half_basis,&custom.map(|v|v/2.0),320.0,240.0).unwrap();
+        for (a,b) in half.iter().zip(projected) {assert!((a-b/2.0).abs()<1e-8);}
+        assert!(project_parameters(&[0.0;8],&full,640.0,480.0).is_none());
+        assert!(project_parameters(&basis,&full,0.0,480.0).is_none());
     }
 }
 

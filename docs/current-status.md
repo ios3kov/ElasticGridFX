@@ -8,6 +8,20 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Finalization in progress: Four Corners native-text baseline cb790f6 FAIL,
+full-domain Layer Plane versus Four Corners differs in 39719 channel samples
+(max error 1.0). Source now projects the existing effect-canvas parameter domain
+through the same sampled text-plane homography. Inverse corner picking uses
+the unedited basis, so degenerate user quads can still be repaired. No public
+parameter IDs, expressions or Grid Positions animations are changed. Scope:
+ordinary plane text, square pixels, AE 25.6 arm64. Per-character 3D is not a
+single plane and is not covered. Required final matrix is in
+tests/ae_native_plane_final.jsx: 8/16/32 identity, full-region parity, custom
+region identity/locality, transitions and preservation of two Grid Positions
+keys; saved/reopened/background rendering and native UI follow-up are required.
+The binding state machine is pristine -> pending idle -> ready; a project saved
+before initialization must fail explicitly, not render a legacy substitute.
+
 Current internal installation: **cb790f6 / EGFX-7e9615eeec72bb7594d9bcdb**,
 receipt EGFX-update-2befc7083a0648ccbc2d67bb970bd176, INSTALLED_FOR_TEST.
 Previous automatic candidate 499157e was rolled back before replacement.
