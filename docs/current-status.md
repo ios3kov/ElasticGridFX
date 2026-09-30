@@ -8,6 +8,22 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Integration preparation, 2026-09-30: plane geometry no longer implicitly grants
+permission to draw, hit-test or drag public Four Corners controls. All three UI
+paths now use explicit `State::corner_controls`; Layer Plane defaults to no
+permission, while invalid user-defined quads retain repair handles. This prevents
+future automatically derived regions exposing editable public corners. It does
+not connect hidden coordinates to rendering or fix the native text 3D offset.
+Default Rust regression: 34/34 PASS, including the new permission/geometry test.
+Research-flag regression: 35/35 PASS. Both ran with locked offline Cargo on macOS
+arm64, Rust 1.98.1; `git diff --check` PASS. Static code scan exit 1:
+review_required, existing workflow action pinning/checkout-credential findings
+and a test-file auth heuristic; no findings in the changed Rust files. Report:
+work/corner-controls-audit-20260930.json (outside repository). Not a release gate.
+Installed ordinary plugin unchanged; native acceptance of this change NOT RUN.
+Next: explicit readiness and coordinate-space contract before connecting the
+hidden projected quad to render, overlay and picking (avoid double projection).
+
 Latest checkpoint: direct SequenceSetup stream access returned Parameter error;
 do not use it for automatic binding. Initial deferred probe 8932480 crashed:
 its idle callback lacked the Rust wrapper's suite context. Corrected clean

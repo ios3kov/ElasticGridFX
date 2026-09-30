@@ -229,7 +229,7 @@ fn hit_test(
     let height = in_data.height().max(1) as f32;
     let mut best: Option<(f32, isize, usize)> = None;
 
-    if let Some(corners) = plane.state.corners {
+    if let Some(corners) = plane.state.corner_controls() {
         for i in 0..4 {
             let p = layer_to_frame(in_data,event,plane,corners[2*i] as f32,corners[2*i+1] as f32)?;
             let d = ((mouse.h as f32-p.x).powi(2)+(mouse.v as f32-p.y).powi(2)).sqrt();
@@ -318,7 +318,7 @@ fn draw_viewer(
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
 
-    if let Some(corners) = plane.state.corners {
+    if let Some(corners) = plane.state.corner_controls() {
         for i in 0..4 {
             let p=layer_to_frame(in_data,event,&plane,corners[2*i] as f32,corners[2*i+1] as f32)?;
             // Four visible, frame-sized corner grips, including invalid quads so
@@ -457,7 +457,7 @@ fn drag_inner(
         event.set_send_drag(false);return Ok(());
     };
     if axis == DRAG_CORNER {
-        if index>=4 || plane.state.corners.is_none() {event.set_send_drag(false);return Ok(());}
+        if index>=4 || plane.state.corner_controls().is_none() {event.set_send_drag(false);return Ok(());}
         let mut param=params.get_mut(plane::CORNERS[index])?;
         param.as_point_mut()?.set_value((layer_x,layer_y));
         param.set_value_changed();

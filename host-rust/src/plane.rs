@@ -18,8 +18,14 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
 #[derive(Clone, Debug, Default)]
 pub(crate) struct State {
     pub corners: Option<[f64; 8]>,
+    // Geometry alone does not grant permission to edit public corner parameters.
+    // Automatically derived regions must keep this false.
+    pub editable_corners: bool,
 }
 impl State {
+    pub fn corner_controls(&self) -> Option<[f64; 8]> {
+        if self.editable_corners { self.corners } else { None }
+    }
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
         let mode = if checkout { checked_popup(params, Params::PlaneMode)? }
                    else { params.get(Params::PlaneMode)?.as_popup()?.value() };
@@ -36,7 +42,7 @@ impl State {
             corners[2*i] = value.x - origin.h as f64;
             corners[2*i+1] = value.y - origin.v as f64;
         }
-        Ok(Self {corners: Some(corners)})
+        Ok(Self {corners: Some(corners), editable_corners: true})
     }
     pub fn geometry(&self) -> Option<Geometry> {
         self.corners.and_then(|corners| Geometry::new(&corners))

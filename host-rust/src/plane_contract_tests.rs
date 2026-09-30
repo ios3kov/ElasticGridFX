@@ -2,6 +2,24 @@
 use super::plane::*;
 
 #[test]
+fn derived_region_does_not_expose_public_corner_controls() {
+    let corners=[0.0,0.0,100.0,0.0,100.0,100.0,0.0,100.0];
+    let mut state=State {corners:Some(corners), ..State::default()};
+    assert!(state.geometry().is_some());
+    assert!(state.corner_controls().is_none());
+    state.editable_corners=true;
+    assert_eq!(state.corner_controls(),Some(corners));
+    // Invalid user quads retain repair controls, but not valid geometry.
+    state.corners=Some([0.0;8]);
+    assert!(state.geometry().is_none());
+    assert_eq!(state.corner_controls(),Some([0.0;8]));
+    // Mode changes also revoke permission for an in-flight corner drag.
+    state.editable_corners=false;
+    assert!(state.corner_controls().is_none());
+    assert!(State::default().corner_controls().is_none());
+}
+
+#[test]
 fn shared_geometry_roundtrip_and_owned_snapshot() {
     let mut state=State {corners:Some([10.0,20.0,180.0,35.0,130.0,160.0,-15.0,115.0]), ..State::default()};
     let snapshot=state.clone();
