@@ -1,0 +1,42 @@
+name: Updater startup diagnostic
+on:
+  push:
+    branches: [fix/final-validation]
+    paths:
+      - CHECK_UPDATE_START_MAC.command
+      - tests/test_update_start.py
+      - .github/workflows/update-start-check.yml
+      - docs/update-start-plan-2026-09-28.md
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  startup:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Shell and read-only startup tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/startup-evidence"
+          bash -n CHECK_UPDATE_START_MAC.command
+          python3 -m unittest discover -s tests -p test_update_start.py -v 2>&1 | tee "$RUNNER_TEMP/startup-evidence/tests.log"
+          git diff --exit-code
+          git rev-parse HEAD > "$RUNNER_TEMP/startup-evidence/COMMIT.txt"
+          python3 -c 'import hashlib,pathlib; p=pathlib.Path("CHECK_UPDATE_START_MAC.command"); print(hashlib.sha256(p.read_bytes()).hexdigest())' > "$RUNNER_TEMP/startup-evidence/script.sha256"
+      - name: Retain exact diagnostic and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: EGFX-startup-${{ runner.os }}-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            CHECK_UPDATE_START_MAC.command
+            ${{ runner.temp }}/startup-evidence/

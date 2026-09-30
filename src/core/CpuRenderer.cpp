@@ -156,8 +156,25 @@ void parallelRows(int height, const RenderSettings& settings, Fn&& fn) {
     out[3] = a[3] + (b[3] - a[3]) * t;
 }
 
+// The dense specialization compiles to the original unchecked pointer math.
+// Only sparse checkouts pay for sentinel handling; no full-canvas allocation.
+template<bool Transparent, typename T>
+const T* sourceRow(const T* data, int y, std::ptrdiff_t stride) noexcept {
+    if constexpr (Transparent) { if (y < 0) return nullptr; }
+    return data + static_cast<std::ptrdiff_t>(y) * stride;
+}
+
+template<bool Transparent, typename T>
+const T* sourcePixel(const T* row, int x) noexcept {
+    if constexpr (Transparent) {
+        static constexpr T zero[4]{};
+        if (!row || x < 0) return zero;
+    }
+    return row + static_cast<std::ptrdiff_t>(x) * 4;
+}
+
 struct CachedHorizontalRow {
-    int source_y = -1;
+    int source_y = -2; // -1 is a valid transparent-row cache key
     std::vector<float> pixels;
 };
 
@@ -169,7 +186,7 @@ BicubicRowCache& reusableBicubicRowCache(std::size_t values_per_row) {
     // frame, while avoiding shared locks between MFR frames.
     thread_local BicubicRowCache cache;
     for (auto& slot : cache) {
-        slot.source_y = -1;
+        slot.source_y = -2;
         slot.pixels.resize(values_per_row);
     }
     return cache;
@@ -194,6 +211,7 @@ void prepareWarpRGBAfInto(PreparedWarpRGBAf& p,
     p.src_width = src_width; p.src_height = src_height;
     p.dst_width = dst_width; p.dst_height = dst_height;
     p.quality = settings.quality;
+    p.transparent_taps = false;
     p.identity = src_width == dst_width && src_height == dst_height &&
                  axisIsIdentity(x_lut, dst_width) && axisIsIdentity(y_lut, dst_height);
 
@@ -226,7 +244,8 @@ PreparedWarpRGBAf prepareWarpRGBAf(int src_width, int src_height,
     return p;
 }
 
-void renderWarpRGBAfPrepared(const ConstImageRGBAf& src,
+template<bool Transparent>
+static void renderFloatPreparedImpl(const ConstImageRGBAf& src,
                              const ImageRGBAf& dst,
                              const PreparedWarpRGBAf& p,
                              const RenderSettings& settings) {
@@ -254,15 +273,15 @@ void renderWarpRGBAfPrepared(const ConstImageRGBAf& src,
         auto render_rows = [&](int y0, int y1) {
             for (int y = y0; y < y1; ++y) {
                 const auto ys = p.y_linear[static_cast<std::size_t>(y)];
-                const float* r0 = src.data + static_cast<std::ptrdiff_t>(ys.i0) * src.row_stride_floats;
-                const float* r1 = src.data + static_cast<std::ptrdiff_t>(ys.i1) * src.row_stride_floats;
+                const float* r0 = sourceRow<Transparent>(src.data, ys.i0, src.row_stride_floats);
+                const float* r1 = sourceRow<Transparent>(src.data, ys.i1, src.row_stride_floats);
                 float* out = dst.data + static_cast<std::ptrdiff_t>(y) * dst.row_stride_floats;
                 for (int x = 0; x < dst.width; ++x) {
                     const auto xs = p.x_linear[static_cast<std::size_t>(x)];
-                    const float* p00 = r0 + xs.i0 * 4;
-                    const float* p10 = r0 + xs.i1 * 4;
-                    const float* p01 = r1 + xs.i0 * 4;
-                    const float* p11 = r1 + xs.i1 * 4;
+                    const float* p00 = sourcePixel<Transparent>(r0, xs.i0);
+                    const float* p10 = sourcePixel<Transparent>(r0, xs.i1);
+                    const float* p01 = sourcePixel<Transparent>(r1, xs.i0);
+                    const float* p11 = sourcePixel<Transparent>(r1, xs.i1);
 #if ELASTICGRID_SIMD_PIXELS
                     const auto a00 = simd::load4(p00);
                     const auto a10 = simd::load4(p10);
@@ -301,21 +320,21 @@ void renderWarpRGBAfPrepared(const ConstImageRGBAf& src,
             }
             if (victim == cache.size()) victim = 0; // all required means this should have been a cache hit
             auto& slot = cache[victim];
-            const float* source = src.data + static_cast<std::ptrdiff_t>(source_y) * src.row_stride_floats;
+            const float* source = sourceRow<Transparent>(src.data, source_y, src.row_stride_floats);
             float* row_out = slot.pixels.data();
             for (int x = 0; x < dst.width; ++x) {
                 const auto& xs = p.x_cubic[static_cast<std::size_t>(x)];
 #if ELASTICGRID_SIMD_PIXELS
                 auto accv = simd::zero();
                 for (std::size_t kx = 0; kx < 4u; ++kx)
-                    accv = simd::madd(accv, simd::load4(source + xs.index[kx] * 4), xs.weight[kx]);
+                    accv = simd::madd(accv, simd::load4(sourcePixel<Transparent>(source, xs.index[kx])), xs.weight[kx]);
                 simd::store4(row_out + x * 4, accv);
 #else
                 float* d = row_out + x * 4;
                 d[0]=d[1]=d[2]=d[3]=0.0f;
                 for (std::size_t kx = 0; kx < 4u; ++kx) {
                     const float w = xs.weight[kx];
-                    const float* q = source + xs.index[kx] * 4;
+                    const float* q = sourcePixel<Transparent>(source, xs.index[kx]);
                     d[0]+=q[0]*w; d[1]+=q[1]*w; d[2]+=q[2]*w; d[3]+=q[3]*w;
                 }
 #endif
@@ -356,7 +375,7 @@ void renderWarpRGBAfPrepared(const ConstImageRGBAf& src,
 }
 
 
-template <typename T, typename Src, typename Dst>
+template <typename T, bool Transparent, typename Src, typename Dst>
 static void renderIntegerPreparedImpl(const Src& src,
                                       const Dst& dst,
                                       const PreparedWarpRGBAf& p,
@@ -391,15 +410,15 @@ static void renderIntegerPreparedImpl(const Src& src,
         auto render_rows = [&](int y0, int y1) {
             for (int y = y0; y < y1; ++y) {
                 const auto ys = p.y_linear[static_cast<std::size_t>(y)];
-                const T* r0 = src.data + static_cast<std::ptrdiff_t>(ys.i0) * src.row_stride_values;
-                const T* r1 = src.data + static_cast<std::ptrdiff_t>(ys.i1) * src.row_stride_values;
+                const T* r0 = sourceRow<Transparent>(src.data, ys.i0, src.row_stride_values);
+                const T* r1 = sourceRow<Transparent>(src.data, ys.i1, src.row_stride_values);
                 T* out = dst.data + static_cast<std::ptrdiff_t>(y) * dst.row_stride_values;
                 for (int x = 0; x < dst.width; ++x) {
                     const auto xs = p.x_linear[static_cast<std::size_t>(x)];
-                    const T* p00 = r0 + xs.i0 * 4;
-                    const T* p10 = r0 + xs.i1 * 4;
-                    const T* p01 = r1 + xs.i0 * 4;
-                    const T* p11 = r1 + xs.i1 * 4;
+                    const T* p00 = sourcePixel<Transparent>(r0, xs.i0);
+                    const T* p10 = sourcePixel<Transparent>(r0, xs.i1);
+                    const T* p01 = sourcePixel<Transparent>(r1, xs.i0);
+                    const T* p11 = sourcePixel<Transparent>(r1, xs.i1);
 #if ELASTICGRID_SIMD_PIXELS
                     if constexpr (std::is_same_v<T, std::uint8_t> || std::is_same_v<T, std::uint16_t>) {
                         const auto a00 = simd::load4(p00);
@@ -453,21 +472,21 @@ static void renderIntegerPreparedImpl(const Src& src,
             }
             if (victim == cache.size()) victim = 0;
             auto& slot = cache[victim];
-            const T* source = src.data + static_cast<std::ptrdiff_t>(source_y) * src.row_stride_values;
+            const T* source = sourceRow<Transparent>(src.data, source_y, src.row_stride_values);
             float* row_out = slot.pixels.data();
             for (int x = 0; x < dst.width; ++x) {
                 const auto& xs = p.x_cubic[static_cast<std::size_t>(x)];
 #if ELASTICGRID_SIMD_PIXELS
                 auto accv = simd::zero();
                 for (std::size_t kx = 0; kx < 4u; ++kx)
-                    accv = simd::madd(accv, simd::load4(source + xs.index[kx] * 4), xs.weight[kx]);
+                    accv = simd::madd(accv, simd::load4(sourcePixel<Transparent>(source, xs.index[kx])), xs.weight[kx]);
                 simd::store4(row_out + x * 4, accv);
 #else
                 float* d = row_out + x * 4;
                 d[0]=d[1]=d[2]=d[3]=0.0f;
                 for (std::size_t kx = 0; kx < 4u; ++kx) {
                     const float w = xs.weight[kx];
-                    const T* q = source + xs.index[kx] * 4;
+                    const T* q = sourcePixel<Transparent>(source, xs.index[kx]);
                     d[0]+=static_cast<float>(q[0])*w; d[1]+=static_cast<float>(q[1])*w;
                     d[2]+=static_cast<float>(q[2])*w; d[3]+=static_cast<float>(q[3])*w;
                 }
@@ -512,7 +531,8 @@ void renderWarpRGBA8Prepared(const ConstImageRGBA8& src,
                              const ImageRGBA8& dst,
                              const PreparedWarpRGBAf& prepared,
                              const RenderSettings& settings) {
-    renderIntegerPreparedImpl<std::uint8_t>(src, dst, prepared, settings, 255);
+    if (prepared.transparent_taps) renderIntegerPreparedImpl<std::uint8_t, true>(src, dst, prepared, settings, 255);
+    else renderIntegerPreparedImpl<std::uint8_t, false>(src, dst, prepared, settings, 255);
 }
 
 void renderWarpRGBA16Prepared(const ConstImageRGBA16& src,
@@ -520,7 +540,16 @@ void renderWarpRGBA16Prepared(const ConstImageRGBA16& src,
                               const PreparedWarpRGBAf& prepared,
                               const RenderSettings& settings,
                               std::uint16_t channel_max) {
-    renderIntegerPreparedImpl<std::uint16_t>(src, dst, prepared, settings, channel_max);
+    if (prepared.transparent_taps) renderIntegerPreparedImpl<std::uint16_t, true>(src, dst, prepared, settings, channel_max);
+    else renderIntegerPreparedImpl<std::uint16_t, false>(src, dst, prepared, settings, channel_max);
+}
+
+void renderWarpRGBAfPrepared(const ConstImageRGBAf& src,
+                             const ImageRGBAf& dst,
+                             const PreparedWarpRGBAf& prepared,
+                             const RenderSettings& settings) {
+    if (prepared.transparent_taps) renderFloatPreparedImpl<true>(src, dst, prepared, settings);
+    else renderFloatPreparedImpl<false>(src, dst, prepared, settings);
 }
 
 void renderWarpRGBAf(const ConstImageRGBAf& src,

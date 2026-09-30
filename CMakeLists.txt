@@ -15,6 +15,9 @@ add_library(elasticgrid_core
     src/core/GridModel.cpp
     src/core/GridCodec.cpp
     src/core/WarpMath.cpp
+    src/core/PlaneTransform.cpp
+    src/core/PlaneWarp.cpp
+    src/core/PlaneRenderer.cpp
     src/core/CpuRenderer.cpp
 )
 target_include_directories(elasticgrid_core PUBLIC src)
@@ -40,6 +43,34 @@ endfunction()
 
 if(ELASTICGRID_BUILD_TESTS)
   enable_testing()
+  add_executable(elasticgrid_plane_sampling_tests tests/test_plane_sampling.cpp src/bridge/plane_ffi.cpp)
+  target_link_libraries(elasticgrid_plane_sampling_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_sampling_tests)
+  add_test(NAME elasticgrid_plane_sampling COMMAND elasticgrid_plane_sampling_tests)
+  add_executable(elasticgrid_plane_bridge_tests tests/test_plane_bridge.cpp src/bridge/plane_ffi.cpp)
+  target_link_libraries(elasticgrid_plane_bridge_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_bridge_tests)
+  add_test(NAME elasticgrid_plane_bridge COMMAND elasticgrid_plane_bridge_tests)
+  add_executable(elasticgrid_plane_expanded_tests tests/test_plane_expanded.cpp)
+  target_link_libraries(elasticgrid_plane_expanded_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_expanded_tests)
+  add_test(NAME elasticgrid_plane_expanded COMMAND elasticgrid_plane_expanded_tests)
+  add_executable(elasticgrid_plane_tests tests/test_plane.cpp)
+  target_link_libraries(elasticgrid_plane_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_tests)
+  add_test(NAME elasticgrid_plane COMMAND elasticgrid_plane_tests)
+  add_executable(elasticgrid_plane_warp_tests tests/test_plane_warp.cpp)
+  target_link_libraries(elasticgrid_plane_warp_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_warp_tests)
+  add_test(NAME elasticgrid_plane_warp COMMAND elasticgrid_plane_warp_tests)
+  add_executable(elasticgrid_plane_render_tests tests/test_plane_render.cpp)
+  target_link_libraries(elasticgrid_plane_render_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_render_tests)
+  add_test(NAME elasticgrid_plane_render COMMAND elasticgrid_plane_render_tests)
+  add_executable(elasticgrid_plane_depth_tests tests/test_plane_depth.cpp)
+  target_link_libraries(elasticgrid_plane_depth_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_depth_tests)
+  add_test(NAME elasticgrid_plane_depth COMMAND elasticgrid_plane_depth_tests)
   add_executable(elasticgrid_tests tests/test_core.cpp)
   target_link_libraries(elasticgrid_tests PRIVATE elasticgrid_core)
   elasticgrid_enable_test_assertions(elasticgrid_tests)
@@ -53,6 +84,22 @@ if(ELASTICGRID_BUILD_TESTS)
   target_include_directories(elasticgrid_bridge_tests PRIVATE src)
   elasticgrid_enable_test_assertions(elasticgrid_bridge_tests)
   add_test(NAME elasticgrid_bridge COMMAND elasticgrid_bridge_tests)
+
+  add_executable(elasticgrid_identity_tests
+      tests/test_identity.cpp
+      src/bridge/elasticgrid_ffi.cpp
+  )
+  target_link_libraries(elasticgrid_identity_tests PRIVATE elasticgrid_core)
+  target_include_directories(elasticgrid_identity_tests PRIVATE src)
+  elasticgrid_enable_test_assertions(elasticgrid_identity_tests)
+  add_test(NAME elasticgrid_identity COMMAND elasticgrid_identity_tests)
+
+  add_executable(elasticgrid_sparse_tests
+      tests/test_sparse.cpp src/bridge/elasticgrid_ffi.cpp)
+  target_link_libraries(elasticgrid_sparse_tests PRIVATE elasticgrid_core)
+  target_include_directories(elasticgrid_sparse_tests PRIVATE src)
+  elasticgrid_enable_test_assertions(elasticgrid_sparse_tests)
+  add_test(NAME elasticgrid_sparse COMMAND elasticgrid_sparse_tests)
 
   add_executable(elasticgrid_gpu_plan_tests
       tests/test_gpu_plan.cpp

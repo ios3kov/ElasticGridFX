@@ -29,6 +29,9 @@ tar -C "$ROOT" \
   --exclude='./build-*' \
   -cf - . | tar -C "$SRC" -xf -
 
+# Export the clean source identity, then validate the copied bytes on every build.
+python3 "$ROOT/tools/build_identity.py" snapshot --root "$ROOT" --out "$TMP/source-record.json"
+export ELASTICGRID_SOURCE_RECORD="$TMP/source-record.json"
 MANIFEST="$SRC/host-rust/Cargo.toml"
 export MACOSX_DEPLOYMENT_TARGET=11.0
 export CARGO_INCREMENTAL=0

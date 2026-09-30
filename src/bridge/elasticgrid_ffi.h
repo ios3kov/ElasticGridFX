@@ -67,6 +67,11 @@ typedef struct EgGpuCubicSample {
     float weight[4];
 } EgGpuCubicSample;
 
+// Evaluates immutable destination guides, including wave, using the legacy path.
+// Output capacities must cover columns+2 and rows+2; no retained pointers.
+int eg_evaluate_grid(const EgRenderParams* params, float* columns, int column_capacity,
+                     float* rows, int row_capacity) noexcept;
+
 // Mutates one normalized guide axis in place using the same clean-room
 // elasticity/no-crossing implementation used by the render core.
 // `line_count` includes the two boundary lines. Returns 0 on success.
@@ -114,6 +119,24 @@ int eg_required_source_rect(
 // Returns 0 on success. Pixel buffers are After Effects ARGB on CPU; the core
 // treats the four channels generically, so channel ordering is preserved.
 int eg_render_frame(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* params) noexcept;
+
+// CPU SmartFX sparse-canvas entry. The host must have requested the complete
+// logical canvas: pixels absent from its returned compact world are zero.
+// Requires positive canvas dimensions; output outside that canvas is zero.
+// Edge modes apply to the logical canvas, NOT the compact storage rectangle.
+// An empty input (width==0 or height==0) clears output without reading input.
+// Existing eg_render_frame and GPU-plan semantics/ABI remain unchanged.
+int eg_render_frame_sparse(
     const void* input_data,
     std::ptrdiff_t input_row_bytes,
     std::int32_t input_width,

@@ -1,0 +1,95 @@
+# Native text coordinate baseline — Stage 9 OPEN
+
+Run: b7c354d8976942c1ad5d9088d9222f30. AE 25.6.0 arm64, PID 36457.
+Installed/live Build ID EGFX-25e03a7ae1a9304311095c8e, candidate
+1eed79aad052f144668c2ebed9426a7934f35f6b. Live image UUID/path and installed
+payload identity PASS (live-identity.json). This is not a renderer PASS.
+
+## Isolation
+
+Previously opened project was saved (no dirty marker). Opened a new empty
+project through AE UI, then ran the guarded fixture. No prior file overwritten.
+New outputs/text-plane-3d-restore-20260930/text-plane.aep contains the owned
+640x480, single native text fixture with unique run marker. Unlike the old path,
+this scene passes structural ownership checks. Scripts return 0.
+
+## Observed failure
+
+At 50% viewer zoom, enabling threeDLayer alone moves the grid by approximately
+160x100 viewer pixels, equivalent to layer Position [320,200,0]. Text is fixed.
+2D grid spans the composition canvas. 3D grid starts at the text origin and
+extends beyond the composition. Screenshots inspected in the conversation.
+Native 3D text overlay baseline: **FAIL**, reproduced on the current candidate.
+
+Host sourcePointToComp probe (no text animators):
+
+| Input layer point | 2D / 3D zero rotation | 3D Y rotation 30 degrees |
+|---|---|---|
+| 0,0 | 320,200 | 320,200 |
+| 640,0 | 960,200 | 1186.025390625,177.5 |
+| 640,480 | 960,680 | 1186.025390625,927.5 |
+| 0,480 | 320,680 | 320,680 |
+
+Probe restores rotation and 3D state in finally. Output coordinates.txt and
+transport logs are retained beside the project. No user composition was probed.
+The sourcePointToComp API has a documented first-character limitation; this
+simple text fixture cannot establish animated-character or per-character-3D behavior.
+
+## Interpretation and next implementation gate
+
+The current ui_projection forward matrix consumes native layer coordinates,
+while the grid domain derives from the effect canvas (in_data width/height).
+The host probe confirms that native layer projection adds Position even in the
+zero-rotation case. The observed offset is consistent with applying it to an
+already transformed text effect canvas. This does not establish a general
+canvas-to-layer inverse for continuously rasterized text.
+
+Do not apply a fixed Position subtraction: rotation/camera require a projective
+mapping, and rendering and inverse picking must share its semantics. Required
+next evidence: identify the host-supported effect-input-to-layer coordinate
+mapping, then test native text, raster control, rotation, camera, parent and
+neutral identity. Do not call general AEGP Layer APIs from MFR/render callbacks
+without a documented threading contract. UI-only state cannot drive renders.
+
+Installed artifact remains unchanged. No fix or Stage 9 acceptance claimed.
+
+## Expression-backed coordinate experiment
+
+Same owned fixture/current installed candidate. Temporarily applied expressions
+to the four existing plane point parameters, using sourceRectAtTime and toComp
+on thisLayer. Evaluated at Y rotation 0 and 30 degrees; all four values finite,
+no expression errors, transport returned 0. Corners and rotation restored in
+finally. Evidence: expression-probe.txt and expression-probe.jsx in the run folder.
+
+At 0 degrees TL=(160.342895507812,135.44921875),
+TR=(482.098510742188,135.44921875).
+At 30 degrees TL=(193.126991294881,144.064876060526),
+TR=(474.465671864278,124.959806473857).
+Thus host-evaluated point parameters can carry the perspective quad; no render
+thread AEGP calls are needed to obtain these tested values.
+
+Research harness extracted into tests/ae_text_plane_expression_probe.jsx.
+Node tests cover normal/error restoration and refusal of keyed corner inputs.
+Static audit text-expression-probe-audit.json: review_required (existing
+workflow pinning/credentials and auth-test heuristic), not security PASS.
+
+This is a coordinate feasibility test, not a production integration. Existing
+Four Corners controls must NOT be overwritten with expressions in user projects.
+A production approach would need separate internal parameters, explicit setup
+and ownership/migration rules, and a shared UI/render mapping. Neither that
+architecture nor extra parameters are implemented. Camera/parent, aerender,
+MFR, cache invalidation, undo and native picking remain NOT RUN for this mechanism.
+
+Automatic-switch extension: same four expressions evaluated without rewrites
+at 2D, 3D zero rotation, 3D Y30, then 2D. Both zero-rotation states and restored
+2D coordinates agree within 0.0001 pixels; rotated values match the prior
+experiment. Real AE transport 0, result auto-switch-probe.txt. Research code
+restores starting 3D state/rotation/corner values. This does not test Grid
+Positions keyframe persistence or solve binding installation for old projects.
+
+The requested product UX is fully automatic; a binding button was explicitly
+rejected. Do not use UpdateParamsUi to mutate bindings: the SDK callback is
+cosmetic-only (also documented in after-effects 0.4.0 pf/command.rs).
+See https://ae-plugins.docsforadobe.dev/effect-basics/command-selectors/ .
+Do not substitute render-thread AEGP calls or a stale UI cache for proper
+host dependencies. No production integration accepted yet.

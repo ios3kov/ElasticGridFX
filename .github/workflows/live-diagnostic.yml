@@ -1,0 +1,39 @@
+name: Live-image diagnostic
+on:
+  push:
+    branches: [fix/final-validation]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: live-diagnostic-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  mac-diagnostic:
+    runs-on: macos-14
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Unit and real Apple sampler tests (owned fixture, not AE)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/diagnostic-evidence"
+          python3 -m unittest discover -s tests -p 'test_live_identity*.py' -v 2>&1 | tee "$RUNNER_TEMP/diagnostic-evidence/tests.log"
+          git diff --exit-code
+      - name: Package exact clean diagnostic (no plugin)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 tools/package_diagnostic.py "$RUNNER_TEMP/ElasticGridFX-Diagnostics.zip" | tee "$RUNNER_TEMP/diagnostic-evidence/package.json"
+      - name: Preserve diagnostic and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-diagnostic-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/diagnostic-evidence/
+            ${{ runner.temp }}/ElasticGridFX-Diagnostics.zip

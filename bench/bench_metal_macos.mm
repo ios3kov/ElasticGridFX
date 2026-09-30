@@ -15,8 +15,8 @@ static EgRenderParams make_params(int quality,
                                   const float* x, int nx, const std::uint8_t* xp,
                                   const float* y, int ny, const std::uint8_t* yp) {
     EgRenderParams p{};
-    p.columns = nx - 1;
-    p.rows = ny - 1;
+    p.columns = nx - 2;
+    p.rows = ny - 2;
     p.column_lines = x;
     p.column_line_count = nx;
     p.column_pins = xp;
@@ -68,10 +68,10 @@ static int run_case(id<MTLDevice> device,
 
     constexpr int columns = 12;
     constexpr int rows = 8;
-    std::vector<float> x(columns + 1), y(rows + 1);
+    std::vector<float> x(columns + 2), y(rows + 2);
     std::vector<std::uint8_t> xp(x.size(), 0), yp(y.size(), 0);
-    for (int i = 0; i <= columns; ++i) x[i] = float(i) / float(columns);
-    for (int i = 0; i <= rows; ++i) y[i] = float(i) / float(rows);
+    for (int i = 0; i <= columns + 1; ++i) x[static_cast<std::size_t>(i)] = float(i) / float(columns + 1);
+    for (int i = 0; i <= rows + 1; ++i) y[static_cast<std::size_t>(i)] = float(i) / float(rows + 1);
     xp.front() = xp.back() = 1;
     yp.front() = yp.back() = 1;
     EgElasticParams ep{4.0f, 2, 1.0f, 0.002f};

@@ -4,6 +4,11 @@
 #include "bridge/elasticgrid_ffi.h"
 
 #include <atomic>
+// Test assertions (including reference renders) must execute in Release too.
+// This affects only this test translation unit, not production renderer flags.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -19,7 +24,7 @@ static EgRenderParams make_params(int quality, int edge) {
     static const std::uint8_t xp[] = {1,0,0,1,0,1};
     static const std::uint8_t yp[] = {1,0,1,0,1};
     EgRenderParams p{};
-    p.columns=5; p.rows=4;
+    p.columns=4; p.rows=3;
     p.column_lines=x; p.column_line_count=6; p.column_pins=xp;
     p.row_lines=y; p.row_line_count=5; p.row_pins=yp;
     p.tension_radius=3.7f; p.falloff=3; p.elasticity_strength=1.1f; p.min_spacing=0.002f;

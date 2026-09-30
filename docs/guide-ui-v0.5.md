@@ -23,6 +23,51 @@ all guide positions continuously.
 
 ## Rendering path
 
+### Stage 9 viewer affordances — 2026-09-29
+
+Current request supersedes the square-marker design: thin guides with elongated
+grips, hover-only hand and visibility on light/dark/middle-gray backgrounds.
+
+- UI-1: guides have centered 48-frame-unit grips. Vertical guides and their grips
+  are cut at EVERY current horizontal guide intersection (12-frame-unit gaps),
+  recomputed from transformed grid coordinates on each draw/hit-test. Horizontal
+  guides remain continuous, like the reference. There is no fixed midpoint gap.
+  Overlapping cuts merge, endpoints clamp, and pinned/dense guides still have cuts.
+  Geometry follows transformed endpoints; short guides under 68 units and grids
+  over 34 lines suppress grips. Pinned guides have no draggable grips.
+- UI-2: hover uses the same 9-unit line pick tolerance as clicks (including the
+  vertical gap); outside a draggable guide AdjustCursor is ignored, allowing AE
+  to choose its selected-tool cursor. Captured drag retains the closed hand.
+- UI-3: white strokes over black outlines: lines 0.5/1.5 units, grips 1.5/3.
+  The previous 1/3-unit guide stroke was rejected by the user as too thick.
+  This is dual-tone contrast, not framebuffer-dependent inversion. The pinned
+  DRAWBOT Surface API exposes no destination-invert operation; inversion alone
+  also loses contrast at middle gray. No framebuffer reads or render changes.
+
+Baseline: d26419c installed in AE 25.6 arm64; user rejected line thickness and
+fixed midpoint gaps. New candidate acceptance requires
+white/black/50%-gray/detail backgrounds, 25/100/200% zoom, rotated layer,
+hover off/on line with Selection/Text/Pen tools, drag/release/undo, deselection,
+exit/re-entry, pinned/dense guides and absence of invalid-cursor dialogs.
+Source unit tests cover moving/multiple/merged intersections, no phantom center
+gap, split/grip geometry, rotated grip length, short/dense/
+degenerate guides and distance picking. Real AE gate remains NOT_RUN for this change.
+
+On macOS a main-thread-only AppKit shim selects openHandCursor/closedHandCursor;
+AE is told CUSTOM only using AdjustCursor, never via App suite or the click/drag
+union. No push/pop stack, dependencies or render changes.
+Release, drag errors, invalidated topology, deactivation, context close and exit
+clear dragging. Non-Mac uses native Hand/Pan as a fallback, not a verified exact
+closed-hand appearance. AE owns delivery of active effect UI events.
+
+Acceptance still requires live AE: selected/deselected effect, hover/click/drag/
+release, exit/re-entry, cancellation, multiple effects, pinned guides, zoom
+25/100/200%, and drag undo. Source tests/build cannot close this visual gate.
+References: Apple NSCursor openHand/closedHand and
+https://ae-plugins.docsforadobe.dev/effect-ui-events/PF_EventUnion/ (ignore
+AdjustCursor to leave cursor ownership to AE). PF_SetCursor(NONE) caused a real
+AE 25.6 modal error; it is not used. Installation remains separately gated.
+
 `eg_render_frame` now accepts optional host-supplied guide arrays. When present, those guides are validated,
 loaded into the same `AxisGrid` model used by the drag logic, then evaluated for Wave and converted into
 inverse LUTs. This closes the previous v0.4 gap where elasticity controls existed in UI but could not affect

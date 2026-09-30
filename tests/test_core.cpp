@@ -34,6 +34,76 @@ int main() {
         expect(g.lines()[3] > 3.0f/8.0f, "neighbor follows drag");
     }
     {
+        // Original GridWarp falloff parity at distance 1 with radius 3.
+        const float delta = 0.10f;
+        const float base = 3.0f / 8.0f;
+        struct Case { FalloffProfile profile; float weight; };
+        const Case cases[] = {
+            {FalloffProfile::Smoothstep, 20.0f / 27.0f},
+            {FalloffProfile::Gaussian, std::exp(-4.0f / 9.0f)},
+            {FalloffProfile::Linear, 2.0f / 3.0f},
+        };
+        for (const auto& c : cases) {
+            AxisGrid g(8);
+            ElasticSettings e;
+            e.radius_lines = 3.0f;
+            e.strength = 1.0f;
+            e.min_spacing = 0.001f;
+            e.falloff = c.profile;
+            expect(g.dragElastic(4, 0.6f, e), "original falloff drag accepted");
+            expect(std::abs(g.lines()[4] - 0.6f) < 1e-6f, "selected guide follows cursor exactly");
+            expect(std::abs(g.lines()[3] - (base + delta * c.weight)) < 2e-5f,
+                   "neighbor falloff matches original");
+        }
+    }
+    {
+        // Original Elasticity Strength also scales the grabbed guide itself.
+        AxisGrid g(8);
+        ElasticSettings e;
+        e.radius_lines = 3.0f;
+        e.strength = 0.5f;
+        e.min_spacing = 0.001f;
+        const float before = g.lines()[4];
+        const float target = 0.65f;
+        expect(g.dragElastic(4, target, e), "half-strength drag accepted");
+        const float expected = before + (target - before) * 0.5f;
+        expect(std::abs(g.lines()[4] - expected) < 1e-6f,
+               "grabbed guide is scaled by elasticity strength");
+    }
+    {
+        // Original min spacing is capped at half uniform segment spacing.
+        AxisGrid g(4);
+        ElasticSettings e;
+        e.radius_lines = 0.0f;
+        e.min_spacing = 0.25f;
+        expect(g.dragElastic(2, 0.99f, e), "extreme original-spacing drag accepted");
+        for (std::size_t i = 1; i < g.lines().size(); ++i)
+            expect(g.lines()[i] - g.lines()[i-1] >= 0.12499f,
+                   "min spacing cap matches half uniform spacing");
+    }
+    {
+        // Original Wave: 100% amplitude is 40% of one uniform segment.
+        AxisGrid g(4);
+        WaveSettings w;
+        w.enabled = true;
+        w.amplitude = 1.0f;
+        w.frequency = 0.0f;
+        w.phase_degrees = 90.0f;
+        w.speed_cycles_per_second = 0.0f;
+        auto e = g.evaluated(w, 0.0f, 0.001f, true);
+        expect(std::abs(e[1] - 0.35f) < 1e-5f, "wave amplitude scales by 0.4 of cell spacing");
+    }
+    {
+        // Original Stretch Easing only blends Hermite near segment edges.
+        const std::vector<float> deformed{0.0f, 0.2f, 0.7f, 1.0f};
+        const float center = inverseMapNormalized(0.45f, deformed, 1.0f, 0.25f);
+        const float center_linear = inverseMapNormalized(0.45f, deformed, 0.0f, 0.25f);
+        expect(std::abs(center - center_linear) < 1e-6f, "easing leaves segment center linear");
+        const float near_edge = inverseMapNormalized(0.25f, deformed, 1.0f, 0.25f);
+        const float near_edge_linear = inverseMapNormalized(0.25f, deformed, 0.0f, 0.25f);
+        expect(std::abs(near_edge - near_edge_linear) > 1e-5f, "easing changes mapping near guide");
+    }
+    {
         AxisGrid g(6);
         g.setPinned(2, true);
         const float before = g.lines()[2];
@@ -118,7 +188,7 @@ int main() {
         w.enabled = true;
         w.amplitude = 0.25f;
         w.frequency = 1.0e30f;
-        w.phase_cycles = -1.0e30f;
+        w.phase_degrees = -1.0e30f;
         w.speed_cycles_per_second = 1.0e20f;
         auto e = g.evaluated(w, -1.0e20f, 0.25f, true);
         expect(e.size() == 129, "extreme wave keeps topology");

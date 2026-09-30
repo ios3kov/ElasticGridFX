@@ -6,7 +6,7 @@
 
 namespace elasticgrid {
 
-enum class FalloffProfile : std::uint8_t { Linear, Smoothstep, Gaussian, Cosine };
+enum class FalloffProfile : std::uint8_t { Smoothstep, Gaussian, Linear };
 enum class WaveAxis : std::uint8_t { Both, ColumnsOnly, RowsOnly };
 enum class EdgeMode : std::uint8_t { Clamp, Wrap, Mirror };
 enum class SampleQuality : std::uint8_t { Bilinear, Bicubic };
@@ -20,9 +20,9 @@ struct ElasticSettings {
 
 struct WaveSettings {
     bool enabled = false;
-    float amplitude = 0.0f;     // normalized axis displacement
+    float amplitude = 0.0f;     // 0..1; original scales to 40% of uniform cell spacing
     float frequency = 1.0f;
-    float phase_cycles = 0.0f;
+    float phase_degrees = 0.0f;
     float speed_cycles_per_second = 0.0f;
     WaveAxis axis = WaveAxis::Both;
 };

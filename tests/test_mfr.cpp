@@ -21,7 +21,7 @@ int main() {
     const std::uint8_t yp[] = {1,0,0,1};
 
     EgRenderParams p{};
-    p.columns = 4; p.rows = 3;
+    p.columns = 3; p.rows = 2;
     p.column_lines = x; p.column_line_count = 5; p.column_pins = xp;
     p.row_lines = y; p.row_line_count = 4; p.row_pins = yp;
     p.tension_radius = 3.0f; p.falloff = 2; p.elasticity_strength = 1.0f;

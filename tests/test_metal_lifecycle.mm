@@ -3,6 +3,10 @@
 
 #include "bridge/elasticgrid_ffi.h"
 
+// Keep test operations and checks active regardless of compiler build mode.
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <cstddef>
 #include <cstdint>

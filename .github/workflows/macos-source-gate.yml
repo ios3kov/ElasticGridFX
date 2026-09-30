@@ -3,7 +3,7 @@ name: macOS source gate
 on:
   workflow_dispatch:
   push:
-    branches: [chore/github-ci-v1]
+    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
@@ -41,10 +41,20 @@ jobs:
         run: |
           xcrun -sdk macosx metal -c src/gpu/warp.metal -o "$RUNNER_TEMP/elasticgrid-warp.air"
           xcrun -sdk macosx metallib "$RUNNER_TEMP/elasticgrid-warp.air" -o "$RUNNER_TEMP/elasticgrid-warp.metallib"
-      - name: Full macOS preflight
-        run: tools/preflight_macos.command
-      - name: Build unsigned-install-free plugin bundle
+      - name: Portable acceptance-tooling regression on macOS
+        run: |
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+          node tests/test_ae_project_safety.js
+          node tests/test_smoke_safety.js
+          node tests/test_plane_smoke_safety.js
+      # Expensive full build runs only after fast cross-platform tooling gates.
+      # The bundle command runs the entire mandatory preflight exactly once.
+      - name: Full preflight and install-free signed plugin bundle
         run: tools/build_macos_sdkless.command
+      - name: Read-only candidate inspection and smoke preparation (NOT AE execution)
+        run: |
+          python3 tools/install_candidate.py > dist/mac/install-inspection.json
+          python3 tools/ae_smoke_runner.py --run-root "$RUNNER_TEMP/egfx-smoke" > dist/mac/smoke-preparation.json
       - name: Upload plugin and reports
         uses: actions/upload-artifact@v4
         with:
@@ -53,5 +63,31 @@ jobs:
           path: |
             dist/mac/ElasticGrid.plugin
             dist/mac/preflight-report.txt
+            dist/mac/ElasticGrid.plugin.zip
+            dist/mac/ElasticGrid.artifact.json
+            dist/mac/host-build.jsonl
+            dist/mac/install-inspection.json
+            dist/mac/smoke-preparation.json
             dist/compliance/**
             host-rust/Cargo.lock
+      - name: Record source state and keep failed-run diagnostics
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p dist/mac
+          {
+            printf 'run=%s attempt=%s\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT"
+            git rev-parse HEAD
+            git status --porcelain --untracked-files=all
+          } > dist/mac/source-state.txt
+      - name: Upload diagnostic reports (not an installable candidate)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ElasticGridFX-mac-diagnostics-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            dist/mac/source-state.txt
+            dist/mac/preflight-report.txt
+            dist/mac/host-build.jsonl
+            dist/compliance/**

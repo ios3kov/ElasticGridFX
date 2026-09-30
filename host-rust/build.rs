@@ -42,6 +42,17 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
+    println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
+    println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
+    println!("cargo:rustc-check-cfg=cfg(fstr_auto_binding)");
+    // The verified automatic plane is part of normal builds. The old cfg names
+    // remain as internal module gates so research/no-default builds can still
+    // reproduce earlier baselines without renaming persistent parameter IDs.
+    if std::env::var_os("CARGO_FEATURE_NATIVE_PLANE").is_some() {
+        for name in ["fstr_lifecycle_probe","fstr_binding_probe","fstr_auto_binding"] {
+            println!("cargo:rustc-cfg={name}");
+        }
+    }
     // The after-effects 0.4.0 macro expands these cfg names in the destination
     // crate. Register them explicitly so modern rustc check-cfg / Clippy can
     // validate the expansion without treating supported host cfgs as unknown.
@@ -57,6 +68,19 @@ fn main() {
     let out_dir = PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
 
+    // Identity is generated only in OUT_DIR. The Python tool validates Git or a
+    // hash-checked source snapshot and emits Cargo change-tracking directives.
+    let identity = std::process::Command::new("python3")
+        .arg(root.join("tools/build_identity.py"))
+        .arg("generate").arg("--root").arg(&root)
+        .arg("--out").arg(&out_dir)
+        .arg("--target").arg(std::env::var("TARGET").expect("TARGET"))
+        .arg("--profile").arg(std::env::var("PROFILE").expect("PROFILE"))
+        .output().expect("run source/build identity generator");
+    assert!(identity.status.success(), "build identity: {}", String::from_utf8_lossy(&identity.stderr));
+    print!("{}", String::from_utf8(identity.stdout).expect("UTF-8 Cargo directives"));
+
+
     let mut cpp = cc::Build::new();
     cpp.cpp(true)
         .std("c++20")
@@ -65,6 +89,10 @@ fn main() {
         .file(root.join("src/core/GridCodec.cpp"))
         .file(root.join("src/core/WarpMath.cpp"))
         .file(root.join("src/core/CpuRenderer.cpp"))
+        .file(root.join("src/core/PlaneTransform.cpp"))
+        .file(root.join("src/core/PlaneWarp.cpp"))
+        .file(root.join("src/core/PlaneRenderer.cpp"))
+        .file(root.join("src/bridge/plane_ffi.cpp"))
         .file(root.join("src/bridge/elasticgrid_ffi.cpp"));
 
     if std::env::var("PROFILE").as_deref() == Ok("release") {
@@ -87,6 +115,7 @@ fn main() {
             .include(root.join("src"))
             .include(&out_dir)
             .file(root.join("src/gpu/metal_backend.mm"))
+            .file(root.join("src/bridge/hand_cursor.mm"))
             .flag_if_supported("-fobjc-arc")
             .flag_if_supported("-fvisibility=hidden")
             .warnings(true);
@@ -96,6 +125,7 @@ fn main() {
         metal.compile("elasticgrid_metal");
         println!("cargo:rustc-link-lib=framework=Metal");
         println!("cargo:rustc-link-lib=framework=Foundation");
+        println!("cargo:rustc-link-lib=framework=AppKit");
     }
 
     for path in [
@@ -107,9 +137,18 @@ fn main() {
         "src/core/WarpMath.h",
         "src/core/CpuRenderer.cpp",
         "src/core/CpuRenderer.h",
+        "src/core/PlaneTransform.cpp",
+        "src/core/PlaneTransform.h",
+        "src/core/PlaneWarp.cpp",
+        "src/core/PlaneWarp.h",
+        "src/core/PlaneRenderer.cpp",
+        "src/core/PlaneRenderer.h",
+        "src/bridge/plane_ffi.cpp",
+        "src/bridge/plane_ffi.h",
         "src/core/SimdPixelOps.h",
         "src/bridge/elasticgrid_ffi.cpp",
         "src/bridge/elasticgrid_ffi.h",
+        "src/bridge/hand_cursor.mm",
         "src/gpu/warp.metal",
         "src/gpu/metal_backend.mm",
     ] {
@@ -128,8 +167,8 @@ fn main() {
 
     pipl::plugin_build(vec![
         Property::Kind(PIPLType::AEEffect),
-        Property::Name("ElasticGrid FX"),
-        Property::Category("ElasticGrid FX"),
+        Property::Name("FSTR Stretch"),
+        Property::Category("FSTR Effects"),
 
         #[cfg(target_os = "windows")]
         Property::CodeWin64X86("EffectMain"),
@@ -155,6 +194,7 @@ fn main() {
             OutFlags::UseOutputExtent |
             OutFlags::NonParamVary |
             OutFlags::DeepColorAware |
+            OutFlags::SendUpdateParamsUI |
             OutFlags::CustomUI
         ),
         Property::AE_Effect_Global_OutFlags_2(out_flags2),

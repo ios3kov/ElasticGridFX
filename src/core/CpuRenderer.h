@@ -88,6 +88,8 @@ struct PreparedWarpRGBAf {
     int dst_height = 0;
     SampleQuality quality = SampleQuality::Bilinear;
     bool identity = false;
+    // Internal CPU-only plan: -1 taps are transparent missing checkout pixels.
+    bool transparent_taps = false;
     std::vector<LinearSample1D> x_linear;
     std::vector<LinearSample1D> y_linear;
     std::vector<CubicSample1D> x_cubic;

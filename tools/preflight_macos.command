@@ -55,6 +55,14 @@ echo "[preflight 3/20] Bridge tests — ASan + UBSan..."
 "$CXX" "${SAN[@]}" "${COMMON[@]}" "${BRIDGE[@]}" "$ROOT/tests/test_bridge.cpp" -o "$BUILD/test_bridge_san"
 run_san "$BUILD/test_bridge_san"
 
+echo "[preflight] Exact identity / no-seam regression — ASan + UBSan..."
+"$CXX" "${SAN[@]}" "${COMMON[@]}" "${BRIDGE[@]}" "$ROOT/tests/test_identity.cpp" -o "$BUILD/test_identity_san"
+run_san "$BUILD/test_identity_san"
+
+echo "[preflight] Sparse/full-canvas equivalence — ASan + UBSan..."
+"$CXX" "${SAN[@]}" "${COMMON[@]}" "${BRIDGE[@]}" "$ROOT/tests/test_sparse.cpp" -o "$BUILD/test_sparse_san"
+run_san "$BUILD/test_sparse_san"
+
 echo "[preflight 4/20] CPU/GPU sampling-plan parity — ASan + UBSan..."
 "$CXX" "${SAN[@]}" "${COMMON[@]}" "${BRIDGE[@]}" "$ROOT/tests/test_gpu_plan.cpp" -o "$BUILD/test_gpu_plan_san"
 run_san "$BUILD/test_gpu_plan_san"

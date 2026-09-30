@@ -17,10 +17,12 @@ echo "Project roundtrip: save -> close -> reopen -> verify params/keyframes -> 3
 set +e
 RESULT="$(osascript <<APPLESCRIPT
 set jsxText to read POSIX file "$JSX" as «class utf8»
-tell application id "$APP_ID"
-    activate
-    set resultCode to DoScript jsxText
-end tell
+with timeout of 120 seconds
+    tell application id "$APP_ID"
+        activate
+        set resultCode to DoScript jsxText
+    end tell
+end timeout
 return resultCode
 APPLESCRIPT
 )"
@@ -38,5 +40,6 @@ case "$RESULT" in
   45) echo "ERROR: saved comp/effect was not restored." >&2; exit 45 ;;
   46) echo "ERROR: saved parameter values/keyframes changed after reopen." >&2; exit 46 ;;
   47) echo "ERROR: reopened project could not produce a 32-bpc frame." >&2; exit 47 ;;
+  48) echo "ERROR: test project cleanup or ownership verification failed. No user project was intentionally closed." >&2; exit 48 ;;
   *) echo "ERROR: unexpected project roundtrip result: ${RESULT:-<empty>}" >&2; exit 49 ;;
 esac

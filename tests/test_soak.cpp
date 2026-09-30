@@ -42,10 +42,10 @@ EgRenderParams make_params(std::vector<float>& cx,
                            std::vector<float>& cy,
                            std::vector<std::uint8_t>& py) {
     constexpr int cols = 8, rows = 6;
-    cx.resize(cols + 1); cy.resize(rows + 1);
-    px.assign(cols + 1, 0); py.assign(rows + 1, 0);
-    for (int i=0;i<=cols;++i) cx[static_cast<std::size_t>(i)] = float(i)/float(cols);
-    for (int i=0;i<=rows;++i) cy[static_cast<std::size_t>(i)] = float(i)/float(rows);
+    cx.resize(cols + 2); cy.resize(rows + 2);
+    px.assign(cols + 2, 0); py.assign(rows + 2, 0);
+    for (int i=0;i<=cols+1;++i) cx[static_cast<std::size_t>(i)] = float(i)/float(cols+1);
+    for (int i=0;i<=rows+1;++i) cy[static_cast<std::size_t>(i)] = float(i)/float(rows+1);
     px.front()=px.back()=1; py.front()=py.back()=1;
 
     EgRenderParams p{};

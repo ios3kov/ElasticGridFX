@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
 #include <span>
 #include <thread>
@@ -26,10 +27,10 @@ static_assert(sizeof(EgGpuCubicSample) == 32, "EgGpuCubicSample ABI drift");
 
 namespace {
 eg::FalloffProfile falloff_from_i32(std::int32_t v) noexcept {
+    // Original popup order: Smoothstep | Gaussian | Linear.
     switch (v) {
-        case 1: return eg::FalloffProfile::Linear;
-        case 3: return eg::FalloffProfile::Gaussian;
-        case 4: return eg::FalloffProfile::Cosine;
+        case 2: return eg::FalloffProfile::Gaussian;
+        case 3: return eg::FalloffProfile::Linear;
         default: return eg::FalloffProfile::Smoothstep;
     }
 }
@@ -77,7 +78,7 @@ bool valid_row_bytes(std::ptrdiff_t row_bytes, std::int32_t width, std::size_t b
 
 eg::ElasticSettings elastic_from_params(const EgElasticParams& p) noexcept {
     eg::ElasticSettings out;
-    out.radius_lines = std::clamp(finite_or(p.tension_radius, 3.0f), 0.0f, 32.0f);
+    out.radius_lines = std::clamp(finite_or(p.tension_radius, 3.0f), 0.0f, 20.0f);
     out.strength = std::clamp(finite_or(p.elasticity_strength, 1.0f), 0.0f, 2.0f);
     out.min_spacing = std::clamp(finite_or(p.min_spacing, 0.005f), 0.0f, 0.25f);
     out.falloff = falloff_from_i32(p.falloff);
@@ -103,7 +104,6 @@ bool load_axis(eg::AxisGrid& axis,
         min_spacing);
 }
 
-
 bool float_bits_equal(float a, float b) noexcept {
     return std::bit_cast<std::uint32_t>(a) == std::bit_cast<std::uint32_t>(b);
 }
@@ -116,6 +116,43 @@ bool axis_uniform_exact(const std::vector<float>& lines) noexcept {
         if (!float_bits_equal(lines[i], expected)) return false;
     }
     return true;
+}
+
+// A uniform destination axis is exactly the identity for every easing value.
+// Reconstructing it through normalized float coordinates/Hermite creates tiny
+// subpixel offsets (visible on high-contrast 16/32-bpc pixels). Emit exact unit
+// taps instead, but only after a bit-exact uniform-grid check: never round a
+// genuinely deformed axis or apply an epsilon-based identity approximation.
+int resolve_identity_pixel(std::int64_t pixel, int extent, eg::EdgeMode edge) noexcept {
+    if (extent <= 1) return 0;
+    const auto n = static_cast<std::int64_t>(extent);
+    if (edge == eg::EdgeMode::Clamp) {
+        return static_cast<int>(std::clamp(pixel, std::int64_t{0}, n - 1));
+    }
+    const auto period = edge == eg::EdgeMode::Mirror ? 2 * n - 2 : n;
+    auto wrapped = pixel % period;
+    if (wrapped < 0) wrapped += period;
+    if (edge == eg::EdgeMode::Mirror && wrapped >= n) wrapped = period - wrapped;
+    return static_cast<int>(wrapped);
+}
+
+void exact_uniform_axis_plan(std::vector<eg::LinearSample1D>& linear,
+                             std::vector<eg::CubicSample1D>& cubic,
+                             eg::SampleQuality quality, eg::EdgeMode edge,
+                             int input_extent, int canvas_extent,
+                             int input_origin, int output_origin, int output_extent) {
+    for (int i = 0; i < output_extent; ++i) {
+        const auto layer_pixel = std::clamp(
+            static_cast<std::int64_t>(output_origin) + i,
+            std::int64_t{0}, static_cast<std::int64_t>(canvas_extent) - 1);
+        const int source = resolve_identity_pixel(layer_pixel - input_origin, input_extent, edge);
+        const auto index = static_cast<std::size_t>(i);
+        if (quality == eg::SampleQuality::Bilinear) {
+            linear[index] = {source, source, 0.0f, 0};
+        } else {
+            cubic[index] = {{source, source, source, source}, {0.0f, 1.0f, 0.0f, 0.0f}};
+        }
+    }
 }
 
 struct PreparedBridge {
@@ -137,22 +174,14 @@ PreparedBridge& reusable_bridge_state() {
     return state;
 }
 
-int prepare_bridge(std::int32_t input_width,
-                   std::int32_t input_height,
-                   std::int32_t output_width,
-                   std::int32_t output_height,
-                   const EgRenderParams* p,
-                   PreparedBridge& out,
-                   bool force_sampling_plan = false) {
-    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0) {
-        return 1;
-    }
+int prepare_grid(const EgRenderParams* p, PreparedBridge& out) {
+    // Num Columns/Rows in the original are counts of INTERNAL guides.
+    // The working axis therefore has N+2 points including implicit 0/1 bounds.
+    const int columns = std::clamp<int>(p->columns, 1, 50);
+    const int rows = std::clamp<int>(p->rows, 1, 50);
 
-    const int columns = std::clamp<int>(p->columns, 1, 128);
-    const int rows = std::clamp<int>(p->rows, 1, 128);
-
-    out.gx.reset(static_cast<std::size_t>(columns));
-    out.gy.reset(static_cast<std::size_t>(rows));
+    out.gx.reset(static_cast<std::size_t>(columns + 1));
+    out.gy.reset(static_cast<std::size_t>(rows + 1));
 
     const EgElasticParams elastic_params{
         p->tension_radius,
@@ -172,9 +201,9 @@ int prepare_bridge(std::int32_t input_width,
 
     eg::WaveSettings wave;
     wave.enabled = p->wave_enabled != 0;
-    wave.amplitude = std::clamp(finite_or(p->wave_amplitude, 0.0f), 0.0f, 0.25f);
-    wave.frequency = std::max(0.0f, finite_or(p->wave_frequency, 1.0f));
-    wave.phase_cycles = finite_or(p->wave_phase, 0.0f);
+    wave.amplitude = std::clamp(finite_or(p->wave_amplitude, 0.0f), 0.0f, 1.0f);
+    wave.frequency = std::clamp(finite_or(p->wave_frequency, 1.0f), 0.0f, 10.0f);
+    wave.phase_degrees = std::clamp(finite_or(p->wave_phase, 0.0f), -360.0f, 360.0f);
     wave.speed_cycles_per_second = finite_or(p->wave_speed, 0.0f);
     wave.axis = wave_axis_from_i32(p->wave_axis);
 
@@ -184,6 +213,19 @@ int prepare_bridge(std::int32_t input_width,
     const float time_seconds = finite_or(p->time_seconds, 0.0f);
     out.gx.evaluatedInto(out.x_lines, wave, time_seconds, min_spacing, wave_x);
     out.gy.evaluatedInto(out.y_lines, wave, time_seconds, min_spacing, wave_y);
+    return 0;
+}
+
+int prepare_bridge(std::int32_t input_width,
+                   std::int32_t input_height,
+                   std::int32_t output_width,
+                   std::int32_t output_height,
+                   const EgRenderParams* p,
+                   PreparedBridge& out,
+                   bool force_sampling_plan = false) {
+    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0) return 1;
+    const int grid_result = prepare_grid(p, out);
+    if (grid_result != 0) return grid_result;
 
     const float easing = std::clamp(finite_or(p->stretch_easing, 0.0f), 0.0f, 1.0f);
     const float easing_distance = std::clamp(finite_or(p->easing_distance, 0.25f), 0.0f, 1.0f);
@@ -215,14 +257,17 @@ int prepare_bridge(std::int32_t input_width,
     out.settings.abort_fn = p->abort_fn;
     out.settings.abort_refcon = p->abort_refcon;
 
-    // Exact semantic identity: no approximation/tolerance is used here. The
-    // grid must be exactly uniform after evaluation, easing must be exactly
-    // disabled, and source/output sizes must match. CPU rendering can then
-    // skip sampling-plan construction entirely and perform an exact row copy.
+    // Easing changes transitions between different segment slopes. Uniform
+    // axes have slope 1 everywhere, so every easing value remains identity.
+    const bool uniform_x = axis_uniform_exact(out.x_lines);
+    const bool uniform_y = axis_uniform_exact(out.y_lines);
     const bool semantic_identity =
         input_width == output_width && input_height == output_height &&
         p->input_origin_x == p->output_origin_x && p->input_origin_y == p->output_origin_y &&
-        float_bits_equal(easing, 0.0f) && axis_uniform_exact(out.x_lines) && axis_uniform_exact(out.y_lines);
+        p->output_origin_x >= 0 && p->output_origin_y >= 0 &&
+        static_cast<std::int64_t>(p->output_origin_x) + output_width <= canvas_width &&
+        static_cast<std::int64_t>(p->output_origin_y) + output_height <= canvas_height &&
+        uniform_x && uniform_y;
     if (semantic_identity && !force_sampling_plan) {
         out.plan.src_width = input_width;
         out.plan.src_height = input_height;
@@ -230,6 +275,7 @@ int prepare_bridge(std::int32_t input_width,
         out.plan.dst_height = output_height;
         out.plan.quality = out.settings.quality;
         out.plan.identity = true;
+        out.plan.transparent_taps = false;
         return 0;
     }
 
@@ -237,10 +283,82 @@ int prepare_bridge(std::int32_t input_width,
         out.plan, input_width, input_height,
         output_width, output_height,
         out.x_lut, out.y_lut, out.settings);
+    // Cropped renders, GPU plans and the unchanged axis of a one-axis warp
+    // need the same exact integer mapping as the full-frame CPU identity path.
+    if (uniform_x) {
+        exact_uniform_axis_plan(out.plan.x_linear, out.plan.x_cubic, out.settings.quality,
+            out.settings.edge, input_width, canvas_width,
+            p->input_origin_x, p->output_origin_x, output_width);
+    }
+    if (uniform_y) {
+        exact_uniform_axis_plan(out.plan.y_linear, out.plan.y_cubic, out.settings.quality,
+            out.settings.edge, input_height, canvas_height,
+            p->input_origin_y, p->output_origin_y, output_height);
+    }
     return 0;
 }
 
+// Called only by the explicit sparse CPU entry. GPU and legacy ROI callers keep
+// their existing nonnegative local-plan contract.
+int prepare_sparse_bridge(int iw, int ih, int ow, int oh,
+                          const EgRenderParams* p, PreparedBridge& out) {
+    EgRenderParams logical = *p;
+    logical.input_origin_x = logical.input_origin_y = 0;
+    const int rc = prepare_bridge(p->canvas_width, p->canvas_height, ow, oh,
+                                  &logical, out, true);
+    if (rc != 0) return rc;
+    auto map_axis = [&](auto& linear, auto& cubic, int origin, int extent,
+                        int canvas, int output_origin, int output_extent) {
+        for (int i = 0; i < output_extent; ++i) {
+            const auto pixel = static_cast<std::int64_t>(output_origin) + i;
+            const bool outside = pixel < 0 || pixel >= canvas;
+            auto map = [&](int& index) {
+                const auto local = static_cast<std::int64_t>(index) - origin;
+                if (outside || local < 0 || local >= extent) {
+                    index = -1;
+                    out.plan.transparent_taps = true;
+                } else index = static_cast<int>(local);
+            };
+            if (out.settings.quality == eg::SampleQuality::Bilinear) {
+                map(linear[static_cast<std::size_t>(i)].i0);
+                map(linear[static_cast<std::size_t>(i)].i1);
+            } else {
+                for (auto& index : cubic[static_cast<std::size_t>(i)].index) map(index);
+            }
+        }
+    };
+    map_axis(out.plan.x_linear, out.plan.x_cubic, p->input_origin_x, iw,
+             p->canvas_width, p->output_origin_x, ow);
+    map_axis(out.plan.y_linear, out.plan.y_cubic, p->input_origin_y, ih,
+             p->canvas_height, p->output_origin_y, oh);
+    out.plan.src_width = iw; out.plan.src_height = ih;
+    out.plan.identity = false;
+    return 0;
+}
+
+bool valid_sparse_span(std::ptrdiff_t stride, int width, int height, std::size_t channel_bytes) {
+    if (!valid_row_bytes(stride, width, channel_bytes) || height <= 0) return false;
+    const auto magnitude = static_cast<std::size_t>(stride < 0 ? -stride : stride);
+    const auto limit = static_cast<std::size_t>(std::numeric_limits<std::ptrdiff_t>::max());
+    const auto row = static_cast<std::size_t>(width) * 4 * channel_bytes;
+    return magnitude <= (limit - row) / static_cast<std::size_t>(std::max(1, height - 1));
+}
+
 } // namespace
+
+int eg_evaluate_grid(const EgRenderParams* p, float* columns, int column_capacity,
+                     float* rows, int row_capacity) noexcept {
+    if(!p || !columns || !rows || p->columns<1 || p->columns>50 || p->rows<1 || p->rows>50 ||
+       column_capacity<p->columns+2 || row_capacity<p->rows+2) return 1;
+    try {
+        PreparedBridge state; // owned invocation; no UI/render shared mutable buffers
+        const int result=prepare_grid(p,state);
+        if(result!=0) return result;
+        std::copy(state.x_lines.begin(),state.x_lines.end(),columns);
+        std::copy(state.y_lines.begin(),state.y_lines.end(),rows);
+        return 0;
+    } catch(...) {return 3;}
+}
 
 int eg_drag_axis(
     float* lines,
@@ -368,7 +486,7 @@ int eg_required_source_rect(
     }
 }
 
-int eg_render_frame(
+static int render_frame_impl(
     const void* input_data,
     std::ptrdiff_t input_row_bytes,
     std::int32_t input_width,
@@ -378,25 +496,44 @@ int eg_render_frame(
     std::int32_t output_width,
     std::int32_t output_height,
     std::int32_t bit_depth,
-    const EgRenderParams* p) noexcept {
+    const EgRenderParams* p, bool sparse) noexcept {
 
-    if (!input_data || !output_data || !p ||
-        input_width <= 0 || input_height <= 0 ||
-        output_width <= 0 || output_height <= 0) {
+    if (!output_data || !p || output_width <= 0 || output_height <= 0 ||
+        input_width < 0 || input_height < 0 ||
+        (!sparse && (!input_data || input_width == 0 || input_height == 0)) ||
+        (sparse && (p->canvas_width <= 0 || p->canvas_height <= 0)) ||
+        (input_width > 0 && input_height > 0 && !input_data)) {
         return 1;
     }
 
     const std::size_t bytes_per_channel = bit_depth == 8 ? 1u : bit_depth == 16 ? 2u : bit_depth == 32 ? 4u : 0u;
     if (bytes_per_channel == 0) return 2;
-    if (!valid_row_bytes(input_row_bytes, input_width, bytes_per_channel) ||
-        !valid_row_bytes(output_row_bytes, output_width, bytes_per_channel)) {
+    const bool empty_input = input_width == 0 || input_height == 0;
+    if ((!empty_input && !valid_row_bytes(input_row_bytes, input_width, bytes_per_channel)) ||
+        !valid_row_bytes(output_row_bytes, output_width, bytes_per_channel) ||
+        (sparse && ((!empty_input && !valid_sparse_span(input_row_bytes, input_width, input_height, bytes_per_channel)) ||
+                    !valid_sparse_span(output_row_bytes, output_width, output_height, bytes_per_channel)))) {
         return 1;
     }
 
     try {
+        if (sparse && empty_input) {
+            for (int y = 0; y < output_height; ++y) {
+                if (y % 2048 == 0 && p->abort_fn && p->abort_fn(p->abort_refcon) != 0) return 5;
+                std::memset(static_cast<std::uint8_t*>(output_data) + static_cast<std::ptrdiff_t>(y) * output_row_bytes,
+                            0, static_cast<std::size_t>(output_width) * 4 * bytes_per_channel);
+            }
+            return p->abort_fn && p->abort_fn(p->abort_refcon) != 0 ? 5 : 0;
+        }
+        const bool full_source = input_width == p->canvas_width && input_height == p->canvas_height &&
+            p->input_origin_x == 0 && p->input_origin_y == 0;
+        const bool output_inside = p->output_origin_x >= 0 && p->output_origin_y >= 0 &&
+            static_cast<std::int64_t>(p->output_origin_x) + output_width <= p->canvas_width &&
+            static_cast<std::int64_t>(p->output_origin_y) + output_height <= p->canvas_height;
         PreparedBridge& prepared = reusable_bridge_state();
-        const int prep_rc = prepare_bridge(
-            input_width, input_height, output_width, output_height, p, prepared);
+        const int prep_rc = sparse && !(full_source && output_inside)
+            ? prepare_sparse_bridge(input_width, input_height, output_width, output_height, p, prepared)
+            : prepare_bridge(input_width, input_height, output_width, output_height, p, prepared);
         if (prep_rc != 0) return prep_rc;
 
         if (bit_depth == 32) {
@@ -435,4 +572,36 @@ int eg_render_frame(
     } catch (...) {
         return 3;
     }
+}
+
+int eg_render_frame(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* p) noexcept {
+    return render_frame_impl(input_data, input_row_bytes, input_width, input_height,
+                             output_data, output_row_bytes, output_width, output_height,
+                             bit_depth, p, false);
+}
+
+int eg_render_frame_sparse(
+    const void* input_data,
+    std::ptrdiff_t input_row_bytes,
+    std::int32_t input_width,
+    std::int32_t input_height,
+    void* output_data,
+    std::ptrdiff_t output_row_bytes,
+    std::int32_t output_width,
+    std::int32_t output_height,
+    std::int32_t bit_depth,
+    const EgRenderParams* p) noexcept {
+    return render_frame_impl(input_data, input_row_bytes, input_width, input_height,
+                             output_data, output_row_bytes, output_width, output_height,
+                             bit_depth, p, true);
 }
