@@ -1,5 +1,26 @@
 # Current development / release status
 
+## RELEASED — FSTR Stretch 0.9.1, 2026-09-30
+
+PR #6 merged as b40245f1072797de871474ed9c17f1ec5f8d026b; merge tree equals
+the checked branch tree. Release: https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.1
+
+Artifact source e1848d5, Build EGFX-879b31e5a95527a385827c24, archive SHA256
+23b75997e310e0acbefcde69570e177199c23d415f67abf00ee064d28efe4d2a.
+Published GitHub asset digest matches the installed/tested archive; no rebuild.
+Includes manifest, install/rollback notes and dependency licenses.
+
+Five PR checks PASS at 5b67c6d; full macOS source gate 36714712234 PASS at
+98c092c (only release documentation added afterward). Local core 19/19,
+Rust 42/42, Python 207/207, Clippy and signed-bundle checks PASS. Target AE
+25.6 arm64: live identity before/after restart; corrected perimeter at four
+rotations; cold/warm and restart parity; 8/16/32-bpc project exports;
+8 animated aerender frames match with MFR ON/OFF. Version bump invalidates
+old cache without manual purge. User accepted the underlying correction.
+
+Scope: docs/release-0.9.1.md. Ad-hoc signed/not notarized, macOS arm64 only.
+Earlier release/preparation entries below are history, not current blockers.
+
 ## RELEASED — FSTR Stretch 0.9.0, 2026-09-30
 
 Authoritative current status: PR #5 merged to main as

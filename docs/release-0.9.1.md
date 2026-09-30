@@ -24,7 +24,8 @@ reproduction and four rotations match the accepted corrected renders exactly;
 cold and warm output match without manual cache purge or parameter edits.
 The original fringe is transparent in exports from 8/16/32-bit projects.
 Core 19/19, Rust 42/42, Python 207/207, Clippy, bundle/signature verification PASS.
-Public-release approval also requires the full macOS source gate and PR CI.
+Full macOS source gate 36714712234 and five PR CI checks PASS. Eight animated
+aerender frames match with MFR ON/OFF; restart identity and frame parity PASS.
 
 Verified target remains ordinary flat native text/raster layers, square pixels,
 macOS Apple Silicon and AE 2025 (25.6 tested). No Windows, Intel, universal
@@ -44,5 +45,6 @@ Keep only one active copy. Reopen AE: FSTR Effects → FSTR Stretch.
 For rollback, quit hosts and restore the previous bundle; preserve project
 backups when opening a newer-version project with an older plugin.
 
-User explicitly authorized PR #6 merge and release. This document describes
-the candidate; publication is not complete until GitHub release is verified.
+User explicitly authorized PR #6 merge and release. Published as v0.9.1 from
+merge b40245f1072797de871474ed9c17f1ec5f8d026b. GitHub asset SHA256 verified
+equal to the tested archive above; no rebuild during publication.
