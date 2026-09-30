@@ -46,12 +46,12 @@ fn even_one_ulp_of_grid_deformation_is_not_initial_identity() {
 #[test]
 fn invalid_grid_pins_dimensions_and_signed_zero_are_not_repaired() {
     let mut cases=Vec::new();
-    let mut grid=GridArb::default(); grid.column_lines[0]=-0.0; cases.push(grid);
+    let mut grid=GridArb::default(); grid.column_lines[0] = -0.0; cases.push(grid);
     let mut grid=GridArb::default(); grid.row_lines[2]=f32::NAN; cases.push(grid);
     let mut grid=GridArb::default(); grid.row_lines[2]=f32::INFINITY; cases.push(grid);
     let mut grid=GridArb::default(); grid.column_lines.pop(); cases.push(grid);
     let mut grid=GridArb::default(); grid.row_pins[2]=1; cases.push(grid);
-    let mut grid=GridArb::default(); grid.columns=3; cases.push(grid);
+    cases.push(GridArb {columns:3, ..GridArb::default()});
     cases.push(GridArb::uniform(3,4));
     for grid in cases {assert!(!eligible(&grid));}
 }
