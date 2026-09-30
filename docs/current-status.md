@@ -8,13 +8,14 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
-Current internal installation: **499157e / EGFX-6acf45cd1cdabb77fce64048**,
-receipt EGFX-update-f136efa4c635477eb524a8c5f90046db, INSTALLED_FOR_TEST.
+Current internal installation: **cb790f6 / EGFX-7e9615eeec72bb7594d9bcdb**,
+receipt EGFX-update-2befc7083a0648ccbc2d67bb970bd176, INSTALLED_FOR_TEST.
+Previous automatic candidate 499157e was rolled back before replacement.
 This supersedes all installation descriptions below (historical checkpoints).
 Research flags lifecycle/binding/auto_binding enabled; ordinary 1eed79a retained
-for rollback. AE 25.6.0 arm64 PID 64239 live identity PASS.
+for rollback. AE 25.6.0 arm64; prior 499157e PID 64239 live identity PASS.
 
-Native results in outputs/auto-plane: generic unselected renamed effect binds
+Native results for 499157e in outputs/auto-plane: generic unselected renamed effect binds
 automatically; Undo/Redo, saved reload, 3D/2D/3D and one Grid Positions key
 preservation PASS. Region identity/exterior error exactly zero at 8/16/32 bpc;
 changed interior counts 6878/6971/8905. Camera plus transformed parent also
@@ -28,9 +29,14 @@ Default Rust tests 36/36 PASS; automatic research configuration 37/37 PASS.
 **First unbound noninteractive render FAIL**: same owned project with empty
 hidden bindings renders successfully via aerender but differs from the bound
 reference (max normalized channel error 1.0; 29772 differing channel samples).
-Evidence outputs/auto-plane/unbound-first. New source rejects marker 0 during
-automatic frame rendering instead of silently falling back. Native verification
-of that guard is pending; automatic pre-render initialization is still unresolved.
+Evidence outputs/auto-plane/unbound-first. cb790f6 rejects marker 0 during
+automatic frame rendering instead of silently falling back. Native guard PASS:
+aerender records EffectMain BadCallbackParameter 516 and exports no guard PNG.
+Important: aerender nevertheless exits 0, so exit status alone is insufficient.
+Bound project on cb790f6 exports the exact same SHA256 listed above; gate PASS.
+38 automatic-config Rust tests PASS. Scanner exit 1/review_required: existing
+unpinned workflow actions, checkout credentials and test auth heuristic remain;
+this is not a security approval. Automatic pre-render initialization is unresolved.
 Native pointer automation is BLOCKED by AXError.notImplemented on drag; not a
 plugin failure or a passed interaction check. Four Corners on native 3D text,
 first-use readiness and complete handoff regression remain OPEN. No final
