@@ -5,6 +5,7 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod control_grid;
 mod ui_projection;
 mod plane;
 #[cfg(fstr_lifecycle_probe)]
@@ -344,40 +345,7 @@ impl GridArb {
         out
     }
 
-    fn resized(&self, columns: usize, rows: usize) -> Self {
-        let columns = columns.clamp(1, MAX_GUIDES);
-        let rows = rows.clamp(1, MAX_GUIDES);
-        if !self.is_valid() {
-            return Self::uniform(columns, rows);
-        }
-        if self.columns as usize == columns && self.rows as usize == rows {
-            return self.clone();
-        }
 
-        // Original GridWarp does not preserve/resample deformation when
-        // Num Columns/Rows changes. Only the changed axis is reset uniformly.
-        let column_lines = if self.columns as usize == columns {
-            self.column_lines.clone()
-        } else {
-            Self::axis_uniform(columns).0
-        };
-        let row_lines = if self.rows as usize == rows {
-            self.row_lines.clone()
-        } else {
-            Self::axis_uniform(rows).0
-        };
-
-        let mut out = Self {
-            columns: columns as u16,
-            rows: rows as u16,
-            column_lines,
-            row_lines,
-            column_pins: Vec::new(),
-            row_pins: Vec::new(),
-        };
-        out.canonicalize_pins();
-        out
-    }
 }
 
 impl ae::ArbitraryData<GridArb> for GridArb {
@@ -507,11 +475,6 @@ impl SmartRenderSnapshot {
     }
 }
 
-fn checked_slider(params: &ae::Parameters<Params>, param: Params) -> Result<i32, ae::Error> {
-    let checked = params.checkout(param)?;
-    Ok(checked.as_slider()?.value())
-}
-
 fn checked_float(params: &ae::Parameters<Params>, param: Params) -> Result<f64, ae::Error> {
     let checked = params.checkout(param)?;
     Ok(checked.as_float_slider()?.value())
@@ -529,12 +492,10 @@ fn smart_render_snapshot(
     // PF_Cmd_SMART_PRE_RENDER / SMART_RENDER do not receive a valid normal
     // parameter array. Every render dependency must be checked out here and
     // copied into owned pre_render_data for the matching SmartRender call.
-    let columns = checked_slider(params, Params::Columns)?.clamp(1, MAX_GUIDES as i32) as usize;
-    let rows = checked_slider(params, Params::Rows)?.clamp(1, MAX_GUIDES as i32) as usize;
     let grid = {
         let checked = params.checkout(Params::GridState)?;
         let value = checked.as_arbitrary()?.value::<GridArb>()?;
-        (*value).resized(columns, rows)
+        retained_grid(&value)?
     };
     let time_seconds = if in_data.time_scale() != 0 {
         in_data.current_time() as f32 / in_data.time_scale() as f32
@@ -601,6 +562,7 @@ unsafe extern "C" {
         params: *const EgRenderParams,
     ) -> i32;
 
+    #[cfg(test)]
     pub(crate) fn eg_drag_axis(
         lines: *mut f32,
         pins: *mut u8,
@@ -690,31 +652,15 @@ fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
     enabled && amplitude.abs() > 1.0e-12 && speed.abs() > 1.0e-12
 }
 
-fn topology(params: &ae::Parameters<Params>) -> Result<(usize, usize), ae::Error> {
-    Ok((
-        params.get(Params::Columns)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
-        params.get(Params::Rows)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
-    ))
+// Display density is deliberately absent from both render snapshots.
+fn retained_grid(grid: &GridArb) -> Result<GridArb, ae::Error> {
+    if !grid.is_valid() { return Err(ae::Error::BadCallbackParameter); }
+    Ok(grid.clone())
 }
 
 pub(crate) fn grid_snapshot(params: &ae::Parameters<Params>) -> Result<GridArb, ae::Error> {
-    let (columns, rows) = topology(params)?;
     let grid = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
-    Ok((*grid).resized(columns, rows))
-}
-
-fn sync_grid_topology(params: &mut ae::Parameters<Params>) -> Result<(), ae::Error> {
-    let (columns, rows) = topology(params)?;
-    let current = {
-        let grid = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
-        (*grid).clone()
-    };
-    if current.columns as usize == columns && current.rows as usize == rows && current.is_valid() {
-        return Ok(());
-    }
-    let next = current.resized(columns, rows);
-    params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(next)?;
-    Ok(())
+    retained_grid(&grid)
 }
 
 pub(crate) fn elastic_params(params: &ae::Parameters<Params>) -> Result<EgElasticParams, ae::Error> {
@@ -956,7 +902,7 @@ impl AdobePluginGlobal for Plugin {
             f.set_label("Fit Layer");
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::DISABLED)?;
         // Topology is a static setup choice; animate Grid Positions instead.
-        // Keep SUPERVISE so manual edits retain the existing grid/Undo path.
+        // SUPERVISE requests a redraw only; it never writes the animated stream.
         params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
             f.set_valid_max(MAX_GUIDES as i32);
@@ -1101,7 +1047,9 @@ impl AdobePluginGlobal for Plugin {
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {
-                    sync_grid_topology(params)?;
+                    // Only request the viewer update. Never touch Grid Positions:
+                    // a setter here would create/overwrite a key at the playhead.
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
 
                 }
             }
@@ -1418,22 +1366,6 @@ mod tests {
         assert!(migrated.is_valid());
         assert_eq!(migrated.column_lines.len(), columns as usize + 2);
         assert_eq!(migrated.row_lines.len(), rows as usize + 2);
-    }
-
-    #[test]
-    fn grid_resize_resets_changed_axes_like_original() {
-        let mut g = GridArb::uniform(4, 4);
-        g.column_lines[1] = 0.18;
-        g.row_lines[1] = 0.16;
-        let r = g.resized(9, 4);
-        assert_eq!(r.column_lines.len(), 11);
-        assert_eq!(r.row_lines.len(), 6);
-        // Changed X topology resets to uniform positions.
-        for (i, value) in r.column_lines.iter().enumerate() {
-            assert!((*value - i as f32 / 10.0).abs() < 1.0e-6);
-        }
-        // Unchanged Y topology preserves its deformation.
-        assert!((r.row_lines[1] - 0.16).abs() < 1.0e-6);
     }
 
     #[test]

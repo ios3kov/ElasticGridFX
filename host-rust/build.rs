@@ -93,7 +93,8 @@ fn main() {
         .file(root.join("src/core/PlaneWarp.cpp"))
         .file(root.join("src/core/PlaneRenderer.cpp"))
         .file(root.join("src/bridge/plane_ffi.cpp"))
-        .file(root.join("src/bridge/elasticgrid_ffi.cpp"));
+        .file(root.join("src/bridge/elasticgrid_ffi.cpp"))
+        .file(root.join("src/bridge/control_grid_ffi.cpp"));
 
     if std::env::var("PROFILE").as_deref() == Ok("release") {
         cpp.opt_level(3);
@@ -185,7 +186,7 @@ fn main() {
         Property::AE_Effect_Version {
             version: 0,
             subversion: 9,
-            bugversion: 1,
+            bugversion: 2,
             stage: Stage::Develop,
             build: 1,
         },

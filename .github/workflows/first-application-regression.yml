@@ -3,7 +3,7 @@ name: First application regression
 on:
   workflow_dispatch:
   push:
-    branches: [fix/first-application-516]
+    branches: [fix/first-application-516, fix/grid-density-preserve-animation]
   pull_request:
     paths:
       - host-rust/src/binding_probe.rs
