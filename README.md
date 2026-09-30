@@ -1,8 +1,9 @@
-> **Development blocker #9 (0.9.1):** the user reports `BadCallbackParameter (516)`
-> on first effect addition to solid, text and precomp layers. This branch contains
-> a targeted first-neutral-frame candidate, **not a verified AE fix or release**.
-> See [investigation and acceptance](docs/first-application-516-2026-09-30.md).
-> RAM Preview / render-cancel gates stay blocked until real-host regression passes.
+> **Development branch (PR #10):** Columns/Rows are now static setup values;
+> Grid Positions remains animatable. The next test package installs **FSTR Stretch.plugin**.
+> First-add/deformation, restart, preview and cancellation were user-confirmed on
+> the earlier 94d6706 candidate, not this new package. New-candidate AE acceptance
+> and old animated-count projects remain unverified. No merge/release has occurred.
+> [Current status](docs/current-status.md) · [Install/rollback and packaging](docs/branded-package-2026-09-30.md).
 
 # FSTR Stretch
 

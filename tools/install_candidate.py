@@ -60,7 +60,8 @@ def discover(roots: list[Path]) -> list[Path]:
             if path.suffix.lower() in ('.plugin', '.bundle'):
                 # Native bundle boundary: inspect its identity, not internal
                 # frameworks/resources (which may contain ordinary symlinks).
-                candidate = 'elasticgrid' in path.name.lower()
+                candidate = ('elasticgrid' in path.name.lower() or
+                             path.name.casefold() == 'fstr stretch.plugin')
                 plist = path / 'Contents/Info.plist'
                 if plist.exists():
                     checked_path(plist)
@@ -158,7 +159,7 @@ def install(bundle: Path, package: Path, manifest: Path, scope: Path, roots: lis
     """Dependencies are injectable ONLY for unit fixtures, never via CLI flags."""
     scope = checked_path(scope, directory=True)
     bundle = checked_path(bundle, directory=True)
-    if bundle.name != 'ElasticGrid.plugin' or scope == bundle or bundle in scope.parents:
+    if bundle.name not in ('ElasticGrid.plugin', 'FSTR Stretch.plugin') or scope == bundle or bundle in scope.parents:
         raise ValueError('invalid source or install scope')
     roots = [*roots, scope]
     destination = scope / bundle.name
