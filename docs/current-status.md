@@ -1,5 +1,28 @@
 # Current development / release status
 
+## RELEASED — FSTR Stretch 0.9.0, 2026-09-30
+
+Authoritative current status: PR #5 merged to main as
+`c3d28b14d3ea0ac6b241db50f4847a9487f22318`; release `v0.9.0` published:
+https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.0
+
+All mandatory pre-merge workflows passed: a57e076 CI 36708825237,
+Final validation 36708821270, live identity tooling 36708821334,
+update safety 36708821342, acceptance packaging 36708821356; full macOS source
+gate on unchanged plugin source 36a04e3: 36708080816 PASS. Merge tree equals
+the tested branch tree. Current installed candidate additionally rendered
+8 distinct animated frames identically with MFR ON/OFF before publication.
+
+Published plugin is the exact 36a04e3 package below, not a rebuilt merge binary.
+GitHub asset SHA256 verified equal to the tested archive. Release includes
+manifest, install/rollback/compatibility instructions, dependency notices and
+license texts. Scoped to macOS Apple Silicon / tested AE 25.6; ad-hoc signed,
+not notarized. Stage 8 remains SKIPPED BY USER, not PASS. Deferred overlay and
+untested platforms are not implicitly included in this release.
+
+All NOT READY / NOT AUTHORIZED / pending statements below are dated history,
+superseded by this release record within the explicitly documented scope.
+
 ## Stage 10 — authorized release preparation, 2026-09-30
 
 User explicitly authorized merge/release and confirmed retargeting PR #5 to main.
