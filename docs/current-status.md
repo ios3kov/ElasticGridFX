@@ -1,5 +1,27 @@
 # Current development / release status
 
+## Development: Fit Layer boundary correction — 2026-09-30
+
+Stage 10, branch `fix/fit-layer-coordinates`, stacked on PR #12. The source
+corrects Fit to (0,0)/(W,0)/(W,H)/(0,H), with the existing corner order and full
+source-layer dimensions. It skips writes to already-fitted corners, including
+repeat Fit. It does not write Grid Positions/counts or migrate stored keys.
+Rendering, layer/comp projections and the density implementation are unchanged.
+The extra Layer Plane overlay/index-span audit still requires native AE
+alignment evidence; a global change to raster coordinates was not made.
+
+Version 0.9.3 development; not released. The source also derives Finder version
+from validated BuildIdentity before signing (#13), and the native verifier
+checks both version fields on the named and extracted bundle. This is not an
+in-place edit of a prior candidate. Exact final CI/artifact evidence is in the
+correction PR; live target AE is NOT RUN in this Linux session.
+
+The user reported the density candidate 59a73ea working, then supplied the Fit
+coordinate mismatch. That historical density acceptance is not a new-candidate
+host PASS. See [coordinate acceptance](fit-layer-coordinate-fix-2026-09-30.md).
+
+## Historical density checkpoint
+
 ## Development: animation-preserving control density — 2026-09-30
 
 Stage 10 remains incomplete. Branch `fix/grid-density-preserve-animation`,
