@@ -224,6 +224,8 @@ unsafe extern "C" {
                        source_extent_x: f64, source_extent_y: f64) -> i32;
     pub(crate) fn eg_render_plane_region(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    pub(crate) fn eg_render_plane_layer(src: *const Image, dst: *const Image, depth: i32,
+                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     #[cfg(test)]
     pub(crate) fn eg_render_plane_between(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32,
@@ -264,7 +266,10 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     let dst = Image {pixels: unsafe {output.data_ptr_mut()}.cast(), row_bytes: output.row_bytes(),
                      width: output.width() as i32, height: output.height() as i32};
     let mut report = Report::default();
-    let rc = unsafe {eg_render_plane_region(&src, &dst, output.bit_depth() as i32,
+    let render_plane=if state.comp_space && !state.editable_corners {
+        eg_render_plane_layer
+    }else{eg_render_plane_region};
+    let rc = unsafe {render_plane(&src, &dst, output.bit_depth() as i32,
                          &frame, &mut report, p.quality - 1, p.edge_mode - 1)};
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
     match rc {

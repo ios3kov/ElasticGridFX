@@ -70,3 +70,9 @@ extern "C" int eg_render_plane_between(const EgPlaneImage* source, const EgPlane
 extern "C" int eg_render_plane_region(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
     std::int32_t quality, std::int32_t edge) noexcept;
+
+// Automatic native layer plane: deform coverage beyond fractional vector bounds.
+// Same ABI/sampler; unlike Four Corners, no unchanged outside-quad fringe.
+extern "C" int eg_render_plane_layer(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge) noexcept;

@@ -16,6 +16,11 @@ public:
     static std::optional<PlaneWarp> prepare(PlaneTransform transform,
         std::vector<float> columns, std::vector<float> rows,
         float easing = 0, float easing_distance = .25f);
+    // Automatic layer plane, not a user-bounded region: include antialiased
+    // coverage outside vector bounds using continuous end-cell extrapolation.
+    static std::optional<PlaneWarp> prepareLayer(PlaneTransform transform,
+        std::vector<float> columns, std::vector<float> rows,
+        float easing = 0, float easing_distance = .25f);
     PlaneMapResult sourceFor(PlanePoint destination) const;
     // Project the original rectangular image into the destination plane.
     // Extent is the source last-pixel center in surface units (not buffer size).
@@ -34,6 +39,7 @@ private:
     std::vector<float> columns_, rows_;
     float easing_ = 0, easing_distance_ = .25f;
     bool identity_ = false;
+    bool extend_layer_ = false;
     std::optional<PlanePoint> source_extent_;
     std::optional<PlaneTransform> source_transform_;
 };

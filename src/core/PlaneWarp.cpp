@@ -17,6 +17,13 @@ bool uniform(const std::vector<float>& axis) {
         if(axis[i]!=static_cast<float>(i)/static_cast<float>(axis.size()-1)) return false;
     return true;
 }
+double extendedAxis(double p,const std::vector<float>& axis,float easing,float distance) {
+    const double cell=1.0/static_cast<double>(axis.size()-1);
+    // Endpoint Hermite tangents equal the adjacent cell slope as well.
+    if(p<0) return p*cell/axis[1];
+    if(p>1) return 1+(p-1)*cell/(1-axis[axis.size()-2]);
+    return inverseMapNormalized(static_cast<float>(p),axis,easing,distance);
+}
 }
 std::optional<PlaneWarp> PlaneWarp::prepare(PlaneTransform transform,
     std::vector<float> columns,std::vector<float> rows,float easing,float easing_distance) {
@@ -27,6 +34,12 @@ std::optional<PlaneWarp> PlaneWarp::prepare(PlaneTransform transform,
     warp.identity_=uniform(columns) && uniform(rows);
     warp.columns_=std::move(columns); warp.rows_=std::move(rows);
     warp.easing_=easing; warp.easing_distance_=easing_distance;
+    return warp;
+}
+std::optional<PlaneWarp> PlaneWarp::prepareLayer(PlaneTransform transform,
+    std::vector<float> columns,std::vector<float> rows,float easing,float easing_distance) {
+    auto warp=prepare(transform,std::move(columns),std::move(rows),easing,easing_distance);
+    if(warp) warp->extend_layer_=true;
     return warp;
 }
 std::optional<PlaneWarp> PlaneWarp::prepareProjected(PlaneTransform destination,
@@ -50,9 +63,15 @@ PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     if(!local) return {PlaneMapStatus::InvalidProjection,std::nullopt};
     // Only absorb floating-point roundoff at the border, never a pixel-wide halo.
     constexpr double border=1e-10;
-    if(local->x < -border || local->x > 1+border || local->y < -border || local->y > 1+border)
+    if(!extend_layer_ && (local->x < -border || local->x > 1+border || local->y < -border || local->y > 1+border))
         return {PlaneMapStatus::OutsidePlane,std::nullopt};
     if(identity_ && !projectsSource()) return {PlaneMapStatus::Mapped,destination};
+    if(extend_layer_) {
+        auto source=transform_.toSurface({extendedAxis(local->x,columns_,easing_,easing_distance_),
+                                         extendedAxis(local->y,rows_,easing_,easing_distance_)});
+        return source ? PlaneMapResult{PlaneMapStatus::Mapped,source}
+                      : PlaneMapResult{PlaneMapStatus::InvalidProjection,std::nullopt};
+    }
     if(source_extent_ && identity_) return {PlaneMapStatus::Mapped,PlanePoint{
         std::clamp(local->x,0.0,1.0)*source_extent_->x,
         std::clamp(local->y,0.0,1.0)*source_extent_->y}};
