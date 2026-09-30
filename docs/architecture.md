@@ -49,3 +49,15 @@ Quality and equal-condition profiling are governed by performance-quality-contra
 Portable tests, native compilation and install receipts have separate scopes;
 none replaces actual loaded-identity, AE effect-chain, render/preview, hardware
 Metal and project-lifecycle evidence. No current source build is release approval.
+
+## Non-destructive control density (development candidate)
+
+`guide_density` separates transient viewer controls from the persistent GridArb
+shape. Render reads only canonical data; count events only request redraw.
+Additional controls edit a fixed 257-sample monotone material-coordinate map
+per axis, independent of visible counts. Rendering composes its inverse after
+the legacy inverse warp and samples the source once. Empty maps preserve the
+exact historical path. Unedited keys stay wire v3; v4 appends actual detail
+geometry. Fixed-basis detail interpolation never changes other stored keys. See non-destructive-density-2026-09-30.md for
+exact semantics, tests and outstanding native acceptance. Earlier staged/planned
+sections above are historical; current-status.md governs release status.

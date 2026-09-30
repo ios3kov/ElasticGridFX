@@ -1,5 +1,6 @@
 #include "core/PlaneWarp.h"
 #include "core/WarpMath.h"
+#include "core/DetailMap.h"
 #include <algorithm>
 #include <cmath>
 #include <utility>
@@ -58,6 +59,12 @@ std::optional<PlaneWarp> PlaneWarp::prepareBetween(PlaneTransform source,
     if(warp) warp->source_transform_=source;
     return warp;
 }
+bool PlaneWarp::setDetail(std::vector<float> columns, std::vector<float> rows) {
+    if (!validDetail(columns) || !validDetail(rows)) return false;
+    column_detail_ = std::move(columns); row_detail_ = std::move(rows);
+    identity_ = uniform(columns_) && uniform(rows_) && identityDetail(column_detail_) && identityDetail(row_detail_);
+    return true;
+}
 PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     auto local=transform_.toLocal(destination);
     if(!local) return {PlaneMapStatus::InvalidProjection,std::nullopt};
@@ -67,8 +74,8 @@ PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
         return {PlaneMapStatus::OutsidePlane,std::nullopt};
     if(identity_ && !projectsSource()) return {PlaneMapStatus::Mapped,destination};
     if(extend_layer_) {
-        auto source=transform_.toSurface({extendedAxis(local->x,columns_,easing_,easing_distance_),
-                                         extendedAxis(local->y,rows_,easing_,easing_distance_)});
+        auto source=transform_.toSurface({inverseDetail(extendedAxis(local->x,columns_,easing_,easing_distance_),column_detail_),
+                                         inverseDetail(extendedAxis(local->y,rows_,easing_,easing_distance_),row_detail_)});
         return source ? PlaneMapResult{PlaneMapStatus::Mapped,source}
                       : PlaneMapResult{PlaneMapStatus::InvalidProjection,std::nullopt};
     }
@@ -83,8 +90,8 @@ PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     }
     const float x=static_cast<float>(std::clamp(local->x,0.0,1.0));
     const float y=static_cast<float>(std::clamp(local->y,0.0,1.0));
-    PlanePoint normalized{inverseMapNormalized(x,columns_,easing_,easing_distance_),
-                          inverseMapNormalized(y,rows_,easing_,easing_distance_)};
+    PlanePoint normalized{inverseDetail(inverseMapNormalized(x,columns_,easing_,easing_distance_),column_detail_),
+                          inverseDetail(inverseMapNormalized(y,rows_,easing_,easing_distance_),row_detail_)};
     if(source_extent_) return {PlaneMapStatus::Mapped,PlanePoint{
         normalized.x*source_extent_->x,normalized.y*source_extent_->y}};
     auto source=(source_transform_ ? *source_transform_ : transform_).toSurface(normalized);

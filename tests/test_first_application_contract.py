@@ -15,11 +15,13 @@ class FirstApplicationContracts(unittest.TestCase):
 
     def test_identity_proof_checks_out_smartfx_dependencies(self):
         proof=BINDING.split('fn pending_frame_identity(',1)[1].split('pub fn add_params(',1)[0]
-        for token in ['checked_slider(params,id)', 'checked_float(params,id)',
+        for token in ['checked_float(params,id)',
                       'checked_popup(params,Params::PlaneMode)?', 'params.checkout(Params::GridState)?',
-                      'Params::Columns','Params::Rows','Params::WaveAmplitude',
+                      'Params::WaveAmplitude',
                       'Params::StretchEasing','Params::MinSpacing']:
             self.assertIn(token,proof)
+        self.assertNotIn('Params::Columns',proof)
+        self.assertNotIn('Params::Rows',proof)
         self.assertNotIn('.resized(',proof)
         self.assertNotIn('unwrap_or',proof)
         self.assertNotIn('set_value(',proof)
@@ -27,7 +29,6 @@ class FirstApplicationContracts(unittest.TestCase):
 
     def test_exact_grid_only_and_no_projection_changes(self):
         proof=BINDING.split('fn initial_identity_values(',1)[1].split('fn pending_frame_identity(',1)[0]
-        self.assertIn('topology != (4,4)',proof)
         self.assertIn('grid == &initial',proof)
         self.assertIn('a.to_bits()==b.to_bits()',proof)
         self.assertNotIn('epsilon',proof.lower())

@@ -54,14 +54,25 @@ fn grid_to_frame(in_data: &ae::InData, event: &ae::EventExtra, plane: &ViewPlane
     layer_to_frame(in_data,event,plane,x,y)
 }
 
-fn displayed_grid(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
+fn evaluated_control_base(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
     -> Result<GridArb, ae::Error> {
     let mut grid = grid_snapshot(params)?;
-    if plane.state.corners.is_some() {
-        let p = evaluated_params(params, *in_data, &grid)?;
-        (grid.column_lines,grid.row_lines) = plane::evaluated_axes(&p)?;
-    }
+    let _ = plane;
+    let p = evaluated_params(params, *in_data, &grid)?;
+    (grid.column_lines,grid.row_lines) = plane::evaluated_axes(&p)?;
     Ok(grid)
+}
+
+fn mapping_settings(params:&ae::Parameters<Params>)->Result<guide_density::Mapping,ae::Error> {
+    Ok(guide_density::Mapping {
+        easing:params.get(Params::StretchEasing)?.as_float_slider()?.value() as f32 / 100.0,
+        distance:params.get(Params::EasingDistance)?.as_float_slider()?.value() as f32 / 100.0,
+    })
+}
+fn displayed_grid(in_data:&ae::InData,params:&mut ae::Parameters<Params>,plane:&ViewPlane)->Result<GridArb,ae::Error> {
+    let base=evaluated_control_base(in_data,params,plane)?;
+    let (columns,rows)=guide_counts(params)?;
+    guide_density::view_grid_mapped(&base,columns,rows,mapping_settings(params)?)
 }
 
 thread_local! {
@@ -427,6 +438,9 @@ pub fn click(
     if let Some((axis, index)) = hit_test(in_data, &grid, &plane, event, event.screen_point())? {
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
+        event.set_continue_refcon(2, (grid.columns as usize * 64 + grid.rows as usize) as _);
+        let canonical = grid_snapshot(params)?;
+        event.set_continue_refcon(3, (canonical.columns as usize * 64 + canonical.rows as usize) as _);
         event.set_send_drag(true);
         set_drag_cursor(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
@@ -483,50 +497,25 @@ fn drag_inner(
         event.set_send_drag(false);return Ok(());
     };
     let mut grid = grid_snapshot(params)?;
+    let (columns, rows) = guide_counts(params)?;
+    if event.continue_refcon(2) != (columns * 64 + rows) as isize
+        || event.continue_refcon(3) != (grid.columns as usize * 64 + grid.rows as usize) as isize {
+        // Count/time changes during a drag must not silently select a new line.
+        event.set_send_drag(false);
+        return Ok(());
+    }
     let elastic = elastic_params(params)?;
-    let displayed=displayed_grid(in_data,params,&plane)?;
-
-    let rc = if axis == DRAG_COLUMNS {
-        if index == 0 || index + 1 >= grid.column_lines.len() {
-            event.set_send_drag(false);
-            return Ok(());
-        }
-        let target = local_x - (displayed.column_lines[index]-grid.column_lines[index]);
-        unsafe {
-            eg_drag_axis(
-                grid.column_lines.as_mut_ptr(),
-                grid.column_pins.as_mut_ptr(),
-                grid.column_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
-    } else {
-        if index == 0 || index + 1 >= grid.row_lines.len() {
-            event.set_send_drag(false);
-            return Ok(());
-        }
-        let target = local_y - (displayed.row_lines[index]-grid.row_lines[index]);
-        unsafe {
-            eg_drag_axis(
-                grid.row_lines.as_mut_ptr(),
-                grid.row_pins.as_mut_ptr(),
-                grid.row_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
+    let base=evaluated_control_base(in_data,params,&plane)?;
+    let mapping=mapping_settings(params)?;
+    let request=guide_density::Drag {
+        columns:axis==DRAG_COLUMNS,visible:if axis==DRAG_COLUMNS {columns} else {rows},
+        index,target:if axis==DRAG_COLUMNS {local_x} else {local_y},mapping,
     };
-
-    if rc == 0 {
+    let changed=guide_density::drag_control(&mut grid,&base,request,&elastic)?;
+    if changed {
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
-        event.set_event_out_flags(
-            ae::EventOutFlags::HANDLED_EVENT
-                | ae::EventOutFlags::ALWAYS_UPDATE
-                | ae::EventOutFlags::UPDATE_NOW,
-        );
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT
+            | ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
     }
 
     if event.last_time() {

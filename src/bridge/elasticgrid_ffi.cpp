@@ -2,6 +2,7 @@
 #include "core/GridModel.h"
 #include "core/WarpMath.h"
 #include "core/CpuRenderer.h"
+#include "bridge/detail_ffi.h"
 
 #include <algorithm>
 #include <bit>
@@ -222,8 +223,8 @@ int prepare_bridge(std::int32_t input_width,
                    std::int32_t output_height,
                    const EgRenderParams* p,
                    PreparedBridge& out,
-                   bool force_sampling_plan = false) {
-    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0) return 1;
+                   bool force_sampling_plan = false, const EgDetailMaps* detail = nullptr) {
+    if (!p || input_width <= 0 || input_height <= 0 || output_width <= 0 || output_height <= 0 || !eg_detail_valid(detail)) return 1;
     const int grid_result = prepare_grid(p, out);
     if (grid_result != 0) return grid_result;
 
@@ -235,6 +236,10 @@ int prepare_bridge(std::int32_t input_width,
                                  p->output_origin_x, easing, easing_distance);
     eg::buildInverseLUTRangeInto(out.y_lut, out.y_lines, output_height, canvas_height,
                                  p->output_origin_y, easing, easing_distance);
+
+    const auto detail_x = eg_detail_x(detail), detail_y = eg_detail_y(detail);
+    if (!detail_x.empty()) for (float& u : out.x_lut.source_u) u = static_cast<float>(eg::inverseDetail(static_cast<double>(u), detail_x));
+    if (!detail_y.empty()) for (float& v : out.y_lut.source_u) v = static_cast<float>(eg::inverseDetail(static_cast<double>(v), detail_y));
 
     // Convert full-layer normalized source coordinates into the local checked-out
     // input-world coordinates. This is the key SmartFX ROI/origin correction.
@@ -259,8 +264,8 @@ int prepare_bridge(std::int32_t input_width,
 
     // Easing changes transitions between different segment slopes. Uniform
     // axes have slope 1 everywhere, so every easing value remains identity.
-    const bool uniform_x = axis_uniform_exact(out.x_lines);
-    const bool uniform_y = axis_uniform_exact(out.y_lines);
+    const bool uniform_x = axis_uniform_exact(out.x_lines) && eg::identityDetail(detail_x);
+    const bool uniform_y = axis_uniform_exact(out.y_lines) && eg::identityDetail(detail_y);
     const bool semantic_identity =
         input_width == output_width && input_height == output_height &&
         p->input_origin_x == p->output_origin_x && p->input_origin_y == p->output_origin_y &&
@@ -301,11 +306,11 @@ int prepare_bridge(std::int32_t input_width,
 // Called only by the explicit sparse CPU entry. GPU and legacy ROI callers keep
 // their existing nonnegative local-plan contract.
 int prepare_sparse_bridge(int iw, int ih, int ow, int oh,
-                          const EgRenderParams* p, PreparedBridge& out) {
+                          const EgRenderParams* p, PreparedBridge& out, const EgDetailMaps* detail = nullptr) {
     EgRenderParams logical = *p;
     logical.input_origin_x = logical.input_origin_y = 0;
     const int rc = prepare_bridge(p->canvas_width, p->canvas_height, ow, oh,
-                                  &logical, out, true);
+                                  &logical, out, true, detail);
     if (rc != 0) return rc;
     auto map_axis = [&](auto& linear, auto& cubic, int origin, int extent,
                         int canvas, int output_origin, int output_extent) {
@@ -496,9 +501,9 @@ static int render_frame_impl(
     std::int32_t output_width,
     std::int32_t output_height,
     std::int32_t bit_depth,
-    const EgRenderParams* p, bool sparse) noexcept {
+    const EgRenderParams* p, bool sparse, const EgDetailMaps* detail = nullptr) noexcept {
 
-    if (!output_data || !p || output_width <= 0 || output_height <= 0 ||
+    if (!eg_detail_valid(detail) || !output_data || !p || output_width <= 0 || output_height <= 0 ||
         input_width < 0 || input_height < 0 ||
         (!sparse && (!input_data || input_width == 0 || input_height == 0)) ||
         (sparse && (p->canvas_width <= 0 || p->canvas_height <= 0)) ||
@@ -532,8 +537,8 @@ static int render_frame_impl(
             static_cast<std::int64_t>(p->output_origin_y) + output_height <= p->canvas_height;
         PreparedBridge& prepared = reusable_bridge_state();
         const int prep_rc = sparse && !(full_source && output_inside)
-            ? prepare_sparse_bridge(input_width, input_height, output_width, output_height, p, prepared)
-            : prepare_bridge(input_width, input_height, output_width, output_height, p, prepared);
+            ? prepare_sparse_bridge(input_width, input_height, output_width, output_height, p, prepared, detail)
+            : prepare_bridge(input_width, input_height, output_width, output_height, p, prepared, false, detail);
         if (prep_rc != 0) return prep_rc;
 
         if (bit_depth == 32) {
@@ -604,4 +609,48 @@ int eg_render_frame_sparse(
     return render_frame_impl(input_data, input_row_bytes, input_width, input_height,
                              output_data, output_row_bytes, output_width, output_height,
                              bit_depth, p, true);
+}
+
+// Same validation, cancellation, pixel sampling and sparse semantics as the
+// legacy functions; only the owned coordinate map is composed before sampling.
+int eg_render_frame_detail(const void* input, std::ptrdiff_t input_pitch,
+    std::int32_t iw, std::int32_t ih, void* output, std::ptrdiff_t output_pitch,
+    std::int32_t ow, std::int32_t oh, std::int32_t depth,
+    const EgRenderParams* params, const EgDetailMaps* detail, std::int32_t sparse) noexcept {
+    if (sparse != 0 && sparse != 1) return 1;
+    return render_frame_impl(input, input_pitch, iw, ih, output, output_pitch,
+                             ow, oh, depth, params, sparse != 0, detail);
+}
+
+int eg_axis_coordinates(const float* axis, std::int32_t count,
+    const float* queries, float* output, std::int32_t n,
+    float easing, float distance, std::int32_t forward) noexcept {
+    if (!axis || count < 3 || count > 52 || !queries || !output || n < 1 || n > 52 ||
+        (forward != 0 && forward != 1) || !std::isfinite(easing) || !std::isfinite(distance)) return 1;
+    for (std::int32_t i = 0; i < count; ++i)
+        if (!std::isfinite(axis[i]) || (i && axis[i] <= axis[i-1])) return 1;
+    if (axis[0] != 0.0f || axis[count-1] != 1.0f) return 1;
+    for (std::int32_t i = 0; i < n; ++i) if (!std::isfinite(queries[i])) return 1;
+    try {
+        const std::vector<float> values(axis, axis + count);
+        for (std::int32_t i = 0; i < n; ++i) {
+            const float q = std::clamp(queries[i], 0.0f, 1.0f);
+            if (!forward) { output[i] = eg::inverseMapNormalized(q, values, easing, distance); continue; }
+            bool exact = false;
+            for (std::int32_t j = 0; j < count; ++j) {
+                if (float_bits_equal(q, static_cast<float>(j) / static_cast<float>(count-1))) {
+                    output[i] = axis[j]; exact = true; break;
+                }
+            }
+            if (exact) continue;
+            float lo = 0.0f, hi = 1.0f;
+            for (int iteration = 0; iteration < 32; ++iteration) {
+                const float mid = lo + (hi-lo)*0.5f;
+                if (eg::inverseMapNormalized(mid, values, easing, distance) < q) lo = mid;
+                else hi = mid;
+            }
+            output[i] = lo + (hi-lo)*0.5f;
+        }
+        return 0;
+    } catch (...) { return 3; }
 }

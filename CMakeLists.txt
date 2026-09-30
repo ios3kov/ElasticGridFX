@@ -183,3 +183,9 @@ if(ELASTICGRID_BUILD_BENCH)
   target_link_libraries(elasticgrid_plan_bench PRIVATE elasticgrid_core)
   target_include_directories(elasticgrid_plan_bench PRIVATE src)
 endif()
+
+# Count-independent edit field: production coordinate maps and samplers.
+add_executable(elasticgrid_detail_tests tests/test_detail.cpp src/bridge/elasticgrid_ffi.cpp src/bridge/plane_ffi.cpp)
+target_link_libraries(elasticgrid_detail_tests PRIVATE elasticgrid_core)
+target_include_directories(elasticgrid_detail_tests PRIVATE src)
+add_test(NAME elasticgrid_detail_tests COMMAND elasticgrid_detail_tests)

@@ -5,6 +5,8 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod guide_density;
+mod detail_map;
 mod ui_projection;
 mod plane;
 #[cfg(fstr_lifecycle_probe)]
@@ -72,9 +74,8 @@ struct Plugin {
 
 ae::define_effect!(Plugin, (), Params);
 
-#[derive(Clone, Debug, Serialize, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub(crate) struct GridArb {
-    #[serde(serialize_with = "serialize_grid_columns")]
     pub(crate) columns: u16,
     pub(crate) rows: u16,
     // Full normalized axes including implicit 0/1 boundaries.
@@ -85,37 +86,30 @@ pub(crate) struct GridArb {
     // has no pin concept; new states always pin boundaries only.
     pub(crate) column_pins: Vec<u8>,
     pub(crate) row_pins: Vec<u8>,
+    pub(crate) column_detail: Vec<f32>,
+    pub(crate) row_detail: Vec<f32>,
 }
 
-fn serialize_grid_columns<S>(columns: &u16, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    let guides = (*columns).clamp(1, MAX_GUIDES as u16);
-    let wire = GRID_WIRE_MARKER | ((GRID_WIRE_VERSION & 0x7f) << 8) | (guides & 0xff);
-    serializer.serialize_u16(wire)
-}
-
-fn deserialize_grid_columns<'de, D>(deserializer: D) -> Result<u16, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let wire = u16::deserialize(deserializer)?;
-    if wire & GRID_WIRE_MARKER == 0 {
-        if (1..=MAX_GUIDES as u16).contains(&wire) {
-            return Ok(wire);
-        }
-        return Err(serde::de::Error::custom("invalid legacy ElasticGrid guide count"));
+// Preserve the exact v3 wire while no detail edit has occurred. A count change
+// therefore cannot rewrite even the serialization version. v4 appends only
+// actual geometry, never the visible counts. Older plugins reject v4 explicitly.
+const GRID_DETAIL_WIRE_VERSION: u16 = 4;
+impl Serialize for GridArb {
+    fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeTuple;
+        let detailed = !self.column_detail.is_empty() || !self.row_detail.is_empty();
+        let version = if detailed { GRID_DETAIL_WIRE_VERSION } else { GRID_WIRE_VERSION };
+        let wire = GRID_WIRE_MARKER | (version << 8) | self.columns;
+        let mut tuple = serializer.serialize_tuple(if detailed {8} else {6})?;
+        tuple.serialize_element(&wire)?;
+        tuple.serialize_element(&self.rows)?;
+        tuple.serialize_element(&self.column_lines)?;
+        tuple.serialize_element(&self.row_lines)?;
+        tuple.serialize_element(&self.column_pins)?;
+        tuple.serialize_element(&self.row_pins)?;
+        if detailed { tuple.serialize_element(&self.column_detail)?; tuple.serialize_element(&self.row_detail)?; }
+        tuple.end()
     }
-    let version = (wire >> 8) & 0x7f;
-    let guides = wire & 0xff;
-    if version != 1 && version != 2 && version != GRID_WIRE_VERSION {
-        return Err(serde::de::Error::custom("unsupported ElasticGrid grid-state version"));
-    }
-    if !(1..=MAX_GUIDES as u16).contains(&guides) {
-        return Err(serde::de::Error::custom("invalid ElasticGrid guide count"));
-    }
-    Ok(guides)
 }
 
 struct BoundedF32VecVisitor;
@@ -173,18 +167,65 @@ where D: Deserializer<'de> {
 }
 
 #[derive(Deserialize)]
+struct BoundedAxis(#[serde(deserialize_with = "deserialize_bounded_f32_vec")] Vec<f32>);
+#[derive(Deserialize)]
+struct BoundedPins(#[serde(deserialize_with = "deserialize_bounded_u8_vec")] Vec<u8>);
+#[derive(Deserialize)]
+struct BoundedDetail(#[serde(deserialize_with = "deserialize_detail_vec")] Vec<f32>);
+fn deserialize_detail_vec<'de,D:Deserializer<'de>>(deserializer:D)->Result<Vec<f32>,D::Error> {
+    struct DetailVisitor;
+    impl<'de> Visitor<'de> for DetailVisitor {
+        type Value=Vec<f32>;
+        fn expecting(&self,f:&mut fmt::Formatter<'_>)->fmt::Result {f.write_str("an empty or 257-sample detail map")}
+        fn visit_seq<A:SeqAccess<'de>>(self,mut seq:A)->Result<Vec<f32>,A::Error> {
+            if seq.size_hint().is_some_and(|n|n>detail_map::SAMPLES) {return Err(serde::de::Error::custom("oversized detail map"));}
+            let mut values=Vec::new();
+            while let Some(value)=seq.next_element::<f32>()? {
+                if values.len()==detail_map::SAMPLES {return Err(serde::de::Error::custom("oversized detail map"));}
+                values.push(value);
+            }
+            if !detail_map::valid(&values) {return Err(serde::de::Error::custom("invalid detail map"));}
+            Ok(values)
+        }
+    }
+    deserializer.deserialize_seq(DetailVisitor)
+}
 struct GridArbWire {
-    #[serde(deserialize_with = "deserialize_grid_columns")]
-    columns: u16,
-    rows: u16,
-    #[serde(deserialize_with = "deserialize_bounded_f32_vec")]
-    column_lines: Vec<f32>,
-    #[serde(deserialize_with = "deserialize_bounded_f32_vec")]
-    row_lines: Vec<f32>,
-    #[serde(deserialize_with = "deserialize_bounded_u8_vec")]
-    column_pins: Vec<u8>,
-    #[serde(deserialize_with = "deserialize_bounded_u8_vec")]
-    row_pins: Vec<u8>,
+    columns:u16, rows:u16, column_lines:Vec<f32>,row_lines:Vec<f32>,
+    column_pins:Vec<u8>,row_pins:Vec<u8>,column_detail:Vec<f32>,row_detail:Vec<f32>,
+}
+impl<'de> Deserialize<'de> for GridArbWire {
+    fn deserialize<D:Deserializer<'de>>(deserializer:D)->Result<Self,D::Error> {
+        struct WireVisitor;
+        impl<'de> Visitor<'de> for WireVisitor {
+            type Value=GridArbWire;
+            fn expecting(&self,f:&mut fmt::Formatter<'_>)->fmt::Result {f.write_str("a versioned ElasticGrid state")}
+            fn visit_seq<A:SeqAccess<'de>>(self,mut seq:A)->Result<Self::Value,A::Error> {
+                fn next<'de,T:Deserialize<'de>,A:SeqAccess<'de>>(seq:&mut A)->Result<T,A::Error> {
+                    seq.next_element()?.ok_or_else(||serde::de::Error::custom("truncated ElasticGrid state"))
+                }
+                let wire:u16=next(&mut seq)?;
+                let version=if wire&GRID_WIRE_MARKER==0 {0} else {(wire>>8)&0x7f};
+                let columns=if version==0 {wire} else {wire&0xff};
+                if version>GRID_DETAIL_WIRE_VERSION || !(1..=MAX_GUIDES as u16).contains(&columns) {
+                    return Err(serde::de::Error::custom("unsupported grid state version/count"));
+                }
+                let rows:u16=next(&mut seq)?;
+                if !(1..=MAX_GUIDES as u16).contains(&rows) {return Err(serde::de::Error::custom("invalid row count"));}
+                let column_lines=next::<BoundedAxis,_>(&mut seq)?.0;
+                let row_lines=next::<BoundedAxis,_>(&mut seq)?.0;
+                let column_pins=next::<BoundedPins,_>(&mut seq)?.0;
+                let row_pins=next::<BoundedPins,_>(&mut seq)?.0;
+                let (column_detail,row_detail)=if version==GRID_DETAIL_WIRE_VERSION {
+                    (next::<BoundedDetail,_>(&mut seq)?.0,next::<BoundedDetail,_>(&mut seq)?.0)
+                } else {(Vec::new(),Vec::new())};
+                Ok(GridArbWire {columns,rows,column_lines,row_lines,column_pins,row_pins,column_detail,row_detail})
+            }
+        }
+        // Binary tuple visitor consumes the six legacy fields or eight v4
+        // fields according to its leading version marker, never by EOF probing.
+        deserializer.deserialize_tuple(8,WireVisitor)
+    }
 }
 
 impl<'de> Deserialize<'de> for GridArb {
@@ -238,6 +279,8 @@ impl<'de> Deserialize<'de> for GridArb {
             row_lines,
             column_pins: Vec::new(),
             row_pins: Vec::new(),
+            column_detail: wire.column_detail,
+            row_detail: wire.row_detail,
         };
         out.canonicalize_pins();
         if out.is_valid() {
@@ -280,6 +323,8 @@ impl GridArb {
             row_lines,
             column_pins,
             row_pins,
+            column_detail: Vec::new(),
+            row_detail: Vec::new(),
         }
     }
 
@@ -316,6 +361,7 @@ impl GridArb {
     fn is_valid(&self) -> bool {
         Self::valid_axis(&self.column_lines, &self.column_pins, self.columns as usize)
             && Self::valid_axis(&self.row_lines, &self.row_pins, self.rows as usize)
+            && detail_map::valid(&self.column_detail) && detail_map::valid(&self.row_detail)
     }
 
     fn resample_axis_raw(lines: &[f32], new_guides: usize) -> Vec<f32> {
@@ -344,40 +390,7 @@ impl GridArb {
         out
     }
 
-    fn resized(&self, columns: usize, rows: usize) -> Self {
-        let columns = columns.clamp(1, MAX_GUIDES);
-        let rows = rows.clamp(1, MAX_GUIDES);
-        if !self.is_valid() {
-            return Self::uniform(columns, rows);
-        }
-        if self.columns as usize == columns && self.rows as usize == rows {
-            return self.clone();
-        }
 
-        // Original GridWarp does not preserve/resample deformation when
-        // Num Columns/Rows changes. Only the changed axis is reset uniformly.
-        let column_lines = if self.columns as usize == columns {
-            self.column_lines.clone()
-        } else {
-            Self::axis_uniform(columns).0
-        };
-        let row_lines = if self.rows as usize == rows {
-            self.row_lines.clone()
-        } else {
-            Self::axis_uniform(rows).0
-        };
-
-        let mut out = Self {
-            columns: columns as u16,
-            rows: rows as u16,
-            column_lines,
-            row_lines,
-            column_pins: Vec::new(),
-            row_pins: Vec::new(),
-        };
-        out.canonicalize_pins();
-        out
-    }
 }
 
 impl ae::ArbitraryData<GridArb> for GridArb {
@@ -389,11 +402,15 @@ impl ae::ArbitraryData<GridArb> for GridArb {
         if !other.is_valid() {
             return self.clone();
         }
+        if value <= 0.0 { return self.clone(); }
+        if value >= 1.0 { return other.clone(); }
         if self.columns != other.columns || self.rows != other.rows {
             return if t < 0.5 { self.clone() } else { other.clone() };
         }
 
         let mut out = self.clone();
+        out.column_detail = detail_map::interpolate(&self.column_detail, &other.column_detail, value.clamp(0.0,1.0));
+        out.row_detail = detail_map::interpolate(&self.row_detail, &other.row_detail, value.clamp(0.0,1.0));
         for (dst, (a, b)) in out.column_lines.iter_mut().zip(self.column_lines.iter().zip(other.column_lines.iter())) {
             *dst = *a + (*b - *a) * t;
         }
@@ -507,11 +524,6 @@ impl SmartRenderSnapshot {
     }
 }
 
-fn checked_slider(params: &ae::Parameters<Params>, param: Params) -> Result<i32, ae::Error> {
-    let checked = params.checkout(param)?;
-    Ok(checked.as_slider()?.value())
-}
-
 fn checked_float(params: &ae::Parameters<Params>, param: Params) -> Result<f64, ae::Error> {
     let checked = params.checkout(param)?;
     Ok(checked.as_float_slider()?.value())
@@ -529,12 +541,10 @@ fn smart_render_snapshot(
     // PF_Cmd_SMART_PRE_RENDER / SMART_RENDER do not receive a valid normal
     // parameter array. Every render dependency must be checked out here and
     // copied into owned pre_render_data for the matching SmartRender call.
-    let columns = checked_slider(params, Params::Columns)?.clamp(1, MAX_GUIDES as i32) as usize;
-    let rows = checked_slider(params, Params::Rows)?.clamp(1, MAX_GUIDES as i32) as usize;
     let grid = {
         let checked = params.checkout(Params::GridState)?;
         let value = checked.as_arbitrary()?.value::<GridArb>()?;
-        (*value).resized(columns, rows)
+        guide_density::render_grid(&value)?
     };
     let time_seconds = if in_data.time_scale() != 0 {
         in_data.current_time() as f32 / in_data.time_scale() as f32
@@ -575,6 +585,7 @@ pub(crate) struct EgElasticParams {
 }
 
 unsafe extern "C" {
+    #[cfg(test)]
     fn eg_render_frame(
         input_data: *const c_void,
         input_row_bytes: isize,
@@ -588,6 +599,7 @@ unsafe extern "C" {
         params: *const EgRenderParams,
     ) -> i32;
 
+    #[cfg(test)]
     fn eg_render_frame_sparse(
         input_data: *const c_void,
         input_row_bytes: isize,
@@ -600,6 +612,14 @@ unsafe extern "C" {
         bit_depth: i32,
         params: *const EgRenderParams,
     ) -> i32;
+
+    fn eg_render_frame_detail(
+        input:*const c_void,input_pitch:isize,iw:i32,ih:i32,
+        output:*mut c_void,output_pitch:isize,ow:i32,oh:i32,depth:i32,
+        params:*const EgRenderParams,detail:*const detail_map::Maps,sparse:i32,
+    )->i32;
+    fn eg_axis_coordinates(axis:*const f32,count:i32,queries:*const f32,output:*mut f32,
+                           n:i32,easing:f32,distance:f32,forward:i32)->i32;
 
     pub(crate) fn eg_drag_axis(
         lines: *mut f32,
@@ -690,7 +710,7 @@ fn wave_is_time_varying(enabled: bool, amplitude: f64, speed: f64) -> bool {
     enabled && amplitude.abs() > 1.0e-12 && speed.abs() > 1.0e-12
 }
 
-fn topology(params: &ae::Parameters<Params>) -> Result<(usize, usize), ae::Error> {
+fn guide_counts(params: &ae::Parameters<Params>) -> Result<(usize, usize), ae::Error> {
     Ok((
         params.get(Params::Columns)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
         params.get(Params::Rows)?.as_slider()?.value().clamp(1, MAX_GUIDES as i32) as usize,
@@ -698,23 +718,8 @@ fn topology(params: &ae::Parameters<Params>) -> Result<(usize, usize), ae::Error
 }
 
 pub(crate) fn grid_snapshot(params: &ae::Parameters<Params>) -> Result<GridArb, ae::Error> {
-    let (columns, rows) = topology(params)?;
     let grid = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
-    Ok((*grid).resized(columns, rows))
-}
-
-fn sync_grid_topology(params: &mut ae::Parameters<Params>) -> Result<(), ae::Error> {
-    let (columns, rows) = topology(params)?;
-    let current = {
-        let grid = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
-        (*grid).clone()
-    };
-    if current.columns as usize == columns && current.rows as usize == rows && current.is_valid() {
-        return Ok(());
-    }
-    let next = current.resized(columns, rows);
-    params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(next)?;
-    Ok(())
+    guide_density::render_grid(&grid)
 }
 
 pub(crate) fn elastic_params(params: &ae::Parameters<Params>) -> Result<EgElasticParams, ae::Error> {
@@ -815,13 +820,14 @@ fn render(
     in_layer: &ae::Layer,
     out_layer: &mut ae::Layer,
     p: &EgRenderParams,
+    grid: &GridArb,
 ) -> Result<(), ae::Error> {
     if in_layer.bit_depth() != out_layer.bit_depth() {
         return Err(ae::Error::BadCallbackParameter);
     }
 
     let rc = unsafe {
-        eg_render_frame(
+        eg_render_frame_detail(
             in_layer.data_ptr().cast(),
             in_layer.row_bytes(),
             in_layer.width() as i32,
@@ -831,7 +837,7 @@ fn render(
             out_layer.width() as i32,
             out_layer.height() as i32,
             out_layer.bit_depth() as i32,
-            p,
+            p, &detail_map::Maps::from_grid(grid), 0,
         )
     };
 
@@ -847,6 +853,7 @@ fn render_sparse(
     input: Option<&ae::Layer>,
     out_layer: &mut ae::Layer,
     p: &EgRenderParams,
+    grid: &GridArb,
 ) -> Result<(), ae::Error> {
     if p.canvas_width <= 0 || p.canvas_height <= 0 {
         return Err(ae::Error::BadCallbackParameter);
@@ -864,7 +871,7 @@ fn render_sparse(
     };
 
     let rc = unsafe {
-        eg_render_frame_sparse(
+        eg_render_frame_detail(
             input_data,
             input_row_bytes,
             input_width,
@@ -874,7 +881,7 @@ fn render_sparse(
             out_layer.width() as i32,
             out_layer.height() as i32,
             out_layer.bit_depth() as i32,
-            p,
+            p, &detail_map::Maps::from_grid(grid), 1,
         )
     };
 
@@ -1101,7 +1108,10 @@ impl AdobePluginGlobal for Plugin {
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {
-                    sync_grid_topology(params)?;
+                    // Display density only: never create, replace or migrate a
+                    // Grid Positions key, including when standing on a key.
+                    ui::release_cursor();
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
 
                 }
             }
@@ -1147,8 +1157,8 @@ impl AdobePluginGlobal for Plugin {
                 apply_spatial_context(in_data, &in_layer, &out_layer, &mut p);
                 let plane = plane::State::read(params, &in_data, false, true)?;
                 if plane.corners.is_some() {
-                    plane::render(Some(&in_layer), &mut out_layer, &p, &plane)?;
-                } else { render(&in_layer, &mut out_layer, &p)?; }
+                    plane::render(Some(&in_layer), &mut out_layer, &p, &plane, &grid)?;
+                } else { render(&in_layer, &mut out_layer, &p, &grid)?; }
             }
             ae::Command::SmartPreRender { mut extra } => {
                 let snapshot = smart_render_snapshot(params, in_data)?;
@@ -1208,8 +1218,8 @@ impl AdobePluginGlobal for Plugin {
                         p.output_origin_x = output_origin.h;
                         p.output_origin_y = output_origin.v;
                         if snapshot.plane.corners.is_some() {
-                            plane::render(input.as_ref(), &mut output, &p, &snapshot.plane)?;
-                        } else { render_sparse(input.as_ref(), &mut output, &p)?; }
+                            plane::render(input.as_ref(), &mut output, &p, &snapshot.plane, &snapshot.grid)?;
+                        } else { render_sparse(input.as_ref(), &mut output, &p, &snapshot.grid)?; }
                     }
                     Ok(())
                 })();
@@ -1257,6 +1267,10 @@ impl AdobePluginGlobal for Plugin {
                         let snapshot = extra
                             .pre_render_data::<SmartRenderSnapshot>()
                             .ok_or(ae::Error::InternalStructDamaged)?;
+                        if !snapshot.grid.column_detail.is_empty() || !snapshot.grid.row_detail.is_empty() {
+                            // GPU dispatch is disabled; never silently drop a detail field.
+                            return Err(ae::Error::BadCallbackParameter);
+                        }
                         let mut p = snapshot.render_params(in_data.as_ptr() as *mut c_void);
                         apply_spatial_context(in_data, &input, &output, &mut p);
                         let gpu_data = extra.gpu_data::<MetalGpuData>().ok_or(ae::Error::InternalStructDamaged)?;
@@ -1386,7 +1400,7 @@ mod tests {
     fn grid_wire_rejects_unknown_version() {
         let g = GridArb::uniform(4, 4);
         let mut legacy = legacy_from(&g);
-        legacy.columns = GRID_WIRE_MARKER | (4u16 << 8) | 4u16;
+        legacy.columns = GRID_WIRE_MARKER | (5u16 << 8) | 4u16;
         let bytes = bincode::serde::encode_to_vec(&legacy, bincode::config::legacy()).unwrap();
         let decoded = bincode::serde::decode_from_slice::<GridArb, _>(&bytes, bincode::config::legacy());
         assert!(decoded.is_err());
@@ -1418,22 +1432,6 @@ mod tests {
         assert!(migrated.is_valid());
         assert_eq!(migrated.column_lines.len(), columns as usize + 2);
         assert_eq!(migrated.row_lines.len(), rows as usize + 2);
-    }
-
-    #[test]
-    fn grid_resize_resets_changed_axes_like_original() {
-        let mut g = GridArb::uniform(4, 4);
-        g.column_lines[1] = 0.18;
-        g.row_lines[1] = 0.16;
-        let r = g.resized(9, 4);
-        assert_eq!(r.column_lines.len(), 11);
-        assert_eq!(r.row_lines.len(), 6);
-        // Changed X topology resets to uniform positions.
-        for (i, value) in r.column_lines.iter().enumerate() {
-            assert!((*value - i as f32 / 10.0).abs() < 1.0e-6);
-        }
-        // Unchanged Y topology preserves its deformation.
-        assert!((r.row_lines[1] - 0.16).abs() < 1.0e-6);
     }
 
     #[test]

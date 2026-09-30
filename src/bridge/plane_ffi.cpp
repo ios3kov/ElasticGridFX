@@ -56,10 +56,10 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
 static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y,
-    const double* source_corners,bool regional=false,bool layer=false) noexcept {
+    const double* source_corners,bool regional=false,bool layer=false,const EgDetailMaps* detail=nullptr) noexcept {
     if(!report) return 1;
     *report={};
-    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
+    if(!eg_detail_valid(detail) || !source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
        !std::isfinite(source_extent_x) || !std::isfinite(source_extent_y) ||
        source_extent_x<0 || source_extent_y<0) return 1;
     const int bytes=depth==8?1:depth==16?2:depth==32?4:0;
@@ -93,6 +93,10 @@ static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
                 {f->columns,f->columns+f->column_count},
                 {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
             if(!warp) return 1;
+        }
+        if (warp && detail) {
+            const auto x = eg_detail_x(detail), y = eg_detail_y(detail);
+            if (!warp->setDetail(std::vector<float>(x.begin(),x.end()), std::vector<float>(y.begin(),y.end()))) return 1;
         }
         const eg::PlaneCanvasRegion region{f->canvas_width,f->canvas_height,
             f->source_x,f->source_y,f->output_x,f->output_y,f->surface_units_x,f->surface_units_y,
@@ -139,4 +143,11 @@ int eg_render_plane_layer(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge) noexcept {
     return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true,true);
+}
+
+int eg_render_plane_detail(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* frame,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge,const EgDetailMaps* detail,std::int32_t layer) noexcept {
+    if (layer != 0 && layer != 1) { if(report) *report={}; return 1; }
+    return renderPlane(source,output,depth,frame,report,quality,edge,0,0,nullptr,true,layer != 0,detail);
 }

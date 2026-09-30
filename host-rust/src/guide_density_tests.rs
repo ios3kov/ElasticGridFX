@@ -1,5 +1,4 @@
-put('host-rust/src/guide_density_tests.rs', [
-    (0,0,r'''//! Pure state/production CPU FFI tests, NOT target-AE acceptance.
+//! Pure state/production CPU FFI tests, NOT target-AE acceptance.
 use super::*;
 
 fn shape() -> GridArb {
@@ -253,5 +252,3 @@ fn mapping_matches_actual_inverse_with_easing_and_detail_field() {
     assert!((moved-target).abs()<3e-6);
     assert_eq!(std::mem::size_of::<detail_map::Maps>(),32);
 }
-'''),
-])

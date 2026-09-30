@@ -2,7 +2,7 @@
 use super::*;
 
 fn eligible(grid:&GridArb)->bool {
-    initial_identity_values(grid,(4,4),1,0.0,0.0,0.5)
+    initial_identity_values(grid,1,0.0,0.0,0.5)
 }
 
 #[test]
@@ -60,16 +60,13 @@ fn invalid_grid_pins_dimensions_and_signed_zero_are_not_repaired() {
 fn waves_easing_spacing_topology_and_four_corners_cannot_bypass_pending() {
     let grid=GridArb::default();
     for value in [f64::from_bits(1),0.001,15.0,-1.0,f64::NAN,f64::INFINITY,-0.0] {
-        assert!(!initial_identity_values(&grid,(4,4),1,value,0.0,0.5));
-        assert!(!initial_identity_values(&grid,(4,4),1,0.0,value,0.5));
+        assert!(!initial_identity_values(&grid,1,value,0.0,0.5));
+        assert!(!initial_identity_values(&grid,1,0.0,value,0.5));
     }
     for value in [0.0,0.1,25.0,f64::NAN,f64::INFINITY] {
-        assert!(!initial_identity_values(&grid,(4,4),1,0.0,0.0,value));
+        assert!(!initial_identity_values(&grid,1,0.0,0.0,value));
     }
-    for topology in [(0,4),(4,0),(5,4),(4,5),(50,50)] {
-        assert!(!initial_identity_values(&grid,topology,1,0.0,0.0,0.5));
-    }
-    for mode in [0,2,3] {assert!(!initial_identity_values(&grid,(4,4),mode,0.0,0.0,0.5));}
+    for mode in [0,2,3] {assert!(!initial_identity_values(&grid,mode,0.0,0.0,0.5));}
 }
 
 // Use the actual production FFI renderer, not a reimplementation of its math.

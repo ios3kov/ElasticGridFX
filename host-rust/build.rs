@@ -185,7 +185,7 @@ fn main() {
         Property::AE_Effect_Version {
             version: 0,
             subversion: 9,
-            bugversion: 1,
+            bugversion: 2,
             stage: Stage::Develop,
             build: 1,
         },

@@ -1,5 +1,23 @@
 # Current development / release status
 
+## Development: non-destructive control density — 2026-09-30
+
+Stage 10 remains INCOMPLETE. New branch `feat/grid-density-independent` builds
+on 7f72201 without modifying PR #10's immutable candidate, main or the release.
+Columns/Rows now control a read-only view over stored Grid Positions;
+count changes never rewrite a key or resize rendering data. Additional guides
+edit an independent, fixed-size material-coordinate field only on real drag.
+Unedited keys retain byte-identical wire v3; detail edits use wire v4.
+Older plugin versions cannot read v4 edits: preserve original projects.
+Source tests and candidate/host boundaries: [density specification](non-destructive-density-2026-09-30.md).
+Version 0.9.2 is a development candidate. Exact-head Rust/Clippy/macOS build and
+native AE acceptance must be recorded separately; no previous PASS is reused.
+
+## Historical checkpoint boundary
+
+The static-count package below still reset axes on count changes; that behavior
+is superseded by the new requirement and must not be presented as accepted.
+
 ## Development: static counts and branded test package — 2026-09-30
 
 Stage 10 remains incomplete. Branch `fix/first-application-516`, draft PR #10.

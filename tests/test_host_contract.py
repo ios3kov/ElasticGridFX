@@ -80,12 +80,16 @@ class HostContract(unittest.TestCase):
                      'PlaneMode', 'Quality'):
             self.assertNotIn('CANNOT_TIME_VARY', block(name))
 
-    def test_manual_topology_change_still_uses_existing_grid_sync(self):
+    def test_count_change_redraws_without_rewriting_grid_keys(self):
         handler = SOURCE.split('ae::Command::UserChangedParam { param_index } => {', 1)[1].split(
             'ae::Command::UpdateParamsUi', 1)[0]
         self.assertIn('params.index(Params::Columns) == Some(param_index)', handler)
         self.assertIn('params.index(Params::Rows) == Some(param_index)', handler)
-        self.assertIn('sync_grid_topology(params)?;', handler)
+        self.assertNotIn('sync_grid_topology', SOURCE)
+        count_handler = handler.split('if params.index(Params::Columns)', 1)[1]
+        self.assertNotIn('set_value', count_handler)
+        self.assertNotIn('GridState', count_handler)
+        self.assertIn('ForceRerender', count_handler)
         # Never change registration-only behavior flags during rendering/UI.
         self.assertNotIn('CANNOT_TIME_VARY', handler)
 
@@ -117,7 +121,7 @@ class HostContract(unittest.TestCase):
             '#[cfg(target_os = "macos")]', 1
         )[0]
         self.assertIn('eg_render_frame_sparse(', SOURCE)
-        self.assertIn('render_sparse(input.as_ref(), &mut output, &p)?;', smart)
+        self.assertIn('render_sparse(input.as_ref(), &mut output, &p, &snapshot.grid)?;', smart)
         self.assertIn('let input = cb.checkout_layer_pixels(0)?;', smart)
         self.assertNotIn('let Some(input) = cb.checkout_layer_pixels(0)? else', smart)
         self.assertIn('let checkin = cb.checkin_layer_pixels(0);', smart)

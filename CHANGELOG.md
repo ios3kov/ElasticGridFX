@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.2-dev — non-destructive control density (not released)
+
+- Keep Columns/Rows changes out of Grid Positions key data and render geometry.
+- Derive evenly subdivided/thinned virtual controls over the preserved cage.
+- Preserve untouched same-density drag behavior; extra controls edit independent local geometry.
+- Keep old keys byte-identical until an actual edit; v4 adds a fixed-size detail map.
+- Compose detail coordinates before the original CPU/plane sampler, with no extra image resampling.
+- Invalidate the old count-dependent AE cache version; target-host acceptance pending.
+
 ## 0.9.1
 
 - Refresh plane controls automatically when the owning layer switches to 3D.

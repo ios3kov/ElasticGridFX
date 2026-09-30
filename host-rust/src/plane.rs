@@ -224,6 +224,9 @@ unsafe extern "C" {
                        source_extent_x: f64, source_extent_y: f64) -> i32;
     pub(crate) fn eg_render_plane_region(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    fn eg_render_plane_detail(source:*const Image,output:*const Image,depth:i32,
+        frame:*const Frame,report:*mut Report,quality:i32,edge:i32,
+        detail:*const detail_map::Maps,layer:i32)->i32;
     pub(crate) fn eg_render_plane_layer(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     #[cfg(test)]
@@ -245,7 +248,7 @@ pub(crate) fn evaluated_axes(p: &EgRenderParams) -> Result<(Vec<f32>, Vec<f32>),
 }
 
 pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
-                     p: &EgRenderParams, state: &State) -> Result<(), ae::Error> {
+                     p: &EgRenderParams, state: &State, grid: &GridArb) -> Result<(), ae::Error> {
     let corners = state.corners.ok_or(ae::Error::BadCallbackParameter)?;
     if input.is_some_and(|layer| layer.bit_depth() != output.bit_depth()) {
         return Err(ae::Error::BadCallbackParameter);
@@ -269,8 +272,13 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     let render_plane=if state.comp_space && !state.editable_corners {
         eg_render_plane_layer
     }else{eg_render_plane_region};
-    let rc = unsafe {render_plane(&src, &dst, output.bit_depth() as i32,
-                         &frame, &mut report, p.quality - 1, p.edge_mode - 1)};
+    let rc = if grid.column_detail.is_empty() && grid.row_detail.is_empty() {
+        unsafe {render_plane(&src, &dst, output.bit_depth() as i32,
+                             &frame, &mut report, p.quality - 1, p.edge_mode - 1)}
+    } else {
+        unsafe {eg_render_plane_detail(&src,&dst,output.bit_depth() as i32,&frame,&mut report,
+            p.quality-1,p.edge_mode-1,&detail_map::Maps::from_grid(grid),i32::from(state.comp_space && !state.editable_corners))}
+    };
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
     match rc {
         0 => Ok(()), 5 => Err(ae::Error::InterruptCancel),

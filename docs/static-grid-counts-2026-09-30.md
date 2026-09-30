@@ -1,3 +1,7 @@
+> **Superseded behavior:** the user subsequently required non-destructive density.
+> The reset-on-manual-count-change behavior described below is historical, not
+> the new contract. See [non-destructive density](non-destructive-density-2026-09-30.md).
+
 # Static Columns and Rows — 2026-09-30
 
 ## Stage 10: source change; target AE acceptance pending

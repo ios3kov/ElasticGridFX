@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include "bridge/detail_ffi.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -147,6 +148,14 @@ int eg_render_frame_sparse(
     std::int32_t output_height,
     std::int32_t bit_depth,
     const EgRenderParams* params) noexcept;
+
+int eg_render_frame_detail(const void* input, std::ptrdiff_t input_pitch,
+    std::int32_t iw, std::int32_t ih, void* output, std::ptrdiff_t output_pitch,
+    std::int32_t ow, std::int32_t oh, std::int32_t depth,
+    const EgRenderParams* params, const EgDetailMaps* detail, std::int32_t sparse) noexcept;
+int eg_axis_coordinates(const float* axis, std::int32_t count,
+    const float* queries, float* output, std::int32_t n,
+    float easing, float distance, std::int32_t forward) noexcept;
 
 #ifdef __APPLE__
 // Metal backend. AE passes id<MTLDevice>, id<MTLCommandQueue>, and id<MTLBuffer>
