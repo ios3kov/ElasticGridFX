@@ -8,6 +8,17 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Latest installation override: user explicitly requested hands-on inspection.
+The exact c132d87 research package was reinstalled, receipt
+EGFX-update-594f4233fecd4d669de595791079bef1 INSTALLED_FOR_TEST.
+Ordinary 1eed79a is retained for rollback, not currently installed. User project
+was saved/clean before quit and was not modified. Owned text fixture is open
+unsaved with second effect bound, leading 110 and Y30, for visual inspection
+only. Evidence: outputs/viewer-user-c132d87 (binding and live identity).
+This prototype binds only the restricted fixture, not arbitrary user projects;
+render parity remains unimplemented. Do not save over the fixture or use this
+research build in production. Restore ordinary payload after user inspection.
+
 Native viewer checkpoint 2026-09-30: clean c132d87 research candidate,
 Build ID EGFX-a3cbb3dcaa431d5641bcef11, package SHA-256
 938ece107b508c3cf804fcc26ffa20437db19c0854eeae0b298e8f709e0fbbbf.
