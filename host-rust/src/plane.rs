@@ -23,6 +23,25 @@ fn ui_disabled(three_d:bool, mode:i32)->(bool,bool) {
     (three_d,three_d || mode!=2)
 }
 
+// PF events permit DISABLED changes, not popup definition reconstruction.
+// External layer switches cause a draw without necessarily UPDATE_PARAMS_UI.
+pub(crate) fn sync_event_ui(input:&ae::InData,params:&ae::Parameters<Params>)->Result<(),ae::Error>{
+    let three_d=match ui_layer_is_3d(input){
+        Ok(v)=>v,Err(ae::Error::BadCallbackParameter)=>return Ok(()),Err(e)=>return Err(e),
+    };
+    let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
+    for id in [Params::PlaneMode].into_iter().chain(CORNERS).chain([Params::ResetPlane]) {
+        let current=params.get(id)?;
+        let disabled=if id==Params::PlaneMode {mode_disabled}else{corners_disabled};
+        if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=disabled {
+            let mut definition=(*current).clone();
+            definition.set_ui_flag(ae::ParamUIFlags::DISABLED,disabled);
+            definition.update_param_ui()?;
+        }
+    }
+    Ok(())
+}
+
 pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
     // During effect construction AE may not yet have an owning layer for the
     // UI instance. Leave the setup defaults until the next host UI callback.

@@ -56,6 +56,15 @@ defers cosmetic updates. These errors are not accepted as PASS.
 User project was saved to a fresh recovery checkpoint before restarting;
 original on-disk project and v0.9.0 release were not overwritten.
 
+## Second runtime candidate (3cd2d9a): original symptom remains
+
+Live identity confirmed. With Effect Controls continuously visible, scripting
+the native 3D switch changed the grid/render but left Four Corners enabled.
+Thus UPDATE_PARAMS_UI alone does not cover the external switch. Third candidate
+uses DRAW solely for the SDK-permitted DISABLED bit changes, without rewriting
+popup names or choice counts in event context. Existing UPDATE_PARAMS_UI retains
+the effective-mode label. Runtime acceptance remains open.
+
 Offline scanner: 26 review findings in existing workflow files and a test
 fixture, none in changed source. Mutable action references and credential
 persistence remain existing supply-chain review items; the authentication

@@ -1130,7 +1130,10 @@ impl AdobePluginGlobal for Plugin {
                         }
                     }
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
-                    ae::Event::Draw(_) => ui::draw(&in_data, params, &mut extra)?,
+                    ae::Event::Draw(_) => {
+                        plane::sync_event_ui(&in_data,params)?;
+                        ui::draw(&in_data, params, &mut extra)?;
+                    }
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra)?,
                     ae::Event::Deactivate | ae::Event::CloseContext | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}
