@@ -12,6 +12,8 @@ LEGACY = ['Columns', 'Rows', 'GridState', 'TensionRadius', 'Falloff',
           'WaveAxis', 'EdgeMode', 'Quality']
 STAGE9_APPEND = ['PlaneMode', 'PlaneTopLeft', 'PlaneTopRight',
                  'PlaneBottomRight', 'PlaneBottomLeft', 'ResetPlane']
+NATIVE_PLANE_APPEND = ['ResearchPlaneTL', 'ResearchPlaneTR', 'ResearchPlaneBR',
+                       'ResearchPlaneBL', 'ResearchPlaneKind']
 
 
 def block(name):
@@ -23,7 +25,8 @@ def block(name):
 class HostContract(unittest.TestCase):
     def test_parameter_ids_keep_legacy_prefix_and_approved_append(self):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
-        self.assertEqual(re.findall(r'\b(\w+)\s*,', variants), LEGACY + STAGE9_APPEND)
+        self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
+                         LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND)
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
