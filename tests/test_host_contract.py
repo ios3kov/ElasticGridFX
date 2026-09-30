@@ -57,6 +57,38 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('(0.0, 20.0)', block('WaveFrequency'))
         self.assertIn('(-360.0, 360.0)', block('WavePhase'))
 
+    def test_grid_counts_are_static_but_still_editable_and_supervised(self):
+        for name in ('Columns', 'Rows'):
+            with self.subTest(parameter=name):
+                definition = block(name)
+                self.assertIn('ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY', definition)
+                self.assertIn('ae::ParamUIFlags::empty()', definition)
+                self.assertIn('f.set_valid_min(1)', definition)
+                self.assertIn('f.set_valid_max(MAX_GUIDES as i32)', definition)
+                self.assertIn('f.set_default(4)', definition)
+                self.assertNotIn('CANNOT_INTERP', definition)
+                self.assertNotIn('CONTROL_ONLY', definition)
+
+    def test_only_grid_counts_lose_time_variation(self):
+        # Grid Positions, waves, plane controls and hidden dependencies keep
+        # their existing saved streams and animation policy.
+        self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), 2)
+        self.assertNotIn('CANNOT_TIME_VARY', block('GridState'))
+        self.assertNotIn('CANNOT_INTERP', block('GridState'))
+        self.assertIn('ae::ParamUIFlags::CONTROL', block('GridState'))
+        for name in ('WaveAmplitude', 'WaveFrequency', 'WavePhase', 'WaveSpeed',
+                     'PlaneMode', 'Quality'):
+            self.assertNotIn('CANNOT_TIME_VARY', block(name))
+
+    def test_manual_topology_change_still_uses_existing_grid_sync(self):
+        handler = SOURCE.split('ae::Command::UserChangedParam { param_index } => {', 1)[1].split(
+            'ae::Command::UpdateParamsUi', 1)[0]
+        self.assertIn('params.index(Params::Columns) == Some(param_index)', handler)
+        self.assertIn('params.index(Params::Rows) == Some(param_index)', handler)
+        self.assertIn('sync_grid_topology(params)?;', handler)
+        # Never change registration-only behavior flags during rendering/UI.
+        self.assertNotIn('CANNOT_TIME_VARY', handler)
+
     def test_unused_wave_slot_remains_serialized_but_hidden(self):
         legacy = block('WaveEnabled')
         self.assertIn('ae::CheckBoxDef::setup', legacy)
