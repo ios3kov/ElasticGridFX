@@ -12,8 +12,11 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
     mode.set_ui_flag(ae::ParamUIFlags::DISABLED,three_d);
     // Keep the serialized 2D selection/keyframes untouched. Both stored
     // ordinals display the effective plane while the entire selector is locked.
-    mode.as_popup_mut()?.set_options(if three_d {&["Layer Plane (3D)","Layer Plane (3D)"]}
-        else {&["Layer Plane","Four Corners"]});
+    // PopupDef::set_options owns a temporary CString; dynamic UI definitions
+    // must instead keep names alive through (and after) the host update call.
+    mode.as_mut().u.pd.u.namesptr=if three_d {c"Layer Plane (3D)|Layer Plane (3D)".as_ptr()}
+        else {c"Layer Plane|Four Corners".as_ptr()};
+    mode.as_mut().u.pd.num_choices=2;
     mode.update_param_ui()?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
