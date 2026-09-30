@@ -12,8 +12,28 @@ native text and raster. Exact v1 hidden bindings migrate transactionally to v2;
 foreign/partial/disabled/keyed bindings remain protected. Required checks:
 unit migration rollback, strict lint, native 2D/3D/2D text/raster mode lock,
 saved reopen, UI appearance and render equality of stored mode 1 versus 2 in 3D.
-Status: IMPLEMENTED, candidate/runtime verification pending. Supersedes earlier
+Status: installed and target-host scoped acceptance PASS. Supersedes earlier
 acceptance requirement allowing custom Four Corners regions on 3D layers.
+
+Current installed candidate (supersedes cbe6da1 below):
+`36a04e3a5ab9ccf2ca8872c18b1344b94de65c5c`, Build ID
+`EGFX-2c67eaa5e9c441ca5866edaf`, receipt
+`EGFX-update-7206afd706ef4c169d7739faa57705e9`.
+ZIP SHA256 `f34598ec3f579c56467fba35bcf42fd09e222e9931fbfa976a1f5da08061efe8`.
+Evidence: local outputs/FSTR-Stretch-3D-lock-final. AE 25.6 arm64 live identity
+PASS, PID 31248. Native text 8/16/32 project depth: stored mode 1 versus 2
+renders identical pixels in 3D; modes produce different images in 2D. Raster
+3D same-mode parity PASS; marker 1 -> 3 -> 1 and stored popup restoration PASS.
+Exact v1 binding migration, corner preservation, two Grid Positions keys and
+saved reopen PASS. UI observed disabled Layer Plane (3D), corners/reset disabled,
+no public corner targets. Strict Clippy PASS, 207 Python tests PASS, 41 Rust
+tests PASS on 36a04e3. Initial ebf2e31 runtime
+FAIL (temporary popup CString lifetime) retained as failed-popup.aep; fixed
+with static C strings and retested on 36a04e3. Scanner: 26 pre-existing review
+findings, not a security certification. No new performance/renderer algorithm.
+User's dirty acceptance fixture saved separately as user-check-before-3d-lock.aep
+and reopened after testing. Original acceptance.aep not overwritten.
+Repository CI tracked separately; no merge/release performed.
 
 2026-09-30. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
