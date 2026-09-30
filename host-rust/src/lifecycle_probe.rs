@@ -12,11 +12,19 @@ pub(crate) struct Probe {
 }
 
 // One deferred observation per process. No PF effect handle crosses callbacks.
-struct Deferred { id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool }
+struct Deferred {
+    id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool,
+    basic: *const ae::sys::SPBasicSuite,
+}
 impl Deferred {
     fn observe(&mut self) {
         if self.consumed || !main_thread() || !self.pending.swap(false, Ordering::AcqRel) { return; }
         self.consumed = true;
+        // Non-AEGP hook wrapper does not establish the crate's thread-local
+        // suite context. EffectMain's guard has already been dropped at idle.
+        // Retain only the host-global suite pointer, never PF_InData/effect_ref.
+        if self.basic.is_null() { journal("idle", "idle: missing suite context"); return; }
+        let _context = ae::PicaBasicSuite::from_sp_basic_suite_raw(self.basic);
         let result = self.inspect();
         journal("idle", &format!("idle main: {result:?}"));
     }
@@ -103,7 +111,8 @@ impl Probe {
             let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;
             ae::aegp::suites::RegisterNonAegp::new()?.register_idle_hook(id,
                 Box::new(|state: &mut Deferred, _| { state.observe(); Ok(()) }),
-                Deferred { id, pending: self.pending.clone(), consumed: false })?;
+                Deferred { id, pending: self.pending.clone(), consumed: false,
+                    basic: input.pica_basic_suite_ptr() })?;
             return Ok(0);
         }
         let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;

@@ -82,3 +82,18 @@ not security approval. Native run BLOCKED: Mac locked, UI tool explicitly
 requires manual unlock. No installation or AE shutdown attempted. Ordinary
 1eed79a installed payload reverified unchanged. Next: unlock, verify empty/owned
 AE state, reversible install, separate add/idle/remove calls, rollback.
+
+8932480 native run, AE PID 48588: add harness returned PASS, but AE then
+reported a crash invoking com.elasticgrid.fx.warp. No idle journal was written;
+overall experiment FAIL, removal NOT RUN. After acknowledgement AE exited.
+Rollback receipt EGFX-update-f5cb1a9d927540809d2efe3a8efcf980 is ROLLED_BACK,
+ordinary payload reverified. The test project was never saved.
+
+Code inspection found a concrete diagnostic defect: after-effects 0.4.0's
+NonAegp idle wrapper does not establish PicaBasicSuite thread-local context.
+EffectMain restores the previous (normally null) context before idle runs;
+suite acquisition dereferences that pointer. Follow-up establishes an RAII
+context from the host-global SPBasicSuite pointer, checks null, and restores
+the prior context on exit. No effect or PF_InData pointers are retained.
+This is a likely crash mechanism, not stack-trace-confirmed causality. Repeat
+native run required; default build still excludes the experiment entirely.
