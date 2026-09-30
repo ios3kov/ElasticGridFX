@@ -5,11 +5,38 @@ use std::ptr::NonNull;
 pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopRight,
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
 
-pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
-    let three_d=layer_is_3d(params,false)?;
-    let enabled=!three_d && params.get(Params::PlaneMode)?.as_popup()?.value()==2;
+// UI callbacks only. Do not evaluate the hidden expression during
+// UPDATE_PARAMS_UI (recursive checkout is forbidden there), or use its
+// potentially stale PF snapshot to decide the current layer switch state.
+fn ui_layer_is_3d(input: &ae::InData) -> Result<bool, ae::Error> {
+    #[cfg(target_os="macos")]
+    {
+        unsafe extern "C" { fn pthread_main_np() -> i32; }
+        if unsafe { pthread_main_np() } == 0 { return Err(ae::Error::BadCallbackParameter); }
+    }
+    let layer=ae::aegp::suites::PFInterface::new()?.effect_layer(input.effect_ref())?;
+    Ok(ae::aegp::suites::Layer::new()?.layer_flags(layer)?
+        .contains(ae::aegp::LayerFlags::LAYER_IS_3D))
+}
+
+fn ui_disabled(three_d:bool, mode:i32)->(bool,bool) {
+    (three_d,three_d || mode!=2)
+}
+
+pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>, only_if_changed:bool) -> Result<(), ae::Error> {
+    let three_d=ui_layer_is_3d(input)?;
+    let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
+    // DRAW is also delivered when the layer's external 3D switch changes.
+    // Avoid issuing cosmetic updates on every unchanged draw (redraw loop).
+    if only_if_changed {
+        let mut matches=params.get(Params::PlaneMode)?.ui_flags().contains(ae::ParamUIFlags::DISABLED)==mode_disabled;
+        for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
+            matches &= params.get(id)?.ui_flags().contains(ae::ParamUIFlags::DISABLED)==corners_disabled;
+        }
+        if matches {return Ok(());}
+    }
     let mut mode=(*params.get(Params::PlaneMode)?).clone();
-    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,three_d);
+    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
     // Keep the serialized 2D selection/keyframes untouched. Both stored
     // ordinals display the effective plane while the entire selector is locked.
     // PopupDef::set_options owns a temporary CString; dynamic UI definitions
@@ -21,10 +48,20 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
         let mut definition=(*current).clone();
-        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,!enabled);
+        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,corners_disabled);
         definition.update_param_ui()?;
     }
     Ok(())
+}
+
+#[cfg(test)] mod ui_state_tests {
+    use super::ui_disabled;
+    #[test] fn layer_switch_locks_both_stored_modes_and_restores_2d_controls() {
+        for mode in [1,2] {
+            assert_eq!(ui_disabled(true,mode),(true,true));
+            assert_eq!(ui_disabled(false,mode),(false,mode!=2));
+        }
+    }
 }
 fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
     #[cfg(fstr_binding_probe)]
