@@ -6,7 +6,15 @@ pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopR
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
 
 pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
-    let enabled=params.get(Params::PlaneMode)?.as_popup()?.value()==2;
+    let three_d=layer_is_3d(params,false)?;
+    let enabled=!three_d && params.get(Params::PlaneMode)?.as_popup()?.value()==2;
+    let mut mode=(*params.get(Params::PlaneMode)?).clone();
+    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,three_d);
+    // Keep the serialized 2D selection/keyframes untouched. Both stored
+    // ordinals display the effective plane while the entire selector is locked.
+    mode.as_popup_mut()?.set_options(if three_d {&["Layer Plane (3D)","Layer Plane (3D)"]}
+        else {&["Layer Plane","Four Corners"]});
+    mode.update_param_ui()?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
         let mut definition=(*current).clone();
@@ -14,6 +22,12 @@ pub(crate) fn update_ui(params: &ae::Parameters<Params>) -> Result<(), ae::Error
         definition.update_param_ui()?;
     }
     Ok(())
+}
+fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
+    #[cfg(fstr_binding_probe)]
+    {binding_probe::layer_is_3d(params,checkout)}
+    #[cfg(not(fstr_binding_probe))]
+    {let _=(params,checkout);Ok(false)}
 }
 #[derive(Clone, Debug, Default)]
 pub(crate) struct State {
@@ -34,7 +48,7 @@ impl State {
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
         let mode = if checkout { checked_popup(params, Params::PlaneMode)? }
                    else { params.get(Params::PlaneMode)?.as_popup()?.value() };
-        if mode == 1 {
+        if mode == 1 || layer_is_3d(params,checkout)? {
             #[cfg(fstr_binding_probe)]
             if let Some(derived)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {return Ok(derived);}
             return Ok(Self::default());

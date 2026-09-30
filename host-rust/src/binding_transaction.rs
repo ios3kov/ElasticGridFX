@@ -36,7 +36,14 @@ fn read_all(host: &mut impl Host, count:usize) -> Result<Vec<Snapshot>, String> 
     (0..count).map(|i| host.read(i)).collect()
 }
 
+#[cfg(any(test,not(fstr_auto_binding)))]
 pub fn install(host: &mut impl Host, expected: &[String]) -> Result<Outcome, Failure> {
+    install_or_upgrade(host, expected, &[])
+}
+
+// Only a complete, enabled, unkeyed exact previous version may be upgraded.
+// Use the same readback, reentrancy and rollback contract as initial binding.
+pub fn install_or_upgrade(host: &mut impl Host, expected: &[String], previous: &[String]) -> Result<Outcome, Failure> {
     if expected.is_empty() || expected.len()>16 || expected.iter().any(|s| s.is_empty() || s.contains('\0')) {
         return Err("Invalid binding expressions".to_owned().into());
     }
@@ -46,7 +53,9 @@ pub fn install(host: &mut impl Host, expected: &[String]) -> Result<Outcome, Fai
         return Ok(Outcome::AlreadyInstalled);
     }
     // A partial, disabled, keyed, foreign or newer binding is not ours to repair.
-    if before.iter().any(|s| s.keys!=0 || s.enabled || !s.expression.is_empty()) {
+    let owned_previous = previous.len()==expected.len() && before.iter().zip(previous)
+        .all(|(s,e)| s.keys==0 && s.enabled && s.expression==*e);
+    if !owned_previous && before.iter().any(|s| s.keys!=0 || s.enabled || !s.expression.is_empty()) {
         return Err("Binding conflict; no changes made".to_owned().into());
     }
     host.begin_undo()?;
@@ -139,6 +148,22 @@ pub fn install(host: &mut impl Host, expected: &[String]) -> Result<Outcome, Fai
         assert_eq!((h.writes,h.begins,h.ends),(8,1,1));
         assert_eq!(install(&mut h,&expressions()),Ok(Outcome::AlreadyInstalled));
         assert_eq!((h.writes,h.begins,h.ends),(8,1,1));
+    }
+    #[test] fn exact_previous_binding_upgrades_and_rolls_back_on_each_failure(){
+        let old=expressions();let mut new=old.clone();new[3]="owned-v2-kind".into();
+        let before:Vec<_>=old.iter().map(|e|Snapshot{expression:e.clone(),enabled:true,keys:0}).collect();
+        let mut h=Mock{states:before.clone(),..Mock::default()};
+        assert_eq!(install_or_upgrade(&mut h,&new,&old),Ok(Outcome::Installed));
+        assert_eq!(install_or_upgrade(&mut h,&new,&old),Ok(Outcome::AlreadyInstalled));
+        for fail in 1..=8 {
+            let mut h=Mock{states:before.clone(),fail_write:Some(fail),..Mock::default()};
+            assert!(!install_or_upgrade(&mut h,&new,&old).unwrap_err().rollback_failed);
+            assert_eq!(h.states,before);
+        }
+        for index in 0..4 {
+            let mut h=Mock{states:before.clone(),..Mock::default()};h.states[index].keys=1;
+            assert!(install_or_upgrade(&mut h,&new,&old).is_err());assert_eq!(h.writes,0);
+        }
     }
     #[test] fn five_stream_marker_transaction_rolls_back_all_partial_writes(){
         let expected:Vec<String>=(0..5).map(|i|format!("owned-{i}")).collect();

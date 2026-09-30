@@ -3,13 +3,19 @@ use super::*;
 use binding_transaction::{Host, Snapshot, Outcome};
 const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL", "__FSTR Plane Kind"];
 
+pub fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
+    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
+        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    match kind {0.0|1.0=>Ok(false),2.0|3.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
+}
+
 // Shared UI/render snapshot. No AEGP calls: all dependencies are PF parameters.
 // Native 3D text is distinct from raster footage's layer-local effect input.
 pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
     let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
         else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
-    // 0 is unbound research/legacy; 1 is bound layer-local; 2 is 3D text comp-space.
+    // 0 pending; 1 2D layer-local; 2 3D text comp-space; 3 3D raster layer-local.
     // The marker is installed last and checked out with the four points.
     if !comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding))? {return Ok(None);}
     let par=in_data.pixel_aspect_ratio();
@@ -35,7 +41,7 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
 fn comp_space_kind(kind:f64,frame_context:bool,automatic:bool)->Result<bool,ae::Error>{
     match kind {
         0.0 if automatic && frame_context=>Err(ae::Error::BadCallbackParameter),
-        0.0|1.0=>Ok(false),
+        0.0|1.0|3.0=>Ok(false),
         2.0=>Ok(true),
         _=>Err(ae::Error::BadCallbackParameter),
     }
@@ -49,11 +55,16 @@ pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
         }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     }
     params.add_with_flags(Params::ResearchPlaneKind,NAMES[4],ae::FloatSliderDef::setup(|f| {
-        setup_float(f,(0.0,2.0),(0.0,2.0),0.0,0,false);
+        setup_float(f,(0.0,3.0),(0.0,3.0),0.0,0,false);
     }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     Ok(())
 }
 fn expressions()->Vec<String>{
+    let mut values=legacy_expressions();
+    values[4]="// FSTR native plane v2\nvar k=1;if(thisLayer.transform.position.value.length===3){k=3;try{var t=thisLayer.text.sourceText.value;k=2;}catch(e){}}\nk;".into();
+    values
+}
+fn legacy_expressions()->Vec<String>{
     let mut values:Vec<String>=[(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|format!(
         "// FSTR research plane v1\nvar r=thisLayer.sourceRectAtTime(time,false);\nvar p=thisLayer.toComp([r.left{},r.top{},0]);\n[p[0],p[1]];",
         if right {"+r.width"} else {""},if bottom {"+r.height"} else {""})).into();
@@ -122,7 +133,7 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
 
 #[cfg(fstr_auto_binding)]
 pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Outcome,String>{
-    binding_transaction::install(&mut Adapter{id,effect,layer,basic},&expressions()).map_err(|e|format!("{e:?}"))
+    binding_transaction::install_or_upgrade(&mut Adapter{id,effect,layer,basic},&expressions(),&legacy_expressions()).map_err(|e|format!("{e:?}"))
 }
 
 // The wrapper locks even a null GetExpression result. Query explicitly and
@@ -178,7 +189,8 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
         for frame in [false,true] {
             assert_eq!(comp_space_kind(1.0,frame,true),Ok(false));
             assert_eq!(comp_space_kind(2.0,frame,true),Ok(true));
-            for invalid in [-1.0,0.5,3.0,f64::NAN,f64::INFINITY] {
+            assert_eq!(comp_space_kind(3.0,frame,true),Ok(false));
+            for invalid in [-1.0,0.5,4.0,f64::NAN,f64::INFINITY] {
                 assert!(comp_space_kind(invalid,frame,true).is_err());
             }
         }

@@ -1,5 +1,20 @@
 # Current development / release status
 
+## User acceptance update: 3D mode lock
+
+2026-09-30: user accepted perspective guide deformation, Grid Positions animation/
+Undo and cursor interaction on cbe6da1. New requirement: Four Corners unavailable
+on every 3D layer. Effective mode must be Layer Plane in UI, picking and render,
+even when a saved/animated popup requests Four Corners. Preserve the 2D popup
+value, all corners and keyframes so returning to 2D restores them. Disable the
+selector and corner controls in 3D; display Layer Plane (3D). Scope includes
+native text and raster. Exact v1 hidden bindings migrate transactionally to v2;
+foreign/partial/disabled/keyed bindings remain protected. Required checks:
+unit migration rollback, strict lint, native 2D/3D/2D text/raster mode lock,
+saved reopen, UI appearance and render equality of stored mode 1 versus 2 in 3D.
+Status: IMPLEMENTED, candidate/runtime verification pending. Supersedes earlier
+acceptance requirement allowing custom Four Corners regions on 3D layers.
+
 2026-09-30. Branch: fix/final-validation, draft PR #5. **NOT READY FOR RELEASE.**
 
 **Stage 9 of 10: implementation and automated target-host acceptance PASS for the scope below; final manual interaction acceptance pending. Stage 10 release NOT AUTHORIZED. Stage 8 SKIPPED BY USER, not PASS.**
