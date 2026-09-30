@@ -54,3 +54,23 @@ Real AE adapter, native Undo/Redo and automatic binding remain NOT RUN.
 
 No promise that an idle-based strategy satisfies production requirements yet.
 Stage 9 stays OPEN. Stage 8 remains skipped by user; no GPU/performance work.
+
+## Opt-in native adapter experiment
+
+`--cfg fstr_binding_probe --cfg fstr_lifecycle_probe` now enables an adapter and
+four appended invisible research-only Point parameters (streams 24..27).
+The default schema is unchanged. The fixture-only deferred callback initializes
+only its newly added second effect, using one Undo group, checks exact readback,
+then repeats the transaction to require AlreadyInstalled without another Undo.
+Stream names/types/count, key state, effect match name and layer lock are checked.
+Scoped stream references are reacquired for every access; no PF handles survive
+the callback. Expressions derive sourceRect corners through thisLayer.toComp.
+They do not depend on layer/effect display names and have no render consumer yet.
+
+This is not production targeting: the existing exact fixture-name/active-layer
+guard remains intentionally research-only. Never save this research-schema
+project over user work. Original effect hidden streams must remain empty.
+Native acceptance: automatic binding readback and expression evaluation,
+idempotency, one native Undo clears all four expressions, Redo restores them,
+remove second effect, close fixture unsaved, verify rollback to ordinary build.
+Host check compiles; native acceptance is NOT RUN until separately recorded.

@@ -11,8 +11,12 @@ mod plane;
 mod lifecycle_probe;
 #[cfg(test)]
 mod plane_contract_tests;
-#[cfg(test)]
+#[cfg(any(test, fstr_binding_probe))]
 mod binding_transaction;
+#[cfg(fstr_binding_probe)]
+mod binding_probe;
+#[cfg(all(fstr_binding_probe, not(fstr_lifecycle_probe)))]
+compile_error!("Binding research requires lifecycle research context");
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
 }
@@ -51,6 +55,10 @@ pub(crate) enum Params {
     PlaneBottomRight,
     PlaneBottomLeft,
     ResetPlane,
+    #[cfg(fstr_binding_probe)] ResearchPlaneTL,
+    #[cfg(fstr_binding_probe)] ResearchPlaneTR,
+    #[cfg(fstr_binding_probe)] ResearchPlaneBR,
+    #[cfg(fstr_binding_probe)] ResearchPlaneBL,
 }
 
 #[derive(Default)]
@@ -1032,6 +1040,9 @@ impl AdobePluginGlobal for Plugin {
             f.set_default(2);
             f.set_value(f.default());
         }))?;
+
+        #[cfg(fstr_binding_probe)]
+        binding_probe::add_params(params)?;
 
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(

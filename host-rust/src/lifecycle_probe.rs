@@ -1,4 +1,5 @@
-//! Opt-in, read-only lifecycle experiment. Never shipped in the default build.
+//! Opt-in lifecycle experiment. Never shipped in the default build.
+//! Read-only unless the separate fstr_binding_probe write experiment is enabled.
 //! Enable with RUSTFLAGS='--cfg fstr_lifecycle_probe' (recorded in build identity).
 use super::*;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
@@ -48,6 +49,11 @@ impl Deferred {
             let key = effects.installed_key_from_layer_effect(effect)?;
             if effects.effect_match_name(key)? != "com.elasticgrid.fx.warp" {
                 return Err(ae::Error::BadCallbackParameter);
+            }
+            #[cfg(fstr_binding_probe)] {
+                let binding = binding_probe::run(self.id,effect,layer);
+                journal("binding", &format!("binding main: {binding:?}"));
+                if binding.is_err() { return Err(ae::Error::BadCallbackParameter); }
             }
             ae::aegp::suites::Stream::new()?.effect_num_param_streams(effect)
         })();
