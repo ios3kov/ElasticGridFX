@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1
+
+- Refresh plane controls automatically when the owning layer switches to 3D.
+- Deform antialiased native-text perimeter pixels with the automatic layer plane;
+  preserve bounded Four Corners behavior and Grid Positions animation.
+- Increment the AE effect version so upgraded projects invalidate old render caches.
+
 ## v1.0.0-dev — final validation cycle
 
 - Target-Mac bootstrap hardening: the one-click build now detects Rust older than 1.85 or missing Clippy and installs/activates a user-local stable toolchain automatically. Dependency audit now fails if the committed `Cargo.lock` is missing instead of silently regenerating the graph.
