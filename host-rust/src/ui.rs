@@ -15,16 +15,30 @@ struct ViewPlane {
     height: f32,
     projection: Option<ui_projection::Projection>,
     projection_unavailable: bool,
+    comp_space: bool,
 }
 impl ViewPlane {
+    fn needs_layer_conversion(&self, window: ae::WindowType) -> bool {
+        !self.comp_space && self.projection.is_none() && window==ae::WindowType::Comp
+    }
     fn read(in_data: &ae::InData, params: &ae::Parameters<Params>, event: &ae::EventExtra) -> Result<Self, ae::Error> {
         let state = plane::State::read(params, in_data, false, false)?;
+        #[cfg(fstr_binding_probe)]
+        let derived = binding_probe::viewer_plane(in_data,params)?;
+        #[cfg(not(fstr_binding_probe))]
+        let derived: Option<plane::State> = None;
+        let comp_space=derived.is_some();
+        let state=derived.unwrap_or(state);
         let geometry = state.geometry();
-        let (projection,projection_unavailable)=match ui_projection::read(in_data,event) {
+        let (projection,projection_unavailable)=if comp_space {
+            // Comp-space text overlay is not yet supported in the Layer viewer.
+            // Never use that viewer's layer-local source_to_frame on this quad.
+            (None,event.window_type()!=ae::WindowType::Comp)
+        } else {match ui_projection::read(in_data,event) {
             Ok(value)=>(value,false), Err(_)=>(None,true),
-        };
+        }};
         Ok(Self {state, geometry, width: in_data.width().max(1) as f32,
-            height: in_data.height().max(1) as f32, projection, projection_unavailable})
+            height: in_data.height().max(1) as f32, projection, projection_unavailable,comp_space})
     }
     fn invalid(&self) -> bool { self.state.corners.is_some() && self.geometry.is_none() }
     fn local(&self, x: f32, y: f32) -> Option<(f32, f32)> {
@@ -163,7 +177,7 @@ fn layer_to_frame(
         x: ae::Fixed::from(x).as_fixed(),
         y: ae::Fixed::from(y).as_fixed(),
     };
-    if plane.projection.is_none() && event.window_type() == ae::WindowType::Comp &&
+    if plane.needs_layer_conversion(event.window_type()) &&
         event.callbacks().layer_to_comp(in_data.current_time(), in_data.time_scale(), &mut p).is_err() {
         return Ok(unavailable);
     }
@@ -191,7 +205,7 @@ fn frame_to_layer(
                                    ae::Fixed::from_fixed(fixed.y).as_f32() as f64)
             .map(|(x,y)|(x as f32,y as f32)).ok_or(ae::Error::BadCallbackParameter);
     }
-    if event.window_type() == ae::WindowType::Comp {
+    if plane.needs_layer_conversion(event.window_type()) {
         event.callbacks().comp_to_layer(in_data.current_time(), in_data.time_scale(), &mut fixed)?;
     }
     Ok((
@@ -550,6 +564,29 @@ pub fn adjust_cursor(
 
 #[cfg(test)]
 mod cursor_tests {
+    #[test]
+    fn projected_text_quad_picking_uses_comp_coordinates_once() {
+        use super::*;
+        // Recorded native AE Y30 quad. This tests geometry, not host callbacks.
+        let state=plane::State {corners:Some([
+            193.126991294881,144.064876060526,474.465671864278,124.959806473857,
+            474.465671864278,621.680710828136,193.126991294881,558.293851707426
+        ]),editable_corners:false};
+        let p=ViewPlane {geometry:state.geometry(),state,width:640.0,height:480.0,
+            projection:None,projection_unavailable:false,comp_space:true};
+        assert!(!p.needs_layer_conversion(ae::WindowType::Comp));
+        assert!(p.state.corner_controls().is_none());
+        for x in [0.0,0.25,0.5,1.0] {for y in [0.0,0.4,1.0] {
+            let q=p.geometry.as_ref().unwrap().map(false,x,y).unwrap();
+            let local=p.local(q.0 as f32,q.1 as f32).unwrap();
+            assert!((local.0 as f64-x).abs()<1e-6);
+            assert!((local.1 as f64-y).abs()<1e-6);
+        }}
+        let mut ordinary=p;
+        ordinary.comp_space=false;
+        assert!(ordinary.needs_layer_conversion(ae::WindowType::Comp));
+        assert!(!ordinary.needs_layer_conversion(ae::WindowType::Layer));
+    }
     use super::*;
 
     #[test]

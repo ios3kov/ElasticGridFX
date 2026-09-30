@@ -3,6 +3,35 @@ use super::*;
 use binding_transaction::{Host, Snapshot, Outcome};
 const NAMES: [&str;4] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL"];
 
+// UI experiment only: never invoke these AEGP queries from a render selector.
+// Native text is deliberately distinct from raster footage, whose effect input
+// is layer-local. Hidden points are host-evaluated comp coordinates.
+pub fn viewer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>)
+    ->Result<Option<plane::State>,ae::Error>{
+    if params.get(Params::PlaneMode)?.as_popup()?.value()!=1 {return Ok(None);}
+    let layer=ae::aegp::suites::PFInterface::new()?.effect_layer(in_data.effect_ref())?;
+    let layers=ae::aegp::suites::Layer::new()?;
+    if !layers.is_layer_3d(layer)? ||
+        layers.layer_object_type(layer)?!=ae::aegp::ObjectType::Text {return Ok(None);}
+    let comp=layers.layer_parent_comp(layer)?;
+    let item=ae::aegp::suites::Comp::new()?.item_from_comp(comp)?;
+    let par=in_data.pixel_aspect_ratio();
+    let comp_par=ae::aegp::suites::Item::new()?.item_pixel_aspect_ratio(item)?;
+    if par.num<=0 || comp_par.num<=0 || i64::from(par.num)!=i64::from(par.den) ||
+        i64::from(comp_par.num)!=i64::from(comp_par.den) {
+        return Ok(Some(plane::State {corners:Some([0.0;8]),editable_corners:false}));
+    }
+    let mut corners=[0.0;8];
+    for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
+        Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate(){
+        let p=params.get(id)?.as_point()?.float_value()?;
+        corners[2*i]=p.x;corners[2*i+1]=p.y;
+    }
+    // An unbound/degenerate quad hides the experimental overlay rather than
+    // drawing a misleading legacy grid. No public corner controls are exposed.
+    Ok(Some(plane::State {corners:Some(corners),editable_corners:false}))
+}
+
 pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
     for (id,name) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
         Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().zip(NAMES) {

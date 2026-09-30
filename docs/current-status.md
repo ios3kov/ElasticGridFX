@@ -8,6 +8,26 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Research viewer integration, 2026-09-30 (after 8344162): explicit binding flag
+now lets Layer Plane on native 3D text consume the four hidden evaluated points
+for overlay geometry and inverse picking. Already projected comp coordinates
+bypass both the native projection matrix and layer/comp callback conversion.
+Raster, 2D and Four Corners retain the existing path. Unbound/degenerate quads,
+non-square pixels and the Layer viewer do not display this experimental grid.
+No render consumer, readiness/version signal or production binding targeting
+has been added. In particular, displayed deformation and rendered deformation
+are NOT yet accepted as matching. This is research-only code, not a user build.
+Required gates: both Rust configurations, recorded-Y30 inverse mapping test,
+static audit and diff review; native overlay/drag acceptance remains NOT RUN
+until an identified research artifact is installed in the owned fixture.
+Verification on macOS arm64/Rust 1.98.1, locked offline Cargo: default 35/35 PASS;
+research flags 36/36 PASS, including recorded-Y30 geometry/inverse picking.
+An intermediate PAR guard failed compilation on signed/unsigned comparison;
+corrected to widened i64 comparison, research suite rerun PASS. Static scan
+`work/comp-viewer-final-audit-20260930.json` exit 1, review_required: unchanged
+workflow pinning/checkout credentials and test auth heuristic, no changed-Rust
+findings. No native acceptance, release or renderer parity claimed.
+
 Integration preparation, 2026-09-30: plane geometry no longer implicitly grants
 permission to draw, hit-test or drag public Four Corners controls. All three UI
 paths now use explicit `State::corner_controls`; Layer Plane defaults to no
