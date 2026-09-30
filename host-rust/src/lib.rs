@@ -1034,7 +1034,8 @@ impl AdobePluginGlobal for Plugin {
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ResetPlane) == Some(param_index) {
-                    if fit_layer::apply(&in_data, params)? {
+                    let changed = fit_layer::apply(&in_data, params)?;
+                    if changed {
                         out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                     }
                 }
