@@ -31,7 +31,7 @@ def check(folder):
     return dict(status='PASS' if identity<=1/255 and exterior_error<=1/255 and inside_changes>30 else 'FAIL',
                 neutral_max_error=identity,exterior_max_error=exterior_error,
                 changed_interior_pixels=inside_changes,
-                scope='8bpc native text identity and region locality only')
+                scope='native text identity and region locality only; project depth recorded by producer')
 
 if __name__=='__main__':
     result=check(Path(sys.argv[1]));print(json.dumps(result,indent=2))

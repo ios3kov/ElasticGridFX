@@ -11,8 +11,7 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
         else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
     // 0 is unbound research/legacy; 1 is bound layer-local; 2 is 3D text comp-space.
     // The marker is installed last and checked out with the four points.
-    if kind==0.0 || kind==1.0 {return Ok(None);}
-    if kind!=2.0 {return Err(ae::Error::BadCallbackParameter);}
+    if !comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding))? {return Ok(None);}
     let par=in_data.pixel_aspect_ratio();
     if par.num<=0 || i64::from(par.num)!=i64::from(par.den) {
         return Err(ae::Error::BadCallbackParameter);
@@ -28,6 +27,18 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
     // Degenerate geometry follows the core's exact pass-through contract.
     // No public corner controls are exposed for an automatically derived plane.
     Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true}))
+}
+
+// Pending initialization may hide the UI plane, but must not silently use the
+// legacy screen-space renderer. Noninteractive callers receive an SDK error;
+// no UI, AEGP calls or writes are performed here. Legacy research stays opt-in.
+fn comp_space_kind(kind:f64,frame_context:bool,automatic:bool)->Result<bool,ae::Error>{
+    match kind {
+        0.0 if automatic && frame_context=>Err(ae::Error::BadCallbackParameter),
+        0.0|1.0=>Ok(false),
+        2.0=>Ok(true),
+        _=>Err(ae::Error::BadCallbackParameter),
+    }
 }
 
 pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
@@ -159,6 +170,18 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
 
 #[cfg(test)] mod tests {
     use super::*;
+    #[test] fn pending_binding_never_renders_legacy_in_automatic_mode(){
+        assert!(comp_space_kind(0.0,true,true).is_err());
+        assert_eq!(comp_space_kind(0.0,false,true),Ok(false));
+        assert_eq!(comp_space_kind(0.0,true,false),Ok(false));
+        for frame in [false,true] {
+            assert_eq!(comp_space_kind(1.0,frame,true),Ok(false));
+            assert_eq!(comp_space_kind(2.0,frame,true),Ok(true));
+            for invalid in [-1.0,0.5,3.0,f64::NAN,f64::INFINITY] {
+                assert!(comp_space_kind(invalid,frame,true).is_err());
+            }
+        }
+    }
     use std::sync::{OnceLock,atomic::{AtomicUsize,Ordering}};
     static RELEASES:AtomicUsize=AtomicUsize::new(0);
     unsafe extern "C" fn empty(_:i32,_:ae::sys::AEGP_StreamRefH,out:*mut ae::sys::AEGP_MemHandle)->i32 {

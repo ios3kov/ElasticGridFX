@@ -8,6 +8,36 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Current internal installation: **499157e / EGFX-6acf45cd1cdabb77fce64048**,
+receipt EGFX-update-f136efa4c635477eb524a8c5f90046db, INSTALLED_FOR_TEST.
+This supersedes all installation descriptions below (historical checkpoints).
+Research flags lifecycle/binding/auto_binding enabled; ordinary 1eed79a retained
+for rollback. AE 25.6.0 arm64 PID 64239 live identity PASS.
+
+Native results in outputs/auto-plane: generic unselected renamed effect binds
+automatically; Undo/Redo, saved reload, 3D/2D/3D and one Grid Positions key
+preservation PASS. Region identity/exterior error exactly zero at 8/16/32 bpc;
+changed interior counts 6878/6971/8905. Camera plus transformed parent also
+PASS (6389 interior changes). These are locality tests, not exact drag direction
+or HDR certification. Saved bound 16bpc camera-parent project aerender (MFR OFF)
+matches UI PNG byte-for-byte, SHA256
+f2d98918bff58d37d91e13ad9b37ee4650b4456677f92b96f6b3c90ce7ca8517.
+Render-process live identity was not separately captured for this one-frame run.
+Default Rust tests 36/36 PASS; automatic research configuration 37/37 PASS.
+
+**First unbound noninteractive render FAIL**: same owned project with empty
+hidden bindings renders successfully via aerender but differs from the bound
+reference (max normalized channel error 1.0; 29772 differing channel samples).
+Evidence outputs/auto-plane/unbound-first. New source rejects marker 0 during
+automatic frame rendering instead of silently falling back. Native verification
+of that guard is pending; automatic pre-render initialization is still unresolved.
+Native pointer automation is BLOCKED by AXError.notImplemented on drag; not a
+plugin failure or a passed interaction check. Four Corners on native 3D text,
+first-use readiness and complete handoff regression remain OPEN. No final
+candidate is being handed off. Stage 9 OPEN, Stage 10 BLOCKED.
+
+### Historical checkpoints (not current installation or readiness)
+
 Shared render checkpoint: cec5773 / EGFX-f9b7337802910afe93ef578b installed
 internally (receipt EGFX-update-a631be43e534453088b4ea8118752da4). Live identity
 PASS. Native 8bpc text X=-20/Y=30: neutral max error 0, region exterior max
