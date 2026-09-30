@@ -54,3 +54,23 @@ and last cells continuously past vector bounds. Public Four Corners still uses
   appeared during verification; both bundle-ID and full-path DoScript targeting
   now fail with -600. Do not terminate the independently-owned debugger session
   or replace a binary while either AE process is running.
+
+## Installed candidate / original-symptom verification
+
+After user authorization, the debugger process exited independently. Main AE
+was checkpointed and quit through DoScript addressed to its exact PID; baseline
+exports at Z=0/90/180/270 were preserved before replacement. Candidate e1269d2,
+Build EGFX-4b2ef86487d7553a4700e6a4, installed rollback-safely with receipt
+EGFX-update-9cf8a9e85f5544998e6c4f753f162b2c. Live identity PASS in AE PID 56880.
+
+The first reopened-project export reused old AE cache and still showed the
+fringe. Fresh owned duplicates rendered correctly. After ALL_CACHES purge,
+the original repro export matched the fresh duplicate byte-for-byte. At x=498,
+y=683..705, all previous fringe alpha is now zero. Fresh exports at all four
+rotations were visually inspected; no residual perimeter lines observed.
+Artifacts: outputs/FSTR-Stretch-perimeter/after-purged.png, side-0-fresh.png
+through side-3-fresh.png; ready-to-check.aep saved and opened for the user.
+Host verification covers this 8-bit native-text fixture. Higher depths and
+projective corner coverage are core-test evidence, not broad host certification.
+Before distributing a new public version, bump the effect version to invalidate
+old caches; this local test installation explicitly purged them. No release.
