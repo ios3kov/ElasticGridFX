@@ -9,7 +9,8 @@ function EGFXBindingProbe(config, enabled) {
     if(l.name!=='__EGFX_TEST_TEXT' || !l.property('ADBE Text Properties') || effects.numProperties!==2)
         throw Error('Wrong text fixture');
     var fx=effects.property(2),names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL'];
-    if(fx.matchName!=='com.elasticgrid.fx.warp' || fx.numProperties!==27) throw Error('Wrong research schema');
+    if(fx.matchName!=='com.elasticgrid.fx.warp' || fx.numProperties!==28 ||
+       fx.property(28).matchName!=='ADBE Effect Built In Params') throw Error('Wrong research schema');
     var result=[];
     for(var i=0;i<4;i++) {
         var q=fx.property(24+i);

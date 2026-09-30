@@ -84,3 +84,35 @@ returned memory handle. Follow-up explicitly handles a successful null result,
 bounds UTF16 decoding and balances non-null memory and suite calls. A mocked
 null-result ABI regression and all research-config tests PASS (34/34). Native
 repeat required; null handling is a hypothesis for this specific host error.
+
+## Native hidden binding acceptance — 0db7077
+
+Clean source 0db707786ffb0f8b91c4dc07b576a892eaaae354,
+EGFX-d92302fb2f590dbb00d841c9, package SHA-256
+371de04b4580f4258b53d5babfae13d2291aaa9d41bd9099af0ed40337c588e8.
+AE 25.6.0 arm64, PID 52634. Research flags both enabled.
+
+- Automatic installation and immediate idempotency readback: PASS.
+- Expression evaluation on all four hidden corners: PASS.
+- Original effect's hidden expressions remain empty: PASS.
+- One native Cmd+Z clears all four; Cmd+Shift+Z restores all four: PASS.
+- 2D -> 3D -> Y30 -> 2D, without rewriting expressions: PASS; finite values,
+  rotation changes X and final 2D matches initial within 0.0001 pixel.
+- Exact live image UUID/path/payload: PASS, same PID.
+- Temporary second effect removal and fixture close without saving: PASS.
+- Ordinary 1eed79a restored, payload verified; receipt
+  EGFX-update-48f23f82e9944340890dd6f6bac83b58 ROLLED_BACK.
+
+Evidence: outputs/binding-empty-0db7077, including journals, verify-fixed.txt,
+undo.txt, redo.txt, transitions.txt, remove.txt and live-identity.json.
+First verifier wrongly expected 27 JSX properties and reported FAIL; schema.txt
+shows the additional native Compositing Options group at 28. The verifier now
+checks that exact built-in match name. Original FAIL preserved; corrected
+verification uses a separate report on the same immutable plugin. Node positive
+and negative schema controls PASS. Research Rust tests 34/34 PASS. Scanner
+review_required remains existing workflow/test findings, not security approval.
+
+This confirms the research binding mechanism only. Production target discovery,
+pending deletion/Undo cancellation, existing animated Grid Positions persistence,
+save/reload, non-interactive first render, shared overlay/picking/render geometry,
+camera/parent coverage remain NOT RUN or unimplemented. Stage 9 stays OPEN.

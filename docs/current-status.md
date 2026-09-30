@@ -25,6 +25,15 @@ guards and explicit Undo-close/recovery failures. See
 [transaction contract](stage9-binding-transaction.md). No hidden parameters or
 production host adapter are installed yet; real binding/Undo acceptance NOT RUN.
 
+Latest native research supersedes that NOT RUN: opt-in adapter on dedicated hidden
+parameters, clean 0db7077 / EGFX-d92302fb2f590dbb00d841c9, passed automatic binding,
+idempotency, native Undo/Redo and 2D/3D/Y30/2D coordinate evaluation in PID 52634.
+Exact loaded identity PASS. Research fixture closed unsaved and ordinary 1eed79a
+restored/verified. This adapter is compiled only with explicit research flags;
+the installed ordinary renderer and UI do not consume hidden coordinates yet.
+Production targeting, pending cancellation, animated key persistence, save/reload
+and first-render safety remain open. See the transaction document for exact scope.
+
 User requires automatic behavior when the layer's 3D switch changes. No Bind
 button, manual expression setup or precomposition requirement is acceptable.
 Grid Positions keys must survive both directions of the transition.
