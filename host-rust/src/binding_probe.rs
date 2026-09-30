@@ -17,7 +17,14 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
         else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
     // 0 pending; 1 2D layer-local; 2 3D text comp-space; 3 3D raster layer-local.
     // The marker is installed last and checked out with the four points.
-    if !comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding))? {return Ok(None);}
+    // AE may request a neutral first frame before the deferred binding runs.
+    // Only an exact initial identity can render without knowing the layer plane.
+    // Do not turn an unknown/deformed plane into a successful legacy render.
+    let initial_identity = kind == 0.0 && frame_context && cfg!(fstr_auto_binding)
+        && pending_frame_identity(params, checkout)?;
+    if !resolve_comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding),initial_identity)? {
+        return Ok(None);
+    }
     let par=in_data.pixel_aspect_ratio();
     if par.num<=0 || i64::from(par.num)!=i64::from(par.den) {
         return Err(ae::Error::BadCallbackParameter);
@@ -44,6 +51,62 @@ fn comp_space_kind(kind:f64,frame_context:bool,automatic:bool)->Result<bool,ae::
         0.0|1.0|3.0=>Ok(false),
         2.0=>Ok(true),
         _=>Err(ae::Error::BadCallbackParameter),
+    }
+}
+
+// Keep the original rejecting policy for every unproven pending frame. The
+// exception is a mathematically identical image, not a "ready" binding state.
+fn resolve_comp_space_kind(kind:f64,frame_context:bool,automatic:bool,initial_identity:bool)
+    ->Result<bool,ae::Error>{
+    if kind == 0.0 && frame_context && automatic && initial_identity {
+        return Ok(false);
+    }
+    comp_space_kind(kind,frame_context,automatic)
+}
+
+fn initial_identity_values(grid:&GridArb,topology:(i32,i32),mode:i32,
+                           wave:f64,easing:f64,min_spacing:f64)->bool {
+    // Deliberately narrower than every possible identity grid. No approximate
+    // equality, resizes, sanitization, or fallback from malformed saved state.
+    if topology != (4,4) || mode != 1 || wave.to_bits() != 0.0f64.to_bits()
+        || easing.to_bits() != 0.0f64.to_bits()
+        || min_spacing.to_bits() != 0.5f64.to_bits() {
+        return false;
+    }
+    let initial=GridArb::default();
+    grid == &initial
+        && grid.column_lines.iter().zip(&initial.column_lines)
+            .all(|(a,b)|a.to_bits()==b.to_bits())
+        && grid.row_lines.iter().zip(&initial.row_lines)
+            .all(|(a,b)|a.to_bits()==b.to_bits())
+}
+
+fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
+    // SmartPreRender has no valid ordinary params array. All dependencies used
+    // in this decision must be checked out just like the owned render snapshot.
+    let slider=|id| ->Result<i32,ae::Error>{
+        if checkout {checked_slider(params,id)} else {Ok(params.get(id)?.as_slider()?.value())}
+    };
+    let float=|id| ->Result<f64,ae::Error>{
+        if checkout {checked_float(params,id)} else {Ok(params.get(id)?.as_float_slider()?.value())}
+    };
+    let mode=if checkout {checked_popup(params,Params::PlaneMode)?}
+        else {params.get(Params::PlaneMode)?.as_popup()?.value()};
+    let topology=(slider(Params::Columns)?,slider(Params::Rows)?);
+    let wave=float(Params::WaveAmplitude)?;
+    let easing=float(Params::StretchEasing)?;
+    let spacing=float(Params::MinSpacing)?;
+    // Read the original arbitrary value: grid_snapshot/resized may repair bad
+    // state and therefore cannot establish the exact-identity precondition.
+    let matches=|grid:&GridArb|initial_identity_values(grid,topology,mode,wave,easing,spacing);
+    if checkout {
+        let checked=params.checkout(Params::GridState)?;
+        let value=checked.as_arbitrary()?.value::<GridArb>()?;
+        Ok(matches(&value))
+    } else {
+        let param=params.get(Params::GridState)?;
+        let value=param.as_arbitrary()?.value::<GridArb>()?;
+        Ok(matches(&value))
     }
 }
 
@@ -220,3 +283,7 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
         assert_eq!(RELEASES.load(Ordering::SeqCst),1);
     }
 }
+
+#[cfg(test)]
+#[path = "first_application_tests.rs"]
+mod first_application_tests;

@@ -33,3 +33,13 @@ Issues #7 (RAM Preview) and #8 (cancel/re-render) remain open until #9 is actual
 - https://ae-plugins.docsforadobe.dev/effect-basics/errors/ — propagate errors; interruption is not a successful frame.
 - https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/ — deferred idle wakeup is not synchronous initialization.
 - https://ae-plugins.docsforadobe.dev/smartfx/smartfx/ — checked-out pre-render dependencies and per-request data.
+
+## Implementation checkpoint
+
+The candidate adds an exact initial-neutral-image exception to the pending-plane guard. It does not claim that deferred binding already completed. Eligibility checks the original (not repaired/resized) 4x4 grid and pins bit-for-bit, Layer Plane mode, zero wave/easing, and default minimum spacing. Any non-identity/preset/invalid state retains the old error; known ready markers retain the old render path. SmartFX eligibility dependencies are checked out. No rendering/math/schema/binding-transaction changes.
+
+The real production CPU FFI is exercised by new Rust tests at 8/16/32 bpc for dense and sparse offset input, padded rows, alpha and finite negative/extended float values. The policy test explicitly reproduces the rejecting 0.9.1 branch and checks the new exact-neutral exception; one-ULP deformations remain rejected. Python tests guard the wiring and Node tests guard the new AE fixture; neither is host execution.
+
+`tests/ae_first_application.jsx` supplies one guarded host case for solid, text or Checkerboard precomp at an explicit depth and 2D/3D state. It captures before adding and immediately after adding in the same script turn, without dialog suppression or waiting for/repairing binding. It retains the owned test project and reports CAPTURED_NOT_FULL_ACCEPTANCE, never a blanket PASS. Real-host identity, error-dialog observation, decoded-pixel comparison and subsequent bound deformation remain required.
+
+Baseline automated evidence: hosted run 36729029845 on source checkpoint 7e8bd43786ca04048f9aaf25f7ab3dcb631c8823 succeeded (Rust contracts/Clippy, portable C++, Python and Node). Local Linux C++ baseline 19/19 PASS, 25.21 s; unchanged C++ source. New Rust tests and exact-head source gate must pass for the candidate; results belong to their GitHub run/commit, not this planned status. No new artifact has been installed or host-verified.
