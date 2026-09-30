@@ -13,6 +13,8 @@ function elasticGridTextPlaneProbe(config) {
     var source = layer.property("ADBE Text Properties").property("ADBE Text Document");
     var doc = source.value;
     doc.fontSize = 100; doc.applyFill = true; doc.fillColor = [1,1,1];
+    // Do not inherit the user's last-used leading (386 px hid line 2 in QA).
+    doc.autoLeading = false; doc.leading = 110;
     doc.justification = ParagraphJustification.CENTER_JUSTIFY;
     source.setValue(doc);
     layer.property("ADBE Transform Group").property("ADBE Position").setValue([320,200]);

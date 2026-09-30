@@ -42,3 +42,25 @@ assert.equal(valid.mutations(),1);assert.equal(valid.fx.selected,true);
 assert.throws(()=>valid.ctx.elasticGridTextPlaneToggle({...config,three_d:'false'}),/Invalid toggle config/);
 assert.equal(valid.mutations(),1);
 console.log('text plane probe structural ownership and positive control PASS');
+
+// Fixture layout must not inherit a user's very large last-used leading.
+{
+  let savedDocument;
+  const property={setValue(){}};
+  const doc={leading:386,autoLeading:true};
+  const text={property:()=>({value:doc,setValue:d=>{savedDocument={...d};}})};
+  const effect={property:()=>property};
+  const layer={property:n=>n==='ADBE Text Properties'?text:
+    n==='ADBE Effect Parade'?{addProperty:()=>effect}:{property:()=>property}};
+  const comp={layers:{addText:()=>layer},openInViewer(){}};
+  const ctx={app:{project:{file:null,numItems:0,dirty:false,
+    items:{addComp:()=>comp},save(){}}},
+    ParagraphJustification:{CENTER_JUSTIFY:1},
+    Folder:function(n){this.fsName=n;this.exists=true;},
+    File:function(n){this.fsName=n;this.exists=false;}};
+  vm.runInNewContext(source,ctx);
+  ctx.elasticGridTextPlaneProbe({run_id:'a'.repeat(32),folder:'/owned'});
+  assert.equal(savedDocument.leading,110);
+  assert.equal(savedDocument.autoLeading,false);
+}
+console.log('text plane fixture explicit leading PASS');

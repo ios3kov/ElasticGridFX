@@ -8,6 +8,31 @@
 
 ### Automatic 3D requirement (supersedes proposed binding button)
 
+Native viewer checkpoint 2026-09-30: clean c132d87 research candidate,
+Build ID EGFX-a3cbb3dcaa431d5641bcef11, package SHA-256
+938ece107b508c3cf804fcc26ffa20437db19c0854eeae0b298e8f709e0fbbbf.
+AE 25.6.0 arm64 PID 58472: loaded identity PASS; automatic four-point binding
+PASS; visual overlay alignment with native text bounds at Y0/Y30 PASS for
+the owned fixture only. Screenshots observed in the session, not a numerical
+pixel acceptance. Real pointer-drag, render parity, camera/parent and first
+noninteractive render remain NOT RUN. Stage 9 remains OPEN.
+Evidence: outputs/viewer-c132d87/{live-identity.json,add.txt,view.txt,bounds.txt,leading.txt}.
+The initial oversized rectangle was a fixture issue: inherited leading 386 px
+put the second line outside the comp. Bounds were identical with both effects
+disabled; setting owned test leading to 110 changed height 451.4296875 to
+175.4296875. Fixture generator now sets leading explicitly. Existing saved
+fixtures and the user's saved project were not overwritten.
+Test fixture closed without saving; receipt
+EGFX-update-aeffd076e24346808fa3cbd8df561776 ROLLED_BACK, ordinary 1eed79a
+installed payload reverified. No research build handed off for user work.
+Ordinary AE restarted and user's saved project reopened without modifications;
+ordinary live identity PASS (outputs/viewer-c132d87/restored/live-identity.json).
+Fixture safety/ownership tests, new explicit-leading test and expression
+restoration tests PASS; diff check PASS. Static audit exit 1 review_required,
+existing workflow pinning/checkout credentials and test auth heuristic only
+(work/viewer-native-audit-20260930.json). Next gate: shared render-coordinate
+consumer and native pointer-drag/renderer parity, not user acceptance yet.
+
 Research viewer integration, 2026-09-30 (after 8344162): explicit binding flag
 now lets Layer Plane on native 3D text consume the four hidden evaluated points
 for overlay geometry and inverse picking. Already projected comp coordinates
