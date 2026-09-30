@@ -49,7 +49,8 @@ and last cells continuously past vector bounds. Public Four Corners still uses
 - Static code audit: review_required, the same 26 baseline findings (20 unpinned
   actions, 5 retained checkout credentials, 1 rate-limit heuristic); none in the
   changed render code. This is not release certification.
-- Further live AE exports / installation: **NOT RUN for the new build**. The
+- Initial checkpoint, superseded by the installed verification below: further
+  live AE exports / installation were **NOT RUN for the new build**. The
   original live reproduction is preserved. A second AE process under LLDB
   appeared during verification; both bundle-ID and full-path DoScript targeting
   now fail with -600. Do not terminate the independently-owned debugger session
@@ -74,3 +75,13 @@ Host verification covers this 8-bit native-text fixture. Higher depths and
 projective corner coverage are core-test evidence, not broad host certification.
 Before distributing a new public version, bump the effect version to invalidate
 old caches; this local test installation explicitly purged them. No release.
+
+## User acceptance
+
+2026-09-30: following the manual checklist (400% perimeter inspection while
+moving guides, 3D layer/grid alignment, Grid Positions animation), the user
+replied “фиксируем”. Recorded as user acceptance of the installed correction,
+separate from the automated evidence above. Perimeter defect closed for this
+candidate. No additional merge, push or public release performed by this
+confirmation. Release preparation still requires an effect-version bump for
+cache invalidation and verification of that exact release artifact.
