@@ -11,6 +11,8 @@ mod plane;
 mod lifecycle_probe;
 #[cfg(test)]
 mod plane_contract_tests;
+#[cfg(test)]
+mod binding_transaction;
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
 }

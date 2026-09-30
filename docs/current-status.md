@@ -19,6 +19,12 @@ read-only deferred access, not automatic binding or a 3D fix. Next gate is an
 idempotent hidden-parameter binding transaction with Undo/deletion safety and
 non-interactive first-render handling; Grid Positions must remain untouched.
 
+Host-independent binding transaction is now implemented under tests only:
+conflict refusal, idempotency, rollback of partial setters, deletion/replacement
+guards and explicit Undo-close/recovery failures. See
+[transaction contract](stage9-binding-transaction.md). No hidden parameters or
+production host adapter are installed yet; real binding/Undo acceptance NOT RUN.
+
 User requires automatic behavior when the layer's 3D switch changes. No Bind
 button, manual expression setup or precomposition requirement is acceptable.
 Grid Positions keys must survive both directions of the transition.
