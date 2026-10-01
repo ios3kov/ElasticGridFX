@@ -246,17 +246,18 @@ Evidence is retained by default under
 
 Before any fixture is created the runner:
 
-1. verifies the manifest is exactly commit `2ccc5f6...`;
-2. verifies Build ID `EGFX-bd19dee13315abc0b7e6090e`;
-3. verifies the exact accepted ZIP SHA-256;
-4. performs the read-only loaded-image identity diagnostic against the running AE;
-5. refuses ambiguous/conflicting installed copies;
-6. resolves the matching `aerender` executable;
-7. verifies the installed bundle against the same artifact manifest.
+1. requires the running host to be **After Effects 25.6** on Apple Silicon macOS;
+2. verifies the manifest is exactly commit `2ccc5f6...`;
+3. verifies Build ID `EGFX-bd19dee13315abc0b7e6090e`;
+4. verifies the exact accepted ZIP SHA-256;
+5. performs the read-only loaded-image identity diagnostic against the running AE;
+6. refuses ambiguous/conflicting installed copies;
+7. resolves the matching `aerender` executable;
+8. verifies the installed bundle against the same artifact manifest.
 
 The `core` matrix then records the required ordinary-grid 1080p/4K 32-bpc
-static/animated MFR ON/OFF conditions, supporting 4K 8/16-bpc measurements and
-4K Four Corners static/animated MFR ON/OFF. A shorter `smoke` matrix exists only
+static/animated MFR ON/OFF conditions, an explicit `PERF094-RQ-003` 4K
+8/16/32-bpc matrix, and 4K Four Corners static/animated MFR ON/OFF. A shorter `smoke` matrix exists only
 for runner diagnosis and **cannot close Stage 1**.
 
 Even a complete aerender matrix reports `stage_status=BLOCKED`. It cannot promote
