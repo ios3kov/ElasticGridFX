@@ -11,11 +11,12 @@ function run(options={}){
  const rq={templates:options.noBest?[]:['Best Settings'],applyTemplate(){},timeSpanStart:0,timeSpanDuration:0,skipFrames:0,render:false,outputModule(){return om;}};
  const project=Object.prototype.hasOwnProperty.call(options,'project') ? options.project : {file:null,numItems:0,dirty:false,bitsPerChannel:16,workingSpace:'',linearizeWorkingSpace:false,
    importFile(){calls.import++;return{};},items:{addComp(){calls.comp++;return comp;}},
-   renderQueue:{items:{add(){return rq;}}},
+   renderQueue:{numItems:0,items:{add(){return rq;}}},
    save(file){calls.save++;this.file=file;this.dirty=false;files[file.fsName]='AEP';},
    close(){calls.close++;if(options.closeFail)return false;app.project=null;return true;}
  };
  if(options.noDirtyProperty && project) delete project.dirty;
+ if(options.forceDirty && project) project.dirty=true;
  const app={project,version:'fixture',beginSuppressDialogs(){calls.dialogs++;},endSuppressDialogs(){calls.dialogs--;},
    newProject(){calls.newProject++;app.project={bitsPerChannel:16};return app.project;}};
  function File(n){this.fsName=String(n);Object.defineProperty(this,'exists',{get:()=>Object.hasOwn(files,this.fsName)});Object.defineProperty(this,'length',{get:()=>files[this.fsName]?.length||0});this.open=()=>true;this.write=t=>{files[this.fsName]=t;};this.close=()=>{};}
@@ -27,16 +28,36 @@ function run(options={}){
  return {app,calls,files,capture};
 }
 for(const project of [
- {file:{fsName:'/user/work.aep'},numItems:1,dirty:false,bitsPerChannel:16},
- {file:null,numItems:1,dirty:true,bitsPerChannel:16},
- {file:null,numItems:0,dirty:true,bitsPerChannel:16},
+ {file:{fsName:'/user/work.aep'},numItems:1,dirty:false,bitsPerChannel:16,renderQueue:{numItems:0}},
+ {file:null,numItems:1,dirty:true,bitsPerChannel:16,renderQueue:{numItems:0}},
+ {file:null,numItems:0,dirty:true,bitsPerChannel:16,renderQueue:{numItems:1}},
  null
 ]){
  const {calls,app}=run({project});
  assert.notEqual(app.exitCode,0);assert.equal(calls.save+calls.close+calls.newProject,0,'unsafe project untouched');
 }
 {
+ const {app,capture}=run({project:undefined});
+ assert.notEqual(app.exitCode,0);
+}
+{
+ const base=run();
+ const project=base.app.project;
+ // The real AE 25.6 host can mark a fresh empty project dirty. The runner must
+ // rely on unsaved + no items + empty render queue instead.
+ const fresh={file:null,numItems:0,dirty:true,bitsPerChannel:16,workingSpace:'',linearizeWorkingSpace:false,
+   importFile(){return{};},items:{addComp(){return {resolutionFactor:[1,1],layers:{add(){return {property(){return {addProperty(){return null;}}};}}};}}},
+   renderQueue:{numItems:0,items:{add(){return{};}}},save(){},close(){return true;}};
+ // Use the normal harness instead of this synthetic object for success below;
+ // this assertion documents that dirty alone is no longer a refusal condition.
+ assert.equal(fresh.dirty,true);
+}
+{
  const {app,capture}=run({noDirtyProperty:true});
+ assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
+}
+{
+ const {app,capture}=run({forceDirty:true});
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
 }
 for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true},{geometry:'bad'}]){
