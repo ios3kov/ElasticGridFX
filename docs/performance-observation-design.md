@@ -45,3 +45,20 @@ Source verification: default Rust 61 tests; feature Rust 65 tests and strict
 Clippy; complete Python 246/246 (including native owned-process observations). Runtime, sealed package and target
 pixel checks remain separate gates. Build/CI outcomes are recorded in the current
 checkpoint, not implied by this design.
+
+## Effect-cache identity
+
+Accepted 0.9.3 and initial performance artifacts retained Develop build 1. The
+[SDK guide's cache discussion](https://ae-plugins.docsforadobe.dev/effect-details/tips-tricks/#global-performance-cache-consideratons)
+says the effect version participates in the Global Performance Cache key. This
+is an additional confounder in the rejected RGB8 observations; reuse was not
+proved. Continue with Develop build 2 for ordinary performance builds and build 3
+for `render-diagnostics`, retaining product version 0.9.3. No global cache purge,
+match-name/parameter/state change or image-quality change.
+
+Verified pinned source: `pipl 0.1.1` `AE_Effect_Version` emits the same `pf_version`
+into resource `eVER` and `PIPL_VERSION`. `after-effects 0.4.0` EffectMain sets
+`PF_OutData.my_version` from that environment value in GlobalSetup. Builds 1/2/3
+fit the existing nine-bit build field. Existing API/property only, no new host
+call. Verify real packaged resource and generated compile values for both variants;
+runtime callback evidence and uninstrumented timing remain required.

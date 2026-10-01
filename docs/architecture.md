@@ -78,6 +78,9 @@ Callbacks are not unique frames; missing observations do not prove cache hits.
 Overlapping sampling intervals do not establish concurrent CPU execution.
 Active Cargo features participate in Build Identity. A diagnostic and default
 build cannot share a Build ID for the same source/toolchain/settings.
+The existing PiPL effect version separates Develop build 2 (ordinary) and 3
+(observer) from accepted build 1, so validation variants use distinct effect
+cache identities without global purge. Product/saved-state versions are unchanged.
 See [observation design](performance-observation-design.md). Actual diagnostic
 host execution and uninstrumented target timing remain pending.
 

@@ -20,6 +20,9 @@
   fresh-render verification. Default builds do not log or add observer locks.
   Pin active Cargo features into Build Identity so diagnostic artifacts cannot
   share an identity with normal builds. Host diagnostic execution remains pending.
+- Separate ordinary and diagnostic AE effect Develop builds (2/3) from the
+  accepted build 1 cache identity, without purging caches or changing saved data.
+  Verify existing PiPL/GlobalSetup version propagation; actual callbacks pending.
 - Adopt the user-selected central AE-Development-Rules baseline and resume
   Stage 8 without rewriting prior acceptance evidence.
 

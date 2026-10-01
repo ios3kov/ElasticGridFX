@@ -304,3 +304,24 @@ package from identical source must differ. Feature Rust 65/65, strict Clippy
 and Python 246/246 PASS. Package sealing, loaded identity, real callback capture and pixel parity
 remain pending. This source/tooling block does not accept target throughput or
 RAM Preview; the Mac is still locked and the original installed payload restored.
+
+
+## Cache-version separation before fresh host profiling
+
+Ordinary observer-source checkpoint `dabf4d1` passed complete physical-Mac
+20-stage preflight, Rust 61/61, clean reproducible builds and sealed/extracted
+bundle verification. Retain its artifact; no installation was performed.
+
+Direct resource inspection shows accepted and 41283e3 plugins both used encoded
+0.9.3 Develop build 1 (`eVER` 301057). The SDK cache guide identifies effect
+version as part of the cache key. This adds an uncontrolled confounder to earlier
+process-start runs; it does not prove cache reuse or explain the pixel mismatch.
+The next checkpoint selects existing effect Develop builds 2/3 for ordinary and
+instrumented variants. Existing pinned PiPL and GlobalSetup propagation sources
+were verified; no new API, saved-state change or cache purge.
+
+A separate independent straight-RGBA16 decoder is prepared in the private host
+workspace. Exact calibration includes low RGB bits and low alpha; it passes all
+sample values with no premultiplication or 8-bit reduction. This is preparation,
+not actual target pixel evidence. Final host comparisons remain pending Mac
+unlock.

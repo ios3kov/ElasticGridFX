@@ -59,7 +59,14 @@ instrumented and ordinary artifacts distinct. The reader rejects malformed,
 partial and capped logs as performance evidence. Diagnostic logging perturbs
 execution; final timing must use the default artifact.
 
-Sealed packages and actual host observation remain pending. This block prepares
+Ordinary checkpoint `dabf4d1` complete physical-Mac 20-stage preflight, default
+Rust 61/61, reproducible builds and sealed/extracted bundle checks PASS. That
+artifact is retained separately. Inspection confirms its resource effect version
+matches accepted build 1; cached frames are an additional uncontrolled confounder,
+not an established cause of the rejected host series. The next source checkpoint
+uses existing PiPL Develop build 2 (ordinary) / 3 (observer), without purging user
+cache or changing saved parameters. See [verified source contracts](performance-observation-design.md#effect-cache-identity).
+New sealed packages and actual host observation remain pending. This block prepares
 fresh-render/cache and phase attribution; it does not close Stage 8 or establish
 RAM Preview/AE acceleration. See [design](performance-observation-design.md).
 
@@ -78,7 +85,8 @@ RAM Preview/AE acceleration. See [design](performance-observation-design.md).
   contracts. New API use requires source/signature/version verification.
 - Branch: `perf/plane-render-throughput`; native source checkpoint `41283e3`, tooling checkpoint `1fcb0f3`. The next
   observation checkpoint adds optional host instrumentation and feature-aware
-  identity; default sampling and host behavior remain unchanged. Preserve exact artifact
+  identity; sampling and saved-data behavior remain unchanged. The next cache
+  identity correction separates ordinary/observer effect Develop builds. Preserve exact artifact
   identity above; recheck HEAD/tree before dependent actions.
 
 | Confirmed scope / permission | Source | Still applies |
