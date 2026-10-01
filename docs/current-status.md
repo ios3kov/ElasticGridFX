@@ -14,17 +14,77 @@ scale. Other geometries keep the general mapping. Per-channel tap/arithmetic
 order, Final Catmull-Rom, integer rounding, float/HDR, C ABI and saved data remain
 unchanged. Independent-frame caches are call-local, with no retained source data.
 
-Initial native baseline/candidate pixels were byte-identical in all 31 external
-finite scenes; initial median improvement was 12.3x at 1080p/32 bpc and 12.8x at
-4K/32 bpc. Linux CI then exposed a NaN-payload difference in the new float test.
-The corrected renderer recomputes NaN channels with the historical scalar loop;
-all 16 new external exceptional-float scenes match the original renderer exactly
-on arm64 and x86 via Rosetta. Updated timing and full candidate gates are pending;
-the initial packaged candidate is withheld. Initial local C++ 21/21 (Release/host math/ASan+UBSan), TSan,
-Rust 61/61, Clippy and Python 239/239 PASS. New target-AE Render and
-RAM Preview acceleration is **NOT RUN**, not inferred from native timings.
+Corrected source `41283e3d0935160da669d7ec69bc4ae01d51f264`: native
+baseline/candidate pixels are byte-identical in 31 finite scenes and 16 additional
+exceptional-float arm64/x86-Rosetta checks. Five alternating pairs show 12.06x
+median improvement at 1080p/32 bpc and 12.84x at 4K/32 bpc for eligible deformed
+planes. Perspective: 1.26x. No target-AE speed claim follows from these timings.
+
+Corrected code passed strict host-math C++ 21/21, ASan+UBSan 21/21 and TSan.
+Its complete physical-Mac 20-stage preflight, Rust 61/61/Clippy, real Metal,
+dependency audit, two clean reproducible builds, signed bundle and extracted ZIP
+checks PASS. Linux GCC/Clang/static/ASan+UBSan/TSan and two regression CI jobs PASS;
+hosted macOS source gate PASS. All eight checks at source 41283e3 PASS.
+
+Validation artifact: Build `EGFX-ce45a845413a943552df0258`, source `41283e3`, ZIP
+SHA-256 `a3c001599dc615996a666eac2a6976b2576adf4a0d5ccd4f85cc1daf86dbf362`.
+User explicitly authorized temporary replacement. Candidate 41283e3 was temporarily
+installed for test; exact old `2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e` inode,
+content/modes/xattrs were retained and verified in a transaction backup. Receipt
+`EGFX-update-b2a4807ee046479ab986a4bd9b1a972b`. Loaded GUI-AE and aerender image identity PASS for the exact candidate. The
+unchanged legacy PNG smoke passed five ordinary pixel checks but did not produce
+the Adjustment Layer chain frame; the full matrix remains BLOCKED pending baseline
+comparison. An immutable animated 1080p/32-bpc/Final 60-frame AEP was prepared in
+a controlled workspace. Its alternating aerender series retained nine successful
+runs but stopped on a changed process key at run 9; five measured pairs were
+not obtained. Decoded RGB8 equality FAIL (max 1/255), including a baseline repeat.
+No target speed claim is accepted. Exact external native checks on the same
+pattern pass all 16 cases; this is not AE checkout proof. New fixtures now require
+verified straight RGBA16 with recorded color state and encoded-header validation.
+Python 240/240 and all 12 JSX control-flow files PASS; mocks are not host proof.
+Original installed payload is restored; Adobe hosts stopped. GUI continuation
+is waiting for the user to unlock the Mac. RAM Preview remains NOT RUN. No cache purge, main merge
+or public release. Initial aefeb4b artifact is withheld after
+its x86 NaN-payload FAIL; corrected tests retain exact equality.
 See [the resumed performance record](performance-resume-2026-10-01.md).
-No installed plugin replacement, cache purge, main merge or public release.
+
+### Resume checkpoint — AI-STATE-001
+
+- Goal: quality-preserving Render/RAM Preview acceleration, requested by the user
+  on 2026-10-01; [quality contract](performance-quality-contract.md) covers this
+  scope. Stage 8 exit requires actual host timings and unchanged output.
+- Rules: v5.0.0 candidate / `b27f45467e0a9152fc82c1072438dfed07f0c36e`, refreshed
+  at the user's explicit request, with AI_ENTRYPOINT read first. Stable published
+  standard remains v4.0.0. Applicable native Critical risk; Development work and
+  limited Validation artifact, no Release request.
+- Components: existing Rust `after-effects 0.4.0` SDK-less host and C++ plane
+  sampler, Apple Silicon/macOS 26.6.2 physical checks; AE 2025 / 25.6 target scope.
+  No new SDK/host API use; reuse current integration evidence only for unchanged
+  contracts. New API use requires source/signature/version verification.
+- Branch: `perf/plane-render-throughput`; source checkpoint `41283e3`. Subsequent
+  tooling/documentation checkpoint changes no renderer/host code. Preserve exact artifact
+  identity above; recheck HEAD/tree before dependent actions.
+
+| Confirmed scope / permission | Source | Still applies |
+|---|---|---|
+| Continue this repository under central rules | Original user request, 2026-10-01 | Source edits and relevant checks |
+| Extremely fast Render/RAM Preview, no quality loss | User clarification, 2026-10-01; quality contract | No filter/precision/resolution downgrade |
+| Push performance branch and open draft PR | Explicit user answer, 2026-10-01 | [PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20), ongoing branch updates |
+| Reread current AI_ENTRYPOINT and continue | User instruction, 2026-10-01 | Adopt current v5.0.0 candidate baseline for continuing work |
+| Temporary installed-plugin replacement | Explicit user message, 2026-10-01 | Exact 41283e3 candidate, preserve original for rollback |
+| Close projects without saving in After Effects | Explicit user message and AE-only clarification, 2026-10-01 | AE project closure allowed; does not extend to other apps |
+| Finish development continuously with stage statuses | Explicit user instruction, 2026-10-01 | Continue applicable development/validation; report each completed block, then continue |
+
+Temporary candidate installation is authorized; original is restored between experiments. Controlled host
+validation continues on synthetic projects; merge, release and cache purge
+are outside the current authorization. Closing AE projects without saving is
+explicitly authorized. The task-state record points to the conversation; it is
+not independent authorization.
+
+Next: finish straight-RGBA16 host validation after Mac unlock, compare the missing legacy chain capture
+on the original plugin, and run the existing straight-RGBA16 plane/3D/AEP matrix.
+Accept Render timings only after pixel parity; RAM Preview needs externally
+observed cache-build/playback measurements. Independent source/CI/documentation work continues alongside host validation. Stage 8 remains IN PROGRESS.
 
 Canonical rules now point to the user-selected AE-Development-Rules baseline.
 Earlier project evidence and the accepted 0.9.3 runtime candidate below remain

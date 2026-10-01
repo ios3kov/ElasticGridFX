@@ -14,6 +14,7 @@ function elasticGridPerfFixture(config) {
         if (!(config.bit_depth===8 || config.bit_depth===16 || config.bit_depth===32)) throw new Error("Unsupported bit depth");
         if (!(config.fps===30 && config.duration===2)) throw new Error("Unsupported fixture timing");
         if (!(config.mode==="static" || config.mode==="animated")) throw new Error("Unsupported fixture mode");
+        if (!(config.output_precision===8 || config.output_precision===16)) throw new Error("Unsupported output precision");
         var folder=new Folder(config.folder);
         if (!folder.exists) throw new Error("Workspace missing");
         var input=new File(config.folder+"/pattern.png");
@@ -28,6 +29,9 @@ function elasticGridPerfFixture(config) {
         app.beginSuppressDialogs(); suppressing=true;
         initialBpc=app.project.bitsPerChannel;
         owned=app.project;
+        owned.workingSpace="";owned.linearizeWorkingSpace=false;
+        if ((owned.workingSpace!=="" && owned.workingSpace!=="None") || owned.linearizeWorkingSpace!==false)
+            throw new Error("Fixture color state was not applied");
         owned.bitsPerChannel=config.bit_depth;
         if (owned.bitsPerChannel!==config.bit_depth) throw new Error("Bit depth not applied");
 
@@ -53,7 +57,10 @@ function elasticGridPerfFixture(config) {
         rq.timeSpanStart=0.0; rq.timeSpanDuration=config.duration; rq.skipFrames=0; rq.render=true;
         var om=rq.outputModule(1);
         result.stage="output_template";
-        var outputTemplate=hasTemplate(om.templates,"PNG Sequence") ? "PNG Sequence" : (hasTemplate(om.templates,"png") ? "png" : null);
+        // Reuse the straight RGBA16 template already verified by the target
+        // plane fixture. A template label alone is never precision evidence.
+        var outputTemplate=config.output_precision===16 && hasTemplate(om.templates,"_HIDDEN X-Factor 16") ? "_HIDDEN X-Factor 16" :
+            (hasTemplate(om.templates,"PNG Sequence") ? "PNG Sequence" : (hasTemplate(om.templates,"png") ? "png" : null));
         if (outputTemplate===null) throw new Error("PNG Sequence template unavailable");
         om.applyTemplate(outputTemplate);
         // OutputModule objects may be invalidated by settings changes; reacquire.
@@ -66,6 +73,11 @@ function elasticGridPerfFixture(config) {
         result.stage="output_format";
         if (!settings || String(settings.Format)!=="PNG Sequence") throw new Error("Output format is not PNG Sequence");
         if (String(settings.Resize)!=="false" || String(settings.Crop)!=="false") throw new Error("Output geometry changed");
+        if (config.output_precision===16 && (String(settings.Depth)!=="Trillions of Colors+" ||
+            String(settings.Channels)!=="RGB + Alpha" || String(settings.Color)!=="Straight (Unmatted)"))
+            throw new Error("Required straight RGBA16 output was not applied");
+        if (config.output_precision===8 && String(settings.Depth)!=="Millions of Colors")
+            throw new Error("Legacy RGB8 output was not applied");
 
         result.stage="save";
         owned.save(projectFile);
@@ -79,6 +91,9 @@ function elasticGridPerfFixture(config) {
         result.composition="EGFX_PERF"; result.rqindex=1;
         result.render_template="Best Settings"; result.output_template=outputTemplate;
         result.output_format="PNG Sequence"; result.output_pattern="frame_[#####].png";
+        result.output_precision=config.output_precision;result.output_depth=String(settings.Depth);
+        result.output_channels=String(settings.Channels);result.output_color=String(settings.Color);
+        result.working_space=String(owned.workingSpace);result.linearize=owned.linearizeWorkingSpace;
     } catch (error) {
         result.status="FAIL";
         result.error_number=typeof error.number==='number' ? error.number : null;
@@ -112,6 +127,9 @@ function elasticGridPerfFixture(config) {
                     ',"output_template":'+q(result.output_template||"")+
                     ',"output_format":'+q(result.output_format||"")+
                     ',"output_pattern":'+q(result.output_pattern||"")+
+                    ',"output_precision":'+(result.output_precision||0)+',"output_depth":'+q(result.output_depth||"")+
+                    ',"output_channels":'+q(result.output_channels||"")+',"output_color":'+q(result.output_color||"")+
+                    ',"working_space":'+q(result.working_space||"")+',"linearize":'+String(result.linearize===true)+
                     ',"saved":'+(saved?"true":"false")+
                     ',"error_number":'+(result.error_number==null?'null':result.error_number)+
                     ',"error_line":'+(result.error_line==null?'null':result.error_line)+'}');

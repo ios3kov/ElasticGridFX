@@ -5,8 +5,8 @@ https://github.com/ios3kov/AE-Development-Rules
 
 Start with [AI_ENTRYPOINT.md](https://github.com/ios3kov/AE-Development-Rules/blob/main/AI_ENTRYPOINT.md), then select the rules applicable to the actual task. This file is a project pointer and additions, not a modified copy of the standard.
 
-Baseline reviewed on 2026-10-01: **4.1.0 candidate**, commit
-`05bd9a8d71c11280d972b96caf64b776f2a075d7`. The standard identifies 4.0.0 as
+Baseline reviewed on 2026-10-01: **5.0.0 candidate**, commit
+`b27f45467e0a9152fc82c1072438dfed07f0c36e`. The standard identifies 4.0.0 as
 its published stable baseline; this task follows the user-selected current
 repository. Pin both version and commit for subsequent milestone evidence.
 
@@ -31,6 +31,11 @@ Stage 8 skip remains historical; it does not cancel the resumed task.
   to a new binary or claim AE acceleration from a standalone benchmark.
 - Keep projects, installed plugins, rollback backups and historical evidence.
   Development does not authorize installation, cache purge, merge or release.
+
+The user requested a fresh rules read during this block. AI_ENTRYPOINT was read
+first; the prior 4.1.0 / 05bd9a8 adoption remains provenance for initial evidence.
+Apply AI-STATE-001/AI-AUTO-001 checkpoints and API-SOURCE-001 before any new or
+changed Adobe API call. No Adobe API call changes in the current native sampler.
 
 Read [current status](docs/current-status.md) and
 [the resumed performance record](docs/performance-resume-2026-10-01.md).

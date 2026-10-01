@@ -87,5 +87,15 @@ cmake --build build --parallel 2 --target elasticgrid_plane_bench
 
 Modes: `region`, `layer`, `perspective`, `identity`; storage: `dense` or `sparse`.
 The JSON reports cold and warmed native frame times at Final Bicubic with abort
-polling. An optional final filename writes exact pixel/padding bytes for comparison.
+polling. An optional filename writes exact pixel/padding bytes for comparison. A following
+`nonfinite` argument injects exceptional 32-bpc pixels for byte-parity checks.
 This is a standalone plane-bridge benchmark, not After Effects or RAM Preview.
+
+### Controlled target-AE performance fixture
+
+`tools/perf_fixture_runner.py` defaults to verified straight RGBA16 output and
+records the owned project's unmanaged color state in fixture schema 2. It refuses
+a template whose actual settings have the wrong depth, alpha, matting or geometry.
+`--output-precision 8` is retained for legacy dithering research, not exact-fidelity
+acceptance. Schema-1 observations remain historical; their unknown output depth
+is not upgraded retroactively. PNG is not a float/HDR oracle.

@@ -2,7 +2,27 @@
 
 Targets are engineering acceptance criteria, not marketing claims.
 
-## Current CPU development baseline
+## Current target-path checkpoint — 2026-10-01
+
+Source 41283e3 accelerates the currently integrated native plane sampler. On the
+physical M1 Pro / 16 GiB target, five alternating native Final comparisons give
+32.0415 ms at 1080p/32 bpc and 127.145 ms at 4K/32 bpc for eligible deformed
+planes. The general sparse-perspective case is 180.010 ms at 1080p. These are
+full native C-bridge medians; they exclude AE checkout, conversion, export and
+RAM Preview. Exact settings, samples and pixel parity are in
+[the corrected comparison](performance-plane-corrected-comparison-2026-10-01.json).
+They do not establish real-time host performance or the Metal targets below.
+
+Actual target-AE alternating Render measurements and host pixel checks are in
+progress. RAM Preview generation/playback and drag latency remain NOT RUN for
+this candidate. Freeze host targets only after a valid controlled baseline; do
+not derive them from these native medians. Stage 8 remains IN PROGRESS.
+
+The older CPU path numbers below are historical and do not describe the active
+plane sampler. AE GPU dispatch remains disabled; physical Metal backend tests
+are separate supporting evidence.
+
+## Historical CPU development baseline
 
 Linux/x86-64 development container, 3840×2160, full C bridge including grid/wave evaluation,
 LUT/sampling-plan preparation and pixel render. Repeated-run approximate values:

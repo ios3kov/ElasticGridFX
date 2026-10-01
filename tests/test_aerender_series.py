@@ -1,9 +1,11 @@
 from pathlib import Path
 import sys
 import unittest
+import struct
+import tempfile
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from aerender_series import mapped_candidate, schedule, progress_record
+from aerender_series import mapped_candidate, schedule, progress_record, verify_png_geometry
 
 class SeriesContract(unittest.TestCase):
     def test_schedule(self):
@@ -28,5 +30,20 @@ class MappedIdentity(unittest.TestCase):
         self.assertFalse(mapped_candidate('p123\nn/old/ElasticGrid\n',123,path))
         self.assertFalse(mapped_candidate('p123\nn'+str(path)+'\nn/old/ElasticGrid\n',123,path))
         self.assertFalse(mapped_candidate('p123\nn/Library/Other.plugin\n',123,path))
+
+class OutputPrecision(unittest.TestCase):
+    def test_encoded_header_must_match_the_declared_output(self):
+        fixture=dict(schema=2,width=1920,height=1080,output_bit_depth=16,output_channels='RGBA')
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'frame.png'
+            def write(w=1920,h=1080,depth=16,color=6,interlace=0):
+                path.write_bytes(b'\x89PNG\r\n\x1a\n'+struct.pack('>I',13)+b'IHDR'+
+                    struct.pack('>IIBBBBB',w,h,depth,color,0,0,interlace)+b'\x00'*4)
+            write();verify_png_geometry(path,fixture)
+            for values in (dict(depth=8),dict(color=2),dict(w=960),dict(interlace=1)):
+                write(**values)
+                with self.subTest(values=values),self.assertRaises(ValueError):verify_png_geometry(path,fixture)
+            path.write_bytes(b'\x89PNG\r\n\x1a\n')
+            with self.assertRaises(ValueError):verify_png_geometry(path,fixture)
 
 if __name__=='__main__': unittest.main()

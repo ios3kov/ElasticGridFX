@@ -83,8 +83,21 @@ Earlier blocked reports remain historical and are not rewritten as PASS.
 
 2026-10-01: user explicitly resumed acceleration without quality loss.
 Current work/evidence: [performance-resume-2026-10-01.md](performance-resume-2026-10-01.md).
-Standalone native optimization is in progress; new AE Render/RAM Preview speed
-acceptance remains NOT RUN.
+Native bounded optimization and eight CI source gates PASS at 41283e3.
+Target AE speed acceptance remains IN PROGRESS. The user requested uninterrupted
+development with stage status reports, then continued work.
+
+Current scoped blocks:
+- 8.1 Native exact sampler optimization: PASS, including 16 same-input pattern comparisons.
+- 8.2 Measurement safety/precision: Python 240/240 and 12 JSX control-flow files PASS;
+  default straight RGBA16 and recorded color state. Real new-format execution pending.
+- 8.3 Target pixel/plane/3D/AEP matrix: IN PROGRESS; legacy Adjustment capture missing.
+- 8.4 Target Render: NOT ACCEPTED; incomplete process-start series and RGB8 exact-pixel FAIL.
+- 8.5 RAM Preview cache-build/playback/invalidation: NOT RUN for this candidate.
+- 8.6 UI response/cancel lifecycle and final scoped candidate validation: pending.
+
+Original installed bundle is restored. Mac unlock is required for further GUI
+work; independent source/tooling work continues. No merge or release is implied.
 
 2026-09-29: user explicitly requested skipping performance acceleration.
 Retain collected measurements as historical evidence; incomplete RAM Preview,

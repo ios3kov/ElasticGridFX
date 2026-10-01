@@ -12,6 +12,10 @@
 - Run new cache tests in sanitizer/TSan gates and trigger Rust host regression
   for all relevant native/host source changes. AE/RAM Preview speed acceptance
   remains separate from standalone renderer measurements.
+- Require verified straight RGBA16 and explicit color context for new host
+  performance fixtures; retain schema-1 historical fixtures. Verify actual PNG
+  encoded depth/channels and preserve rejected render-process identity evidence.
+  Do not accept incomplete/dithered RGB8 observations as target speed proof.
 - Adopt the user-selected central AE-Development-Rules baseline and resume
   Stage 8 without rewriting prior acceptance evidence.
 

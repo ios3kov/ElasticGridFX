@@ -71,8 +71,16 @@ def load_fixture(workspace: Path, fixture_path: Path) -> dict:
     required = {'schema','fixture_id','project','project_sha256','composition','rqindex',
                 'width','height','fps','frame_start','frame_end','bit_depth',
                 'quality','output_format','output_pattern'}
-    if set(data) != required or data['schema'] != 1:
+    precision_fields={'output_bit_depth','output_channels','output_color','working_space','linearize'}
+    if not ((data.get('schema')==1 and set(data)==required) or
+            (data.get('schema')==2 and set(data)==required|precision_fields)):
         raise ValueError('invalid performance fixture schema')
+    if data['schema']==2:
+        if data['working_space'] not in ('','None') or data['linearize'] is not False:
+            raise ValueError('invalid fixture color context')
+        if not ((data['output_bit_depth']==16 and data['output_channels']=='RGBA' and data['output_color']=='Straight (Unmatted)') or
+                (data['output_bit_depth']==8 and data['output_channels']=='RGB' and isinstance(data['output_color'],str))):
+            raise ValueError('invalid fixture output precision')
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', data['fixture_id']):
         raise ValueError('invalid fixture identifier')
     project_rel = PurePosixPath(data['project'])

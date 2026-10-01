@@ -20,10 +20,10 @@ from smoke_pixels import pattern
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str)->tuple[Path,dict]:
+def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str,output_precision:int=16)->tuple[Path,dict]:
     root=checked_path(root)
     root.mkdir(parents=True,exist_ok=True)
-    if not ((width,height) in ((1920,1080),(3840,2160))) or bit_depth not in (8,16,32) or mode not in ('static','animated'):
+    if not ((width,height) in ((1920,1080),(3840,2160))) or bit_depth not in (8,16,32) or mode not in ('static','animated') or output_precision not in (8,16):
         raise ValueError('unsupported performance fixture configuration')
     run_id=uuid.uuid4().hex
     folder=root/('EGFX-perf-'+run_id)
@@ -31,7 +31,7 @@ def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str)->tuple[Path,d
     pattern(folder/'pattern.png',width,height)
     source=(ROOT/'tests/perf_fixture.jsx').read_text()
     config=dict(run_id=run_id,folder=str(folder.resolve()),width=width,height=height,
-                bit_depth=bit_depth,fps=30,duration=2,mode=mode)
+                bit_depth=bit_depth,fps=30,duration=2,mode=mode,output_precision=output_precision)
     (folder/'run.jsx').write_text(source+'\nelasticGridPerfFixture('+json.dumps(config)+');\n')
     meta=dict(schema=1,run_id=run_id,status='NOT RUN',actual_ae_execution=False,
               config={k:v for k,v in config.items() if k!='folder'},
@@ -51,17 +51,26 @@ def inspect(folder:Path,meta:dict)->dict:
         if data.get(key)!=cfg[key]: raise ValueError('fixture capture configuration mismatch')
     if data.get('fps')!=30 or data.get('duration')!=2 or data.get('composition')!='EGFX_PERF' or data.get('rqindex')!=1:
         raise ValueError('fixture render configuration mismatch')
-    if data.get('render_template')!='Best Settings' or data.get('output_template') not in ('PNG Sequence','png') or data.get('output_format')!='PNG Sequence':
+    if data.get('render_template')!='Best Settings' or data.get('output_template') not in ('PNG Sequence','png','_HIDDEN X-Factor 16') or data.get('output_format')!='PNG Sequence':
         raise ValueError('required render/output templates were not applied')
+    precision=cfg['output_precision']
+    if data.get('output_precision')!=precision or data.get('working_space') not in ('','None') or data.get('linearize') is not False:
+        raise ValueError('output precision or controlled color context was not recorded')
+    if precision==16 and (data.get('output_depth')!='Trillions of Colors+' or data.get('output_channels')!='RGB + Alpha' or data.get('output_color')!='Straight (Unmatted)'):
+        raise ValueError('required straight RGBA16 output was not applied')
+    if precision==8 and (data.get('output_depth')!='Millions of Colors' or data.get('output_channels')!='RGB'):
+        raise ValueError('legacy RGB8 output was not applied')
     if data.get('output_pattern')!='frame_[#####].png':
         raise ValueError('unexpected fixture output pattern')
     project=bi.safe_file(folder,'EGFX_PERF.aep')
-    fixture=dict(schema=1,fixture_id=f"egfx-perf-{cfg['width']}x{cfg['height']}-{cfg['bit_depth']}bpc-{cfg['mode']}",
+    fixture=dict(schema=2,fixture_id=f"egfx-perf-{cfg['width']}x{cfg['height']}-{cfg['bit_depth']}bpc-{cfg['mode']}-{precision}out",
                  project='EGFX_PERF.aep',project_sha256=ab.file_digest(project),
                  composition='EGFX_PERF',rqindex=1,width=cfg['width'],height=cfg['height'],
                  fps=30.0,frame_start=0,frame_end=59,bit_depth=cfg['bit_depth'],
                  quality='Final Bicubic',output_format='PNG sequence',
-                 output_pattern='frame_[#####].png')
+                 output_pattern='frame_[#####].png',output_bit_depth=precision,
+                 output_channels='RGBA' if precision==16 else 'RGB',
+                 output_color=data['output_color'],working_space=data['working_space'],linearize=False)
     bi.dump(folder/'fixture.json',fixture)
     return fixture
 
@@ -105,12 +114,13 @@ def main()->int:
     p.add_argument('--root',type=Path,required=True)
     p.add_argument('--width',type=int,default=1920);p.add_argument('--height',type=int,default=1080)
     p.add_argument('--bit-depth',type=int,default=32);p.add_argument('--mode',choices=('static','animated'),default='animated')
+    p.add_argument('--output-precision',type=int,choices=(8,16),default=16,help='16: verified straight RGBA; 8: legacy dithering research only')
     p.add_argument('--ae-app',type=Path);p.add_argument('--installed-bundle',type=Path)
     p.add_argument('--package',type=Path);p.add_argument('--manifest',type=Path)
     p.add_argument('--execute-in-test-ae',action='store_true')
     a=p.parse_args()
     try:
-        folder,meta=prepare(a.root,a.width,a.height,a.bit_depth,a.mode)
+        folder,meta=prepare(a.root,a.width,a.height,a.bit_depth,a.mode,a.output_precision)
         if a.execute_in_test_ae:
             if not all((a.ae_app,a.installed_bundle,a.package,a.manifest)):
                 raise ValueError('execution requires AE app, installed bundle, package and manifest')

@@ -59,10 +59,10 @@ Static code scanner exit 1: existing workflow-action pinning and persisted-check
 credential findings require review; a rate-limit heuristic targets a local test,
 not a network endpoint. Scanner output is not release certification.
 
-## Status
+## Initial checkpoint (before corrected candidate installation)
 
 Initial native timing/optimization: PASS for the standalone finite scope below.
-Current candidate: revalidation after the exceptional-float correction below.
+Corrected native candidate: PASS as recorded below; target-AE checks remain NOT RUN.
 New target-AE Render/RAM Preview timing: NOT RUN.
 No installation, project mutation, cache purge, merge or release.
 
@@ -169,3 +169,116 @@ See [exceptional-float evidence](performance-plane-nonfinite-comparison-2026-10-
 These checks do not establish native Intel Mac/Windows/AE compatibility. Strict
 host-math C++ 21/21 and arm64 contraction-on/x86 contraction-off cache tests pass;
 sanitizers, hosted CI and corrected timing/package gates are being repeated.
+
+## Corrected candidate — final native verification
+
+Source `41283e3d0935160da669d7ec69bc4ae01d51f264`. This is a new timing record;
+the initial JSON/table above remains historical evidence for aefeb4b. Same
+hardware, compiler and serial five-pair protocol; all builds/tests stopped before
+the final series. 24 small finite cases and seven timed scenes are byte-identical.
+The 16 separate exceptional-float external checks are also exact.
+
+| Native Final scene | Baseline median ms | Candidate median ms | Speedup |
+|---|---:|---:|---:|
+| 1080p, 8 bpc, deformed region | 381.4780 | 30.0448 | 12.697x |
+| 1080p, 16 bpc, deformed region | 378.9990 | 30.3583 | 12.484x |
+| 1080p, 32 bpc, deformed region | 386.4830 | 32.0415 | 12.062x |
+| 1080p, sparse native layer, 32 bpc | 300.9650 | 30.7686 | 9.782x |
+| 1080p, sparse perspective, 32 bpc | 227.4470 | 180.0100 | 1.264x |
+| 1080p, neutral, 32 bpc | 19.8748 | 7.1328 | 2.786x |
+| 4K, deformed region, 32 bpc | 1632.9900 | 127.1450 | 12.844x |
+
+Full raw timing/RSS ranges, hashes and samples:
+[corrected comparison JSON](performance-plane-corrected-comparison-2026-10-01.json).
+4K peak RSS: 267,059,200 -> 268,369,920 bytes (+1,310,720). The 1080p/16-bpc
+96.7042-ms candidate outlier is retained. No latency guarantee or host FPS claim.
+
+Corrected C++ strict host-math and ASan/UBSan suites: 21/21 each; TSan cache matrix
+PASS. Linux GCC/Clang, static analysis, ASan/UBSan, TSan and both regression jobs
+PASS at 41283e3. Complete local physical-Mac 20-stage preflight PASS, including
+Rust 61/61/Clippy, real Metal gates, dependency/SBOM audit and two clean
+reproducible builds. Signed bundle and real ZIP extraction verification PASS.
+Hosted macOS validation is separate and was still running at this checkpoint.
+
+Validation Build `EGFX-ce45a845413a943552df0258`, source 41283e3 (clean), macOS arm64,
+Final ZIP SHA-256 `a3c001599dc615996a666eac2a6976b2576adf4a0d5ccd4f85cc1daf86dbf362`.
+Ad-hoc signature is for this bounded development test, not a public release.
+Package/preflight/raw evidence is retained in the controlled workspace; no private
+RGBA/log files are uploaded to the public PR. Installed/loaded identity and
+Render/RAM Preview results are NOT RUN. A reversible test-install authorization
+was answered explicitly: temporary replacement is authorized. Candidate 41283e3
+is installed for test; exact original is retained and verified in transaction
+backup `EGFX-update-b2a4807ee046479ab986a4bd9b1a972b`. Live identity/pixel smoke
+is in progress. No user-project/cache mutation.
+
+The user requested a fresh canonical-rules read during the package block.
+AI_ENTRYPOINT was read first, then applicable updates. Continuing baseline:
+v5.0.0 candidate / `b27f45467e0a9152fc82c1072438dfed07f0c36e` (stable published v4.0.0).
+The earlier 4.1.0 reference remains the initial evidence's provenance. Current
+scope is covered by the existing quality contract; no new Stage 0/reference audit.
+Apply AI-STATE-001, AI-AUTO-001 and API-SOURCE-001 for subsequent host work.
+No new/changed Adobe API calls were introduced by the sampler optimization.
+
+
+## Target-host validation checkpoint
+
+All eight hosted checks at exact source 41283e3 PASS, including macOS/Metal.
+The user explicitly authorized temporary installation and AE-only closure of
+projects without saving. Test transactions retain the exact original bundle;
+normal asynchronous Adobe helper shutdown is awaited, never force-terminated
+or excluded from the replacement guard. An initial series stopped safely on
+live helpers and retained its candidate warmup without claiming a pair result.
+
+The corrected candidate's live GUI-AE and separate aerender image UUID/path
+match the sealed binary; both identity checks PASS. Aerender returned success
+and 60 correctly sized PNGs for the saved animated 1080p/32-bpc Final fixture
+(project SHA-256 650f2eb5f4bdfe859b7ff091c1cdb4203fa7f2c46ed6bf1856e7dde00067da3d).
+These instrumented observations are not benchmarks. The unchanged legacy smoke
+produced seven ordinary images and passed five partial pixel checks, but no
+Adjustment Layer chain frame; the complete smoke remains BLOCKED. The original
+plugin comparison is pending.
+
+Five alternating target-host pairs are IN PROGRESS. Output PNG byte hashes
+differ between versions and between new-candidate runs. Accept no performance
+claim until independent pixel/encoding comparison explains these differences.
+No competing agent builds/tests run during the series. RAM Preview remains
+NOT RUN; Stage 8 remains IN PROGRESS.
+
+
+## Host series rejected; measurement precision correction
+
+The alternating series retained nine successful runs (one warmup each, four
+measured candidate and three measured baseline), then rejected a changed process
+key at baseline run 9. The original key-changing observation was not recorded;
+do not infer a zombie/exit race or relax the guard without reproduction. The
+runner now preserves that rejected observation for diagnosis. Original payload
+was restored before the rejected baseline run, and all Adobe hosts subsequently
+stopped normally. Five measured pairs were NOT obtained.
+
+Actual PNG headers show RGB8, although the project rendered at 32 bpc. Independent
+decoding finds max difference 1/255 in 838–896 channels across 60 frames for
+candidate comparisons; a baseline repeat also differs in 19 channels in its
+last frame. Exact equality is FAIL and remains FAIL. Adobe documents dithering
+when converting/rendering/exporting to 8 bpc in
+[Color basics](https://helpx.adobe.com/after-effects/desktop/adjust-colors/color-basics/color-basics.html);
+this is a possible explanation, not established attribution. No before/after
+Render acceleration claim is accepted.
+
+[Rejected raw timing/pixel record](performance-host-observation-2026-10-01.json).
+[Additional exact native pattern record](performance-host-pattern-parity-2026-10-01.json):
+16 original/current C-bridge comparisons at 1080p use the actual opaque pattern
+normalized to float, frame times 0/3/4/59, both last-center/buffer-size extents and
+divide/multiply normalization. Complete raw float arrays compare byte-for-byte;
+SHA-256 is retained. This excludes AE's source conversion and output encoding.
+
+New fixtures default to the straight RGBA16 template already used by the unchanged
+plane gate. Validate actual settings and encoded PNG precision/channels; record
+controlled working space/linearization in schema 2. Historical schema 1 remains
+readable. Reject wrong precision, missing alpha, matting, resize/crop and unsafe
+project ownership; no filter, project render depth or pixel tolerance is lowered.
+All Python tooling tests: 240/240 PASS. All 12 JSX control-flow files PASS (mock
+safety only). The production plugin source/package is unchanged from 41283e3.
+
+The Mac locked before the next GUI run. The user was asked to unlock manually;
+independent tooling/source work continues. Original is restored. Full target
+pixel matrix, RGBA16 Render series, RAM Preview and interaction gates remain open.

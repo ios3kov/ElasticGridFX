@@ -1,0 +1,2658 @@
+{
+  "schema": 1,
+  "status": "NOT_ACCEPTED",
+  "scope": "actual AE 25.6 aerender, same animated 1080p32 Final PNG fixture; not RAM Preview",
+  "fixture": {
+    "bit_depth": 32,
+    "composition": "EGFX_PERF",
+    "fixture_id": "egfx-perf-1920x1080-32bpc-animated",
+    "fps": 30.0,
+    "frame_end": 59,
+    "frame_start": 0,
+    "height": 1080,
+    "output_format": "PNG sequence",
+    "output_pattern": "frame_[#####].png",
+    "project": "EGFX_PERF.aep",
+    "project_sha256": "650f2eb5f4bdfe859b7ff091c1cdb4203fa7f2c46ed6bf1856e7dde00067da3d",
+    "quality": "Final Bicubic",
+    "rqindex": 1,
+    "schema": 1,
+    "width": 1920
+  },
+  "limitations": [
+    "startup, PNG encoding and polling included",
+    "disk/OS cache uncontrolled; no purge",
+    "MFR requested OFF; actual frame concurrency not instrumented",
+    "PNG equality does not certify HDR fidelity",
+    "ambient activity uncontrolled"
+  ],
+  "source_report_sha256": "c248c9dddf4f209a8a0a527c5ae80c2621bf7b6131d5e5d58579f364ac691276",
+  "interruption": "render-process key changed at run 9; conservative guard rejected it; exact changed key was not captured by the original runner; no cause inferred",
+  "restoration": "original payload restored before rejected baseline run; Adobe hosts later confirmed stopped",
+  "samples": [
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-ce45a845413a943552df0258",
+        "commit": "41283e3d0935160da669d7ec69bc4ae01d51f264",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "7cd2ca6997c7e023f26b080b57315a30d9f2d3ee22a3fd20d70aa22916e99ecd",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "warmup",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "a36e94d3f572889dd753a72f85686fa4c7084a23ff4556beea497ba9fec11a3c",
+      "output_files": 60,
+      "polls": 56,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2677522432,
+      "target_pid": 17243,
+      "version": "candidate",
+      "wall_seconds": 33.26365387500846
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+        "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+          "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "warmup",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "2138bbce76f8bbe97b800b9d17f4ebbed4abbecf715c39aedafd1f70779e888e",
+      "output_files": 60,
+      "polls": 55,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2885337088,
+      "target_pid": 17656,
+      "version": "baseline",
+      "wall_seconds": 33.307003709007404
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-ce45a845413a943552df0258",
+        "commit": "41283e3d0935160da669d7ec69bc4ae01d51f264",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "7cd2ca6997c7e023f26b080b57315a30d9f2d3ee22a3fd20d70aa22916e99ecd",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 23
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "c830c22ae9378baabbcac4c21167fd66ff9407618e6001f7652cde32404c751b",
+      "output_files": 60,
+      "polls": 59,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2351349760,
+      "target_pid": 18047,
+      "version": "candidate",
+      "wall_seconds": 35.73857200000202
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+        "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+          "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 0
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "2138bbce76f8bbe97b800b9d17f4ebbed4abbecf715c39aedafd1f70779e888e",
+      "output_files": 60,
+      "polls": 54,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 3174334464,
+      "target_pid": 18487,
+      "version": "baseline",
+      "wall_seconds": 32.59003758399922
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-ce45a845413a943552df0258",
+        "commit": "41283e3d0935160da669d7ec69bc4ae01d51f264",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "7cd2ca6997c7e023f26b080b57315a30d9f2d3ee22a3fd20d70aa22916e99ecd",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "2efc9bad76f00159f3410802895697a5271ed8bbe7c935f2c59b67c3fa7121f1",
+      "output_files": 60,
+      "polls": 55,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2645950464,
+      "target_pid": 18819,
+      "version": "candidate",
+      "wall_seconds": 33.560707666008966
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+        "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+          "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "2138bbce76f8bbe97b800b9d17f4ebbed4abbecf715c39aedafd1f70779e888e",
+      "output_files": 60,
+      "polls": 55,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2857140224,
+      "target_pid": 19144,
+      "version": "baseline",
+      "wall_seconds": 32.57318741700146
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-ce45a845413a943552df0258",
+        "commit": "41283e3d0935160da669d7ec69bc4ae01d51f264",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "7cd2ca6997c7e023f26b080b57315a30d9f2d3ee22a3fd20d70aa22916e99ecd",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 0
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 24
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "2efc9bad76f00159f3410802895697a5271ed8bbe7c935f2c59b67c3fa7121f1",
+      "output_files": 60,
+      "polls": 60,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2074279936,
+      "target_pid": 19803,
+      "version": "candidate",
+      "wall_seconds": 36.67695145901234
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+        "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+          "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 0
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "d11a579d878030af2439df0784ea9b0a79486068430ef8e39d8ca7305437c694",
+      "output_files": 60,
+      "polls": 57,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2516533248,
+      "target_pid": 20139,
+      "version": "baseline",
+      "wall_seconds": 34.96979975000431
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-ce45a845413a943552df0258",
+        "commit": "41283e3d0935160da669d7ec69bc4ae01d51f264",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+        "source_sha256": "7cd2ca6997c7e023f26b080b57315a30d9f2d3ee22a3fd20d70aa22916e99ecd",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "host_progress": {
+        "frame_reports": [
+          {
+            "frame": 1,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 2,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 3,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 4,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 5,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 6,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 7,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 8,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 9,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 10,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 11,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 12,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 13,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 14,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 15,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 16,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 17,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 18,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 19,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 20,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 21,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 22,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 23,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 24,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 25,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 26,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 27,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 28,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 29,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 30,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 31,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 32,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 33,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 34,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 35,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 36,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 37,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 38,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 39,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 40,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 41,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 42,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 43,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 44,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 45,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 46,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 47,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 48,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 49,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 50,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 51,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 52,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 53,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 54,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 55,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 56,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 57,
+            "reported_seconds": 1
+          },
+          {
+            "frame": 58,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 59,
+            "reported_seconds": 0
+          },
+          {
+            "frame": 60,
+            "reported_seconds": 1
+          }
+        ],
+        "resolution": "whole seconds; host-reported, not precise latency",
+        "total_reported_seconds": 22
+      },
+      "kind": "measured",
+      "mapped_candidate": true,
+      "mfr_requested": "OFF",
+      "output_digest": "792ba785055089b2860fda56824ccc7351d49f68606b1c4837a6d9adc2ca9076",
+      "output_files": 60,
+      "polls": 58,
+      "returncode": 0,
+      "sampled_peak_rss_bytes": 2617786368,
+      "target_pid": 20572,
+      "version": "candidate",
+      "wall_seconds": 34.343887499999255
+    }
+  ],
+  "decoded_pixel_comparison": {
+    "scope": "decoded actual AE RGB8 PNG integer channels; exact equality required, not HDR oracle",
+    "source_report_sha256": "c248c9dddf4f209a8a0a527c5ae80c2621bf7b6131d5e5d58579f364ac691276",
+    "comparisons": [
+      {
+        "run": 0,
+        "version": "candidate",
+        "kind": "warmup",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 896,
+        "different_frames": 55,
+        "rms_integer_channel_difference": 0.0015493704195075472,
+        "first_difference": {
+          "frame": "frame_00003.png",
+          "x": 552,
+          "y": 4,
+          "channel": 1,
+          "baseline": 74,
+          "candidate": 73
+        }
+      },
+      {
+        "run": 2,
+        "version": "candidate",
+        "kind": "measured",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 878,
+        "different_frames": 54,
+        "rms_integer_channel_difference": 0.0015337285901368006,
+        "first_difference": {
+          "frame": "frame_00004.png",
+          "x": 327,
+          "y": 189,
+          "channel": 2,
+          "baseline": 219,
+          "candidate": 220
+        }
+      },
+      {
+        "run": 3,
+        "version": "baseline",
+        "kind": "measured",
+        "status": "PASS",
+        "maximum_integer_channel_difference": 0,
+        "changed_channels": 0,
+        "different_frames": 0,
+        "rms_integer_channel_difference": 0.0,
+        "first_difference": null
+      },
+      {
+        "run": 4,
+        "version": "candidate",
+        "kind": "measured",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 860,
+        "different_frames": 53,
+        "rms_integer_channel_difference": 0.0015179255843291667,
+        "first_difference": {
+          "frame": "frame_00005.png",
+          "x": 462,
+          "y": 71,
+          "channel": 1,
+          "baseline": 61,
+          "candidate": 62
+        }
+      },
+      {
+        "run": 5,
+        "version": "baseline",
+        "kind": "measured",
+        "status": "PASS",
+        "maximum_integer_channel_difference": 0,
+        "changed_channels": 0,
+        "different_frames": 0,
+        "rms_integer_channel_difference": 0.0,
+        "first_difference": null
+      },
+      {
+        "run": 6,
+        "version": "candidate",
+        "kind": "measured",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 860,
+        "different_frames": 53,
+        "rms_integer_channel_difference": 0.0015179255843291667,
+        "first_difference": {
+          "frame": "frame_00005.png",
+          "x": 462,
+          "y": 71,
+          "channel": 1,
+          "baseline": 61,
+          "candidate": 62
+        }
+      },
+      {
+        "run": 7,
+        "version": "baseline",
+        "kind": "measured",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 19,
+        "different_frames": 1,
+        "rms_integer_channel_difference": 0.00022562023946317046,
+        "first_difference": {
+          "frame": "frame_00059.png",
+          "x": 1728,
+          "y": 27,
+          "channel": 1,
+          "baseline": 228,
+          "candidate": 227
+        }
+      },
+      {
+        "run": 8,
+        "version": "candidate",
+        "kind": "measured",
+        "status": "FAIL",
+        "maximum_integer_channel_difference": 1,
+        "changed_channels": 838,
+        "different_frames": 52,
+        "rms_integer_channel_difference": 0.0014983844752483571,
+        "first_difference": {
+          "frame": "frame_00006.png",
+          "x": 620,
+          "y": 294,
+          "channel": 1,
+          "baseline": 84,
+          "candidate": 83
+        }
+      }
+    ],
+    "status": "FAIL"
+  },
+  "conclusions": [
+    "five complete measured pairs NOT obtained",
+    "decoded RGB8 exact equality FAIL; max 1/255; even baseline repeats differ",
+    "no target Render acceleration or RAM Preview claim",
+    "RGBA16 fixture/encoded-header validation replaces ambiguous RGB8 default"
+  ],
+  "research": [
+    {
+      "url": "https://helpx.adobe.com/after-effects/desktop/adjust-colors/color-basics/color-basics.html",
+      "finding": "Adobe documents dithering when converting/rendering/exporting to 8-bpc; attribution of observed differences remains a hypothesis"
+    }
+  ]
+}

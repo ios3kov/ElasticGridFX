@@ -41,6 +41,18 @@ def progress_record(text, frame_count):
                 total_reported_seconds=int(totals[0]), resolution='whole seconds; host-reported, not precise latency')
 
 
+def verify_png_geometry(path, fixture):
+    with path.open('rb') as handle: header=handle.read(33)
+    if (len(header)!=33 or header[:8]!=b'\x89PNG\r\n\x1a\n' or header[8:16]!=b'\x00\x00\x00\rIHDR' or
+            struct.unpack('>II',header[16:24])!=(fixture['width'],fixture['height'])):
+        raise ValueError('invalid PNG geometry')
+    if fixture.get('schema')==2:
+        expected_color={'RGB':2,'RGBA':6}[fixture['output_channels']]
+        if (header[24]!=fixture['output_bit_depth'] or header[25]!=expected_color or
+                header[26:29]!=b'\x00\x00\x00'):
+            raise ValueError('PNG output does not match fixture precision/channels')
+
+
 def measure(root, fixture, args, index, manifest, mfr):
     run=root/('run-'+str(index));run.mkdir()
     output=run/'output';output.mkdir()
@@ -59,6 +71,11 @@ def measure(root, fixture, args, index, manifest, mfr):
             if hosts:
                 pid=hosts[0]['pid'];current_key=li.process_key(pid)
                 if target is not None and (pid!=target or current_key!=key):
+                    # Retain the rejected observation before raising. This does
+                    # not accept process exits, zombies or another process.
+                    bi.dump(run/'identity-change.json',dict(expected_pid=target,observed_pid=pid,
+                        expected_key=key,observed_key=current_key,elapsed_seconds=time.monotonic()-start,
+                        aerender_returncode=process.poll(),status='REJECTED'))
                     raise RuntimeError('render process changed')
                 target=pid;key=current_key
                 result=subprocess.run(['/bin/ps','-p',str(pid),'-o','rss='],capture_output=True,text=True,timeout=5)
@@ -80,9 +97,7 @@ def measure(root, fixture, args, index, manifest, mfr):
     files,digest=ab.output_manifest(output)
     if len(files)!=fixture['frame_end']-fixture['frame_start']+1: raise ValueError('incorrect frame count')
     for item in files:
-        with (output/item['path']).open('rb') as handle: header=handle.read(24)
-        if header[:8]!=b'\x89PNG\r\n\x1a\n' or struct.unpack('>II',header[16:24])!=(fixture['width'],fixture['height']):
-            raise ValueError('invalid PNG geometry')
+        verify_png_geometry(output/item['path'],fixture)
     record.update(output_files=len(files),output_digest=digest,
                   host_progress=progress_record((run/'stdout.log').read_text(),len(files)))
     bi.dump(run/'observation.json',record)
