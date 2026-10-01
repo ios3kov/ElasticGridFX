@@ -231,6 +231,7 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
 
         fixtures_root = run_root / "fixtures"
         fixtures_root.mkdir(mode=0o700)
+        runtime_identity = None
         for condition in matrix_conditions(matrix):
             require_same_host(host)
             folder, meta = pf.prepare(
@@ -239,9 +240,16 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
             meta = pf.execute(folder, meta, host["app"], installed, package, manifest_path)
             bi.dump(folder / "prepare.json", meta)
             require_same_host(host)
+            if runtime_identity is None:
+                runtime_identity = ab.runtime_identity_preflight(
+                    folder,aerender,installed,package,manifest_path,host["executable"])
+                result["aerender_runtime_identity"] = ab.validate_runtime_identity(
+                    runtime_identity,BASELINE_BUILD_ID)
+                require_same_host(host)
             report, report_path = ab.benchmark(
                 folder, folder/"fixture.json", aerender, installed, package, manifest_path,
-                warmups, samples, condition["mfr"], timeout, condition["test_case_id"])
+                warmups, samples, condition["mfr"], timeout, condition["test_case_id"],
+                runtime_identity)
             require_same_host(host)
             result["conditions"].append(dict(
                 **condition,

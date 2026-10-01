@@ -15,7 +15,7 @@ import aerender_benchmark as ab
 class BenchmarkTool(unittest.TestCase):
     def test_mfr_command_includes_required_cpu_percentage(self):
         fixture={'project_path':self.project,'rqindex':1,'output_pattern':'frame_[#####].png'}
-        result=subprocess.CompletedProcess([],0,'ElasticGridBuildID=EGFX-'+'a'*24,
+        result=subprocess.CompletedProcess([],0,'',
             ' 1.0 real 0.5 user 0.1 sys\n 12345 maximum resident set size\n')
         with patch.object(ab.subprocess,'run',return_value=result) as run, patch.object(ab,'output_manifest',return_value=([{'size':1}],'digest')):
             ab.run_once(1,'sample',self.root,Path('/test/aerender'),fixture,'EGFX-'+'a'*24,'on',60)
@@ -92,6 +92,31 @@ class BenchmarkTool(unittest.TestCase):
         with patch.object(ab.subprocess,'run',return_value=bad):
             with self.assertRaisesRegex(ValueError,'version query failed'):
                 ab.environment_summary(Path('/test/aerender'))
+
+    def test_runtime_identity_validation_requires_exact_build_and_uuid(self):
+        build_id='EGFX-'+'a'*24
+        record=dict(status='IDENTITY_AND_FRAME_COUNT_PASS',build={'build_id':build_id},
+                    identity={'uuid':'CB903F7F-0C9C-37EA-A549-52463FFCB509'},
+                    output_digest='digest')
+        checked=ab.validate_runtime_identity(record,build_id)
+        self.assertEqual(checked['build_id'],build_id)
+        self.assertEqual(checked['image_uuid'],'CB903F7F-0C9C-37EA-A549-52463FFCB509')
+        with self.assertRaises(ValueError):
+            ab.validate_runtime_identity(dict(record,build={'build_id':'EGFX-'+'b'*24}),build_id)
+
+    def test_runtime_identity_preflight_uses_existing_probe(self):
+        build_id='EGFX-'+'a'*24
+        record=dict(status='IDENTITY_AND_FRAME_COUNT_PASS',build={'build_id':build_id},
+                    identity={'uuid':'CB903F7F-0C9C-37EA-A549-52463FFCB509'},
+                    output_digest='digest')
+        completed=subprocess.CompletedProcess([],0,json.dumps(record),'')
+        with patch.object(ab,'checked_path',side_effect=lambda p,directory=False: Path(p)), \
+             patch.object(ab.subprocess,'run',return_value=completed) as run:
+            observed=ab.runtime_identity_preflight(
+                self.root,Path('/test/aerender'),Path('/test/plugin'),
+                Path('/test/p.zip'),Path('/test/m.json'),Path('/test/After Effects'))
+        self.assertEqual(observed['status'],'IDENTITY_AND_FRAME_COUNT_PASS')
+        self.assertIn('--render-executable',run.call_args.args[0])
 
     def test_benchmark_refuses_nonmac_before_execution(self):
         with patch.object(ab.platform,'system',return_value='Linux'), patch.object(ab.subprocess,'run') as run:

@@ -204,6 +204,7 @@ Existing performance tooling is retained and hardened instead of replaced:
 - `tools/perf_fixture_runner.py` — creates only owned synthetic fixtures;
 - `tests/perf_fixture.jsx` — AE-side fixture creation;
 - `tools/aerender_benchmark.py` — exact-candidate timing and memory;
+- `tools/aerender_identity_probe.py` — separate real render-process mapped-image/Mach-O identity preflight;
 - `tools/perf_compare.py` — comparable Before/After reporting.
 
 Stage 1 tooling additions:
@@ -253,7 +254,17 @@ Before any fixture is created the runner:
 5. performs the read-only loaded-image identity diagnostic against the running AE;
 6. refuses ambiguous/conflicting installed copies;
 7. resolves the matching `aerender` executable;
-8. verifies the installed bundle against the same artifact manifest.
+8. verifies the installed bundle against the same artifact manifest;
+9. creates the first owned fixture and runs a separate untimed `aerender`
+   runtime-identity preflight;
+10. confirms the spawned render process actually maps the exact installed
+    FSTR Stretch Mach-O image/UUID and verifies its disk payload before timing begins.
+
+The plug-in's `GlobalSetup` diagnostic may be emitted by a spawned render process
+whose stderr is not forwarded by the `aerender` launcher. Therefore timing runs
+do not infer identity from launcher stdout/stderr. Runtime identity is established
+by the dedicated mapped-image preflight and then reused as evidence for the
+unmodified candidate during the timing matrix.
 
 The `core` matrix then records the required ordinary-grid 1080p/4K 32-bpc
 static/animated MFR ON/OFF conditions, an explicit `PERF094-RQ-003` 4K

@@ -216,12 +216,13 @@ def run_once(index: int, kind: str, workspace: Path, aerender: Path, fixture: di
     (run/'stderr.log').write_text(result.stderr)
     if result.returncode != 0:
         raise ValueError(f'aerender failed in {kind} sample {index}; retained logs in controlled workspace')
-    observed = runtime_build_id(result.stdout, result.stderr, expected_build_id)
     metrics = parse_time_metrics(result.stderr)
     outputs, digest = output_manifest(output)
     record = dict(index=index,kind=kind,wall_seconds=wall,metrics=metrics,
-                  runtime_build_id=observed,output_digest=digest,
-                  output_files=len(outputs),output_bytes=sum(x['size'] for x in outputs))
+                  candidate_build_id=expected_build_id,
+                  runtime_identity_source='separate mapped-image preflight',
+                  output_digest=digest,output_files=len(outputs),
+                  output_bytes=sum(x['size'] for x in outputs))
     bi.dump(run/'sample.json', record)
     return record
 
@@ -237,10 +238,53 @@ def environment_summary(aerender: Path) -> dict:
                 aerender_version=match.group(0).strip(),
                 aerender_version_query_exit_code=version.returncode)
 
+def validate_runtime_identity(record: dict, expected_build_id: str) -> dict:
+    if record.get('status') != 'IDENTITY_AND_FRAME_COUNT_PASS':
+        raise ValueError('aerender runtime identity preflight did not pass')
+    build = record.get('build') or {}
+    identity = record.get('identity') or {}
+    image_uuid = str(identity.get('uuid') or '')
+    if build.get('build_id') != expected_build_id:
+        raise ValueError('aerender runtime identity Build ID differs from candidate')
+    if not re.fullmatch(r'[0-9A-Fa-f]{8}(?:-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}', image_uuid):
+        raise ValueError('aerender runtime identity UUID is invalid')
+    return dict(status='PASS',build_id=expected_build_id,image_uuid=image_uuid.upper(),
+                output_digest=record.get('output_digest'))
+
+
+def runtime_identity_preflight(workspace: Path, aerender: Path, bundle: Path,
+                               package: Path, manifest: Path,
+                               render_executable: Path) -> dict:
+    workspace = checked_path(workspace, directory=True)
+    aerender = checked_path(aerender)
+    bundle = checked_path(bundle, directory=True)
+    package = checked_path(package)
+    manifest = checked_path(manifest)
+    render_executable = checked_path(render_executable)
+    runner = checked_path(Path(__file__).with_name('aerender_identity_probe.py'))
+    token = uuid.uuid4().hex
+    cmd = [sys.executable,str(runner),'--workspace',str(workspace),
+           '--aerender',str(aerender),'--bundle',str(bundle),
+           '--package',str(package),'--manifest',str(manifest),
+           '--render-executable',str(render_executable)]
+    result = subprocess.run(cmd,capture_output=True,text=True,timeout=240)
+    (workspace/f'identity-preflight-{token}-stdout.log').write_text(result.stdout)
+    (workspace/f'identity-preflight-{token}-stderr.log').write_text(result.stderr)
+    if result.returncode != 0:
+        raise ValueError('aerender runtime identity preflight failed; retained logs in controlled workspace')
+    try:
+        record = json.loads(result.stdout)
+    except json.JSONDecodeError as error:
+        raise ValueError('aerender runtime identity preflight returned invalid evidence') from error
+    return record
+
+
 
 def benchmark(workspace: Path, fixture_path: Path, aerender: Path, bundle: Path,
               package: Path, manifest: Path, warmups: int, samples: int,
-              mfr: str, timeout: int, test_case_id: str) -> tuple[dict, Path]:
+              mfr: str, timeout: int, test_case_id: str,
+              runtime_identity: dict | None = None,
+              render_executable: Path | None = None) -> tuple[dict, Path]:
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         raise ValueError('benchmark requires the target Apple Silicon macOS environment')
     if not 0 <= warmups <= 5 or not MIN_SAMPLES <= samples <= MAX_SAMPLES:
@@ -256,6 +300,12 @@ def benchmark(workspace: Path, fixture_path: Path, aerender: Path, bundle: Path,
         raise ValueError('explicit aerender executable required')
     build = verify_candidate(bundle, package, manifest)
     env = environment_summary(aerender)
+    if runtime_identity is None:
+        if render_executable is None:
+            raise ValueError('explicit render executable required for runtime identity preflight')
+        runtime_identity = runtime_identity_preflight(
+            workspace,aerender,bundle,package,manifest,render_executable)
+    identity_evidence = validate_runtime_identity(runtime_identity,build['build_id'])
     runs = workspace/'runs'
     checked_path(runs)
     if runs.exists():
@@ -270,8 +320,9 @@ def benchmark(workspace: Path, fixture_path: Path, aerender: Path, bundle: Path,
     frame_count = fixture['frame_end'] - fixture['frame_start'] + 1
     report = dict(schema=SCHEMA,status='MEASURED',release='BLOCKED',
                   test_case_id=test_case_id,test_run_id=uuid.uuid4().hex,
-                  scope='aerender timing/memory + runtime Build ID; not RAM Preview or HDR pixel equivalence',
-                  candidate=build,fixture={k:v for k,v in fixture.items() if k!='project_path'},
+                  scope='aerender timing/memory after exact mapped-image runtime identity preflight; not RAM Preview or HDR pixel equivalence',
+                  candidate=build,runtime_identity=identity_evidence,
+                  fixture={k:v for k,v in fixture.items() if k!='project_path'},
                   environment=env,settings=dict(warmups=warmups,samples=samples,mfr=mfr,
                                                 timeout_seconds=timeout,
                                                 cache_state='warm-after-explicit-warmups' if warmups else 'uncontrolled'),
@@ -293,6 +344,7 @@ def main() -> int:
     p.add_argument('--installed-bundle',type=Path,required=True)
     p.add_argument('--package',type=Path,required=True)
     p.add_argument('--manifest',type=Path,required=True)
+    p.add_argument('--render-executable',type=Path,required=True)
     p.add_argument('--warmups',type=int,default=2)
     p.add_argument('--samples',type=int,default=5)
     p.add_argument('--mfr',choices=('inherit','on','off'),default='inherit')
@@ -302,7 +354,8 @@ def main() -> int:
     a=p.parse_args()
     try:
         report,path=benchmark(a.workspace,a.fixture,a.aerender,a.installed_bundle,a.package,a.manifest,
-                              a.warmups,a.samples,a.mfr,a.timeout,a.test_case_id)
+                              a.warmups,a.samples,a.mfr,a.timeout,a.test_case_id,
+                              None,a.render_executable)
     except (OSError,ValueError,KeyError,subprocess.SubprocessError) as e:
         print('BLOCKED: '+str(e),file=sys.stderr); return 3
     print(json.dumps(dict(status=report['status'],report=str(path),release='BLOCKED'),indent=2))
