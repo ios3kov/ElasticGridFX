@@ -35,6 +35,7 @@ function elasticGridPerfFixture(config) {
         initialBpc=app.project.bitsPerChannel;
         owned=app.project;
         owned.bitsPerChannel=config.bit_depth;
+        result.observed_bits_per_channel=String(owned.bitsPerChannel);
         if (Number(owned.bitsPerChannel)!==config.bit_depth) throw new Error("Bit depth not applied");
         owned.workingSpace="";
         owned.linearizeWorkingSpace=false;
@@ -45,19 +46,23 @@ function elasticGridPerfFixture(config) {
         if (observedWorkingSpace!=="" || !(observedLinearize==="false" || observedLinearize==="0"))
             throw new Error("Color management contract not applied");
 
-        result.stage="fixture";
+        result.stage="import_footage";
         footage=owned.importFile(new ImportOptions(input));
+        result.stage="add_comp";
         comp=owned.items.addComp("EGFX_PERF",config.width,config.height,1.0,config.duration,config.fps);
         comp.resolutionFactor=[1,1];
         var layer=comp.layers.add(footage);
+        result.stage="add_effect";
         var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         if (fx===null || fx.matchName!=="com.elasticgrid.fx.warp") throw new Error("ElasticGrid unavailable");
+        result.stage="set_parameters";
         param(fx,"Columns").setValue(8); param(fx,"Rows").setValue(8);
         param(fx,"Render Quality").setValue(2); param(fx,"Edge Behavior").setValue(1);
         param(fx,"Wave Axis").setValue(1); param(fx,"Wave Frequency").setValue(1.3);
         param(fx,"Wave Phase").setValue(35.0); param(fx,"Stretch Easing").setValue(0.0);
         param(fx,"Wave Amplitude").setValue(10.0);
         param(fx,"Wave Speed").setValue(config.mode==="animated" ? 0.5 : 0.0);
+        result.stage="set_geometry";
         if (config.geometry==="four_corners") {
             param(fx,"Deformation Plane").setValue(2);
             param(fx,"Plane Top Left").setValue([config.width*0.08,config.height*0.08]);
@@ -106,6 +111,8 @@ function elasticGridPerfFixture(config) {
         result.status="FAIL";
         result.error_number=typeof error.number==='number' ? error.number : null;
         result.error_line=typeof error.line==='number' ? error.line : null;
+        result.error_name=error && error.name ? String(error.name) : "";
+        result.error_message=error && error.message ? String(error.message) : String(error);
     } finally {
         if (owned!==null) {
             if (app.project!==owned) { result.status="FAIL"; result.stage="foreign_project"; }
@@ -115,7 +122,10 @@ function elasticGridPerfFixture(config) {
                     if (!owned.close(CloseOptions.DO_NOT_SAVE_CHANGES)) throw new Error("Owned project close failed");
                     app.newProject();
                     if (app.project===null) throw new Error("New empty project unavailable");
-                } catch (cleanupError) { result.status="FAIL"; result.stage="cleanup"; }
+                } catch (cleanupError) {
+                    result.status="FAIL"; result.stage="cleanup";
+                    result.cleanup_error_message=cleanupError && cleanupError.message ? String(cleanupError.message) : String(cleanupError);
+                }
             }
         }
         if (suppressing) {
@@ -129,7 +139,8 @@ function elasticGridPerfFixture(config) {
                     ',"ae_version":'+q(result.ae_version)+',"width":'+(result.width||0)+',"height":'+(result.height||0)+
                     ',"fps":'+(result.fps||0)+',"duration":'+(result.duration||0)+',"bit_depth":'+(result.bit_depth||0)+
                     ',"mode":'+q(result.mode||"")+',"geometry":'+q(result.geometry||"")+
-                    ',"color_management":'+q(result.color_management||"")+',"working_space":'+q(result.working_space||"")+
+                    ',"color_management":'+q(result.color_management||"")+',"observed_bits_per_channel":'+q(result.observed_bits_per_channel||"")+
+                    ',"working_space":'+q(result.working_space||"")+
                     ',"linearize_working_space":'+q(result.linearize_working_space||"")+',"composition":'+q(result.composition||"")+
                     ',"rqindex":'+(result.rqindex||0)+',"render_template":'+q(result.render_template||"")+
                     ',"output_template":'+q(result.output_template||"")+
@@ -137,7 +148,10 @@ function elasticGridPerfFixture(config) {
                     ',"output_pattern":'+q(result.output_pattern||"")+
                     ',"saved":'+(saved?"true":"false")+
                     ',"error_number":'+(result.error_number==null?'null':result.error_number)+
-                    ',"error_line":'+(result.error_line==null?'null':result.error_line)+'}');
+                    ',"error_line":'+(result.error_line==null?'null':result.error_line)+
+                    ',"error_name":'+q(result.error_name||"")+
+                    ',"error_message":'+q(result.error_message||"")+
+                    ',"cleanup_error_message":'+q(result.cleanup_error_message||"")+'}');
                 resultFile.close();
             } catch (writeError) { result.status="FAIL"; }
         }

@@ -58,6 +58,11 @@ for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');
 }
 {
+ const {capture}=run({noEffect:true});
+ assert.equal(capture.stage,'add_effect');
+ assert.match(capture.error_message,/ElasticGrid unavailable/);
+}
+{
  const {app,calls,capture,files}=run();
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');assert.equal(capture.saved,true);
  assert.equal(capture.geometry,'grid');assert.equal(capture.color_management,'none-linearize-off');
