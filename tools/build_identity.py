@@ -127,7 +127,7 @@ def about_message(version):
     # Writing UTF-8 C2 A9 makes the host display an extra leading character.
     return (b'FSTR Stretch\rVersion ' + version.encode('ascii') +
             b'\r\rProfessional mesh deformation for Adobe After Effects' +
-            b'\r\r\xa9 2026 FSTR.tech. All rights reserved\rfstr.tech')
+            b'\r\r\xa9 2026 FSTR.tech. All rights reserved')
 
 
 def generate(root, out, target, profile):

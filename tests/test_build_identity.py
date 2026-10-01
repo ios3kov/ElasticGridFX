@@ -156,10 +156,11 @@ class IdentityTests(unittest.TestCase):
             about,
             b'FSTR Stretch\rVersion 0.9.0'
             b'\r\rProfessional mesh deformation for Adobe After Effects'
-            b'\r\r\xa9 2026 FSTR.tech. All rights reserved\rfstr.tech',
+            b'\r\r\xa9 2026 FSTR.tech. All rights reserved',
         )
         self.assertEqual(about.count(b'\xa9'), 1)
         self.assertNotIn(b'\xc2\xa9', about)
+        self.assertNotIn(b'fstr.tech', about)
         self.assertLess(len(about), 256)
 
     def test_generated_about_is_branded_and_diagnostic_retains_identity(self):

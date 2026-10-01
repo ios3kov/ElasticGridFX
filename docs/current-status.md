@@ -1,5 +1,23 @@
 # Current development / release status
 
+## About footer cleanup — 2026-10-01
+
+Per user review, the standalone `fstr.tech` footer is redundant and removed.
+The final visible copy is now:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+```
+
+The single-byte copyright encoding correction remains unchanged. This source
+change creates a new candidate identity, so automated gates must pass again
+before handoff. No merge or release is authorized.
+
 ## About copyright encoding correction — 2026-10-01
 
 The user opened the newly branded 0.9.3 About dialog and the new text appeared,
@@ -20,7 +38,6 @@ Version 0.9.3
 Professional mesh deformation for Adobe After Effects
 
 © 2026 FSTR.tech. All rights reserved
-fstr.tech
 ```
 
 The internal BuildIdentity/diagnostic path remains unchanged and separate.
