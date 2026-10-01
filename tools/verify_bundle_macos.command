@@ -20,6 +20,8 @@ plutil -lint "$PLIST"
 /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$PLIST"
 /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$PLIST"
 
+python3 "$ROOT/tools/bundle_version.py" verify "$BUNDLE"
+
 printf '[bundle] binary\n'
 file "$BIN"
 if command -v lipo >/dev/null 2>&1; then

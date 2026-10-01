@@ -1,5 +1,138 @@
 # Current development / release status
 
+## About footer candidate gate failure and correction — 2026-10-01
+
+Candidate source `e4f1ed10c650f9f70e606ed97f34d4dc16042ae4` removed the redundant
+standalone `fstr.tech` footer, but the mandatory first-application and macOS
+source gates **FAILED** before handoff. The failure is preserved as evidence and
+is not relabeled as PASS.
+
+Failed runs:
+- push first-application regression **36853623602** — FAIL in Rust host contracts;
+- PR first-application regression **36853629081** — same FAIL;
+- macOS source gate **36853623609** — FAIL during full preflight;
+- PR CI **36853629066** — PASS for portable C++/sanitizer/static-analysis scope only.
+
+Root cause: research-only `host-rust/src/lifecycle_probe.rs` still referenced
+the removed generated constant `build_identity::ABOUT`. The production About
+path had already moved to `ABOUT_BYTES`, while internal diagnostics use
+`DIAGNOSTIC`. This compile error is unrelated to rendering or the copyright
+byte itself, but it blocks delivery under the development rules.
+
+Correction: the lifecycle research journal now uses
+`build_identity::DIAGNOSTIC`, matching the intended separation between
+user-facing About bytes and internal provenance. No renderer, parameters,
+serialization, Fit Layer, grid-density, package naming or project data behavior
+changes in this correction.
+
+The previous failed runs remain failures. A new candidate must pass the complete
+required regression and macOS source/package gates before it can be handed off.
+Target-AE verification is still required for the final About rendering. No merge
+or release is authorized.
+
+## About footer cleanup — 2026-10-01
+
+Per user review, the standalone `fstr.tech` footer is redundant and removed.
+The final visible copy is now:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+```
+
+The single-byte copyright encoding correction remains unchanged. This source
+change creates a new candidate identity, so automated gates must pass again
+before handoff. No merge or release is authorized.
+
+## About copyright encoding correction — 2026-10-01
+
+The user opened the newly branded 0.9.3 About dialog and the new text appeared,
+but the copyright glyph rendered as `¬©`. This directly identifies an encoding
+mismatch in the visible dialog: the Rust wrapper copied UTF-8 bytes `C2 A9`
+into AE's legacy `A_char[256]` return-message buffer, and the host displayed
+both bytes as characters. Adobe's own About dialog on the same host displays a
+normal copyright glyph.
+
+The correction keeps the real `©` symbol and writes the About field as exact
+legacy bytes with a **single `0xA9` copyright byte**. The visible copy is also
+updated per user request to remove terminal periods:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+```
+
+The internal BuildIdentity/diagnostic path remains unchanged and separate.
+This source change creates another new candidate identity, so the prior package
+and Build ID must not be relabeled. Mandatory automated gates and a final
+target-AE About check are required again. No merge or release is authorized.
+
+## Target-AE acceptance and About branding — 2026-10-01
+
+The user loaded the exact 0.9.3 candidate `ae0c6c47d3318f3e1b7cb0edb4290f6ce04b0dd7`
+(Build ID `EGFX-2ac782234af13eae3b01f67d`), supplied an About screenshot
+matching those identifiers, and after the requested manual checks reported that
+the rest works. Record this as **USER-REPORTED acceptance of the requested
+manual scenario**, not as full platform/compatibility certification.
+
+The next source change is presentation-only: the user-facing About dialog is
+approved as:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+fstr.tech
+```
+
+Build ID, commit, target and source-state text are removed from the visible
+About dialog, but provenance remains in `BuildIdentity.json` and the
+noninteractive diagnostic string so support/package verification can still
+identify the exact binary.
+
+Because this changes source after the accepted `ae0c6c4` artifact, any plugin
+built from the new commit is a **new candidate** with a new commit/Build ID.
+The old artifact hashes and host PASS must not be transferred to it; mandatory
+automation/package checks and target-AE handoff must be repeated. Version
+0.9.3 remains a development version and is not a published release.
+
+The remaining Layer Plane overlay/index-span alignment item in #14 stays open
+until its real AE viewer mapping is measured and resolved or explicitly
+accepted. No merge or release is authorized.
+
+## Development: Fit Layer boundary correction — 2026-09-30
+
+Stage 10, branch `fix/fit-layer-coordinates`, stacked on PR #12. The source
+corrects Fit to (0,0)/(W,0)/(W,H)/(0,H), with the existing corner order and full
+source-layer dimensions. It skips writes to already-fitted corners, including
+repeat Fit. It does not write Grid Positions/counts or migrate stored keys.
+Rendering, layer/comp projections and the density implementation are unchanged.
+The extra Layer Plane overlay/index-span audit still requires native AE
+alignment evidence; a global change to raster coordinates was not made.
+
+Version 0.9.3 development; not released. The source also derives Finder version
+from validated BuildIdentity before signing (#13), and the native verifier
+checks both version fields on the named and extracted bundle. This is not an
+in-place edit of a prior candidate. Exact final CI/artifact evidence is in the
+correction PR; live target AE is NOT RUN in this Linux session.
+
+The user reported the density candidate 59a73ea working, then supplied the Fit
+coordinate mismatch. That historical density acceptance is not a new-candidate
+host PASS. See [coordinate acceptance](fit-layer-coordinate-fix-2026-09-30.md).
+
+## Historical density checkpoint
+
 ## Development: animation-preserving control density — 2026-09-30
 
 Stage 10 remains incomplete. Branch `fix/grid-density-preserve-animation`,

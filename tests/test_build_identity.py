@@ -150,7 +150,20 @@ class IdentityTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 bi.safe_file(self.root, path)
 
-    def test_generated_about_marker_and_directives(self):
+    def test_about_message_uses_single_byte_copyright_and_no_terminal_periods(self):
+        about = bi.about_message('0.9.0')
+        self.assertEqual(
+            about,
+            b'FSTR Stretch\rVersion 0.9.0'
+            b'\r\rProfessional mesh deformation for Adobe After Effects'
+            b'\r\r\xa9 2026 FSTR.tech. All rights reserved',
+        )
+        self.assertEqual(about.count(b'\xa9'), 1)
+        self.assertNotIn(b'\xc2\xa9', about)
+        self.assertNotIn(b'fstr.tech', about)
+        self.assertLess(len(about), 256)
+
+    def test_generated_about_is_branded_and_diagnostic_retains_identity(self):
         out = Path(self.tmp.name) / 'out'
         original_run = bi.run
         def fake_run(args, cwd=None):
@@ -162,10 +175,20 @@ class IdentityTests(unittest.TestCase):
             # git is still resolved by the system default search path.
             bi.generate(self.root, out, 'aarch64-apple-darwin', 'release')
         meta = json.loads((out / 'BuildIdentity.json').read_text())
-        rust = (out / 'build_identity.rs').read_text()
-        self.assertIn(meta['build_id'], rust)
-        self.assertIn(meta['commit'], rust)
-        self.assertIn('ElasticGridBuildID=', rust)
+        rust = (out / 'build_identity.rs').read_text(encoding='ascii')
+        about_line = next(line for line in rust.splitlines() if line.startswith('pub const ABOUT_BYTES:'))
+        diagnostic_line = next(line for line in rust.splitlines() if line.startswith('pub const DIAGNOSTIC:'))
+        expected_bytes = ', '.join(f'0x{byte:02x}' for byte in bi.about_message('0.9.0'))
+        self.assertEqual(about_line, 'pub const ABOUT_BYTES: &[u8] = &[' + expected_bytes + '];')
+        self.assertIn('0xa9', about_line)
+        self.assertNotIn('0xc2, 0xa9', about_line)
+        self.assertNotIn(meta['build_id'], about_line)
+        self.assertNotIn(meta['commit'], about_line)
+        self.assertIn(meta['build_id'], diagnostic_line)
+        self.assertIn(meta['commit'], diagnostic_line)
+        self.assertIn('ElasticGridBuildID=', diagnostic_line)
+        self.assertIn('aarch64-apple-darwin', diagnostic_line)
+        self.assertIn('Source:', diagnostic_line)
         self.assertIn('cargo:rerun-if-env-changed=RUSTFLAGS', stdout.getvalue())
         self.assertIn(str(self.root / 'src/example.cpp'), stdout.getvalue())
 

@@ -104,7 +104,7 @@ echo "[1/6] Running audit/debug/parity/performance preflight..."
 set -o pipefail
 "$ROOT/tools/preflight_macos.command" 2>&1 | tee -a "$REPORT"
 
-echo "[2/6] Building ElasticGrid FX v0.9 (native $(uname -m))..." | tee -a "$REPORT"
+echo "[2/6] Building FSTR Stretch (native $(uname -m))..." | tee -a "$REPORT"
 cargo build --release --locked --manifest-path "$MANIFEST" --message-format=json-render-diagnostics \
   2>&1 | tee "$DIST/host-build.jsonl" | tee -a "$REPORT"
 
@@ -122,12 +122,8 @@ cp "$TARGET/elasticgrid_ae_Info.plist" "$BUNDLE/Contents/Info.plist"
   /usr/libexec/PlistBuddy -c 'Set :CFBundleExecutable ElasticGrid' "$BUNDLE/Contents/Info.plist" >/dev/null
 /usr/libexec/PlistBuddy -c 'Add :CFBundleName string ElasticGrid FX' "$BUNDLE/Contents/Info.plist" >/dev/null 2>&1 || \
   /usr/libexec/PlistBuddy -c 'Set :CFBundleName ElasticGrid FX' "$BUNDLE/Contents/Info.plist" >/dev/null
-/usr/libexec/PlistBuddy -c 'Add :CFBundleShortVersionString string 0.9.0' "$BUNDLE/Contents/Info.plist" >/dev/null 2>&1 || \
-  /usr/libexec/PlistBuddy -c 'Set :CFBundleShortVersionString 0.9.0' "$BUNDLE/Contents/Info.plist" >/dev/null
-/usr/libexec/PlistBuddy -c 'Add :CFBundleVersion string 9' "$BUNDLE/Contents/Info.plist" >/dev/null 2>&1 || \
-  /usr/libexec/PlistBuddy -c 'Set :CFBundleVersion 9' "$BUNDLE/Contents/Info.plist" >/dev/null
-
 python3 "$ROOT/tools/build_identity.py" stamp --root "$ROOT" --bundle "$BUNDLE" --cargo-log "$DIST/host-build.jsonl"
+python3 "$ROOT/tools/bundle_version.py" stamp "$BUNDLE"
 
 xattr -cr "$BUNDLE" || true
 codesign --force --deep --sign - "$BUNDLE"

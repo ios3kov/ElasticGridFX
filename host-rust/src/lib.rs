@@ -8,6 +8,7 @@ mod ui;
 mod control_grid;
 mod ui_projection;
 mod plane;
+mod fit_layer;
 #[cfg(fstr_lifecycle_probe)]
 mod lifecycle_probe;
 #[cfg(test)]
@@ -22,6 +23,19 @@ compile_error!("Binding research requires lifecycle research context");
 compile_error!("Automatic binding requires binding parameters");
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
+}
+
+fn set_return_msg_bytes(out_data: &mut ae::OutData, msg: &[u8]) {
+    assert!(msg.len() < 256);
+    let raw = out_data.as_ptr().cast_mut();
+    // SAFETY: OutData wraps AE's writable PF_OutData for this command. We write
+    // only the fixed 256-byte return_msg field and always leave a NUL terminator.
+    unsafe {
+        (*raw).return_msg.fill(0);
+        for (index, byte) in msg.iter().copied().enumerate() {
+            (*raw).return_msg[index] = byte as _;
+        }
+    }
 }
 
 const GRID_REFCON: u64 = 0x4547_4658_4752_4944; // "EGFXGRID"
@@ -1019,13 +1033,13 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::GlobalSetup => {
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
                 // One noninteractive diagnostic per host setup, never per frame.
-                eprintln!("{}", build_identity::ABOUT.replace('\r', " | "));
+                eprintln!("{}", build_identity::DIAGNOSTIC.replace('\r', " | "));
             }
             ae::Command::About => {
-                out_data.set_return_msg(build_identity::ABOUT);
+                set_return_msg_bytes(&mut out_data, build_identity::ABOUT_BYTES);
                 #[cfg(all(fstr_lifecycle_probe,not(feature="native-plane")))]
                 out_data.set_return_msg(&format!("LIFECYCLE RESEARCH ONLY\r{}\r{}",
-                    build_identity::ABOUT, self.lifecycle_probe.report()));
+                    build_identity::DIAGNOSTIC, self.lifecycle_probe.report()));
             }
             ae::Command::UserChangedParam { param_index } => {
                 if params.index(Params::PlaneMode)==Some(param_index) {
@@ -1033,16 +1047,10 @@ impl AdobePluginGlobal for Plugin {
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ResetPlane) == Some(param_index) {
-                    // Layer-space last pixel centers match the legacy raster
-                    // grid domain. UI command: never consult frame-only origin.
-                    let w=in_data.width().saturating_sub(1).max(0) as f32;
-                    let h=in_data.height().saturating_sub(1).max(0) as f32;
-                    for (id,point) in plane::CORNERS.into_iter().zip([(0.0,0.0),(w,0.0),(w,h),(0.0,h)]) {
-                        let mut param=params.get_mut(id)?;
-                        param.as_point_mut()?.set_value(point);
-                        param.set_value_changed();
+                    let changed = fit_layer::apply(&in_data, params)?;
+                    if changed {
+                        out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                     }
-                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                 }
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)

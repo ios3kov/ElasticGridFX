@@ -121,6 +121,15 @@ def dump(path, value):
     path.write_bytes(json.dumps(value, indent=2, sort_keys=True).encode() + b'\n')
 
 
+def about_message(version):
+    # PF_OutData.return_msg is a legacy A_char buffer, not a UTF-8 string.
+    # AE 25.6 on macOS renders a single 0xA9 byte as the copyright symbol.
+    # Writing UTF-8 C2 A9 makes the host display an extra leading character.
+    return (b'FSTR Stretch\rVersion ' + version.encode('ascii') +
+            b'\r\rProfessional mesh deformation for Adobe After Effects' +
+            b'\r\r\xa9 2026 FSTR.tech. All rights reserved')
+
+
 def generate(root, out, target, profile):
     snapshot = os.environ.get('ELASTICGRID_SOURCE_RECORD')
     record = source_record(root, snapshot)
@@ -130,13 +139,18 @@ def generate(root, out, target, profile):
     out.mkdir(parents=True, exist_ok=True)
     dump(out / 'BuildIdentity.json', meta)
     marker = 'ElasticGridBuildID=' + meta['build_id']
-    about = ('FSTR Stretch v' + meta['version'] + ' / ' + target + '\r' + marker + '\rCommit: ' + meta['commit'] +
-             '\rSource: ' + meta['source_state'] + ' / ' + meta['source_sha256'][:16])
-    if len(about.encode()) >= 256:
+    about = about_message(meta['version'])
+    diagnostic = ('FSTR Stretch v' + meta['version'] + ' / ' + target + '\r' + marker +
+                  '\rCommit: ' + meta['commit'] +
+                  '\rSource: ' + meta['source_state'] + ' / ' + meta['source_sha256'][:16])
+    if len(about) >= 256:
         raise ValueError('About message exceeds the AE ABI buffer')
-    # Values are validated ASCII; JSON escaping is also valid Rust for these strings.
-    rust = 'pub const ABOUT: &str = ' + json.dumps(about) + ';\n'
-    (out / 'build_identity.rs').write_text(rust)
+    # Keep the product-facing About bytes exact. Provenance remains UTF-8/ASCII
+    # in BuildIdentity and the noninteractive diagnostic string.
+    rust = ('pub const ABOUT_BYTES: &[u8] = &[' +
+            ', '.join(f'0x{byte:02x}' for byte in about) + '];\n' +
+            'pub const DIAGNOSTIC: &str = ' + json.dumps(diagnostic) + ';\n')
+    (out / 'build_identity.rs').write_text(rust, encoding='ascii')
     for name in record['files']:
         print('cargo:rerun-if-changed=' + str(root / name))
     for name in ('src', 'host-rust/src', 'tools', 'tests', 'docs', '.github'):
