@@ -17,9 +17,9 @@ function run(options={}){
  };
  if(options.noDirtyProperty && project) delete project.dirty;
  if(options.forceDirty && project) project.dirty=true;
- if(options.hostColorTypes && project){
+ if((options.hostColorTypes || options.hostWorkingSpaceNone) && project){
    let ws=project.workingSpace, lin=project.linearizeWorkingSpace;
-   Object.defineProperty(project,'workingSpace',{configurable:true,get(){return new String(ws);},set(v){ws=v;}});
+   Object.defineProperty(project,'workingSpace',{configurable:true,get(){return options.hostWorkingSpaceNone && String(ws)==='' ? 'None' : new String(ws);},set(v){ws=v;}});
    Object.defineProperty(project,'linearizeWorkingSpace',{configurable:true,get(){return lin?1:0;},set(v){lin=v;}});
  }
  const app={project,version:'fixture',beginSuppressDialogs(){calls.dialogs++;},endSuppressDialogs(){calls.dialogs--;},
@@ -53,6 +53,11 @@ for(const project of [
  const {app,capture}=run({hostColorTypes:true});
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
  assert.equal(capture.working_space,'');assert.equal(capture.linearize_working_space,'0');
+}
+{
+ const {app,capture}=run({hostWorkingSpaceNone:true});
+ assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
+ assert.equal(capture.working_space,'None');assert.equal(capture.linearize_working_space,'0');
 }
 for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true},{geometry:'bad'}]){
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');

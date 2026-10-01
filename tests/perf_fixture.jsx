@@ -40,10 +40,14 @@ function elasticGridPerfFixture(config) {
         owned.workingSpace="";
         owned.linearizeWorkingSpace=false;
         var observedWorkingSpace=String(owned.workingSpace);
+        var normalizedWorkingSpace=observedWorkingSpace.toLowerCase();
         var observedLinearize=String(owned.linearizeWorkingSpace).toLowerCase();
         result.working_space=observedWorkingSpace;
         result.linearize_working_space=observedLinearize;
-        if (observedWorkingSpace!=="" || !(observedLinearize==="false" || observedLinearize==="0"))
+        // AE scripting documents "" as the None working space, while AE 25.6x101
+        // has also been observed to read the same state back as "None".
+        if (!((normalizedWorkingSpace==="" || normalizedWorkingSpace==="none") &&
+              (observedLinearize==="false" || observedLinearize==="0")))
             throw new Error("Color management contract not applied");
 
         result.stage="import_footage";
