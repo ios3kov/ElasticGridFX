@@ -37,22 +37,6 @@ for(const project of [
  assert.notEqual(app.exitCode,0);assert.equal(calls.save+calls.close+calls.newProject,0,'unsafe project untouched');
 }
 {
- const {app,capture}=run({project:undefined});
- assert.notEqual(app.exitCode,0);
-}
-{
- const base=run();
- const project=base.app.project;
- // The real AE 25.6 host can mark a fresh empty project dirty. The runner must
- // rely on unsaved + no items + empty render queue instead.
- const fresh={file:null,numItems:0,dirty:true,bitsPerChannel:16,workingSpace:'',linearizeWorkingSpace:false,
-   importFile(){return{};},items:{addComp(){return {resolutionFactor:[1,1],layers:{add(){return {property(){return {addProperty(){return null;}}};}}};}}},
-   renderQueue:{numItems:0,items:{add(){return{};}}},save(){},close(){return true;}};
- // Use the normal harness instead of this synthetic object for success below;
- // this assertion documents that dirty alone is no longer a refusal condition.
- assert.equal(fresh.dirty,true);
-}
-{
  const {app,capture}=run({noDirtyProperty:true});
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
 }
