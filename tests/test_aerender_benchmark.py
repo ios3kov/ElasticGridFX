@@ -81,6 +81,18 @@ class BenchmarkTool(unittest.TestCase):
         self.assertAlmostEqual(result['ms_per_frame_median'],100.0)
         with self.assertRaises(ValueError):ab.summarize([sample(n,str(n)) for n in range(1,6)],30)
 
+    def test_environment_summary_accepts_valid_version_with_nonzero_exit(self):
+        good=subprocess.CompletedProcess([],15,'aerender version 25.6x101\n','')
+        with patch.object(ab.subprocess,'run',return_value=good):
+            env=ab.environment_summary(Path('/test/aerender'))
+        self.assertEqual(env['aerender_version'],'aerender version 25.6x101')
+        self.assertEqual(env['aerender_version_query_exit_code'],15)
+
+        bad=subprocess.CompletedProcess([],0,'aerender version 25.6x101\naerender SYNTAX ERROR: bad flag\n','')
+        with patch.object(ab.subprocess,'run',return_value=bad):
+            with self.assertRaisesRegex(ValueError,'version query failed'):
+                ab.environment_summary(Path('/test/aerender'))
+
     def test_benchmark_refuses_nonmac_before_execution(self):
         with patch.object(ab.platform,'system',return_value='Linux'), patch.object(ab.subprocess,'run') as run:
             with self.assertRaises(ValueError):
