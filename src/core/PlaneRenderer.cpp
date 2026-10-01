@@ -244,8 +244,20 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                 for(int c=0;c<4;++c) values[c]+=horizontal[c]*ys.w[j];
             }
             for(int c=0;c<4;++c) {
-                const float value=values[c];
+                float value=values[c];
                 if constexpr(std::is_floating_point_v<T>) {
+                    // A SIMD sum can select a different NaN payload than the
+                    // historical scalar sum on x86. Recompute only NaN channels
+                    // with the original sampling loop; finite HDR stays cached.
+                    if(std::isnan(value)) {
+                        value=0;
+                        for(int j=0;j<ys.count;++j) {
+                            float horizontal=0;
+                            for(int i=0;i<xs.count;++i)
+                                horizontal+=sourcePixel(xs.index[i],ys.index[j])[c]*xs.w[i];
+                            value+=horizontal*ys.w[j];
+                        }
+                    }
                     pixel[c]=value; // float alpha/HDR/negative values remain unclamped
                 } else {
                     constexpr float maximum=std::is_same_v<T,std::uint16_t>?32768.f:255.f;

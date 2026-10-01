@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <cstdio>
 #include <future>
 #include <thread>
 #include <type_traits>
@@ -44,7 +45,21 @@ void compare(const PlaneWarp* warp,PlaneCanvasRegion region,int sw,int sh,int dw
     const auto b=render(input.data(),sw,sh,ss,scalar.data(),dw,dh,ds,region,warp);
     assert(a.invalid_plane==b.invalid_plane && a.outside_pixels==b.outside_pixels &&
            a.invalid_projection_pixels==b.invalid_projection_pixels);
-    assert(!std::memcmp(cached.data(),scalar.data(),cached.size()*sizeof(T)));
+    if(std::memcmp(cached.data(),scalar.data(),cached.size()*sizeof(T))) {
+        for(std::size_t i=0;i<cached.size();++i) {
+            if(std::memcmp(&cached[i],&scalar[i],sizeof(T))) {
+                std::uint32_t actual=0,expected=0;
+                std::memcpy(&actual,&cached[i],sizeof(T));
+                std::memcpy(&expected,&scalar[i],sizeof(T));
+                std::fprintf(stderr,"plane parity: element=%zu depth=%zu cached=%08x general=%08x "
+                    "source=%dx%d output=%dx%d origin=%d,%d quality=%d edge=%d separable=%d\n",
+                    i,sizeof(T)*8,actual,expected,sw,sh,dw,dh,region.output_x,region.output_y,
+                    int(region.quality),int(region.edge),warp && bool(warp->separableAnchor()));
+                break;
+            }
+        }
+        assert(false && "cached/general plane pixels must match exactly");
+    }
     // Cancellation remains on the calling thread, before any mapping/output.
     struct Abort {std::thread::id owner;int calls=0;int limit;};
     auto callback=[](void* raw)->std::int32_t {

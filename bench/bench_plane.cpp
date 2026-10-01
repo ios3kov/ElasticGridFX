@@ -1,6 +1,8 @@
 #include "bridge/plane_ffi.h"
 #include <algorithm>
 #include <chrono>
+#include <bit>
+#include <limits>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
@@ -14,7 +16,7 @@ std::int32_t neverAbort(void*) noexcept { return 0; }
 
 template<typename T>
 int benchmark(int width, int height, int frames, int depth, const std::string& mode,
-              bool sparse, const std::string& dump) {
+              bool sparse, const std::string& dump, bool nonfinite) {
     const int sw=sparse?std::max(1,width/3):width, sh=sparse?std::max(1,height/3):height;
     const int source_stride=sw*4+8, output_stride=width*4+8;
     std::vector<T> input(static_cast<std::size_t>(source_stride)*sh);
@@ -26,6 +28,15 @@ int benchmark(int width, int height, int frames, int depth, const std::string& m
             input[static_cast<std::size_t>(y)*source_stride+x*4+c]=c==3?float(v)/250:float(v)/50-2;
         else input[static_cast<std::size_t>(y)*source_stride+x*4+c]=
             static_cast<T>(v*(depth==16?128:1));
+    }
+    if constexpr(std::is_same_v<T,float>) {
+        if(nonfinite) {
+            input[0]=std::bit_cast<float>(0x80000000u);
+            if(input.size()>17) {
+                input[9]=std::numeric_limits<float>::infinity();
+                input[17]=std::bit_cast<float>(0x7fc00123u);
+            }
+        }
     }
     std::vector<float> columns{0,.12f,.30f,.51f,.70f,.85f,1}, rows{0,.18f,.40f,.61f,.79f,1};
     if(mode=="identity") {
@@ -71,7 +82,8 @@ int benchmark(int width, int height, int frames, int depth, const std::string& m
     std::cout<<"{\"scope\":\"native plane bridge, NOT After Effects or RAM Preview\","
              <<"\"width\":"<<width<<",\"height\":"<<height<<",\"depth\":"<<depth
              <<",\"quality\":\"Final Bicubic\",\"mode\":\""<<mode<<"\",\"sparse\":"
-             <<(sparse?"true":"false")<<",\"abort_polling\":true,\"cold_ms\":"<<cold<<",\"frame_ms\":[";
+             <<(sparse?"true":"false")<<",\"nonfinite_input\":"<<(nonfinite?"true":"false")
+             <<",\"abort_polling\":true,\"cold_ms\":"<<cold<<",\"frame_ms\":[";
     for(std::size_t i=0;i<times.size();++i) std::cout<<(i?",":"")<<times[i];
     std::cout<<"],\"outside_pixels\":"<<report.outside_pixels
              <<",\"invalid_projection_pixels\":"<<report.invalid_projection_pixels<<"}\n";
@@ -84,13 +96,14 @@ int main(int argc,char** argv) {
         const int frames=argc>3?std::stoi(argv[3]):5,depth=argc>4?std::stoi(argv[4]):32;
         const std::string mode=argc>5?argv[5]:"region";
         const bool sparse=argc>6 && std::string(argv[6])=="sparse";
+        const bool nonfinite=argc>8 && std::string(argv[8])=="nonfinite";
         if(w<2 || h<2 || w>8192 || h>8192 || frames<1 || frames>100 ||
-           (depth!=8 && depth!=16 && depth!=32) ||
+           (depth!=8 && depth!=16 && depth!=32) || (nonfinite && depth!=32) ||
            (mode!="region" && mode!="layer" && mode!="perspective" && mode!="identity"))
-            throw std::invalid_argument("usage: bench_plane width height frames depth region|layer|perspective|identity dense|sparse [pixel_dump]");
+            throw std::invalid_argument("usage: bench_plane width height frames depth region|layer|perspective|identity dense|sparse [pixel_dump] [finite|nonfinite (32 bpc)]");
         const std::string dump=argc>7?argv[7]:"";
-        if(depth==8) return benchmark<std::uint8_t>(w,h,frames,depth,mode,sparse,dump);
-        if(depth==16) return benchmark<std::uint16_t>(w,h,frames,depth,mode,sparse,dump);
-        return benchmark<float>(w,h,frames,depth,mode,sparse,dump);
+        if(depth==8) return benchmark<std::uint8_t>(w,h,frames,depth,mode,sparse,dump,nonfinite);
+        if(depth==16) return benchmark<std::uint16_t>(w,h,frames,depth,mode,sparse,dump,nonfinite);
+        return benchmark<float>(w,h,frames,depth,mode,sparse,dump,nonfinite);
     } catch(const std::exception& error) {std::cerr<<error.what()<<'\n';return 2;}
 }

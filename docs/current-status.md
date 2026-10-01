@@ -14,9 +14,13 @@ scale. Other geometries keep the general mapping. Per-channel tap/arithmetic
 order, Final Catmull-Rom, integer rounding, float/HDR, C ABI and saved data remain
 unchanged. Independent-frame caches are call-local, with no retained source data.
 
-Native baseline/candidate pixels are byte-identical in all 31 external scenes;
-measured median improvement is 12.3x at 1080p/32 bpc and 12.8x at 4K/32 bpc
-for eligible deformed planes. C++ 21/21 (Release/host math/ASan+UBSan), TSan,
+Initial native baseline/candidate pixels were byte-identical in all 31 external
+finite scenes; initial median improvement was 12.3x at 1080p/32 bpc and 12.8x at
+4K/32 bpc. Linux CI then exposed a NaN-payload difference in the new float test.
+The corrected renderer recomputes NaN channels with the historical scalar loop;
+all 16 new external exceptional-float scenes match the original renderer exactly
+on arm64 and x86 via Rosetta. Updated timing and full candidate gates are pending;
+the initial packaged candidate is withheld. Initial local C++ 21/21 (Release/host math/ASan+UBSan), TSan,
 Rust 61/61, Clippy and Python 239/239 PASS. New target-AE Render and
 RAM Preview acceleration is **NOT RUN**, not inferred from native timings.
 See [the resumed performance record](performance-resume-2026-10-01.md).

@@ -61,7 +61,8 @@ not a network endpoint. Scanner output is not release certification.
 
 ## Status
 
-Native timing/optimization: PASS for the standalone scope below.
+Initial native timing/optimization: PASS for the standalone finite scope below.
+Current candidate: revalidation after the exceptional-float correction below.
 New target-AE Render/RAM Preview timing: NOT RUN.
 No installation, project mutation, cache purge, merge or release.
 
@@ -143,3 +144,28 @@ This is qualitative attribution, not CPU percentages or a timing baseline.
 The earlier exploratory sample overlapped a build and is excluded from final
 profile evidence. Current scanner: 23 unpinned-action, 5 checkout-credential
 candidates; no findings in changed plane/benchmark/regression files.
+
+## Exceptional-float CI correction
+
+Initial commit `aefeb4b` passed the physical Mac's complete 20-stage preflight,
+two clean reproducible builds, signed bundle and extracted ZIP validation.
+Build `EGFX-f900e4be32c6302ed3612a67`, package SHA-256
+`07e4bfea17caa5c98c38893d572dc4fd44affca7bc6a8396e9fb931b25c44ae7`.
+It was not installed or handed off: Linux Clang Release and GCC TSan failed the
+new float pixel parity test. The initial timing table above describes its finite
+sampling path; corrected-candidate timing is pending.
+
+Local x86/Rosetta reproduction with contraction disabled exposed cached
+`ffc00000` versus general `7fc00123`: SIMD and scalar additions chose different
+NaN payloads when Infinity*0 and an input NaN met in the same channel. Finite
+pixels were not the failing case. The correction resamples only NaN output
+channels with the original scalar loop; no tolerance change or NaN canonicalization.
+The test keeps byte equality and now prints the first differing element/bit pattern.
+
+The benchmark accepts explicit 32-bpc exceptional inputs. Against the unchanged
+`2e3d066` renderer, all eight dense/sparse region/layer/perspective/identity scenes
+pass on arm64 and all eight pass on x86 via Rosetta, including output padding.
+See [exceptional-float evidence](performance-plane-nonfinite-comparison-2026-10-01.json).
+These checks do not establish native Intel Mac/Windows/AE compatibility. Strict
+host-math C++ 21/21 and arm64 contraction-on/x86 contraction-off cache tests pass;
+sanitizers, hosted CI and corrected timing/package gates are being repeated.

@@ -7,6 +7,8 @@
   Keep Final Bicubic, per-channel arithmetic order and saved/FFI compatibility.
 - Add a plane-specific benchmark and byte-exact optimized/reference checks for
   all depths, sparse/expanded worlds, cancellation and independent frames.
+- Preserve historical NaN payload selection on x86 by recomputing exceptional
+  float channels with the original scalar sampling loop; retain finite HDR caches.
 - Run new cache tests in sanitizer/TSan gates and trigger Rust host regression
   for all relevant native/host source changes. AE/RAM Preview speed acceptance
   remains separate from standalone renderer measurements.
