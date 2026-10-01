@@ -21,23 +21,28 @@ def report(build,median,p95,mfr='on',digest='same',geometry='grid',case='PERF094
 
 
 class Compare(unittest.TestCase):
-    def test_reports_delta_only_with_exact_encoded_output_match(self):
+    def test_reports_delta_without_overclaiming_quality(self):
         r=pc.compare(report('EGFX-'+'a'*24,10,11),report('EGFX-'+'b'*24,9,10))
         self.assertAlmostEqual(r['delta_percent']['median'],-10.0)
-        self.assertEqual(r['quality_equivalence'],'EXACT_ENCODED_OUTPUT_MATCH')
+        self.assertEqual(r['encoded_output_equivalence'],'EXACT_MATCH')
+        self.assertEqual(r['quality_equivalence'],'NOT RUN')
         self.assertTrue(r['encoded_output_exact_match'])
-        self.assertFalse(r['performance_regression_gate'])
+        self.assertTrue(r['investigation_gate'])
+        self.assertFalse(r['slowdown_investigation_gate'])
+        self.assertFalse(r['performance_claim_allowed'])
         self.assertEqual(r['release'],'BLOCKED')
 
     def test_output_mismatch_is_explicit_fail(self):
         r=pc.compare(report('A',10,11,digest='a'),report('B',9,10,digest='b'))
         self.assertEqual(r['status'],'FAIL')
-        self.assertEqual(r['quality_equivalence'],'FAIL_ENCODED_OUTPUT_MISMATCH')
+        self.assertEqual(r['encoded_output_equivalence'],'FAIL_MISMATCH')
+        self.assertEqual(r['quality_equivalence'],'NOT RUN')
         self.assertFalse(r['encoded_output_exact_match'])
 
-    def test_over_five_percent_slowdown_sets_regression_gate(self):
+    def test_over_five_percent_slowdown_sets_investigation_gate(self):
         r=pc.compare(report('A',10,11),report('B',10.6,11.7))
-        self.assertTrue(r['performance_regression_gate'])
+        self.assertTrue(r['slowdown_investigation_gate'])
+        self.assertTrue(r['investigation_gate'])
         self.assertTrue(r['meaningful_timing_change'])
 
     def test_mismatched_fixture_mfr_geometry_or_case_refuses(self):
