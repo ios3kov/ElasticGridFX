@@ -28,6 +28,7 @@ class Baseline094(unittest.TestCase):
         self.assertTrue(any(c['geometry']=='four_corners' and c['mfr']=='on' for c in cases))
         self.assertTrue(any(c['geometry']=='four_corners' and c['mfr']=='off' for c in cases))
         self.assertEqual(len({c['condition_id'] for c in cases}),len(cases))
+        self.assertEqual(len(cases),15)
 
     def test_smoke_is_explicit_subset_not_stage_completion(self):
         smoke=pb.matrix_conditions('smoke')
@@ -69,6 +70,32 @@ class Baseline094(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'Build ID'):
                 pb.candidate_files(self.root)
 
+    def test_cross_condition_output_parity_rejects_mfr_difference(self):
+        base=dict(width=3840,height=2160,bit_depth=32,mode='static',geometry='grid',
+                  test_case_id='PERF094-RQ-002')
+        a=dict(base,condition_id='a',mfr='on',summary={'output_digest':'same'})
+        b=dict(base,condition_id='b',mfr='off',summary={'output_digest':'same'})
+        records=pb.validate_cross_condition_outputs([a,b])
+        self.assertEqual(records[0]['status'],'PASS')
+        b['summary']['output_digest']='different'
+        with self.assertRaisesRegex(ValueError,'encoded output differs'):
+            pb.validate_cross_condition_outputs([a,b])
+
+    def test_runtime_failure_retains_explicit_blocked_record(self):
+        with patch.object(pb.platform,'system',return_value='Darwin'), \
+             patch.object(pb.platform,'machine',return_value='arm64'), \
+             patch.object(pb,'candidate_files',side_effect=ValueError('candidate mismatch')):
+            with self.assertRaisesRegex(ValueError,'candidate mismatch'):
+                pb.run_baseline(self.root,self.root,'smoke',0,5,60)
+        runs=list(self.root.glob('FSTR-Stretch-094-baseline-*'))
+        self.assertEqual(len(runs),1)
+        record=(runs[0]/'baseline-failure.json')
+        self.assertTrue(record.is_file())
+        data=__import__('json').loads(record.read_text())
+        self.assertEqual(data['status'],'BLOCKED')
+        self.assertEqual(data['stage_status'],'BLOCKED')
+        self.assertIn('candidate mismatch',data['reason'])
+
     def test_successful_mock_matrix_still_reports_stage_blocked(self):
         installed=self.root/'Installed.plugin';installed.mkdir()
         package=self.root/pb.PACKAGE_NAME;package.write_bytes(b'p')
@@ -97,7 +124,7 @@ class Baseline094(unittest.TestCase):
                                    output_digest='d',encoded_output_repeatability='PASS'))
             return data,report
 
-        with patch.object(pb.platform,'system',return_value='Darwin'),              patch.object(pb.platform,'machine',return_value='arm64'),              patch.object(pb,'candidate_files',return_value=(package,manifest,{})),              patch.object(pb,'running_target',return_value=host),              patch.object(pb,'discover_aerender',return_value=aerender),              patch.object(pb,'live_baseline_identity',return_value=({'observed_build_id':pb.BASELINE_BUILD_ID,'observed_image_uuid':'U'},installed)),              patch.object(pb.ab,'verify_candidate'),              patch.object(pb,'require_same_host'),              patch.object(pb,'matrix_conditions',return_value=[condition]),              patch.object(pb.pf,'prepare',side_effect=fake_prepare),              patch.object(pb.pf,'execute',side_effect=fake_execute),              patch.object(pb.ab,'benchmark',side_effect=fake_benchmark):
+        with patch.object(pb.platform,'system',return_value='Darwin'),              patch.object(pb.platform,'machine',return_value='arm64'),              patch.object(pb,'candidate_files',return_value=(package,manifest,{})),              patch.object(pb,'running_target',return_value=host),              patch.object(pb,'discover_aerender',return_value=aerender),              patch.object(pb,'live_baseline_identity',return_value=({'observed_build_id':pb.BASELINE_BUILD_ID,'observed_image_uuid':'U','ae':{'version':'25.6.0'}},installed)),              patch.object(pb.ab,'verify_candidate'),              patch.object(pb,'require_same_host'),              patch.object(pb,'matrix_conditions',return_value=[condition]),              patch.object(pb.pf,'prepare',side_effect=fake_prepare),              patch.object(pb.pf,'execute',side_effect=fake_execute),              patch.object(pb.ab,'benchmark',side_effect=fake_benchmark):
             result,path=pb.run_baseline(self.root,self.root,'smoke',0,5,60)
         self.assertEqual(result['status'],'AERENDER_BASELINE_MEASURED')
         self.assertEqual(result['stage_status'],'BLOCKED')
