@@ -15,8 +15,12 @@ class Fixture(unittest.TestCase):
  def test_prepare_is_unique_and_not_run(self):
   a,ma=pf.prepare(self.root,1920,1080,32,'animated','grid');b,mb=pf.prepare(self.root,1920,1080,32,'animated','grid')
   self.assertNotEqual(a,b);self.assertEqual(ma['status'],'NOT RUN');self.assertTrue((a/'pattern.png').is_file())
- def test_prepare_supports_four_corners_and_8k(self):
-  folder,meta=pf.prepare(self.root,7680,4320,32,'static','four_corners')
+ def test_prepare_supports_four_corners_and_8k_without_allocating_real_8k_fixture(self):
+  def tiny_pattern(path,width,height):
+   self.assertEqual((width,height),(7680,4320))
+   path.write_bytes(b'8k-config-probe')
+  with patch.object(pf,'pattern',side_effect=tiny_pattern):
+   folder,meta=pf.prepare(self.root,7680,4320,32,'static','four_corners')
   self.assertEqual(meta['config']['geometry'],'four_corners');self.assertEqual(meta['config']['width'],7680)
   self.assertTrue((folder/'run.jsx').is_file())
  def test_prepare_rejects_unsupported_configuration(self):
