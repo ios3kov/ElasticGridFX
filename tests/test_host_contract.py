@@ -80,12 +80,13 @@ class HostContract(unittest.TestCase):
                      'PlaneMode', 'Quality'):
             self.assertNotIn('CANNOT_TIME_VARY', block(name))
 
-    def test_manual_topology_change_still_uses_existing_grid_sync(self):
+    def test_manual_density_change_requests_redraw_without_grid_sync(self):
         handler = SOURCE.split('ae::Command::UserChangedParam { param_index } => {', 1)[1].split(
             'ae::Command::UpdateParamsUi', 1)[0]
         self.assertIn('params.index(Params::Columns) == Some(param_index)', handler)
         self.assertIn('params.index(Params::Rows) == Some(param_index)', handler)
-        self.assertIn('sync_grid_topology(params)?;', handler)
+        self.assertNotIn('sync_grid_topology', handler)
+        self.assertIn('out_data.set_out_flag(ae::OutFlags::ForceRerender, true)', handler)
         # Never change registration-only behavior flags during rendering/UI.
         self.assertNotIn('CANNOT_TIME_VARY', handler)
 

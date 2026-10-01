@@ -84,21 +84,18 @@ fn initial_identity_values(grid:&GridArb,topology:(i32,i32),mode:i32,
 fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
     // SmartPreRender has no valid ordinary params array. All dependencies used
     // in this decision must be checked out just like the owned render snapshot.
-    let slider=|id| ->Result<i32,ae::Error>{
-        if checkout {checked_slider(params,id)} else {Ok(params.get(id)?.as_slider()?.value())}
-    };
     let float=|id| ->Result<f64,ae::Error>{
         if checkout {checked_float(params,id)} else {Ok(params.get(id)?.as_float_slider()?.value())}
     };
     let mode=if checkout {checked_popup(params,Params::PlaneMode)?}
         else {params.get(Params::PlaneMode)?.as_popup()?.value()};
-    let topology=(slider(Params::Columns)?,slider(Params::Rows)?);
     let wave=float(Params::WaveAmplitude)?;
     let easing=float(Params::StretchEasing)?;
     let spacing=float(Params::MinSpacing)?;
-    // Read the original arbitrary value: grid_snapshot/resized may repair bad
-    // state and therefore cannot establish the exact-identity precondition.
-    let matches=|grid:&GridArb|initial_identity_values(grid,topology,mode,wave,easing,spacing);
+    // Density controls are not render dependencies. Prove identity using only
+    // the original stored lattice; do not sanitize or resize invalid data.
+    let matches=|grid:&GridArb|initial_identity_values(
+        grid,(i32::from(grid.columns),i32::from(grid.rows)),mode,wave,easing,spacing);
     if checkout {
         let checked=params.checkout(Params::GridState)?;
         let value=checked.as_arbitrary()?.value::<GridArb>()?;

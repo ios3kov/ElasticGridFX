@@ -1,5 +1,22 @@
 # Current development / release status
 
+## Development: animation-preserving control density — 2026-09-30
+
+Stage 10 remains incomplete. Branch `fix/grid-density-preserve-animation`,
+based on 7f72201 / PR #10. User supersedes the reset-on-count-change policy.
+Columns/Rows now select visible controls over the retained animated deformation;
+count changes do not write Grid Positions or resize/reset render snapshots.
+The default stored lattice and wire format remain unchanged. New handles edit
+that retained curve through interpolation/elastic influence, not through a
+lossy conversion of old keys. Fewer visible lines do not discard hidden detail.
+
+Source implements the requirement; exact native AE UI/key metadata checks are
+NOT RUN here. See [acceptance and evidence](grid-density-preserve-animation-2026-09-30.md).
+Version is 0.9.2 development; the AE effect version is bumped to invalidate old
+render caches. This is not a published release. `FSTR Stretch.plugin` is retained.
+
+## Historical static-count/package checkpoint
+
 ## Development: static counts and branded test package — 2026-09-30
 
 Stage 10 remains incomplete. Branch `fix/first-application-516`, draft PR #10.

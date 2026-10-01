@@ -15,11 +15,13 @@ class FirstApplicationContracts(unittest.TestCase):
 
     def test_identity_proof_checks_out_smartfx_dependencies(self):
         proof=BINDING.split('fn pending_frame_identity(',1)[1].split('pub fn add_params(',1)[0]
-        for token in ['checked_slider(params,id)', 'checked_float(params,id)',
+        for token in ['checked_float(params,id)',
                       'checked_popup(params,Params::PlaneMode)?', 'params.checkout(Params::GridState)?',
-                      'Params::Columns','Params::Rows','Params::WaveAmplitude',
+                      'i32::from(grid.columns)','i32::from(grid.rows)','Params::WaveAmplitude',
                       'Params::StretchEasing','Params::MinSpacing']:
             self.assertIn(token,proof)
+        self.assertNotIn('Params::Columns',proof)
+        self.assertNotIn('Params::Rows',proof)
         self.assertNotIn('.resized(',proof)
         self.assertNotIn('unwrap_or',proof)
         self.assertNotIn('set_value(',proof)

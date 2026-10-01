@@ -1,5 +1,7 @@
 # Static Columns and Rows — 2026-09-30
 
+Historical reset behavior below is superseded by [animation-preserving density](grid-density-preserve-animation-2026-09-30.md). Static flags remain; the new count handler does not reset or write Grid Positions.
+
 ## Stage 10: source change; target AE acceptance pending
 
 The user requested manual-only guide counts because animated counts break the

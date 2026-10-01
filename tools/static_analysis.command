@@ -8,6 +8,7 @@ FILES=(
   "$ROOT/src/core/WarpMath.cpp"
   "$ROOT/src/core/CpuRenderer.cpp"
   "$ROOT/src/bridge/elasticgrid_ffi.cpp"
+  "$ROOT/src/bridge/control_grid_ffi.cpp"
 )
 INCLUDES=( -I"$ROOT/src" )
 WARN=(

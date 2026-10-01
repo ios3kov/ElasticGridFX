@@ -54,15 +54,6 @@ fn grid_to_frame(in_data: &ae::InData, event: &ae::EventExtra, plane: &ViewPlane
     layer_to_frame(in_data,event,plane,x,y)
 }
 
-fn displayed_grid(in_data: &ae::InData, params: &mut ae::Parameters<Params>, plane: &ViewPlane)
-    -> Result<GridArb, ae::Error> {
-    let mut grid = grid_snapshot(params)?;
-    if plane.state.corners.is_some() {
-        let p = evaluated_params(params, *in_data, &grid)?;
-        (grid.column_lines,grid.row_lines) = plane::evaluated_axes(&p)?;
-    }
-    Ok(grid)
-}
 
 thread_local! {
     static GUIDE_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
@@ -308,7 +299,8 @@ fn draw_viewer(
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
         return Ok(());
     }
-    let grid = displayed_grid(in_data,params,&plane)?;
+    let controls = control_grid::read(in_data,params)?;
+    let grid = controls.grid;
     let drawbot = event.context_handle().drawing_reference()?;
     let supplier = drawbot.supplier()?;
     let surface = drawbot.surface()?;
@@ -423,10 +415,13 @@ pub fn click(
         return Ok(());
     }
     let plane=ViewPlane::read(in_data,params,event)?;
-    let grid=displayed_grid(in_data,params,&plane)?;
-    if let Some((axis, index)) = hit_test(in_data, &grid, &plane, event, event.screen_point())? {
+    let controls=control_grid::read(in_data,params)?;
+    let grid=&controls.grid;
+    if let Some((axis, index)) = hit_test(in_data, grid, &plane, event, event.screen_point())? {
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
+        event.set_continue_refcon(2, grid.columns as _);
+        event.set_continue_refcon(3, grid.rows as _);
         event.set_send_drag(true);
         set_drag_cursor(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
@@ -483,44 +478,27 @@ fn drag_inner(
         event.set_send_drag(false);return Ok(());
     };
     let mut grid = grid_snapshot(params)?;
+    let before = grid.clone();
     let elastic = elastic_params(params)?;
-    let displayed=displayed_grid(in_data,params,&plane)?;
-
-    let rc = if axis == DRAG_COLUMNS {
-        if index == 0 || index + 1 >= grid.column_lines.len() {
-            event.set_send_drag(false);
-            return Ok(());
-        }
-        let target = local_x - (displayed.column_lines[index]-grid.column_lines[index]);
-        unsafe {
-            eg_drag_axis(
-                grid.column_lines.as_mut_ptr(),
-                grid.column_pins.as_mut_ptr(),
-                grid.column_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
+    let displayed = control_grid::read(in_data,params)?;
+    // A reentrant density change must not redirect an in-flight drag to another handle.
+    if event.continue_refcon(2) != displayed.grid.columns as isize ||
+        event.continue_refcon(3) != displayed.grid.rows as isize {
+        event.set_send_drag(false); return Ok(());
+    }
+    let (positions,refs,lines,pins,target) = if axis == DRAG_COLUMNS {
+        (&displayed.grid.column_lines,&displayed.column_refs,
+         &mut grid.column_lines,&grid.column_pins,local_x)
     } else {
-        if index == 0 || index + 1 >= grid.row_lines.len() {
-            event.set_send_drag(false);
-            return Ok(());
-        }
-        let target = local_y - (displayed.row_lines[index]-grid.row_lines[index]);
-        unsafe {
-            eg_drag_axis(
-                grid.row_lines.as_mut_ptr(),
-                grid.row_pins.as_mut_ptr(),
-                grid.row_lines.len() as i32,
-                index as i32,
-                target,
-                &elastic,
-            )
-        }
+        (&displayed.grid.row_lines,&displayed.row_refs,
+         &mut grid.row_lines,&grid.row_pins,local_y)
     };
-
-    if rc == 0 {
+    if index == 0 || index+1 >= positions.len() {
+        event.set_send_drag(false); return Ok(());
+    }
+    control_grid::drag(lines,pins,refs[index],target-positions[index],&elastic)?;
+    // Only a real deformation edit may write the animated arbitrary parameter.
+    if grid != before {
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
         event.set_event_out_flags(
             ae::EventOutFlags::HANDLED_EVENT
@@ -550,8 +528,9 @@ pub fn adjust_cursor(
     let dragging = GUIDE_DRAGGING.get();
     if !dragging {
         let plane=ViewPlane::read(in_data,params,event)?;
-        let grid=displayed_grid(in_data,params,&plane)?;
-        if hit_test(in_data, &grid, &plane, event, event.screen_point())?.is_none() {
+        let controls=control_grid::read(in_data,params)?;
+    let grid=&controls.grid;
+        if hit_test(in_data, grid, &plane, event, event.screen_point())?.is_none() {
             // Documented AdjustCursor handoff; never call PF_SetCursor(NONE).
             // Do not mark handled, so AE can use the currently selected tool.
             return Ok(());
