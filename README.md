@@ -1,9 +1,10 @@
-> **Development branch (PR #10):** Columns/Rows are now static setup values;
-> Grid Positions remains animatable. The next test package installs **FSTR Stretch.plugin**.
-> First-add/deformation, restart, preview and cancellation were user-confirmed on
-> the earlier 94d6706 candidate, not this new package. New-candidate AE acceptance
-> and old animated-count projects remain unverified. No merge/release has occurred.
-> [Current status](docs/current-status.md) · [Install/rollback and packaging](docs/branded-package-2026-09-30.md).
+> **Accepted development candidate 0.9.3:** exact runtime candidate
+> `2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e` passed the automated gates and
+> user target-AE acceptance, then was merged through PR #10 → #12 → #15.
+> The public release remains **0.9.1**; 0.9.3 is not published yet. Public macOS
+> distribution is still blocked on Developer ID signing, notarization and a
+> Gatekeeper-clean quarantined-download test.
+> [Current status](docs/current-status.md) · [0.9.3 retrospective](docs/retrospective-0.9.3.md).
 
 # FSTR Stretch
 
@@ -29,10 +30,11 @@ ordinary flat text/raster layers. This is not Windows/Intel, other AE versions,
 per-character 3D or universal HDR/OCIO certification. The bundle is ad-hoc signed,
 not Developer ID signed or notarized; do not bypass macOS security protections.
 
-Publication does not mean every development gate is closed. Separate target-host
-RAM Preview and render-cancellation evidence remains outstanding. Performance
-optimization was skipped by the user, not passed. Persistent grid display while
-the effect/layer is unselected is deferred.
+The published 0.9.1 record is historical relative to the accepted 0.9.3
+development candidate. Final 0.9.3 target-host RAM Preview and cancellation
+checks are closed as USER-REPORTED PASS. Performance optimization was skipped by
+the user, not passed. Persistent grid display while the effect/layer is unselected
+remains deferred.
 
 ## Artifact identity
 
@@ -48,7 +50,8 @@ excluding itself, using sorted repository-relative paths.
 
 ## Development and evidence
 
-- [Current status and open checks](docs/current-status.md)
+- [Current status and scope](docs/current-status.md)
+- [0.9.3 technical retrospective / AE know-how](docs/retrospective-0.9.3.md)
 - [Ten-stage map](docs/development-stages.md)
 - [Final gate: current verdict and historical evidence](docs/stage10-final-gate-2026-09-30.md)
 - [Architecture](docs/architecture.md) and [approved plane requirements](docs/perspective-plane-plan.md)

@@ -87,6 +87,15 @@ The current bundle is ad-hoc signed for the controlled development workflow.
 
 ## Release / merge state
 
-This acceptance **does not authorize merge or publication**. PR #15 remains draft and
-unmerged. The final 0.9.3 development artifact remains the exact candidate above until
-the user separately authorizes merge/release.
+After this acceptance, the user authorized the pre-merge verification and merge.
+PR #10 → #12 → #15 were merged to `main`; the tree after the PR #15 merge was
+identical to the accepted `2ccc5f6` source tree. PR #16 subsequently merged only
+documentation and `SHA256SUMS.txt`.
+
+The accepted runtime artifact remains the exact candidate above; no post-acceptance
+binary rebuild is relabeled as the accepted file. Version 0.9.3 is still **not a
+published GitHub release**.
+
+See [0.9.3 technical retrospective](retrospective-0.9.3.md). Under the current
+public macOS distribution rule, a normal public release remains BLOCKED until a
+Developer ID signed/notarized Gatekeeper-clean artifact is produced and verified.

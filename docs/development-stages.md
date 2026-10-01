@@ -171,9 +171,14 @@ Silicon / AE 25.6. Automated source/package gates PASS; target-host acceptance i
 USER-REPORTED PASS for the requested functional, Layer Plane, RAM Preview and
 cancellation/re-render scenarios. #7, #8, #9, #13 and #14 are closed.
 
-The earlier v0.9.1 release remains historical. Version 0.9.3 is **not published**
-and no merge/release is authorized without a separate user command. See
-stage10-final-acceptance-2026-10-01.md and stage10-final-gate-2026-09-30.md.
+The earlier v0.9.1 release remains historical. The accepted 0.9.3 source has now
+been merged through PR #10 → #12 → #15; PR #16 merged documentation only.
+Version 0.9.3 is **not published**. See stage10-final-acceptance-2026-10-01.md,
+stage10-final-gate-2026-09-30.md and retrospective-0.9.3.md.
+
+Under the current public macOS distribution rule, publication remains BLOCKED
+until the exact public artifact is Developer ID signed, notarized/stapled where
+applicable, and verified through a quarantined Gatekeeper-clean download/install.
 
 ### Historical pre-release checkpoint
 
@@ -201,5 +206,6 @@ documented scope. Stage 8 is skipped by user (not PASS).
 Stage 10 is COMPLETE for the agreed 0.9.3 macOS Apple Silicon / AE 25.6
 development scope. This does not certify Windows/Intel, other AE versions,
 broad HDR/OCIO, physical GPU execution, or public signing/notarization.
-No percentage or performance-completion claim. Version 0.9.3 remains unmerged
-and unpublished pending a separate user command.
+No percentage or performance-completion claim. Version 0.9.3 is merged but
+unpublished; the public macOS distribution gate remains BLOCKED on
+Developer ID/notarization/Gatekeeper-clean delivery.

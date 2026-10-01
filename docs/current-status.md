@@ -17,8 +17,20 @@ cancel→rerender cycles. #7, #8, #9, #13 and #14 are closed as scoped evidence.
 See [Stage 10 final acceptance](stage10-final-acceptance-2026-10-01.md).
 
 Stage 8 optimization remains **SKIPPED BY USER**, not PASS. Windows/Intel, other AE
-versions, broad HDR/OCIO, physical GPU execution and public signing/notarization
-remain outside the accepted scope. **No merge or 0.9.3 release is authorized yet.**
+versions, broad HDR/OCIO and physical GPU execution remain outside the accepted
+scope.
+
+After acceptance, PR #10 → #12 → #15 were merged to `main`; PR #16 merged the
+Stage 10 documentation. The plugin tree at the PR #15 merge matched the exact
+accepted `2ccc5f6` tree; later merged differences were documentation/checksums only.
+0.9.3 is still **not published**.
+
+The §25.1 technical retrospective is now recorded in
+[retrospective-0.9.3.md](retrospective-0.9.3.md). Under the current macOS public
+distribution rule, release readiness remains **BLOCKED** on Developer ID signing,
+notarization/applicable stapling and a Gatekeeper-clean quarantined download/install
+test. The accepted development artifact remains ad-hoc signed; no security bypass is
+an acceptable release step.
 
 Everything below is preserved historical development context unless explicitly
 marked current.
