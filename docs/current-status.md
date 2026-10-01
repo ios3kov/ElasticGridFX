@@ -19,10 +19,18 @@ geometry/color records, Four Corners fixture support and optional 8K preparation
 This branch does **not** enable Metal, change SmartFX ROI, scheduling, cache behavior
 or renderer math.
 
-Real target-AE Render Queue/RAM Preview/native-3D measurements are **BLOCKED** in
-the current development session because it has no access to the target AE runtime.
-Portable/CI checks cannot substitute for those measurements, so Stage 1 remains
-IN PROGRESS until real host Evidence exists.
+Real target-AE access is now available and the `core` aerender baseline was
+attempted on AE 25.6x101 with the exact frozen 0.9.3 artifact. The run produced
+many successful 1080p/4K renders, then one 3840×2160 warmup failed inside AE with
+`Error Code: 516` and `EffectMain returned error: BadCallbackParameter
+(516) (25 :: 237)`. The then-current harness later surfaced the secondary
+`aerender produced no benchmark output` message because the launcher itself
+returned success.
+
+This real-host attempt is preserved as **FAIL / BLOCKED evidence**, not PASS.
+The runtime failure must be reproduced and localized before production renderer
+optimization begins. RAM Preview, native-3D and deep-profile baselines also remain
+incomplete, so Stage 1 stays IN PROGRESS / BLOCKED.
 
 See:
 - [0.9.4 Performance Release Plan](performance-plan-0.9.4.md)

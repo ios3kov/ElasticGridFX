@@ -2,7 +2,7 @@
 
 Date: 2026-10-01  
 Process mode: **Release / Critical**  
-Status: **IN PROGRESS — tooling/source verification first; real target-AE measurements BLOCKED in this development session**
+Status: **IN PROGRESS / BLOCKED — real target-AE core baseline produced a runtime FAIL that must be investigated before optimization**
 
 Authoritative rules: `ios3kov/AE-Development-Rules` commit
 `320f80902fe5f50041935712e8d144ac61d29687`, rules blob
@@ -30,6 +30,38 @@ The baseline runtime is the exact accepted 0.9.3 candidate:
 - binary SHA-256: `7dc57622442eaddcc1f061e044e77db3796a2db44e4061c807eee6aa60c15beb`.
 
 Historical 0.9.3 functional acceptance is not a 0.9.4 performance measurement.
+
+
+## 2.1 Real target-AE baseline evidence — 2026-10-01
+
+A full `core` baseline was attempted on the controlled target Mac with After
+Effects 25.6x101 and the exact frozen 0.9.3 artifact above. The matrix produced
+many successful 1080p/4K renders and retained PNG output, but one 3840×2160
+warmup failed inside After Effects before producing benchmark output.
+
+Retained real-host evidence:
+
+- baseline run: `FSTR-Stretch-094-baseline-3517c1bfd676425781c1824c1a075234`;
+- failing fixture: `EGFX-perf-cf65330682314886ac06d6237e99e9d5`;
+- failing run: `warmup-01-d25806c42b5d44b39dba42fb4b40ec8f`;
+- AE reported: `An unexpected error occurred while exporting a composition`;
+- AE error code: `516`;
+- first logged effect error:
+  `EffectMain returned error: BadCallbackParameter (516) (25 :: 237)`;
+- AE reported six logged errors and requested restart/retry;
+- the aerender launcher returned success to the harness, so the then-current
+  runner surfaced the secondary symptom `aerender produced no benchmark output`;
+- this attempt is **FAIL / BLOCKED evidence** and must not be relabeled PASS.
+
+This is the first real-host runtime failure found by the 0.9.4 baseline cycle.
+The failure is not yet attributed to a production-code root cause. In particular,
+the retained evidence does not by itself prove MFR, renderer math, lifecycle,
+or fixture setup is the cause. Reproduction and localization are required before
+any production renderer change.
+
+Stage 1 remains blocked. No performance optimization is authorized from this
+partial matrix.
+
 
 ## 3. Scope and risks
 
