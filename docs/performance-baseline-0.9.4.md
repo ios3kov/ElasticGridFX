@@ -255,10 +255,13 @@ Before any fixture is created the runner:
 6. refuses ambiguous/conflicting installed copies;
 7. resolves the matching `aerender` executable;
 8. verifies the installed bundle against the same artifact manifest;
-9. creates the first owned fixture and runs a separate untimed `aerender`
-   runtime-identity preflight;
-10. confirms the spawned render process actually maps the exact installed
-    FSTR Stretch Mach-O image/UUID and verifies its disk payload before timing begins.
+9. resolves the target macOS background render executable `aerendercore`
+   from the same AE application bundle;
+10. creates the first owned fixture and runs a separate untimed `aerender`
+    runtime-identity preflight;
+11. confirms the spawned `aerendercore` process actually maps the exact
+    installed FSTR Stretch Mach-O image/UUID and verifies its disk payload
+    before timing begins.
 
 The plug-in's `GlobalSetup` diagnostic may be emitted by a spawned render process
 whose stderr is not forwarded by the `aerender` launcher. Therefore timing runs

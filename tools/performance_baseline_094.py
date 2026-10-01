@@ -92,6 +92,28 @@ def discover_aerender(ae_app: Path) -> Path:
     return unique[0]
 
 
+def discover_render_executable(ae_app: Path) -> Path:
+    candidates = [
+        ae_app / "Contents" / "aerendercore.app" / "Contents" / "MacOS" / "aerendercore",
+        ae_app / "Contents" / "MacOS" / "aerendercore",
+    ]
+    found = []
+    for candidate in candidates:
+        try:
+            candidate = checked_path(candidate)
+        except (OSError, ValueError):
+            continue
+        if candidate.is_file() and candidate.name == "aerendercore":
+            found.append(candidate)
+    unique = []
+    for candidate in found:
+        if not any(candidate.samefile(existing) for existing in unique):
+            unique.append(candidate)
+    if len(unique) != 1:
+        raise ValueError("could not resolve exactly one aerendercore executable for the running AE")
+    return unique[0]
+
+
 def candidate_files(candidate_dir: Path) -> tuple[Path, Path, dict]:
     candidate_dir = checked_path(candidate_dir, directory=True)
     package = bi.safe_file(candidate_dir, PACKAGE_NAME)
@@ -216,6 +238,7 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
         package, manifest_path, manifest = candidate_files(candidate_dir)
         host = running_target()
         aerender = discover_aerender(host["app"])
+        render_executable = discover_render_executable(host["app"])
 
         identity, installed = live_baseline_identity(run_root, manifest, host)
         ab.verify_candidate(installed, package, manifest_path)
@@ -227,6 +250,7 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
             observed_image_uuid=identity["observed_image_uuid"],
             installed_bundle=str(installed),
             aerender=str(aerender),
+            render_executable=str(render_executable),
         )
 
         fixtures_root = run_root / "fixtures"
@@ -242,7 +266,7 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
             require_same_host(host)
             if runtime_identity is None:
                 runtime_identity = ab.runtime_identity_preflight(
-                    folder,aerender,installed,package,manifest_path,host["executable"])
+                    folder,aerender,installed,package,manifest_path,render_executable)
                 result["aerender_runtime_identity"] = ab.validate_runtime_identity(
                     runtime_identity,BASELINE_BUILD_ID)
                 require_same_host(host)

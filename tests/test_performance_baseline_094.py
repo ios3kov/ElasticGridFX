@@ -30,6 +30,15 @@ class Baseline094(unittest.TestCase):
         self.assertEqual(len({c['condition_id'] for c in cases}),len(cases))
         self.assertEqual(len(cases),15)
 
+    def test_discover_render_executable_uses_aerendercore_inside_app(self):
+        app=self.root/'Adobe After Effects 2025.app'
+        target=app/'Contents'/'aerendercore.app'/'Contents'/'MacOS'/'aerendercore'
+        target.parent.mkdir(parents=True);target.write_bytes(b'x')
+        self.assertEqual(pb.discover_render_executable(app),target.resolve())
+        target.unlink()
+        with self.assertRaisesRegex(ValueError,'aerendercore'):
+            pb.discover_render_executable(app)
+
     def test_smoke_is_explicit_subset_not_stage_completion(self):
         smoke=pb.matrix_conditions('smoke')
         core=pb.matrix_conditions('core')
@@ -103,6 +112,8 @@ class Baseline094(unittest.TestCase):
         ae_app=self.root/'AE.app';ae_app.mkdir()
         exe=self.root/'After Effects';exe.write_bytes(b'x')
         aerender=self.root/'aerender';aerender.write_bytes(b'x')
+        render_executable=ae_app/'Contents'/'aerendercore.app'/'Contents'/'MacOS'/'aerendercore'
+        render_executable.parent.mkdir(parents=True);render_executable.write_bytes(b'x')
         host=dict(pid=123,app=ae_app,executable=exe)
         condition=dict(condition_id='grid-1080p-32-animated-mfr-on',
                        test_case_id='PERF094-RQ-001',width=1920,height=1080,
