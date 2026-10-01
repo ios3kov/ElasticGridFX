@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compare controlled aerender reports with output-integrity and regression gates."""
+"""Compare controlled aerender reports with output-integrity and timing gates."""
 from __future__ import annotations
 import argparse
 import json
@@ -52,11 +52,14 @@ def compare(a:dict,b:dict)->dict:
                        peak_rss=b['summary']['peak_rss_max_bytes'],output_digest=digest_b),
                 delta_percent=dict(median=delta,p95=delta95),
                 meaningful_timing_change=abs(delta)>5.0,
-                performance_regression_gate=delta>5.0,
+                investigation_gate=abs(delta)>5.0,
+                slowdown_investigation_gate=delta>5.0,
                 encoded_output_exact_match=exact_output,
-                quality_equivalence='EXACT_ENCODED_OUTPUT_MATCH' if exact_output else 'FAIL_ENCODED_OUTPUT_MISMATCH',
+                encoded_output_equivalence='EXACT_MATCH' if exact_output else 'FAIL_MISMATCH',
+                quality_equivalence='NOT RUN',
                 quality_scope='Encoded timing outputs only; not a 32f/HDR or universal pixel-quality oracle.',
-                note='A speed result is not approved until all applicable quality/runtime gates also pass.')
+                performance_claim_allowed=False,
+                note='Timing comparison alone never approves an optimization; all applicable quality/runtime gates must also pass.')
 
 
 def main()->int:
