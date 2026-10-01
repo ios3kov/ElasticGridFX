@@ -22,8 +22,13 @@ function elasticGridPerfFixture(config) {
         projectFile=new File(config.folder+"/EGFX_PERF.aep");
         resultFile=new File(config.folder+"/capture.json");
         if (projectFile.exists || resultFile.exists) { resultFile=null; throw new Error("Stale fixture evidence"); }
-        if (app.project===null || app.project.file!==null || app.project.numItems!==0 ||
-            typeof app.project.dirty!=="boolean" || app.project.dirty) throw new Error("Requires empty unsaved clean test project");
+        if (app.project===null || app.project.file!==null || app.project.numItems!==0)
+            throw new Error("Requires empty unsaved clean test project");
+        // AE 25.6 does not expose Project.dirty consistently. When the property is
+        // available, keep the stricter guard; otherwise file==null + numItems==0
+        // is the strongest non-destructive empty-project check available here.
+        if (typeof app.project.dirty==="boolean" && app.project.dirty)
+            throw new Error("Requires empty unsaved clean test project");
 
         result.ae_version=app.version;
         app.beginSuppressDialogs(); suppressing=true;

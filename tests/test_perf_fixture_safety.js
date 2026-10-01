@@ -15,6 +15,7 @@ function run(options={}){
    save(file){calls.save++;this.file=file;this.dirty=false;files[file.fsName]='AEP';},
    close(){calls.close++;if(options.closeFail)return false;app.project=null;return true;}
  };
+ if(options.noDirtyProperty && project) delete project.dirty;
  const app={project,version:'fixture',beginSuppressDialogs(){calls.dialogs++;},endSuppressDialogs(){calls.dialogs--;},
    newProject(){calls.newProject++;app.project={bitsPerChannel:16};return app.project;}};
  function File(n){this.fsName=String(n);Object.defineProperty(this,'exists',{get:()=>Object.hasOwn(files,this.fsName)});Object.defineProperty(this,'length',{get:()=>files[this.fsName]?.length||0});this.open=()=>true;this.write=t=>{files[this.fsName]=t;};this.close=()=>{};}
@@ -33,6 +34,10 @@ for(const project of [
 ]){
  const {calls,app}=run({project});
  assert.notEqual(app.exitCode,0);assert.equal(calls.save+calls.close+calls.newProject,0,'unsafe project untouched');
+}
+{
+ const {app,capture}=run({noDirtyProperty:true});
+ assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
 }
 for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true},{geometry:'bad'}]){
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');
