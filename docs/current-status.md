@@ -1,5 +1,41 @@
 # Current development / release status
 
+## Target-AE acceptance and About branding — 2026-10-01
+
+The user loaded the exact 0.9.3 candidate `ae0c6c47d3318f3e1b7cb0edb4290f6ce04b0dd7`
+(Build ID `EGFX-2ac782234af13eae3b01f67d`), supplied an About screenshot
+matching those identifiers, and after the requested manual checks reported that
+the rest works. Record this as **USER-REPORTED acceptance of the requested
+manual scenario**, not as full platform/compatibility certification.
+
+The next source change is presentation-only: the user-facing About dialog is
+approved as:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects.
+
+© 2026 FSTR.tech. All rights reserved.
+fstr.tech
+```
+
+Build ID, commit, target and source-state text are removed from the visible
+About dialog, but provenance remains in `BuildIdentity.json` and the
+noninteractive diagnostic string so support/package verification can still
+identify the exact binary.
+
+Because this changes source after the accepted `ae0c6c4` artifact, any plugin
+built from the new commit is a **new candidate** with a new commit/Build ID.
+The old artifact hashes and host PASS must not be transferred to it; mandatory
+automation/package checks and target-AE handoff must be repeated. Version
+0.9.3 remains a development version and is not a published release.
+
+The remaining Layer Plane overlay/index-span alignment item in #14 stays open
+until its real AE viewer mapping is measured and resolved or explicitly
+accepted. No merge or release is authorized.
+
 ## Development: Fit Layer boundary correction — 2026-09-30
 
 Stage 10, branch `fix/fit-layer-coordinates`, stacked on PR #12. The source

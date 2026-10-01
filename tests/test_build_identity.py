@@ -150,7 +150,7 @@ class IdentityTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 bi.safe_file(self.root, path)
 
-    def test_generated_about_marker_and_directives(self):
+    def test_generated_about_is_branded_and_diagnostic_retains_identity(self):
         out = Path(self.tmp.name) / 'out'
         original_run = bi.run
         def fake_run(args, cwd=None):
@@ -162,10 +162,23 @@ class IdentityTests(unittest.TestCase):
             # git is still resolved by the system default search path.
             bi.generate(self.root, out, 'aarch64-apple-darwin', 'release')
         meta = json.loads((out / 'BuildIdentity.json').read_text())
-        rust = (out / 'build_identity.rs').read_text()
-        self.assertIn(meta['build_id'], rust)
-        self.assertIn(meta['commit'], rust)
-        self.assertIn('ElasticGridBuildID=', rust)
+        rust = (out / 'build_identity.rs').read_text(encoding='utf-8')
+        about_line = next(line for line in rust.splitlines() if line.startswith('pub const ABOUT:'))
+        diagnostic_line = next(line for line in rust.splitlines() if line.startswith('pub const DIAGNOSTIC:'))
+        self.assertIn('FSTR Stretch', about_line)
+        self.assertIn('Version 0.9.0', about_line)
+        self.assertIn('Professional mesh deformation for Adobe After Effects.', about_line)
+        self.assertIn('© 2026 FSTR.tech. All rights reserved.', about_line)
+        self.assertIn('fstr.tech', about_line)
+        self.assertNotIn(meta['build_id'], about_line)
+        self.assertNotIn(meta['commit'], about_line)
+        self.assertNotIn('aarch64-apple-darwin', about_line)
+        self.assertNotIn('Source:', about_line)
+        self.assertIn(meta['build_id'], diagnostic_line)
+        self.assertIn(meta['commit'], diagnostic_line)
+        self.assertIn('ElasticGridBuildID=', diagnostic_line)
+        self.assertIn('aarch64-apple-darwin', diagnostic_line)
+        self.assertIn('Source:', diagnostic_line)
         self.assertIn('cargo:rerun-if-env-changed=RUSTFLAGS', stdout.getvalue())
         self.assertIn(str(self.root / 'src/example.cpp'), stdout.getvalue())
 

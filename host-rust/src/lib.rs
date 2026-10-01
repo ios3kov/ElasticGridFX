@@ -1020,7 +1020,7 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::GlobalSetup => {
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
                 // One noninteractive diagnostic per host setup, never per frame.
-                eprintln!("{}", build_identity::ABOUT.replace('\r', " | "));
+                eprintln!("{}", build_identity::DIAGNOSTIC.replace('\r', " | "));
             }
             ae::Command::About => {
                 out_data.set_return_msg(build_identity::ABOUT);
