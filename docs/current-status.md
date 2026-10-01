@@ -1,5 +1,33 @@
 # Current development / release status
 
+## About copyright encoding correction — 2026-10-01
+
+The user opened the newly branded 0.9.3 About dialog and the new text appeared,
+but the copyright glyph rendered as `¬©`. This directly identifies an encoding
+mismatch in the visible dialog: the Rust wrapper copied UTF-8 bytes `C2 A9`
+into AE's legacy `A_char[256]` return-message buffer, and the host displayed
+both bytes as characters. Adobe's own About dialog on the same host displays a
+normal copyright glyph.
+
+The correction keeps the real `©` symbol and writes the About field as exact
+legacy bytes with a **single `0xA9` copyright byte**. The visible copy is also
+updated per user request to remove terminal periods:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+fstr.tech
+```
+
+The internal BuildIdentity/diagnostic path remains unchanged and separate.
+This source change creates another new candidate identity, so the prior package
+and Build ID must not be relabeled. Mandatory automated gates and a final
+target-AE About check are required again. No merge or release is authorized.
+
 ## Target-AE acceptance and About branding — 2026-10-01
 
 The user loaded the exact 0.9.3 candidate `ae0c6c47d3318f3e1b7cb0edb4290f6ce04b0dd7`
@@ -15,9 +43,9 @@ approved as:
 FSTR Stretch
 Version 0.9.3
 
-Professional mesh deformation for Adobe After Effects.
+Professional mesh deformation for Adobe After Effects
 
-© 2026 FSTR.tech. All rights reserved.
+© 2026 FSTR.tech. All rights reserved
 fstr.tech
 ```
 
