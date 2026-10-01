@@ -1,4 +1,4 @@
-"""Portable tests for synthetic performance fixture preparation. No AE execution."""
+"""Portable tests for 0.9.4 synthetic performance fixture preparation. No AE execution."""
 import json
 from pathlib import Path
 import sys,tempfile,unittest
@@ -13,29 +13,37 @@ class Fixture(unittest.TestCase):
   self.tmp=tempfile.TemporaryDirectory(prefix='egfx-perf-fixture-');self.addCleanup(self.tmp.cleanup)
   self.root=Path(self.tmp.name).resolve()
  def test_prepare_is_unique_and_not_run(self):
-  a,ma=pf.prepare(self.root,1920,1080,32,'animated');b,mb=pf.prepare(self.root,1920,1080,32,'animated')
+  a,ma=pf.prepare(self.root,1920,1080,32,'animated','grid');b,mb=pf.prepare(self.root,1920,1080,32,'animated','grid')
   self.assertNotEqual(a,b);self.assertEqual(ma['status'],'NOT RUN');self.assertTrue((a/'pattern.png').is_file())
+ def test_prepare_supports_four_corners_and_8k(self):
+  folder,meta=pf.prepare(self.root,7680,4320,32,'static','four_corners')
+  self.assertEqual(meta['config']['geometry'],'four_corners');self.assertEqual(meta['config']['width'],7680)
+  self.assertTrue((folder/'run.jsx').is_file())
  def test_prepare_rejects_unsupported_configuration(self):
-  for args in [(100,100,32,'animated'),(1920,1080,24,'animated'),(1920,1080,32,'bad')]:
+  for args in [(100,100,32,'animated','grid'),(1920,1080,24,'animated','grid'),
+               (1920,1080,32,'bad','grid'),(1920,1080,32,'animated','native_3d')]:
    with self.assertRaises(ValueError):pf.prepare(self.root,*args)
- def test_inspect_builds_exact_benchmark_schema(self):
-  folder,meta=pf.prepare(self.root,1920,1080,32,'static')
+ def test_inspect_builds_v2_benchmark_schema(self):
+  folder,meta=pf.prepare(self.root,1920,1080,32,'static','four_corners')
   (folder/'EGFX_PERF.aep').write_bytes(b'aep')
   capture=dict(run_id=meta['run_id'],status='PREPARED',stage='prepared',saved=True,ae_version='x',
-               width=1920,height=1080,fps=30,duration=2,bit_depth=32,mode='static',composition='EGFX_PERF',
+               width=1920,height=1080,fps=30,duration=2,bit_depth=32,mode='static',geometry='four_corners',
+               color_management='none-linearize-off',composition='EGFX_PERF',
                rqindex=1,render_template='Best Settings',output_template='PNG Sequence',
                output_format='PNG Sequence',output_pattern='frame_[#####].png')
   (folder/'capture.json').write_text(json.dumps(capture))
   fixture=pf.inspect(folder,meta)
+  self.assertEqual(fixture['schema'],2);self.assertEqual(fixture['geometry'],'four_corners')
   self.assertEqual(fixture['quality'],'Final Bicubic');self.assertEqual(fixture['frame_end'],59)
-  self.assertEqual(ab.load_fixture(folder,folder/'fixture.json')['project_path'],folder/'EGFX_PERF.aep')
+  loaded=ab.load_fixture(folder,folder/'fixture.json')
+  self.assertEqual(loaded['project_path'],folder/'EGFX_PERF.aep');self.assertEqual(loaded['geometry'],'four_corners')
  def test_capture_mismatch_refuses(self):
-  folder,meta=pf.prepare(self.root,1920,1080,32,'animated')
+  folder,meta=pf.prepare(self.root,1920,1080,32,'animated','grid')
   (folder/'EGFX_PERF.aep').write_bytes(b'aep')
   (folder/'capture.json').write_text(json.dumps(dict(run_id=meta['run_id'],status='FAIL')))
   with self.assertRaises(ValueError):pf.inspect(folder,meta)
  def test_execute_refuses_nonmac_before_transport(self):
-  folder,meta=pf.prepare(self.root,1920,1080,32,'animated')
+  folder,meta=pf.prepare(self.root,1920,1080,32,'animated','grid')
   with patch.object(pf.platform,'system',return_value='Linux'),patch.object(pf.subprocess,'run') as run:
    with self.assertRaises(ValueError):pf.execute(folder,meta,self.root/'AE.app',self.root/'plugin',self.root/'p.zip',self.root/'m.json')
    run.assert_not_called()

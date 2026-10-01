@@ -68,11 +68,23 @@ def load_fixture(workspace: Path, fixture_path: Path) -> dict:
     fixture_path = checked_path(fixture_path)
     relative_under(workspace, fixture_path)
     data = json.loads(fixture_path.read_text())
-    required = {'schema','fixture_id','project','project_sha256','composition','rqindex',
-                'width','height','fps','frame_start','frame_end','bit_depth',
-                'quality','output_format','output_pattern'}
-    if set(data) != required or data['schema'] != 1:
-        raise ValueError('invalid performance fixture schema')
+    common = {'schema','fixture_id','project','project_sha256','composition','rqindex',
+              'width','height','fps','frame_start','frame_end','bit_depth',
+              'quality','output_format','output_pattern'}
+    schema = data.get('schema')
+    if schema == 1:
+        if set(data) != common:
+            raise ValueError('invalid legacy performance fixture schema')
+        data = dict(data, geometry='grid', color_management='legacy-unspecified')
+    elif schema == 2:
+        if set(data) != common | {'geometry','color_management'}:
+            raise ValueError('invalid performance fixture schema v2')
+        if data['geometry'] not in ('grid','four_corners','native_3d'):
+            raise ValueError('invalid fixture geometry')
+        if data['color_management'] not in ('none-linearize-off',):
+            raise ValueError('invalid fixture color-management contract')
+    else:
+        raise ValueError('unsupported performance fixture schema')
     if not re.fullmatch(r'[A-Za-z0-9_.-]{1,80}', data['fixture_id']):
         raise ValueError('invalid fixture identifier')
     project_rel = PurePosixPath(data['project'])
@@ -161,16 +173,25 @@ def percentile(values: list[float], p: float) -> float:
     return ordered[rank]
 
 
-def summarize(samples: list[dict]) -> dict:
+def summarize(samples: list[dict], frame_count: int) -> dict:
     if len(samples) < MIN_SAMPLES:
         raise ValueError('at least five measured samples are required')
+    if frame_count < 1:
+        raise ValueError('invalid benchmark frame count')
     walls = [s['wall_seconds'] for s in samples]
     rss = [s['metrics']['peak_rss_bytes'] for s in samples]
-    return dict(samples=len(samples), wall_median_seconds=statistics.median(walls),
-                wall_p95_seconds=percentile(walls,0.95),
+    digests = sorted(set(s['output_digest'] for s in samples))
+    if len(digests) != 1:
+        raise ValueError('measured runs produced different encoded output digests')
+    median = statistics.median(walls)
+    p95 = percentile(walls,0.95)
+    return dict(samples=len(samples), frame_count=frame_count,
+                wall_median_seconds=median, wall_p95_seconds=p95,
                 wall_min_seconds=min(walls), wall_max_seconds=max(walls),
-                peak_rss_max_bytes=max(rss),
-                output_digests=sorted(set(s['output_digest'] for s in samples)))
+                ms_per_frame_median=median*1000.0/frame_count,
+                ms_per_frame_p95=p95*1000.0/frame_count,
+                peak_rss_max_bytes=max(rss), output_digest=digests[0],
+                encoded_output_repeatability='PASS')
 
 
 def run_once(index: int, kind: str, workspace: Path, aerender: Path, fixture: dict,
@@ -214,13 +235,15 @@ def environment_summary(aerender: Path) -> dict:
 
 def benchmark(workspace: Path, fixture_path: Path, aerender: Path, bundle: Path,
               package: Path, manifest: Path, warmups: int, samples: int,
-              mfr: str, timeout: int) -> tuple[dict, Path]:
+              mfr: str, timeout: int, test_case_id: str) -> tuple[dict, Path]:
     if platform.system() != 'Darwin' or platform.machine() != 'arm64':
         raise ValueError('benchmark requires the target Apple Silicon macOS environment')
     if not 0 <= warmups <= 5 or not MIN_SAMPLES <= samples <= MAX_SAMPLES:
         raise ValueError('invalid warmup/sample count')
     if mfr not in ('inherit','on','off') or timeout < 30:
         raise ValueError('invalid benchmark settings')
+    if not re.fullmatch(r'PERF094-[A-Z0-9-]{3,64}', test_case_id):
+        raise ValueError('invalid 0.9.4 performance Test Case ID')
     workspace = checked_path(workspace, directory=True)
     fixture = load_fixture(workspace, fixture_path)
     aerender = checked_path(aerender)
@@ -239,12 +262,17 @@ def benchmark(workspace: Path, fixture_path: Path, aerender: Path, bundle: Path,
             for i in range(1,warmups+1)]
     measured = [run_once(i,'sample',workspace,aerender,fixture,build['build_id'],mfr,timeout)
                 for i in range(1,samples+1)]
+    frame_count = fixture['frame_end'] - fixture['frame_start'] + 1
     report = dict(schema=SCHEMA,status='MEASURED',release='BLOCKED',
+                  test_case_id=test_case_id,test_run_id=uuid.uuid4().hex,
                   scope='aerender timing/memory + runtime Build ID; not RAM Preview or HDR pixel equivalence',
                   candidate=build,fixture={k:v for k,v in fixture.items() if k!='project_path'},
-                  environment=env,settings=dict(warmups=warmups,samples=samples,mfr=mfr,timeout_seconds=timeout),
-                  warmups=warm,samples_data=measured,summary=summarize(measured),
-                  quality_equivalence='NOT RUN')
+                  environment=env,settings=dict(warmups=warmups,samples=samples,mfr=mfr,
+                                                timeout_seconds=timeout,
+                                                cache_state='warm-after-explicit-warmups' if warmups else 'uncontrolled'),
+                  warmups=warm,samples_data=measured,summary=summarize(measured,frame_count),
+                  quality_equivalence='NOT RUN',
+                  encoded_output_repeatability='PASS')
     output = workspace/'aerender-benchmark.json'
     if output.exists() or output.is_symlink():
         raise ValueError('refusing stale benchmark report')
@@ -264,10 +292,12 @@ def main() -> int:
     p.add_argument('--samples',type=int,default=5)
     p.add_argument('--mfr',choices=('inherit','on','off'),default='inherit')
     p.add_argument('--timeout',type=int,default=1800)
+    p.add_argument('--test-case-id',required=True,
+                   help='Versioned Test Case ID, e.g. PERF094-RQ-001')
     a=p.parse_args()
     try:
         report,path=benchmark(a.workspace,a.fixture,a.aerender,a.installed_bundle,a.package,a.manifest,
-                              a.warmups,a.samples,a.mfr,a.timeout)
+                              a.warmups,a.samples,a.mfr,a.timeout,a.test_case_id)
     except (OSError,ValueError,KeyError,subprocess.SubprocessError) as e:
         print('BLOCKED: '+str(e),file=sys.stderr); return 3
     print(json.dumps(dict(status=report['status'],report=str(path),release='BLOCKED'),indent=2))

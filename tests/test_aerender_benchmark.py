@@ -1,4 +1,4 @@
-"""Portable contract tests for Stage 8 aerender benchmark tooling. No AE execution."""
+"""Portable contract tests for 0.9.4 aerender benchmark tooling. No AE execution."""
 import json
 from pathlib import Path
 import sys
@@ -27,11 +27,12 @@ class BenchmarkTool(unittest.TestCase):
         self.root=Path(self.tmp.name).resolve()
         self.project=self.root/'EGFX_PERF.aep'; self.project.write_bytes(b'test-aep')
         self.fixture=self.root/'fixture.json'
-        data=dict(schema=1,fixture_id='egfx-perf-v1',project='EGFX_PERF.aep',
+        data=dict(schema=2,fixture_id='egfx-perf-v2',project='EGFX_PERF.aep',
                   project_sha256=ab.file_digest(self.project),composition='EGFX_PERF',
                   rqindex=1,width=1920,height=1080,fps=30.0,frame_start=0,frame_end=29,
                   bit_depth=32,quality='Final Bicubic',output_format='PNG sequence',
-                  output_pattern='frame_[#####].png')
+                  output_pattern='frame_[#####].png',geometry='grid',
+                  color_management='none-linearize-off')
         self.fixture.write_text(json.dumps(data))
 
     def test_fixture_is_pinned_and_inside_workspace(self):
@@ -46,6 +47,14 @@ class BenchmarkTool(unittest.TestCase):
             changed=dict(data);changed[key]=value;self.fixture.write_text(json.dumps(changed))
             with self.assertRaises(ValueError):ab.load_fixture(self.root,self.fixture)
         self.fixture.write_text(json.dumps(data))
+
+    def test_legacy_fixture_schema_remains_readable(self):
+        data=json.loads(self.fixture.read_text())
+        data.pop('geometry');data.pop('color_management');data['schema']=1
+        self.fixture.write_text(json.dumps(data))
+        loaded=ab.load_fixture(self.root,self.fixture)
+        self.assertEqual(loaded['geometry'],'grid')
+        self.assertEqual(loaded['color_management'],'legacy-unspecified')
 
     def test_time_metrics_and_runtime_build_marker(self):
         err='  1.25 real  1.00 user  0.20 sys\n  123456 maximum resident set size\n'
@@ -63,17 +72,20 @@ class BenchmarkTool(unittest.TestCase):
         (out/'link').symlink_to(out/'a.png')
         with self.assertRaises(ValueError):ab.output_manifest(out)
 
-    def test_summary_requires_five_measured_samples(self):
-        sample=lambda n:dict(wall_seconds=float(n),metrics={'peak_rss_bytes':100+n},output_digest=str(n))
-        with self.assertRaises(ValueError):ab.summarize([sample(1)]*4)
-        result=ab.summarize([sample(n) for n in range(1,6)])
+    def test_summary_requires_five_samples_and_stable_outputs(self):
+        sample=lambda n,d='same':dict(wall_seconds=float(n),metrics={'peak_rss_bytes':100+n},output_digest=d)
+        with self.assertRaises(ValueError):ab.summarize([sample(1)]*4,30)
+        result=ab.summarize([sample(n) for n in range(1,6)],30)
         self.assertEqual(result['samples'],5);self.assertEqual(result['wall_median_seconds'],3.0)
+        self.assertEqual(result['output_digest'],'same')
+        self.assertAlmostEqual(result['ms_per_frame_median'],100.0)
+        with self.assertRaises(ValueError):ab.summarize([sample(n,str(n)) for n in range(1,6)],30)
 
     def test_benchmark_refuses_nonmac_before_execution(self):
         with patch.object(ab.platform,'system',return_value='Linux'), patch.object(ab.subprocess,'run') as run:
             with self.assertRaises(ValueError):
                 ab.benchmark(self.root,self.fixture,self.root/'aerender',self.root/'plugin',
-                             self.root/'p.zip',self.root/'m.json',2,5,'inherit',60)
+                             self.root/'p.zip',self.root/'m.json',2,5,'inherit',60,'PERF094-RQ-001')
             run.assert_not_called()
 
 

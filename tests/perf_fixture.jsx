@@ -4,16 +4,17 @@ function elasticGridPerfFixture(config) {
     var resultFile = null, suppressing = false, projectFile = null, saved = false;
     var result = {run_id:config.run_id,status:"FAIL",stage:"guard",ae_version:""};
     function q(s) { return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n") + '"'; }
-    function own() { if (owned === null || app.project !== owned) throw new Error("Project ownership changed"); }
     function param(fx,name) { var p=fx.property(name); if (p===null) throw new Error("Missing parameter"); return p; }
     function hasTemplate(list,name) { for (var i=0;i<list.length;i++) if (list[i]===name) return true; return false; }
     app.exitCode = 92;
     try {
         if (!/^[a-f0-9]{32}$/.test(config.run_id)) throw new Error("Invalid run identifier");
-        if (!((config.width===1920 && config.height===1080) || (config.width===3840 && config.height===2160))) throw new Error("Unsupported fixture size");
+        if (!((config.width===1920 && config.height===1080) || (config.width===3840 && config.height===2160) ||
+              (config.width===7680 && config.height===4320))) throw new Error("Unsupported fixture size");
         if (!(config.bit_depth===8 || config.bit_depth===16 || config.bit_depth===32)) throw new Error("Unsupported bit depth");
         if (!(config.fps===30 && config.duration===2)) throw new Error("Unsupported fixture timing");
         if (!(config.mode==="static" || config.mode==="animated")) throw new Error("Unsupported fixture mode");
+        if (!(config.geometry==="grid" || config.geometry==="four_corners")) throw new Error("Unsupported fixture geometry");
         var folder=new Folder(config.folder);
         if (!folder.exists) throw new Error("Workspace missing");
         var input=new File(config.folder+"/pattern.png");
@@ -30,6 +31,9 @@ function elasticGridPerfFixture(config) {
         owned=app.project;
         owned.bitsPerChannel=config.bit_depth;
         if (owned.bitsPerChannel!==config.bit_depth) throw new Error("Bit depth not applied");
+        owned.workingSpace="";
+        owned.linearizeWorkingSpace=false;
+        if (owned.workingSpace!=="" || owned.linearizeWorkingSpace!==false) throw new Error("Color management contract not applied");
 
         result.stage="fixture";
         footage=owned.importFile(new ImportOptions(input));
@@ -44,6 +48,15 @@ function elasticGridPerfFixture(config) {
         param(fx,"Wave Phase").setValue(35.0); param(fx,"Stretch Easing").setValue(0.0);
         param(fx,"Wave Amplitude").setValue(10.0);
         param(fx,"Wave Speed").setValue(config.mode==="animated" ? 0.5 : 0.0);
+        if (config.geometry==="four_corners") {
+            param(fx,"Deformation Plane").setValue(2);
+            param(fx,"Plane Top Left").setValue([config.width*0.08,config.height*0.08]);
+            param(fx,"Plane Top Right").setValue([config.width*0.92,config.height*0.03]);
+            param(fx,"Plane Bottom Right").setValue([config.width*0.95,config.height*0.90]);
+            param(fx,"Plane Bottom Left").setValue([config.width*0.05,config.height*0.94]);
+        } else {
+            param(fx,"Deformation Plane").setValue(1);
+        }
 
         result.stage="render_queue";
         var rq=owned.renderQueue.items.add(comp);
@@ -56,7 +69,6 @@ function elasticGridPerfFixture(config) {
         var outputTemplate=hasTemplate(om.templates,"PNG Sequence") ? "PNG Sequence" : (hasTemplate(om.templates,"png") ? "png" : null);
         if (outputTemplate===null) throw new Error("PNG Sequence template unavailable");
         om.applyTemplate(outputTemplate);
-        // OutputModule objects may be invalidated by settings changes; reacquire.
         om=rq.outputModule(1);
         result.stage="output_path";
         var outputFolder=new Folder(config.folder+"/fixture-output");
@@ -76,6 +88,7 @@ function elasticGridPerfFixture(config) {
         result.stage="prepared";
         result.width=config.width; result.height=config.height; result.fps=config.fps;
         result.duration=config.duration; result.bit_depth=config.bit_depth; result.mode=config.mode;
+        result.geometry=config.geometry; result.color_management="none-linearize-off";
         result.composition="EGFX_PERF"; result.rqindex=1;
         result.render_template="Best Settings"; result.output_template=outputTemplate;
         result.output_format="PNG Sequence"; result.output_pattern="frame_[#####].png";
@@ -88,8 +101,6 @@ function elasticGridPerfFixture(config) {
             if (app.project!==owned) { result.status="FAIL"; result.stage="foreign_project"; }
             else {
                 try {
-                    // This project was empty/unsaved before ownership was acquired.
-                    // Close only this owned synthetic/test project; never a user project.
                     owned.bitsPerChannel=initialBpc;
                     if (!owned.close(CloseOptions.DO_NOT_SAVE_CHANGES)) throw new Error("Owned project close failed");
                     app.newProject();
@@ -107,7 +118,8 @@ function elasticGridPerfFixture(config) {
                 resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+
                     ',"ae_version":'+q(result.ae_version)+',"width":'+(result.width||0)+',"height":'+(result.height||0)+
                     ',"fps":'+(result.fps||0)+',"duration":'+(result.duration||0)+',"bit_depth":'+(result.bit_depth||0)+
-                    ',"mode":'+q(result.mode||"")+',"composition":'+q(result.composition||"")+
+                    ',"mode":'+q(result.mode||"")+',"geometry":'+q(result.geometry||"")+
+                    ',"color_management":'+q(result.color_management||"")+',"composition":'+q(result.composition||"")+
                     ',"rqindex":'+(result.rqindex||0)+',"render_template":'+q(result.render_template||"")+
                     ',"output_template":'+q(result.output_template||"")+
                     ',"output_format":'+q(result.output_format||"")+
