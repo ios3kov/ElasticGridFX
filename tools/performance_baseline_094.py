@@ -58,7 +58,7 @@ def matrix_conditions(name: str) -> list[dict]:
                     mode=mode,geometry="grid",mfr=mfr))
     for depth in (8,16,32):
         result.append(dict(
-            condition_id=f"grid-4k-{depth}-static-mfr-on",
+            condition_id=f"rq3-grid-4k-{depth}-static-mfr-on",
             test_case_id="PERF094-RQ-003",width=3840,height=2160,bit_depth=depth,
             mode="static",geometry="grid",mfr="on"))
     for mode in ("static","animated"):
@@ -153,6 +153,31 @@ def write_summary(path: Path, value: dict) -> None:
     bi.dump(path, value)
 
 
+def validate_cross_condition_outputs(conditions: list[dict]) -> list[dict]:
+    groups: dict[tuple, list[dict]] = {}
+    for condition in conditions:
+        key = (condition["width"], condition["height"], condition["bit_depth"],
+               condition["mode"], condition["geometry"])
+        groups.setdefault(key, []).append(condition)
+    records = []
+    for key, entries in groups.items():
+        if len(entries) < 2:
+            continue
+        digests = {entry["summary"]["output_digest"] for entry in entries}
+        record = dict(
+            width=key[0], height=key[1], bit_depth=key[2],
+            mode=key[3], geometry=key[4],
+            condition_ids=[entry["condition_id"] for entry in entries],
+            mfr_states=sorted({entry["mfr"] for entry in entries}),
+            status="PASS" if len(digests) == 1 else "FAIL",
+            encoded_output_digests=sorted(digests),
+        )
+        records.append(record)
+        if len(digests) != 1:
+            raise ValueError("encoded output differs across equivalent MFR/test-case conditions")
+    return records
+
+
 def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
                  warmups: int, samples: int, timeout: int) -> tuple[dict, Path]:
     if platform.system() != "Darwin" or platform.machine() != "arm64":
@@ -167,9 +192,6 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
         parent = checked_path(evidence_root.parent, directory=True)
         evidence_root = parent / evidence_root.name
         evidence_root.mkdir(mode=0o700)
-    package, manifest_path, manifest = candidate_files(candidate_dir)
-    host = running_target()
-    aerender = discover_aerender(host["app"])
 
     run_root = evidence_root / ("FSTR-Stretch-094-baseline-" + uuid.uuid4().hex)
     run_root.mkdir(mode=0o700)
@@ -188,56 +210,71 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
                        native_3d="BLOCKED / NOT RUN",
                        deep_profile="BLOCKED / NOT RUN"),
     )
-    # Create an early record before invoking any host/test fixture.
     bi.dump(run_root / "run-start.json", result)
 
-    identity, installed = live_baseline_identity(run_root, manifest, host)
-    ab.verify_candidate(installed, package, manifest_path)
-    require_same_host(host)
-    result["identity"] = dict(
-        status="PASS", ae_pid=host["pid"],
-        observed_build_id=identity["observed_build_id"],
-        observed_image_uuid=identity["observed_image_uuid"],
-        installed_bundle=str(installed),
-        aerender=str(aerender),
-    )
+    try:
+        package, manifest_path, manifest = candidate_files(candidate_dir)
+        host = running_target()
+        aerender = discover_aerender(host["app"])
 
-    fixtures_root = run_root / "fixtures"
-    fixtures_root.mkdir(mode=0o700)
-    for condition in matrix_conditions(matrix):
+        identity, installed = live_baseline_identity(run_root, manifest, host)
+        ab.verify_candidate(installed, package, manifest_path)
         require_same_host(host)
-        folder, meta = pf.prepare(
-            fixtures_root, condition["width"], condition["height"],
-            condition["bit_depth"], condition["mode"], condition["geometry"])
-        meta = pf.execute(folder, meta, host["app"], installed, package, manifest_path)
-        bi.dump(folder / "prepare.json", meta)
-        require_same_host(host)
-        report, report_path = ab.benchmark(
-            folder, folder/"fixture.json", aerender, installed, package, manifest_path,
-            warmups, samples, condition["mfr"], timeout, condition["test_case_id"])
-        require_same_host(host)
-        result["conditions"].append(dict(
-            **condition,
-            status="MEASURED",
-            report=str(report_path.relative_to(run_root)),
-            report_sha256=ab.file_digest(report_path),
-            summary=report["summary"],
-        ))
+        result["identity"] = dict(
+            status="PASS", ae_pid=host["pid"],
+            ae_version=identity["ae"]["version"],
+            observed_build_id=identity["observed_build_id"],
+            observed_image_uuid=identity["observed_image_uuid"],
+            installed_bundle=str(installed),
+            aerender=str(aerender),
+        )
 
-    result["status"] = "AERENDER_BASELINE_MEASURED"
-    result["stage_status"] = "BLOCKED"
-    result["stage_blockers"] = [
-        "PERF094-RAM-001/002/003 real RAM Preview baseline",
-        "PERF094-3D-001 native 3D projective baseline",
-        "PERF094-PROF-001 real-host deep profile",
-    ]
-    result["scope"] = (
-        "Exact 0.9.3 live identity plus controlled aerender timing/memory and "
-        "encoded-output repeatability. This is not RAM Preview, native-3D or HDR/32f quality certification."
-    )
-    summary = run_root / "baseline-summary.json"
-    write_summary(summary, result)
-    return result, summary
+        fixtures_root = run_root / "fixtures"
+        fixtures_root.mkdir(mode=0o700)
+        for condition in matrix_conditions(matrix):
+            require_same_host(host)
+            folder, meta = pf.prepare(
+                fixtures_root, condition["width"], condition["height"],
+                condition["bit_depth"], condition["mode"], condition["geometry"])
+            meta = pf.execute(folder, meta, host["app"], installed, package, manifest_path)
+            bi.dump(folder / "prepare.json", meta)
+            require_same_host(host)
+            report, report_path = ab.benchmark(
+                folder, folder/"fixture.json", aerender, installed, package, manifest_path,
+                warmups, samples, condition["mfr"], timeout, condition["test_case_id"])
+            require_same_host(host)
+            result["conditions"].append(dict(
+                **condition,
+                status="MEASURED",
+                report=str(report_path.relative_to(run_root)),
+                report_sha256=ab.file_digest(report_path),
+                summary=report["summary"],
+            ))
+
+        result["cross_condition_output_parity"] = validate_cross_condition_outputs(result["conditions"])
+        result["status"] = "AERENDER_BASELINE_MEASURED"
+        result["stage_status"] = "BLOCKED"
+        result["stage_blockers"] = [
+            "PERF094-RAM-001/002/003 real RAM Preview baseline",
+            "PERF094-3D-001 native 3D projective baseline",
+            "PERF094-PROF-001 real-host deep profile",
+        ]
+        result["scope"] = (
+            "Exact 0.9.3 live identity plus controlled aerender timing/memory and "
+            "encoded-output repeatability. This is not RAM Preview, native-3D or HDR/32f quality certification."
+        )
+        summary = run_root / "baseline-summary.json"
+        write_summary(summary, result)
+        return result, summary
+    except Exception as error:
+        result["status"] = "BLOCKED"
+        result["stage_status"] = "BLOCKED"
+        result["conditions_completed"] = len(result["conditions"])
+        result["reason"] = type(error).__name__ + ": " + str(error)
+        failure = run_root / "baseline-failure.json"
+        if not failure.exists():
+            bi.dump(failure, result)
+        raise
 
 
 def main() -> int:
