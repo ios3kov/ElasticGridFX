@@ -1,5 +1,28 @@
 # Current development / release status
 
+## Final Stage 10 acceptance — 2026-10-01
+
+**Stage 10 COMPLETE for the agreed macOS Apple Silicon / AE 25.6 development scope.**
+
+Exact accepted candidate: `2ccc5f674b8b94b534d4c3ad6abdec3524e3624f`,
+Build `EGFX-bd19dee13315abc0b7e6090e`, FSTR Stretch 0.9.3 development,
+ZIP SHA-256 `1448a5231fc561e6b10491d1b9d1839de22f21a11266a43e2990244a25176ebc`.
+
+Automated gates for this exact source/package are PASS: Rust 61/61, C++ 20/20,
+Python 239/239, strict Clippy, PR CI and full macOS source/build/signature/package
+gate. The user loaded this exact candidate in target AE and confirmed the final
+About, functional behavior, Layer Plane alignment, RAM Preview and three
+cancel→rerender cycles. #7, #8, #9, #13 and #14 are closed as scoped evidence.
+
+See [Stage 10 final acceptance](stage10-final-acceptance-2026-10-01.md).
+
+Stage 8 optimization remains **SKIPPED BY USER**, not PASS. Windows/Intel, other AE
+versions, broad HDR/OCIO, physical GPU execution and public signing/notarization
+remain outside the accepted scope. **No merge or 0.9.3 release is authorized yet.**
+
+Everything below is preserved historical development context unless explicitly
+marked current.
+
 ## About footer candidate gate failure and correction — 2026-10-01
 
 Candidate source `e4f1ed10c650f9f70e606ed97f34d4dc16042ae4` removed the redundant

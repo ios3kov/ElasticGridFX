@@ -1,5 +1,30 @@
 # ElasticGridFX — финальный gate, 30.09.2026
 
+## Финальное закрытие Stage 10 — 01.10.2026
+
+**Stage 10 COMPLETE в согласованном scope: macOS Apple Silicon / AE 2025 25.6.**
+
+Точный принятый кандидат: `2ccc5f674b8b94b534d4c3ad6abdec3524e3624f`,
+Build `EGFX-bd19dee13315abc0b7e6090e`, версия 0.9.3 development,
+ZIP SHA-256 `1448a5231fc561e6b10491d1b9d1839de22f21a11266a43e2990244a25176ebc`.
+
+Автоматические проверки точного кандидата: Rust 61/61, C++ 20/20, Python
+239/239, strict Clippy, PR CI и полный macOS source/build/signature/package gate
+— PASS. Пользователь загрузил этот же кандидат в целевом AE и подтвердил
+финальный About, основную функциональность, совпадение Layer Plane, RAM Preview
+и три цикла Cancel активного Render Queue → полный повторный рендер без
+перезапуска AE. #7, #8, #9, #13 и #14 закрыты.
+
+Подробная запись: [Stage 10 final acceptance](stage10-final-acceptance-2026-10-01.md).
+
+Этап 8 остаётся **SKIPPED BY USER**, не PASS. Windows/Intel, другие версии AE,
+широкая HDR/OCIO-сертификация, физический GPU и публичная подпись/notarization
+не входят в подтверждённый scope. 0.9.3 ещё не опубликован и не слит: merge/release
+требуют отдельной команды пользователя.
+
+Ниже сохранена историческая запись gate от 30.09; её прежние INCOMPLETE/BLOCKED
+статусы не описывают текущий принятый 0.9.3 кандидат.
+
 ## Текущий итог после публикации 0.9.1
 
 **Релиз опубликован; полное закрытие финального gate — INCOMPLETE.**
