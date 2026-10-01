@@ -163,12 +163,17 @@ Installation/tooling PASS is not stage completion.
 Research may proceed in parallel; implementation begins only after the current
 functional bugfix is accepted and its performance baseline is recorded.
 
-## Stage 10 of 10 — Release PUBLISHED; full gate INCOMPLETE
+## Stage 10 of 10 — COMPLETE for agreed 0.9.3 development scope
 
-Current: v0.9.1 is published following explicit user authorization. Release
-identity and scoped checks are recorded in release-0.9.1.md. Separate target-host
-RAM Preview and render-cancellation evidence remains outstanding; publication
-does not retroactively pass these checks. See stage10-final-gate-2026-09-30.md.
+Current accepted development candidate: `2ccc5f674b8b94b534d4c3ad6abdec3524e3624f`,
+Build `EGFX-bd19dee13315abc0b7e6090e`, FSTR Stretch 0.9.3, macOS Apple
+Silicon / AE 25.6. Automated source/package gates PASS; target-host acceptance is
+USER-REPORTED PASS for the requested functional, Layer Plane, RAM Preview and
+cancellation/re-render scenarios. #7, #8, #9, #13 and #14 are closed.
+
+The earlier v0.9.1 release remains historical. Version 0.9.3 is **not published**
+and no merge/release is authorized without a separate user command. See
+stage10-final-acceptance-2026-10-01.md and stage10-final-gate-2026-09-30.md.
 
 ### Historical pre-release checkpoint
 
@@ -192,6 +197,9 @@ production release occurs without explicit user instruction.
 ## Current overall progress
 
 Stages 1–7 retain their recorded evidence; Stage 9 is accepted within the
-documented release scope. Stage 8 is skipped by user (not PASS).
-Stage 10: publication complete, full process closure incomplete pending the
-two host-evidence checks above. No percentage or performance-completion claim.
+documented scope. Stage 8 is skipped by user (not PASS).
+Stage 10 is COMPLETE for the agreed 0.9.3 macOS Apple Silicon / AE 25.6
+development scope. This does not certify Windows/Intel, other AE versions,
+broad HDR/OCIO, physical GPU execution, or public signing/notarization.
+No percentage or performance-completion claim. Version 0.9.3 remains unmerged
+and unpublished pending a separate user command.
