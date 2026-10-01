@@ -30,14 +30,20 @@ function elasticGridPerfFixture(config) {
             throw new Error("Requires empty unsaved clean test project");
 
         result.ae_version=app.version;
+        result.stage="project_settings";
         app.beginSuppressDialogs(); suppressing=true;
         initialBpc=app.project.bitsPerChannel;
         owned=app.project;
         owned.bitsPerChannel=config.bit_depth;
-        if (owned.bitsPerChannel!==config.bit_depth) throw new Error("Bit depth not applied");
+        if (Number(owned.bitsPerChannel)!==config.bit_depth) throw new Error("Bit depth not applied");
         owned.workingSpace="";
         owned.linearizeWorkingSpace=false;
-        if (owned.workingSpace!=="" || owned.linearizeWorkingSpace!==false) throw new Error("Color management contract not applied");
+        var observedWorkingSpace=String(owned.workingSpace);
+        var observedLinearize=String(owned.linearizeWorkingSpace).toLowerCase();
+        result.working_space=observedWorkingSpace;
+        result.linearize_working_space=observedLinearize;
+        if (observedWorkingSpace!=="" || !(observedLinearize==="false" || observedLinearize==="0"))
+            throw new Error("Color management contract not applied");
 
         result.stage="fixture";
         footage=owned.importFile(new ImportOptions(input));
@@ -123,7 +129,8 @@ function elasticGridPerfFixture(config) {
                     ',"ae_version":'+q(result.ae_version)+',"width":'+(result.width||0)+',"height":'+(result.height||0)+
                     ',"fps":'+(result.fps||0)+',"duration":'+(result.duration||0)+',"bit_depth":'+(result.bit_depth||0)+
                     ',"mode":'+q(result.mode||"")+',"geometry":'+q(result.geometry||"")+
-                    ',"color_management":'+q(result.color_management||"")+',"composition":'+q(result.composition||"")+
+                    ',"color_management":'+q(result.color_management||"")+',"working_space":'+q(result.working_space||"")+
+                    ',"linearize_working_space":'+q(result.linearize_working_space||"")+',"composition":'+q(result.composition||"")+
                     ',"rqindex":'+(result.rqindex||0)+',"render_template":'+q(result.render_template||"")+
                     ',"output_template":'+q(result.output_template||"")+
                     ',"output_format":'+q(result.output_format||"")+

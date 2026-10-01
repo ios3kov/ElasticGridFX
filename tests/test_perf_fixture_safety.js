@@ -17,6 +17,11 @@ function run(options={}){
  };
  if(options.noDirtyProperty && project) delete project.dirty;
  if(options.forceDirty && project) project.dirty=true;
+ if(options.hostColorTypes && project){
+   let ws=project.workingSpace, lin=project.linearizeWorkingSpace;
+   Object.defineProperty(project,'workingSpace',{configurable:true,get(){return new String(ws);},set(v){ws=v;}});
+   Object.defineProperty(project,'linearizeWorkingSpace',{configurable:true,get(){return lin?1:0;},set(v){lin=v;}});
+ }
  const app={project,version:'fixture',beginSuppressDialogs(){calls.dialogs++;},endSuppressDialogs(){calls.dialogs--;},
    newProject(){calls.newProject++;app.project={bitsPerChannel:16};return app.project;}};
  function File(n){this.fsName=String(n);Object.defineProperty(this,'exists',{get:()=>Object.hasOwn(files,this.fsName)});Object.defineProperty(this,'length',{get:()=>files[this.fsName]?.length||0});this.open=()=>true;this.write=t=>{files[this.fsName]=t;};this.close=()=>{};}
@@ -43,6 +48,11 @@ for(const project of [
 {
  const {app,capture}=run({forceDirty:true});
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
+}
+{
+ const {app,capture}=run({hostColorTypes:true});
+ assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');
+ assert.equal(capture.working_space,'');assert.equal(capture.linearize_working_space,'0');
 }
 for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true},{geometry:'bad'}]){
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');
