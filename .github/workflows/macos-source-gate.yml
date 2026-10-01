@@ -3,7 +3,7 @@ name: macOS source gate
 on:
   workflow_dispatch:
   push:
-    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation]
+    branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation, fix/first-application-516]
     paths-ignore:
       - "**/*.md"
       - ".gitignore"
@@ -65,6 +65,9 @@ jobs:
             dist/mac/preflight-report.txt
             dist/mac/ElasticGrid.plugin.zip
             dist/mac/ElasticGrid.artifact.json
+            dist/mac/delivery/FSTR Stretch.plugin.zip
+            dist/mac/delivery/FSTR Stretch.artifact.json
+            dist/mac/delivery-packaging.json
             dist/mac/host-build.jsonl
             dist/mac/install-inspection.json
             dist/mac/smoke-preparation.json

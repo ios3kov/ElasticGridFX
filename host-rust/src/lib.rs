@@ -955,6 +955,8 @@ impl AdobePluginGlobal for Plugin {
         params.add_with_flags(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
             f.set_label("Fit Layer");
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::DISABLED)?;
+        // Topology is a static setup choice; animate Grid Positions instead.
+        // Keep SUPERVISE so manual edits retain the existing grid/Undo path.
         params.add_with_flags(Params::Columns, "Columns", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
             f.set_valid_max(MAX_GUIDES as i32);
@@ -962,7 +964,7 @@ impl AdobePluginGlobal for Plugin {
             f.set_slider_max(32);
             f.set_default(4);
             f.set_value(f.default());
-        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
         params.add_with_flags(Params::Rows, "Rows", ae::SliderDef::setup(|f| {
             f.set_valid_min(1);
             f.set_valid_max(MAX_GUIDES as i32);
@@ -970,7 +972,7 @@ impl AdobePluginGlobal for Plugin {
             f.set_slider_max(32);
             f.set_default(4);
             f.set_value(f.default());
-        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
 
         let mut grid_state_def = ae::ArbitraryDef::new();
         grid_state_def.set_default(GridArb::default())?;

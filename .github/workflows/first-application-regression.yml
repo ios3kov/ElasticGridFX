@@ -1,0 +1,70 @@
+name: First application regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/first-application-516]
+  pull_request:
+    paths:
+      - host-rust/src/binding_probe.rs
+      - host-rust/src/first_application_tests.rs
+      - tests/test_first_application*.py
+      - .github/workflows/first-application-regression.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: first-application-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    runs-on: macos-14
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Preserve exact source and runner identity (NOT AE evidence)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/first-application-evidence"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/first-application-evidence/source.tar"
+          git rev-parse HEAD > "$RUNNER_TEMP/first-application-evidence/commit.txt"
+          { uname -a; xcodebuild -version; rustc --version; cargo --version; } > "$RUNNER_TEMP/first-application-evidence/environment.txt"
+          shasum -a 256 "$RUNNER_TEMP/first-application-evidence/source.tar" > "$RUNNER_TEMP/first-application-evidence/source.sha256"
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: First-application-source-${{ github.sha }}
+          path: ${{ runner.temp }}/first-application-evidence/*
+          if-no-files-found: error
+      - name: Rust host contracts (NOT AE execution)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo test --locked --manifest-path host-rust/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/rust-tests.log"
+          cargo clippy --locked --manifest-path host-rust/Cargo.toml --all-targets -- -D warnings -A clippy::drop_non_drop -A clippy::question_mark 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/clippy.log"
+      - name: Portable core regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B "$RUNNER_TEMP/first-application-build" -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
+          cmake --build "$RUNNER_TEMP/first-application-build" --parallel 3
+          ctest --test-dir "$RUNNER_TEMP/first-application-build" --output-on-failure 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/ctest.log"
+      - name: Python and project-safety regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/python.log"
+          for test in tests/test_*.js; do node "$test"; done
+          git diff --exit-code
+      - name: Upload results (not an installable plugin or host PASS)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: First-application-results-${{ github.sha }}
+          path: ${{ runner.temp }}/first-application-evidence/*
+          if-no-files-found: error

@@ -1,3 +1,10 @@
+> **Development branch (PR #10):** Columns/Rows are now static setup values;
+> Grid Positions remains animatable. The next test package installs **FSTR Stretch.plugin**.
+> First-add/deformation, restart, preview and cancellation were user-confirmed on
+> the earlier 94d6706 candidate, not this new package. New-candidate AE acceptance
+> and old animated-count projects remain unverified. No merge/release has occurred.
+> [Current status](docs/current-status.md) · [Install/rollback and packaging](docs/branded-package-2026-09-30.md).
+
 # FSTR Stretch
 
 Native After Effects grid deformation effect, listed under **FSTR Effects**.

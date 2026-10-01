@@ -145,6 +145,21 @@ shasum -a 256 "$DIST/ElasticGrid.plugin.zip" "$DIST/ElasticGrid.artifact.json" |
 printf '[artifact] sha256\n' | tee -a "$REPORT"
 shasum -a 256 "$BUNDLE/Contents/MacOS/ElasticGrid" "$BUNDLE/Contents/Resources/ElasticGrid.rsrc" | tee -a "$REPORT"
 
+# User-facing package: keep the signed files and internal executable unchanged.
+# A fresh build output directory is required; never erase an earlier delivery.
+python3 "$ROOT/tools/package_fstr_stretch.py" --bundle "$BUNDLE" \
+  --package "$DIST/ElasticGrid.plugin.zip" --manifest "$DIST/ElasticGrid.artifact.json" \
+  --output "$DIST/delivery" > "$DIST/delivery-packaging.json"
+"$ROOT/tools/verify_bundle_macos.command" "$DIST/delivery/FSTR Stretch.plugin" 2>&1 | tee -a "$REPORT"
+# Verify a real extraction of the distributed ZIP, including its spaced name.
+ROUNDTRIP="$(mktemp -d "$DIST/branded-roundtrip.XXXXXX")"
+/usr/bin/ditto -x -k "$DIST/delivery/FSTR Stretch.plugin.zip" "$ROUNDTRIP"
+"$ROOT/tools/verify_bundle_macos.command" "$ROUNDTRIP/FSTR Stretch.plugin" 2>&1 | tee -a "$REPORT"
+python3 "$ROOT/tools/build_identity.py" verify --bundle "$ROUNDTRIP/FSTR Stretch.plugin" \
+  --package "$DIST/delivery/FSTR Stretch.plugin.zip" --manifest "$DIST/delivery/FSTR Stretch.artifact.json"
+printf '[delivery] named bundle + extracted ZIP signature/payload verified (AE NOT RUN)\n' | tee -a "$REPORT"
+shasum -a 256 "$DIST/delivery/FSTR Stretch.plugin.zip" "$DIST/delivery/FSTR Stretch.artifact.json" | tee -a "$REPORT"
+
 echo "[5/6] No installation performed. Candidate requires separate test authorization." | tee -a "$REPORT"
 
 echo "[6/6] Final report" | tee -a "$REPORT"
