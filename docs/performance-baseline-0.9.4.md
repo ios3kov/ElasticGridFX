@@ -257,8 +257,19 @@ Before any fixture is created the runner:
 
 The `core` matrix then records the required ordinary-grid 1080p/4K 32-bpc
 static/animated MFR ON/OFF conditions, an explicit `PERF094-RQ-003` 4K
-8/16/32-bpc matrix, and 4K Four Corners static/animated MFR ON/OFF. A shorter `smoke` matrix exists only
+8/16/32-bpc matrix, and 4K Four Corners static/animated MFR ON/OFF. Equivalent
+MFR ON/OFF conditions must also produce the same encoded output digest; mismatch
+is a baseline FAIL requiring investigation. A shorter `smoke` matrix exists only
 for runner diagnosis and **cannot close Stage 1**.
+
+Every generated AEP and fixture manifest is retained with its SHA-256. Future
+0.9.4 After measurements must reuse these exact baseline fixtures rather than
+regenerating merely similar projects when a direct Before/After comparison is
+claimed.
+
+If the automated matrix stops after the run directory has been created, it leaves
+an explicit `baseline-failure.json` with `BLOCKED`, the number of completed
+conditions and the reason. Partial output is never interpreted as PASS.
 
 Even a complete aerender matrix reports `stage_status=BLOCKED`. It cannot promote
 RAM Preview, native 3D or deep profiling to PASS.
