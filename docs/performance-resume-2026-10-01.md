@@ -325,3 +325,55 @@ workspace. Exact calibration includes low RGB bits and low alpha; it passes all
 sample values with no premultiplication or 8-bit reduction. This is preparation,
 not actual target pixel evidence. Final host comparisons remain pending Mac
 unlock.
+
+## Actual host route and source isolation — 2026-10-02
+
+Exact-source f611312 passes all eight hosted CI checks. Ordinary Build
+EGFX-6147dc406abc596e7f2d1b60 (Develop build 2) passes the physical-Mac 20-stage
+preflight, clean reproducible builds, signature and extracted ZIP. Optional
+observer EGFX-50e7279b47205ab9285ac7d9 (build 3) passes feature Rust 65/Clippy and
+sealed/extracted package checks. Both exact images were loaded in AE 25.6
+headless owned-project pilots; the original installation was fully restored.
+These immutable packages remain f611312 when subsequent tooling/docs change.
+
+The historical hashed 60-frame AEP is a legacy CPU fallback workload. Actual
+observer records contain 60 successful 32-bpc legacy outputs and 60 pre-render
+callbacks; sampling median 2.199 ms, total 144.440 ms, observed sampling overlap 1.
+Logging/startup/output encoding are not acceptance timing. This scene cannot
+measure the bounded plane optimization. No cache-hit or playback inference.
+
+`_HIDDEN X-Factor 16` produces 60 independently checked noninterlaced 1920x1080
+RGBA16 PNGs from that same AEP. Direct CLI Format/Channels overrides were
+read-only, generated no images and were rejected despite exit 0. The saved color
+context stays fixed by AEP hash; this pilot does not independently read it back
+or convert the old AEP into a controlled new fixture.
+
+Calibrated FFmpeg rgba64be decoding preserves all uint16 channels, including
+low alpha/low bits. Original older-toolchain artifact versus f611312 remains
+strict FAIL: maximum 2/65535, 44,689 changed channels in 53/60 frames, alpha exact.
+Original repeat and ordinary/observer pair match all 60 complete PNG files.
+No tolerance or filter change. PNG precision does not prove native float HDR.
+
+Research clone fcdfe907e2896e53dd20d7ebfa93e0190da68e53 retains all accepted
+2ccc5f6 native/bridge `src/` bytes. Only optional observation/feature identity,
+existing effect Develop build 4 and supporting tests/checksums were added.
+Current-toolchain observer EGFX-70cb973b561335f81da67803 passes feature gates,
+loaded-image/fresh legacy callbacks and all 60 PNGs match ordinary f611312.
+The physical baseline preflight included a checksum-only checkpoint before
+Release compilation, with unchanged code/flags/test inputs; this is documented
+rather than attributed to one uninterrupted source SHA. Research branch is local,
+with no hosted CI or release claim. Inference: a build/toolchain change suffices
+for the changed legacy pixels; plane optimization/observer are not required.
+The precise FP/compiler/flag cause remains unresolved. Older-artifact FAIL is
+retained separately from equal-toolchain source parity.
+
+New schema-3 source explicitly selects Four Corners, reads back full-image
+corners, and records expected plane_region; explicit footage Layer Plane records
+legacy_cpu. The reader checks route/dimensions/depth and every rational frame
+time against a hash-checked fixture. Schema 1/2 remains historical/readable.
+Python 248/248 and all 12 JSX control-flow suites PASS. Actual new fixture,
+40-frame plane/3D/AEP matrix, five accepted render pairs, RAM Preview and UI/cancel
+checks remain BLOCKED / NOT RUN while the Mac is locked. No merge, release or
+cache purge. [Public diagnostic](performance-host-diagnostic-2026-10-02.json)
+retains records, identities, hashes, comparisons and limitations without project
+paths, private samples or pixels.

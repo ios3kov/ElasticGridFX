@@ -89,16 +89,23 @@ development with stage status reports, then continued work.
 
 Current scoped blocks:
 - 8.1 Native exact sampler optimization: PASS, including 16 same-input pattern comparisons.
-- 8.2 Measurement safety/precision: Python 240/240 and 12 JSX control-flow files PASS;
-  default straight RGBA16 and recorded color state. Real new-format execution pending.
-- 8.2a Optional callback attribution: source Rust 65/65 + strict Clippy PASS;
-  feature-aware identity and bounded reader tested. Sealed packages and actual
-  host execution pending; default builds do not log.
+- 8.2 Measurement safety/precision: Python 248/248 and 12 JSX control-flow suites
+  PASS; real straight RGBA16 output verified on 60-frame headless pilots. New
+  schema-3 explicit plane/color-state fixture preparation remains host BLOCKED.
+- 8.2a Optional callback attribution: Rust 65/65 + strict Clippy/sealed packages
+  PASS. Actual loaded-identity/fresh legacy callbacks PASS; this fixture selects
+  `legacy_cpu`, so plane attribution is NOT RUN. Default builds do not log.
+- 8.2b Source/build isolation: unchanged accepted native source under the current
+  toolchain matches all 60 candidate PNG files. Accepted older artifact equality
+  remains FAIL (max 2/65535). Exact FP cause and actual plane parity remain open.
 - 8.3 Target pixel/plane/3D/AEP matrix: IN PROGRESS; legacy Adjustment capture missing.
-- 8.4 Target Render: NOT ACCEPTED; incomplete process-start series and RGB8 exact-pixel FAIL.
+- 8.4 Target Render: NOT ACCEPTED; incomplete old series, old-artifact pixel FAIL
+  and wrong-workload route. No accepted target speed claim.
 - 8.5 RAM Preview cache-build/playback/invalidation: NOT RUN for this candidate.
 - 8.6 UI response/cancel lifecycle and final scoped candidate validation: pending.
 
+All eight CI checks at f611312 PASS; ordinary physical-Mac 20-stage build and
+distinct observer verification PASS. See [actual diagnostic evidence](performance-host-diagnostic-2026-10-02.json).
 Original installed bundle is restored. Mac unlock is required for further GUI
 work; independent source/tooling work continues. No merge or release is implied.
 

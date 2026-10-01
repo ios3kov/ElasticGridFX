@@ -20,10 +20,10 @@ from smoke_pixels import pattern
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str,output_precision:int=16)->tuple[Path,dict]:
+def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str,output_precision:int=16,plane_mode:str="four-corners")->tuple[Path,dict]:
     root=checked_path(root)
     root.mkdir(parents=True,exist_ok=True)
-    if not ((width,height) in ((1920,1080),(3840,2160))) or bit_depth not in (8,16,32) or mode not in ('static','animated') or output_precision not in (8,16):
+    if not ((width,height) in ((1920,1080),(3840,2160))) or bit_depth not in (8,16,32) or mode not in ('static','animated') or output_precision not in (8,16) or plane_mode not in ("four-corners","layer"):
         raise ValueError('unsupported performance fixture configuration')
     run_id=uuid.uuid4().hex
     folder=root/('EGFX-perf-'+run_id)
@@ -31,7 +31,7 @@ def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str,output_precisi
     pattern(folder/'pattern.png',width,height)
     source=(ROOT/'tests/perf_fixture.jsx').read_text()
     config=dict(run_id=run_id,folder=str(folder.resolve()),width=width,height=height,
-                bit_depth=bit_depth,fps=30,duration=2,mode=mode,output_precision=output_precision)
+                bit_depth=bit_depth,fps=30,duration=2,mode=mode,output_precision=output_precision,plane_mode=plane_mode)
     (folder/'run.jsx').write_text(source+'\nelasticGridPerfFixture('+json.dumps(config)+');\n')
     meta=dict(schema=1,run_id=run_id,status='NOT RUN',actual_ae_execution=False,
               config={k:v for k,v in config.items() if k!='folder'},
@@ -62,15 +62,20 @@ def inspect(folder:Path,meta:dict)->dict:
         raise ValueError('legacy RGB8 output was not applied')
     if data.get('output_pattern')!='frame_[#####].png':
         raise ValueError('unexpected fixture output pattern')
+    expected_path='plane_region' if cfg['plane_mode']=='four-corners' else 'legacy_cpu'
+    corners=[0,0,cfg['width']-1,0,cfg['width']-1,cfg['height']-1,0,cfg['height']-1] if cfg['plane_mode']=='four-corners' else []
+    if data.get('plane_mode')!=cfg['plane_mode'] or data.get('plane_corners')!=corners or data.get('expected_render_path')!=expected_path:
+        raise ValueError('requested/read-back deformation plane differs')
     project=bi.safe_file(folder,'EGFX_PERF.aep')
-    fixture=dict(schema=2,fixture_id=f"egfx-perf-{cfg['width']}x{cfg['height']}-{cfg['bit_depth']}bpc-{cfg['mode']}-{precision}out",
+    fixture=dict(schema=3,fixture_id=f"egfx-perf-{cfg['width']}x{cfg['height']}-{cfg['bit_depth']}bpc-{cfg['mode']}-{precision}out-{cfg['plane_mode']}",
                  project='EGFX_PERF.aep',project_sha256=ab.file_digest(project),
                  composition='EGFX_PERF',rqindex=1,width=cfg['width'],height=cfg['height'],
                  fps=30.0,frame_start=0,frame_end=59,bit_depth=cfg['bit_depth'],
                  quality='Final Bicubic',output_format='PNG sequence',
                  output_pattern='frame_[#####].png',output_bit_depth=precision,
                  output_channels='RGBA' if precision==16 else 'RGB',
-                 output_color=data['output_color'],working_space=data['working_space'],linearize=False)
+                 output_color=data['output_color'],working_space=data['working_space'],linearize=False,
+                 plane_mode=cfg['plane_mode'],plane_corners=corners,expected_render_path=expected_path)
     bi.dump(folder/'fixture.json',fixture)
     return fixture
 
@@ -115,12 +120,13 @@ def main()->int:
     p.add_argument('--width',type=int,default=1920);p.add_argument('--height',type=int,default=1080)
     p.add_argument('--bit-depth',type=int,default=32);p.add_argument('--mode',choices=('static','animated'),default='animated')
     p.add_argument('--output-precision',type=int,choices=(8,16),default=16,help='16: verified straight RGBA; 8: legacy dithering research only')
+    p.add_argument('--plane-mode',choices=('four-corners','layer'),default='four-corners',help='Declare plane-region or footage Layer Plane fallback workload')
     p.add_argument('--ae-app',type=Path);p.add_argument('--installed-bundle',type=Path)
     p.add_argument('--package',type=Path);p.add_argument('--manifest',type=Path)
     p.add_argument('--execute-in-test-ae',action='store_true')
     a=p.parse_args()
     try:
-        folder,meta=prepare(a.root,a.width,a.height,a.bit_depth,a.mode,a.output_precision)
+        folder,meta=prepare(a.root,a.width,a.height,a.bit_depth,a.mode,a.output_precision,a.plane_mode)
         if a.execute_in_test_ae:
             if not all((a.ae_app,a.installed_bundle,a.package,a.manifest)):
                 raise ValueError('execution requires AE app, installed bundle, package and manifest')

@@ -19,10 +19,18 @@
 - Add optional, bounded render callback observations for phase attribution and
   fresh-render verification. Default builds do not log or add observer locks.
   Pin active Cargo features into Build Identity so diagnostic artifacts cannot
-  share an identity with normal builds. Host diagnostic execution remains pending.
+  share an identity with normal builds. Actual headless AE identity/legacy callback
+  observations pass; they do not measure the optimized plane route.
 - Separate ordinary and diagnostic AE effect Develop builds (2/3) from the
   accepted build 1 cache identity, without purging caches or changing saved data.
-  Verify existing PiPL/GlobalSetup version propagation; actual callbacks pending.
+  Verify existing PiPL/GlobalSetup version propagation and fresh host callbacks.
+- Declare Four Corners or footage Layer Plane performance workloads explicitly;
+  record read-back geometry in schema 3 and reject wrong callback routes,
+  dimensions/depth or incomplete frame coverage. Keep historical fixtures intact.
+- Retain the strict RGBA16 failure against the accepted older-toolchain artifact.
+  Same-current-toolchain accepted native source matches the candidate's 60 PNGs;
+  this isolates a build difference on the legacy workload, without accepting
+  plane output, target performance or RAM Preview.
 - Adopt the user-selected central AE-Development-Rules baseline and resume
   Stage 8 without rewriting prior acceptance evidence.
 

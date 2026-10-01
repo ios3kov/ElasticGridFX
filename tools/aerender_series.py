@@ -46,7 +46,7 @@ def verify_png_geometry(path, fixture):
     if (len(header)!=33 or header[:8]!=b'\x89PNG\r\n\x1a\n' or header[8:16]!=b'\x00\x00\x00\rIHDR' or
             struct.unpack('>II',header[16:24])!=(fixture['width'],fixture['height'])):
         raise ValueError('invalid PNG geometry')
-    if fixture.get('schema')==2:
+    if fixture.get('schema') in (2,3):
         expected_color={'RGB':2,'RGBA':6}[fixture['output_channels']]
         if (header[24]!=fixture['output_bit_depth'] or header[25]!=expected_color or
                 header[26:29]!=b'\x00\x00\x00'):

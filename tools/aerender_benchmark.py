@@ -72,10 +72,12 @@ def load_fixture(workspace: Path, fixture_path: Path) -> dict:
                 'width','height','fps','frame_start','frame_end','bit_depth',
                 'quality','output_format','output_pattern'}
     precision_fields={'output_bit_depth','output_channels','output_color','working_space','linearize'}
+    plane_fields={'plane_mode','plane_corners','expected_render_path'}
     if not ((data.get('schema')==1 and set(data)==required) or
-            (data.get('schema')==2 and set(data)==required|precision_fields)):
+            (data.get('schema')==2 and set(data)==required|precision_fields) or
+            (data.get('schema')==3 and set(data)==required|precision_fields|plane_fields)):
         raise ValueError('invalid performance fixture schema')
-    if data['schema']==2:
+    if data['schema'] in (2,3):
         if data['working_space'] not in ('','None') or data['linearize'] is not False:
             raise ValueError('invalid fixture color context')
         if not ((data['output_bit_depth']==16 and data['output_channels']=='RGBA' and data['output_color']=='Straight (Unmatted)') or
@@ -107,6 +109,13 @@ def load_fixture(workspace: Path, fixture_path: Path) -> dict:
         raise ValueError('invalid fixture fps')
     if data['output_format'] not in ('PNG sequence','EXR sequence'):
         raise ValueError('benchmark output must be a deterministic image sequence')
+    if data['schema']==3:
+        mode=data['plane_mode']
+        if mode not in ('four-corners','layer'):raise ValueError('invalid fixture plane mode')
+        corners=[0,0,data['width']-1,0,data['width']-1,data['height']-1,0,data['height']-1] if mode=='four-corners' else []
+        path='plane_region' if mode=='four-corners' else 'legacy_cpu'
+        if data['plane_corners']!=corners or data['expected_render_path']!=path:
+            raise ValueError('invalid fixture plane geometry/path')
     safe_output_pattern(data['output_pattern'])
     return dict(data, project_path=project)
 

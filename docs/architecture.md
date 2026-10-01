@@ -81,8 +81,13 @@ build cannot share a Build ID for the same source/toolchain/settings.
 The existing PiPL effect version separates Develop build 2 (ordinary) and 3
 (observer) from accepted build 1, so validation variants use distinct effect
 cache identities without global purge. Product/saved-state versions are unchanged.
-See [observation design](performance-observation-design.md). Actual diagnostic
-host execution and uninstrumented target timing remain pending.
+See [observation design](performance-observation-design.md). Actual AE 25.6
+headless execution observed 60 successful 32-bpc legacy callbacks, with exact
+loaded-image identity. That workload does not exercise plane acceleration.
+New performance fixtures explicitly read back plane mode/corners in schema 3;
+the observation reader checks route, dimensions, depth and complete rational
+frame coverage against the hashed fixture. Historical schema 1/2 is retained.
+Actual plane execution and uninstrumented target timing remain pending.
 
 ## Acceptance
 

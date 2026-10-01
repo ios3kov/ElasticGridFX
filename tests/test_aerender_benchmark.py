@@ -40,6 +40,20 @@ class BenchmarkTool(unittest.TestCase):
         self.project.write_bytes(b'changed')
         with self.assertRaises(ValueError): ab.load_fixture(self.root,self.fixture)
 
+    def test_explicit_plane_schema_retains_historical_fixture_support(self):
+        old=json.loads(self.fixture.read_text())
+        data=dict(old,schema=3,output_bit_depth=16,output_channels='RGBA',
+                  output_color='Straight (Unmatted)',working_space='',linearize=False,
+                  plane_mode='four-corners',plane_corners=[0,0,1919,0,1919,1079,0,1079],expected_render_path='plane_region')
+        self.fixture.write_text(json.dumps(data))
+        self.assertEqual(ab.load_fixture(self.root,self.fixture)['expected_render_path'],'plane_region')
+        for key,value in [('expected_render_path','legacy_cpu'),('plane_corners',[]),('plane_mode','auto')]:
+            self.fixture.write_text(json.dumps(dict(data,**{key:value})))
+            with self.subTest(key=key),self.assertRaises(ValueError):ab.load_fixture(self.root,self.fixture)
+        self.fixture.write_text(json.dumps(dict(data,schema=2)))
+        with self.assertRaises(ValueError):ab.load_fixture(self.root,self.fixture)
+        self.fixture.write_text(json.dumps(old));self.assertEqual(ab.load_fixture(self.root,self.fixture)['schema'],1)
+
     def test_fixture_rejects_nonfinal_or_unsafe_output(self):
         data=json.loads(self.fixture.read_text())
         for key,value in [('quality','Preview'),('output_pattern','../x_[###].png')]:

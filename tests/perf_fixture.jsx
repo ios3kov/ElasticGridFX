@@ -15,6 +15,7 @@ function elasticGridPerfFixture(config) {
         if (!(config.fps===30 && config.duration===2)) throw new Error("Unsupported fixture timing");
         if (!(config.mode==="static" || config.mode==="animated")) throw new Error("Unsupported fixture mode");
         if (!(config.output_precision===8 || config.output_precision===16)) throw new Error("Unsupported output precision");
+        if (!(config.plane_mode==="four-corners" || config.plane_mode==="layer")) throw new Error("Unsupported deformation plane");
         var folder=new Folder(config.folder);
         if (!folder.exists) throw new Error("Workspace missing");
         var input=new File(config.folder+"/pattern.png");
@@ -42,6 +43,21 @@ function elasticGridPerfFixture(config) {
         var layer=comp.layers.add(footage);
         var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         if (fx===null || fx.matchName!=="com.elasticgrid.fx.warp") throw new Error("ElasticGrid unavailable");
+        var planeOrdinal=config.plane_mode==="four-corners" ? 2 : 1;
+        param(fx,"Deformation Plane").setValue(planeOrdinal);
+        if (param(fx,"Deformation Plane").value!==planeOrdinal) throw new Error("Plane mode was not applied");
+        var planeCorners=[];
+        if (planeOrdinal===2) {
+            var cornerNames=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+            var cornerValues=[[0,0],[config.width-1,0],[config.width-1,config.height-1],[0,config.height-1]];
+            for (var cornerIndex=0;cornerIndex<4;cornerIndex++) {
+                var cornerProperty=param(fx,cornerNames[cornerIndex]);cornerProperty.setValue(cornerValues[cornerIndex]);
+                var corner=cornerProperty.value;
+                if (corner.length!==2 || corner[0]!==cornerValues[cornerIndex][0] || corner[1]!==cornerValues[cornerIndex][1])
+                    throw new Error("Plane corners were not applied");
+                planeCorners.push(corner[0]);planeCorners.push(corner[1]);
+            }
+        }
         param(fx,"Columns").setValue(8); param(fx,"Rows").setValue(8);
         param(fx,"Render Quality").setValue(2); param(fx,"Edge Behavior").setValue(1);
         param(fx,"Wave Axis").setValue(1); param(fx,"Wave Frequency").setValue(1.3);
@@ -88,6 +104,8 @@ function elasticGridPerfFixture(config) {
         result.stage="prepared";
         result.width=config.width; result.height=config.height; result.fps=config.fps;
         result.duration=config.duration; result.bit_depth=config.bit_depth; result.mode=config.mode;
+        result.plane_mode=config.plane_mode;result.plane_corners=planeCorners;
+        result.expected_render_path=planeOrdinal===2 ? "plane_region" : "legacy_cpu";
         result.composition="EGFX_PERF"; result.rqindex=1;
         result.render_template="Best Settings"; result.output_template=outputTemplate;
         result.output_format="PNG Sequence"; result.output_pattern="frame_[#####].png";
@@ -122,7 +140,9 @@ function elasticGridPerfFixture(config) {
                 resultFile.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+
                     ',"ae_version":'+q(result.ae_version)+',"width":'+(result.width||0)+',"height":'+(result.height||0)+
                     ',"fps":'+(result.fps||0)+',"duration":'+(result.duration||0)+',"bit_depth":'+(result.bit_depth||0)+
-                    ',"mode":'+q(result.mode||"")+',"composition":'+q(result.composition||"")+
+                    ',"mode":'+q(result.mode||"")+
+                    ',"plane_mode":'+q(result.plane_mode||"")+',"plane_corners":['+(result.plane_corners||[]).join(',')+']'+
+                    ',"expected_render_path":'+q(result.expected_render_path||"")+',"composition":'+q(result.composition||"")+
                     ',"rqindex":'+(result.rqindex||0)+',"render_template":'+q(result.render_template||"")+
                     ',"output_template":'+q(result.output_template||"")+
                     ',"output_format":'+q(result.output_format||"")+

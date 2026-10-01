@@ -48,7 +48,7 @@ or public release. Initial aefeb4b artifact is withheld after
 its x86 NaN-payload FAIL; corrected tests retain exact equality.
 See [the resumed performance record](performance-resume-2026-10-01.md).
 
-### Optional observation block — source validated, host NOT RUN
+### Optional observation block — actual legacy host route verified, 2026-10-02
 
 All eight hosted checks at exact tooling checkpoint `1fcb0f3` PASS. Optional
 Cargo `render-diagnostics` now records bounded callback phase endpoints and
@@ -66,9 +66,39 @@ matches accepted build 1; cached frames are an additional uncontrolled confounde
 not an established cause of the rejected host series. The next source checkpoint
 uses existing PiPL Develop build 2 (ordinary) / 3 (observer), without purging user
 cache or changing saved parameters. See [verified source contracts](performance-observation-design.md#effect-cache-identity).
-New sealed packages and actual host observation remain pending. This block prepares
-fresh-render/cache and phase attribution; it does not close Stage 8 or establish
-RAM Preview/AE acceleration. See [design](performance-observation-design.md).
+Checkpoint `f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761` has all eight exact-source
+CI checks PASS. Its ordinary physical-Mac 20-stage/reproducibility/signature/ZIP
+gate PASS: Build `EGFX-6147dc406abc596e7f2d1b60`, branded ZIP SHA-256
+`b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a`, eVER 301058.
+Distinct diagnostic Build `EGFX-50e7279b47205ab9285ac7d9`, branded ZIP SHA-256
+`d24fde69be2d19c3f5ba2c1bed0f9f6d48ed81f49d91d79e6a1ae45d52f4ae2a`, eVER 301059,
+passes feature Rust 65/Clippy/signature/sealed extracted package checks.
+
+Actual AE 25.6 headless pilots pin loaded payload/image UUID and verify all 60
+1920x1080 straight RGBA16 PNG headers. The observer records 60 fresh completed
+32-bpc `legacy_cpu` outputs plus 60 SmartPreRender callbacks. Sampling median
+2.199 ms is instrumented attribution, not acceptance timing. This historical
+footage fixture does not exercise the optimized plane sampler. CLI Format/Channels
+override attempts failed as read-only and produced no frames; exit 0 was rejected.
+The existing `_HIDDEN X-Factor 16` output template actually produced RGBA16.
+
+Accepted old-toolchain artifact versus f611312 decoded RGBA16 equality remains
+FAIL: up to 2/65535, 44,689 changed channels across 53/60 frames, unchanged alpha.
+Original repeat and ordinary/diagnostic candidate pairs match all 60 complete
+PNG files. A local research clone retains every accepted `src/` native/bridge
+byte and only adds observation/feature identity/effect build 4. Rebuilt with the
+current toolchain, Build `EGFX-70cb973b561335f81da67803` produces 60 PNGs exactly
+matching ordinary f611312; fresh legacy callbacks and loaded image are verified.
+This isolates a build/toolchain difference for this workload; the exact FP cause
+is unresolved, and the original-artifact FAIL is retained. No tolerance change.
+Public sanitized evidence: [host diagnostic](performance-host-diagnostic-2026-10-02.json).
+
+New schema-3 fixtures explicitly select/read back Four Corners and geometry or
+Layer Plane fallback. Callback validation requires actual declared route,
+dimensions/depth and complete frame coverage. Python 248/248 and all 12 JSX
+control-flow suites PASS; mocks do not prove AE execution. Original installation
+is fully restored after each transaction. The Mac remains locked; actual new
+plane fixture/matrix and RAM Preview are BLOCKED / NOT RUN. See [design](performance-observation-design.md).
 
 ### Resume checkpoint — AI-STATE-001
 
@@ -83,11 +113,12 @@ RAM Preview/AE acceleration. See [design](performance-observation-design.md).
   sampler, Apple Silicon/macOS 26.6.2 physical checks; AE 2025 / 25.6 target scope.
   No new SDK/host API use; reuse current integration evidence only for unchanged
   contracts. New API use requires source/signature/version verification.
-- Branch: `perf/plane-render-throughput`; native source checkpoint `41283e3`, tooling checkpoint `1fcb0f3`. The next
-  observation checkpoint adds optional host instrumentation and feature-aware
-  identity; sampling and saved-data behavior remain unchanged. The next cache
-  identity correction separates ordinary/observer effect Develop builds. Preserve exact artifact
-  identity above; recheck HEAD/tree before dependent actions.
+- Branch: `perf/plane-render-throughput`; native sampler checkpoint `41283e3`,
+  observation `dabf4d1`, cache-version/artifact checkpoint `f611312`. Current
+  tooling adds schema-3 route attribution and retains sanitized actual host evidence.
+  Sampling and saved-data behavior remain unchanged. Preserve immutable artifact
+  identity above; documentation/tooling commits do not retag those packages.
+  Recheck HEAD/tree before dependent actions.
 
 | Confirmed scope / permission | Source | Still applies |
 |---|---|---|
@@ -105,8 +136,11 @@ are outside the current authorization. Closing AE projects without saving is
 explicitly authorized. The task-state record points to the conversation; it is
 not independent authorization.
 
-Next: seal distinct default/diagnostic builds, then finish straight-RGBA16 host validation after Mac unlock, compare the missing legacy chain capture
-on the original plugin, and run the existing straight-RGBA16 plane/3D/AEP matrix.
+Next: after Mac unlock, compare the missing legacy chain capture on the original
+plugin, run the existing straight-RGBA16 plane/3D/AEP matrix, and create a real
+schema-3 Four Corners AEP. Require observed `plane_region` frame coverage before
+attributing optimization results; keep same-toolchain source isolation separate
+from accepted older-artifact compatibility.
 Accept Render timings only after pixel parity; RAM Preview needs externally
 observed cache-build/playback measurements. Independent source/CI/documentation work continues alongside host validation. Stage 8 remains IN PROGRESS.
 

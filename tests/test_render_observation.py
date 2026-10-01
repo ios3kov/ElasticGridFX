@@ -26,6 +26,17 @@ class Observation(unittest.TestCase):
         late=self.row();late[-1]=5;early=self.row();early[0]=2
         self.write([late,early]);r=ro.inspect(self.path,BUILD)
         self.assertEqual(r['observed_peak_sampling_interval_overlap'],2)
+    def test_fixture_rejects_wrong_route_and_missing_frames(self):
+        self.write([self.row()]);record=ro.inspect(self.path,BUILD)
+        fixture=dict(schema=3,expected_render_path='plane_region',width=1920,height=1080,
+                     bit_depth=32,fps=30.0,frame_start=3,frame_end=3)
+        self.assertEqual(ro.validate_fixture(record,fixture)['status'],'ROUTE_AND_FRAME_COVERAGE_PASS')
+        for key,value in [('schema',2),('expected_render_path','legacy_cpu'),('width',128),
+                          ('bit_depth',16),('frame_end',4),('fps',24.0),('frame_end',10**100)]:
+            with self.subTest(key=key),self.assertRaises(ValueError):ro.validate_fixture(record,dict(fixture,**{key:value}))
+        record['status']='PARTIAL'
+        with self.assertRaises(ValueError):ro.validate_fixture(record,fixture)
+
     def test_marker_sequence_and_phase_fail_closed(self):
         for index,value in [(0,2),(1,'gpu'),(3,-1),(8,2),(12,''),(13,3),(15,1)]:
             row=self.row();row[index]=value;self.write([row])

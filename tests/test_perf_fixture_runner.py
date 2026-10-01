@@ -26,15 +26,17 @@ class Fixture(unittest.TestCase):
                rqindex=1,render_template='Best Settings',output_template='PNG Sequence',
                output_format='PNG Sequence',output_pattern='frame_[#####].png',
                output_precision=16,output_depth='Trillions of Colors+',output_channels='RGB + Alpha',
-               output_color='Straight (Unmatted)',working_space='',linearize=False)
+               output_color='Straight (Unmatted)',working_space='',linearize=False,plane_mode='four-corners',
+               plane_corners=[0,0,1919,0,1919,1079,0,1079],expected_render_path='plane_region')
   (folder/'capture.json').write_text(json.dumps(capture))
   fixture=pf.inspect(folder,meta)
   self.assertEqual(fixture['quality'],'Final Bicubic');self.assertEqual(fixture['frame_end'],59)
-  self.assertEqual(fixture['schema'],2);self.assertEqual(fixture['output_bit_depth'],16)
+  self.assertEqual(fixture['schema'],3);self.assertEqual(fixture['output_bit_depth'],16)
   self.assertEqual(fixture['output_channels'],'RGBA')
   self.assertEqual(ab.load_fixture(folder,folder/'fixture.json')['project_path'],folder/'EGFX_PERF.aep')
   for field,value in [('output_precision',8),('output_depth','Millions of Colors'),('output_channels','RGB'),
-                      ('output_color','Premultiplied (Matted)'),('working_space','sRGB'),('linearize',True)]:
+                      ('output_color','Premultiplied (Matted)'),('working_space','sRGB'),('linearize',True),
+                      ('plane_mode','layer'),('plane_corners',[0,0,100,0,100,100,0,100]),('expected_render_path','legacy_cpu')]:
    invalid=dict(capture);invalid[field]=value;(folder/'capture.json').write_text(json.dumps(invalid))
    with self.subTest(field=field),self.assertRaises(ValueError):pf.inspect(folder,meta)
  def test_capture_mismatch_refuses(self):

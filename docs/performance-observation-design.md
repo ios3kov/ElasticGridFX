@@ -62,3 +62,29 @@ into resource `eVER` and `PIPL_VERSION`. `after-effects 0.4.0` EffectMain sets
 fit the existing nine-bit build field. Existing API/property only, no new host
 call. Verify real packaged resource and generated compile values for both variants;
 runtime callback evidence and uninstrumented timing remain required.
+
+
+## Confirming the intended host route
+
+The first actual observer run reports 60 successful 32-bpc `legacy_cpu` callbacks
+for the saved footage fixture; it cannot measure the new plane optimization.
+New fixtures must explicitly select Four Corners (bounded full-image rectangle)
+or Layer Plane and retain read-back mode/corners/expected route in schema 3.
+Historical schema 1/2 remains unchanged/readable. Validate observed output routes,
+logical dimensions/depth and complete rational frame-time coverage against the
+pinned new fixture. Wrong/missing routes or frame coverage reject attribution;
+no-record logs do not prove cache hits. Changing test parameters is declared;
+product defaults, quality and renderer selection are not changed.
+
+Schema-3 source validation: Python 248/248 and 12 JSX control-flow suites PASS;
+the route validator rejects wrong route/depth/geometry, fractional frame times,
+incomplete frame coverage and unbounded frame ranges. Actual saved schema-3 AEP
+creation remains blocked by Mac lock. Do not retag the existing schema-1 AEP.
+
+The actual legacy pilot isolates a build difference: original-artifact repeat
+and ordinary/observer candidate pair are exact; accepted native source rebuilt
+with the current toolchain matches all 60 candidate PNGs. Older-toolchain versus
+current-toolchain decoded equality stays FAIL (max 2/65535, no alpha difference).
+This is not plane optimization acceptance or evidence of quality loss caused by
+the new sampler. Preserve the failure and investigate precise FP/build conditions
+if needed; do not relax the quality contract. See [sanitized records](performance-host-diagnostic-2026-10-02.json).

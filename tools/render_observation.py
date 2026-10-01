@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import re
 import statistics
+from fractions import Fraction
 
 HEADER=('sequence','selector','time_numerator','time_scale','width','height','depth','path',
         'has_output','completed','parameters_ns','input_ns','output_ns','sampling_ns','checkin_ns','total_ns','start_ns')
@@ -77,10 +78,40 @@ def inspect(path:Path,expected_build_id:str)->dict:
             'missing/no callbacks cannot alone prove cache hits or preview completion',
             'capped, partial or invalid observations cannot establish performance PASS'])
 
+def validate_fixture(record:dict,fixture:dict)->dict:
+    """Require the declared workload to have actually produced every frame.
+
+    Use only a hash-checked schema-3 fixture from aerender_benchmark.load_fixture.
+    This proves callback coverage, not onscreen playback or uninstrumented speed.
+    """
+    if record['status']!='DECODED' or fixture.get('schema')!=3:
+        raise ValueError('complete observations and explicit schema-3 workload required')
+    outputs=[r for r in record['records'] if r['selector'] in ('smart','render') and r['has_output'] and r['completed']]
+    frames=set();fps=Fraction(str(fixture['fps']))
+    for r in outputs:
+        if (r['path'],r['width'],r['height'],r['depth'])!=(fixture['expected_render_path'],fixture['width'],fixture['height'],fixture['bit_depth']):
+            raise ValueError('actual output callback route/dimensions/depth differs from fixture')
+        frame=Fraction(r['time_numerator'],r['time_scale'])*fps
+        if frame.denominator!=1:raise ValueError('unexpected fractional callback frame')
+        frames.add(int(frame))
+    count=fixture['frame_end']-fixture['frame_start']+1
+    if not 0<count<=MAX_RECORDS:raise ValueError('bounded diagnostic frame range required')
+    expected=set(range(fixture['frame_start'],fixture['frame_end']+1))
+    if frames!=expected:raise ValueError('actual render frame coverage differs from fixture')
+    return dict(status='ROUTE_AND_FRAME_COVERAGE_PASS',expected_render_path=fixture['expected_render_path'],
+        unique_render_frames=len(frames),observed_render_callbacks=len(outputs),
+        scope='instrumented completed-output callbacks; not cached playback or uninstrumented speed')
+
 def main()->int:
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('csv',type=Path);p.add_argument('--build-id',required=True)
+    p.add_argument('--fixture',type=Path,help='Pinned schema-3 fixture; reject the wrong render workload')
     a=p.parse_args()
-    try:record=inspect(a.csv,a.build_id)
+    try:
+        record=inspect(a.csv,a.build_id)
+        if a.fixture:
+            import aerender_benchmark as ab
+            fixture=ab.load_fixture(a.fixture.absolute().parent,a.fixture.absolute())
+            record['fixture_observation']=validate_fixture(record,fixture)
     except (ValueError,OSError,UnicodeError) as error:
         print(json.dumps(dict(status='REJECTED',reason=str(error))));return 3
     print(json.dumps(record,indent=2));return 0 if record['status']=='DECODED' else 3
