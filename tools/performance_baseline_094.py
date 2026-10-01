@@ -27,6 +27,7 @@ import perf_fixture_runner as pf
 BASELINE_COMMIT = "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f"
 BASELINE_BUILD_ID = "EGFX-bd19dee13315abc0b7e6090e"
 BASELINE_VERSION = "0.9.3"
+BASELINE_AE_PREFIX = "25.6"
 BASELINE_PACKAGE_SHA256 = "1448a5231fc561e6b10491d1b9d1839de22f21a11266a43e2990244a25176ebc"
 PACKAGE_NAME = "FSTR Stretch.plugin.zip"
 MANIFEST_NAME = "FSTR Stretch.artifact.json"
@@ -55,8 +56,7 @@ def matrix_conditions(name: str) -> list[dict]:
                     condition_id=f"grid-{label}-32-{mode}-mfr-{mfr}",
                     test_case_id=case,width=width,height=height,bit_depth=32,
                     mode=mode,geometry="grid",mfr=mfr))
-    # 32-bpc for the core bit-depth matrix is already measured by RQ-002.
-    for depth in (8,16):
+    for depth in (8,16,32):
         result.append(dict(
             condition_id=f"grid-4k-{depth}-static-mfr-on",
             test_case_id="PERF094-RQ-003",width=3840,height=2160,bit_depth=depth,
@@ -137,6 +137,9 @@ def live_baseline_identity(run_root: Path, manifest: dict, host: dict) -> tuple[
         raise ValueError("running AE loaded a different FSTR Stretch Build ID")
     if result.get("ae", {}).get("pid") != host["pid"]:
         raise ValueError("identity probe observed a different AE process")
+    ae_version = str(result.get("ae", {}).get("version") or "")
+    if not ae_version.startswith(BASELINE_AE_PREFIX):
+        raise ValueError("Stage 1 baseline requires After Effects 25.6")
     if checked_path(Path(result["ae"]["path"]), directory=True) != host["app"]:
         raise ValueError("identity probe observed a different AE application")
     binary = checked_path(Path(result["loaded_images"][0]["path"]))
