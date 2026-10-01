@@ -1,20 +1,32 @@
 # Current development / release status
 
-## Next development cycle — FSTR Stretch 0.9.4 Performance — PLANNED
+## FSTR Stretch 0.9.4 Performance — Stage 1 of 10 — IN PROGRESS
 
-The next update is explicitly planned as a performance-focused release: make
-Render Queue and RAM Preview dramatically faster **without lowering image quality**.
+Process mode: **Release / Critical** because the 0.9.4 cycle will touch render,
+SmartFX/MFR, threading, GPU and performance-critical behavior.
 
-The accepted 0.9.3 runtime remains the immutable functional/quality baseline.
-Implementation has not started in this documentation change; no plugin/runtime source
-is modified.
+Authoritative rules were re-read from `ios3kov/AE-Development-Rules` at commit
+`320f80902fe5f50041935712e8d144ac61d29687`, rules blob
+`740f752dd9bd437391e141aea333646798bd547e`.
 
-The plan prioritizes cache/invalidation correctness, MFR-aware CPU scheduling,
-proven SmartFX ROI, safe activation of the existing Metal grid renderer, a new Metal
-Four Corners/3D projective renderer, optimized CPU projective fallback and final
-target-AE RAM Preview/Render Queue measurement.
+Current stage: establish a reproducible **0.9.3 Before baseline and test contract**
+before changing production renderer behavior. The accepted 0.9.3 runtime remains the
+immutable functional/quality baseline.
 
-See [FSTR Stretch 0.9.4 Performance Release Plan](performance-plan-0.9.4.md).
+Stage 1 tooling hardens the existing synthetic fixture/aerender benchmark path with
+versioned Test Case/Test Run IDs, stable output-digest requirements, schema-v2
+geometry/color records, Four Corners fixture support and optional 8K preparation.
+This branch does **not** enable Metal, change SmartFX ROI, scheduling, cache behavior
+or renderer math.
+
+Real target-AE Render Queue/RAM Preview/native-3D measurements are **BLOCKED** in
+the current development session because it has no access to the target AE runtime.
+Portable/CI checks cannot substitute for those measurements, so Stage 1 remains
+IN PROGRESS until real host Evidence exists.
+
+See:
+- [0.9.4 Performance Release Plan](performance-plan-0.9.4.md)
+- [Stage 1 baseline and test contract](performance-baseline-0.9.4.md)
 
 Historical Stage 8 remains SKIPPED for the 0.9.3 cycle; 0.9.4 is a new performance
 cycle and does not rewrite that evidence.

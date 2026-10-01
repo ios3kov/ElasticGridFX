@@ -52,6 +52,7 @@ excluding itself, using sorted repository-relative paths.
 
 - [Current status and scope](docs/current-status.md)
 - [0.9.4 performance release plan](docs/performance-plan-0.9.4.md)
+- [0.9.4 Stage 1 performance baseline / test contract](docs/performance-baseline-0.9.4.md)
 - [0.9.3 technical retrospective / AE know-how](docs/retrospective-0.9.3.md)
 - [Ten-stage map](docs/development-stages.md)
 - [Final gate: current verdict and historical evidence](docs/stage10-final-gate-2026-09-30.md)
