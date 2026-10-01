@@ -23,6 +23,8 @@ class Baseline094(unittest.TestCase):
         self.assertTrue(any(c['test_case_id']=='PERF094-RQ-002' and c['width']==3840 for c in cases))
         depths={c['bit_depth'] for c in cases if c['geometry']=='grid' and c['width']==3840}
         self.assertEqual(depths,{8,16,32})
+        rq3_depths={c['bit_depth'] for c in cases if c['test_case_id']=='PERF094-RQ-003'}
+        self.assertEqual(rq3_depths,{8,16,32})
         self.assertTrue(any(c['geometry']=='four_corners' and c['mfr']=='on' for c in cases))
         self.assertTrue(any(c['geometry']=='four_corners' and c['mfr']=='off' for c in cases))
         self.assertEqual(len({c['condition_id'] for c in cases}),len(cases))
@@ -40,6 +42,18 @@ class Baseline094(unittest.TestCase):
             with self.assertRaises(ValueError):
                 pb.run_baseline(self.root,self.root,'smoke',0,5,60)
             candidate.assert_not_called();host.assert_not_called()
+
+    def test_live_identity_refuses_wrong_ae_version(self):
+        run=self.root/'run';run.mkdir()
+        app=self.root/'AE.app';app.mkdir()
+        host=dict(pid=123,app=app,executable=self.root/'After Effects')
+        observed=dict(status='PASS',loaded_image_status='PASS',
+                      observed_build_id=pb.BASELINE_BUILD_ID,
+                      ae={'pid':123,'path':str(app),'version':'25.5.0'},
+                      loaded_images=[{'path':str(self.root/'unused')}])
+        with patch.object(pb.li,'diagnose',return_value=observed):
+            with self.assertRaisesRegex(ValueError,'25.6'):
+                pb.live_baseline_identity(run,{'build':{}},host)
 
     def test_candidate_identity_requires_exact_frozen_baseline(self):
         package=self.root/pb.PACKAGE_NAME;package.write_bytes(b'package')
