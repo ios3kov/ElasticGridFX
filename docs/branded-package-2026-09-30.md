@@ -81,3 +81,34 @@ Rollback: quit Adobe hosts; move the new named bundle outside plugin roots; rest
 the exact backed-up old bundle to its original location. Never leave both names
 active. No host verification, installation, merge, release or overall gate closure
 is implied by building the archive.
+
+
+## 2026-10-01 superseding branding / density notes
+
+The current user-facing About copy is:
+
+```text
+FSTR Stretch
+Version 0.9.3
+
+Professional mesh deformation for Adobe After Effects
+
+© 2026 FSTR.tech. All rights reserved
+```
+
+The copyright symbol is intentionally written to AE's legacy
+`PF_OutData.return_msg` / `A_char[256]` field as a single `0xA9` byte.
+UTF-8 `C2 A9` was observed by the user to render as `¬©` in AE 25.6.
+Build ID, commit, target and source-state provenance remain in
+`BuildIdentity.json` and the noninteractive diagnostic path, not in the visible
+About dialog.
+
+The historical statement above that changing Columns/Rows after animation
+resets an axis is **superseded** by the later animation-preserving density work:
+changing Columns/Rows must not change the image, create or overwrite Grid
+Positions keys, reset either axis, or discard hidden deformation. See
+`docs/grid-density-preserve-animation-2026-09-30.md` and current status.
+
+About/footer changes are presentation-only, but every source change receives a
+new commit/Build ID and must pass mandatory automated/package gates again. Failed
+candidate runs are retained as failed evidence. No merge/release is implied.

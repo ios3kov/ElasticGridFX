@@ -1,5 +1,35 @@
 # Current development / release status
 
+## About footer candidate gate failure and correction — 2026-10-01
+
+Candidate source `e4f1ed10c650f9f70e606ed97f34d4dc16042ae4` removed the redundant
+standalone `fstr.tech` footer, but the mandatory first-application and macOS
+source gates **FAILED** before handoff. The failure is preserved as evidence and
+is not relabeled as PASS.
+
+Failed runs:
+- push first-application regression **36853623602** — FAIL in Rust host contracts;
+- PR first-application regression **36853629081** — same FAIL;
+- macOS source gate **36853623609** — FAIL during full preflight;
+- PR CI **36853629066** — PASS for portable C++/sanitizer/static-analysis scope only.
+
+Root cause: research-only `host-rust/src/lifecycle_probe.rs` still referenced
+the removed generated constant `build_identity::ABOUT`. The production About
+path had already moved to `ABOUT_BYTES`, while internal diagnostics use
+`DIAGNOSTIC`. This compile error is unrelated to rendering or the copyright
+byte itself, but it blocks delivery under the development rules.
+
+Correction: the lifecycle research journal now uses
+`build_identity::DIAGNOSTIC`, matching the intended separation between
+user-facing About bytes and internal provenance. No renderer, parameters,
+serialization, Fit Layer, grid-density, package naming or project data behavior
+changes in this correction.
+
+The previous failed runs remain failures. A new candidate must pass the complete
+required regression and macOS source/package gates before it can be handed off.
+Target-AE verification is still required for the final About rendering. No merge
+or release is authorized.
+
 ## About footer cleanup — 2026-10-01
 
 Per user review, the standalone `fstr.tech` footer is redundant and removed.

@@ -151,7 +151,7 @@ fn journal(index: &str, record: &str) {
         use std::os::unix::fs::OpenOptionsExt;
         let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{index}.txt", std::process::id()));
         if let Ok(mut f) = std::fs::OpenOptions::new().write(true).create_new(true).mode(0o600).open(path) {
-            let _ = writeln!(f, "{}\n{}", build_identity::ABOUT, record);
+            let _ = writeln!(f, "{}\n{}", build_identity::DIAGNOSTIC, record);
         }
     }
 }
