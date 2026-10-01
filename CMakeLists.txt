@@ -42,6 +42,10 @@ function(elasticgrid_enable_test_assertions target)
 endfunction()
 
 if(ELASTICGRID_BUILD_TESTS)
+  add_executable(elasticgrid_plane_axis_cache_tests tests/test_plane_axis_cache.cpp)
+  target_link_libraries(elasticgrid_plane_axis_cache_tests PRIVATE elasticgrid_core)
+  elasticgrid_enable_test_assertions(elasticgrid_plane_axis_cache_tests)
+  add_test(NAME elasticgrid_plane_axis_cache COMMAND elasticgrid_plane_axis_cache_tests)
   add_executable(elasticgrid_control_density_tests tests/test_control_density.cpp
       src/bridge/control_grid_ffi.cpp src/bridge/elasticgrid_ffi.cpp)
   target_link_libraries(elasticgrid_control_density_tests PRIVATE elasticgrid_core)
@@ -171,6 +175,8 @@ if(ELASTICGRID_BUILD_TESTS)
 endif()
 
 if(ELASTICGRID_BUILD_BENCH)
+  add_executable(elasticgrid_plane_bench bench/bench_plane.cpp src/bridge/plane_ffi.cpp)
+  target_link_libraries(elasticgrid_plane_bench PRIVATE elasticgrid_core)
   add_executable(elasticgrid_bench bench/bench_core.cpp)
   target_link_libraries(elasticgrid_bench PRIVATE elasticgrid_core)
 

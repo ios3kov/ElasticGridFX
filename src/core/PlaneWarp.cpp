@@ -91,4 +91,8 @@ PlaneMapResult PlaneWarp::sourceFor(PlanePoint destination) const {
     if(!source) return {PlaneMapStatus::InvalidProjection,std::nullopt};
     return {PlaneMapStatus::Mapped,source};
 }
+std::optional<PlanePoint> PlaneWarp::separableAnchor() const {
+    if(projectsSource() || !transform_.axisAligned()) return std::nullopt;
+    return transform_.toSurface({.5,.5});
+}
 } // namespace elasticgrid

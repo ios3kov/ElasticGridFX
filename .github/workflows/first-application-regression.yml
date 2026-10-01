@@ -3,12 +3,21 @@ name: First application regression
 on:
   workflow_dispatch:
   push:
-    branches: [fix/first-application-516, fix/grid-density-preserve-animation, fix/fit-layer-coordinates]
+    branches: [main, fix/first-application-516, fix/grid-density-preserve-animation, fix/fit-layer-coordinates, perf/plane-render-throughput]
+    paths:
+      - host-rust/**
+      - src/**
+      - tests/**
+      - tools/**
+      - CMakeLists.txt
+      - .github/workflows/first-application-regression.yml
   pull_request:
     paths:
-      - host-rust/src/binding_probe.rs
-      - host-rust/src/first_application_tests.rs
-      - tests/test_first_application*.py
+      - host-rust/**
+      - src/**
+      - tests/**
+      - tools/**
+      - CMakeLists.txt
       - .github/workflows/first-application-regression.yml
 
 permissions:

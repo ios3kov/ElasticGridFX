@@ -12,6 +12,8 @@ public:
     static std::optional<PlaneTransform> fromCorners(const std::array<PlanePoint,4>& corners);
     std::optional<PlanePoint> toSurface(PlanePoint local) const;
     std::optional<PlanePoint> toLocal(PlanePoint surface) const;
+    // Exact structural test, never an epsilon approximation of perspective.
+    bool axisAligned() const;
 private:
     PlaneTransform() = default;
     std::array<double,9> forward_{}, inverse_{};

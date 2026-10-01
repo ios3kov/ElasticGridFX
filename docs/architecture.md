@@ -18,7 +18,7 @@ Bicubic. CPU channel operations support 8/16/32 bpc; 16-bpc uses AE's 32768 rang
 macOS scheduling uses GCD; independent frame threads own reusable plan/row caches.
 Actual AE MFR, cancellation and throughput still require host acceptance.
 
-## Staged sparse CPU path (not host-connected)
+## Sparse CPU path
 
 eg_render_frame_sparse requires explicit positive logical canvas dimensions.
 The caller must establish that pixels absent from the returned compact world
@@ -32,16 +32,35 @@ kernels once per render. Transparent taps use -1 internally; the row cache uses
 -2 as its unused key. Existing eg_prepare_gpu_plan keeps nonnegative indices and
 unchanged layout; these sentinels MUST NOT be sent to current Metal kernels.
 The frozen 160-byte EgRenderParams and saved AE parameter schema are unchanged.
+The host uses this path when no plane snapshot is available; its immutable
+snapshot carries logical-canvas dimensions/origins and handles empty checkouts.
 See sparse-render-stage-plan.md and sparse-render-results-2026-09-28.md.
 
-## Planned perspective plane
+## Implemented perspective plane
 
-Four-corner placement and camera/layer-driven 3D perspective are approved product
-requirements, not active code. Proposed composition maps output to plane-local
-coordinates, applies inverse grid deformation, maps back and samples once.
-Overlay and hit testing must use that same transform. The general projected
-mapping is not screen-separable; retain the existing separable fast path when
-projection is off. See perspective-plane-plan.md for decisions and acceptance.
+`host-rust/src/plane.rs` renders immutable evaluated axes through the separate
+152-byte `EgPlaneFrame` ABI. Normal bounded planes use `eg_render_plane_region`;
+native comp-space text uses `eg_render_plane_layer` with end-cell extrapolation
+so fractional perimeter coverage deforms. Mapping composes the plane transform
+with inverse deformation and samples the original image once. Overlay and hit
+testing share the plane geometry. Four Corners remains a 2D bounded region;
+native 3D uses Layer Plane. See perspective-plane-plan.md and the exact 0.9.3
+acceptance record for scope and limitations.
+
+The resumed performance branch caches the original mapping and sampling taps
+per output axis only when both transform matrices have exactly zero cross-axis
+and perspective coefficients, the warp does not project a separate source, and
+raster surface scale is one. There is no approximate geometry classification.
+Four call-local horizontal rows reuse Bicubic intermediate results without
+changing per-channel arithmetic/tap order. Cache keys refer to logical source
+rows and cannot evict any row still required by the current output row.
+Non-unit scales, rotated/perspective/projected geometry and failed intermediate
+projections retain the general sampler. C++ reference tests can disable this
+optimization through `PlaneCanvasRegion`; it is not an AE parameter or C ABI field.
+
+These caches are local to one render call. MFR frames do not share mutable
+mapping, rows or source pointers. Cancellation is polled on the calling thread,
+before preparation and at the same per-row frequency as the original sampler.
 
 ## Acceptance
 

@@ -1,5 +1,31 @@
 # Current development / release status
 
+## Stage 8 resumed — 2026-10-01 — IN PROGRESS
+
+The user explicitly resumed extremely fast Render / RAM Preview with unchanged
+Final quality. This supersedes the earlier skip for new work; it does not change
+the historical 0.9.3 acceptance or approve a new artifact.
+
+Branch: `perf/plane-render-throughput`, baseline `2e3d066`.
+The current plane renderer is measured independently from the older separable
+CPU path. Implementation caches exact axis mappings/taps and four horizontal
+rows only for structurally axis-aligned, nonprojected planes at unit raster
+scale. Other geometries keep the general mapping. Per-channel tap/arithmetic
+order, Final Catmull-Rom, integer rounding, float/HDR, C ABI and saved data remain
+unchanged. Independent-frame caches are call-local, with no retained source data.
+
+Native baseline/candidate pixels are byte-identical in all 31 external scenes;
+measured median improvement is 12.3x at 1080p/32 bpc and 12.8x at 4K/32 bpc
+for eligible deformed planes. C++ 21/21 (Release/host math/ASan+UBSan), TSan,
+Rust 61/61, Clippy and Python 239/239 PASS. New target-AE Render and
+RAM Preview acceleration is **NOT RUN**, not inferred from native timings.
+See [the resumed performance record](performance-resume-2026-10-01.md).
+No installed plugin replacement, cache purge, main merge or public release.
+
+Canonical rules now point to the user-selected AE-Development-Rules baseline.
+Earlier project evidence and the accepted 0.9.3 runtime candidate below remain
+historical evidence for those exact artifacts.
+
 ## Final Stage 10 acceptance — 2026-10-01
 
 **Stage 10 COMPLETE for the agreed macOS Apple Silicon / AE 25.6 development scope.**
@@ -16,7 +42,8 @@ cancel→rerender cycles. #7, #8, #9, #13 and #14 are closed as scoped evidence.
 
 See [Stage 10 final acceptance](stage10-final-acceptance-2026-10-01.md).
 
-Stage 8 optimization remains **SKIPPED BY USER**, not PASS. Windows/Intel, other AE
+At this accepted checkpoint Stage 8 optimization was **SKIPPED BY USER**, not PASS.
+It is resumed above for new development. Windows/Intel, other AE
 versions, broad HDR/OCIO and physical GPU execution remain outside the accepted
 scope.
 

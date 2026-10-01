@@ -32,8 +32,9 @@ not Developer ID signed or notarized; do not bypass macOS security protections.
 
 The published 0.9.1 record is historical relative to the accepted 0.9.3
 development candidate. Final 0.9.3 target-host RAM Preview and cancellation
-checks are closed as USER-REPORTED PASS. Performance optimization was skipped by
-the user, not passed. Persistent grid display while the effect/layer is unselected
+checks are closed as USER-REPORTED PASS. Performance optimization was skipped at
+that checkpoint and resumed on 2026-10-01; see [current performance work](docs/performance-resume-2026-10-01.md).
+New target-AE speed verification is pending. Persistent grid display while the effect/layer is unselected
 remains deferred.
 
 ## Artifact identity
@@ -75,3 +76,16 @@ node tests/test_smoke_safety.js
 Portable checks do not replace real AE verification. Hosted Metal tests can be
 compile-only. Preserve artifact identity, user projects and rollback backups;
 build scripts do not implicitly authorize installation or release.
+
+### Plane-specific native benchmark
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=ON
+cmake --build build --parallel 2 --target elasticgrid_plane_bench
+./build/elasticgrid_plane_bench 1920 1080 5 32 region dense
+```
+
+Modes: `region`, `layer`, `perspective`, `identity`; storage: `dense` or `sparse`.
+The JSON reports cold and warmed native frame times at Final Bicubic with abort
+polling. An optional final filename writes exact pixel/padding bytes for comparison.
+This is a standalone plane-bridge benchmark, not After Effects or RAM Preview.

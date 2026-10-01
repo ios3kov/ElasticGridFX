@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — resumed performance development
+
+- Cache exact per-axis plane mapping/taps and horizontal sampling rows for
+  eligible axis-aligned planes; retain general projective sampling elsewhere.
+  Keep Final Bicubic, per-channel arithmetic order and saved/FFI compatibility.
+- Add a plane-specific benchmark and byte-exact optimized/reference checks for
+  all depths, sparse/expanded worlds, cancellation and independent frames.
+- Run new cache tests in sanitizer/TSan gates and trigger Rust host regression
+  for all relevant native/host source changes. AE/RAM Preview speed acceptance
+  remains separate from standalone renderer measurements.
+- Adopt the user-selected central AE-Development-Rules baseline and resume
+  Stage 8 without rewriting prior acceptance evidence.
+
 ## 0.9.1
 
 - Refresh plane controls automatically when the owning layer switches to 3D.

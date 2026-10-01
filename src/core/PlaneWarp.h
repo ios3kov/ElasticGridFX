@@ -33,6 +33,8 @@ public:
         PlaneTransform destination, std::vector<float> columns, std::vector<float> rows,
         float easing = 0, float easing_distance = .25f);
     bool projectsSource() const { return source_extent_.has_value() || source_transform_.has_value(); }
+    // A point inside both axes, only when sourceFor has independent X/Y math.
+    std::optional<PlanePoint> separableAnchor() const;
 private:
     explicit PlaneWarp(PlaneTransform transform) : transform_(transform) {}
     PlaneTransform transform_;

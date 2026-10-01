@@ -16,6 +16,8 @@ struct PlaneCanvasRegion {
     double surface_units_x = 1, surface_units_y = 1;
     EdgeMode edge = EdgeMode::Clamp;
     SampleQuality quality = SampleQuality::Bicubic;
+    // Internal reference/benchmark control; no saved parameter or C ABI field.
+    bool cache_axis_mapping = true;
 };
 // Stored rectangles may extend beyond the logical canvas, including negative
 // origins. Output outside the canvas and missing source pixels are transparent

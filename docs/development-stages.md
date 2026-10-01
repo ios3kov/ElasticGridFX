@@ -79,7 +79,12 @@ runner 7371408, immutable plugin fd69988, same AE PID 42039, identity and
 ten-frame pixel smoke PASS. See current-status.md for hashes and scope.
 Earlier blocked reports remain historical and are not rewritten as PASS.
 
-## Stage 8 of 10 — Render / RAM Preview profiling and optimization — SKIPPED BY USER
+## Stage 8 of 10 — Render / RAM Preview profiling and optimization — RESUMED
+
+2026-10-01: user explicitly resumed acceleration without quality loss.
+Current work/evidence: [performance-resume-2026-10-01.md](performance-resume-2026-10-01.md).
+Standalone native optimization is in progress; new AE Render/RAM Preview speed
+acceptance remains NOT RUN.
 
 2026-09-29: user explicitly requested skipping performance acceleration.
 Retain collected measurements as historical evidence; incomplete RAM Preview,
@@ -202,7 +207,7 @@ production release occurs without explicit user instruction.
 ## Current overall progress
 
 Stages 1–7 retain their recorded evidence; Stage 9 is accepted within the
-documented scope. Stage 8 is skipped by user (not PASS).
+documented scope. Stage 8 was skipped at acceptance and is now resumed (not PASS).
 Stage 10 is COMPLETE for the agreed 0.9.3 macOS Apple Silicon / AE 25.6
 development scope. This does not certify Windows/Intel, other AE versions,
 broad HDR/OCIO, physical GPU execution, or public signing/notarization.
