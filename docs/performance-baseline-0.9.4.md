@@ -215,7 +215,52 @@ Stage 1 tooling additions:
 - every benchmark report gets Test Case ID + unique Test Run ID;
 - repeated timing samples must have one stable encoded output digest;
 - compare reports make encoded-output mismatch an explicit FAIL;
-- timing comparison still does not become a broad HDR/quality certification.
+- timing comparison still does not become a broad HDR/quality certification;
+- `tools/performance_baseline_094.py` orchestrates the exact 0.9.3 live-identity
+  check, owned fixture creation and the aerender matrix;
+- `RUN_FSTR_STRETCH_094_BASELINE_MAC.command` is the single user-facing entry
+  point for that automated baseline.
+
+### One-command target-Mac aerender baseline
+
+The runner does not install, replace or modify the plug-in. The exact accepted
+0.9.3 artifact must already be installed and loaded in one running AE instance.
+The running AE project must be empty, unsaved and clean; otherwise fixture creation
+fails closed without touching user work.
+
+The candidate directory must contain the exact accepted files:
+
+- `FSTR Stretch.plugin.zip`;
+- `FSTR Stretch.artifact.json`.
+
+Normal full Stage 1 aerender matrix:
+
+```sh
+./RUN_FSTR_STRETCH_094_BASELINE_MAC.command \
+  --candidate-dir "/path/to/accepted-0.9.3-artifact" \
+  --matrix core
+```
+
+Evidence is retained by default under
+`~/Desktop/FSTR-Stretch-0.9.4-Baselines/` in a unique run directory.
+
+Before any fixture is created the runner:
+
+1. verifies the manifest is exactly commit `2ccc5f6...`;
+2. verifies Build ID `EGFX-bd19dee13315abc0b7e6090e`;
+3. verifies the exact accepted ZIP SHA-256;
+4. performs the read-only loaded-image identity diagnostic against the running AE;
+5. refuses ambiguous/conflicting installed copies;
+6. resolves the matching `aerender` executable;
+7. verifies the installed bundle against the same artifact manifest.
+
+The `core` matrix then records the required ordinary-grid 1080p/4K 32-bpc
+static/animated MFR ON/OFF conditions, supporting 4K 8/16-bpc measurements and
+4K Four Corners static/animated MFR ON/OFF. A shorter `smoke` matrix exists only
+for runner diagnosis and **cannot close Stage 1**.
+
+Even a complete aerender matrix reports `stage_status=BLOCKED`. It cannot promote
+RAM Preview, native 3D or deep profiling to PASS.
 
 ## 7. What Stage 1 does not authorize
 
