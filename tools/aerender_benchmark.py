@@ -25,8 +25,8 @@ MAX_OUTPUT_BYTES = 8 * 1024 * 1024 * 1024
 BUILD_MARKER = re.compile(r'ElasticGridBuildID=(EGFX-[0-9a-f]{24})')
 TIME_LINE = re.compile(r'^\s*([0-9.]+)\s+real\s+([0-9.]+)\s+user\s+([0-9.]+)\s+sys\s*$', re.M)
 RSS_LINE = re.compile(r'^\s*(\d+)\s+maximum resident set size\s*$', re.M)
-AERENDER_VERSION_LINE = re.compile(r'^\\s*aerender\\s+version\\s+([^\\r\\n]{1,120})\\s*$', re.I | re.M)
-AERENDER_ERROR_LINE = re.compile(r'^\\s*aerender\\s+(?:SYNTAX\\s+ERROR|ERROR)\\b', re.I | re.M)
+AERENDER_VERSION_LINE = re.compile(r'^\s*aerender\s+version\s+([^\r\n]{1,120})\s*$', re.I | re.M)
+AERENDER_ERROR_LINE = re.compile(r'^\s*aerender\s+(?:SYNTAX\s+ERROR|ERROR)\b', re.I | re.M)
 
 
 def file_digest(path: Path) -> str:
