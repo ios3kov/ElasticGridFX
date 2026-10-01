@@ -1,5 +1,24 @@
 # Current development / release status
 
+## Next development cycle — FSTR Stretch 0.9.4 Performance — PLANNED
+
+The next update is explicitly planned as a performance-focused release: make
+Render Queue and RAM Preview dramatically faster **without lowering image quality**.
+
+The accepted 0.9.3 runtime remains the immutable functional/quality baseline.
+Implementation has not started in this documentation change; no plugin/runtime source
+is modified.
+
+The plan prioritizes cache/invalidation correctness, MFR-aware CPU scheduling,
+proven SmartFX ROI, safe activation of the existing Metal grid renderer, a new Metal
+Four Corners/3D projective renderer, optimized CPU projective fallback and final
+target-AE RAM Preview/Render Queue measurement.
+
+See [FSTR Stretch 0.9.4 Performance Release Plan](performance-plan-0.9.4.md).
+
+Historical Stage 8 remains SKIPPED for the 0.9.3 cycle; 0.9.4 is a new performance
+cycle and does not rewrite that evidence.
+
 ## Final Stage 10 acceptance — 2026-10-01
 
 **Stage 10 COMPLETE for the agreed macOS Apple Silicon / AE 25.6 development scope.**
