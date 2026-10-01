@@ -9,7 +9,7 @@ function run(options={}){
  const comp={resolutionFactor:[1,1],layers:{add(){return layer;}}};
  const om={templates:options.noPng?[]:[options.localPng?'png':'PNG Sequence'],applyTemplate(){},file:null,getSettings(){return {Format:'PNG Sequence',Resize:options.resize?'true':'false',Crop:'false'};}};
  const rq={templates:options.noBest?[]:['Best Settings'],applyTemplate(){},timeSpanStart:0,timeSpanDuration:0,skipFrames:0,render:false,outputModule(){return om;}};
- const project=Object.prototype.hasOwnProperty.call(options,'project') ? options.project : {file:null,numItems:0,dirty:false,bitsPerChannel:16,
+ const project=Object.prototype.hasOwnProperty.call(options,'project') ? options.project : {file:null,numItems:0,dirty:false,bitsPerChannel:16,workingSpace:'',linearizeWorkingSpace:false,
    importFile(){calls.import++;return{};},items:{addComp(){calls.comp++;return comp;}},
    renderQueue:{items:{add(){return rq;}}},
    save(file){calls.save++;this.file=file;this.dirty=false;files[file.fsName]='AEP';},
@@ -20,7 +20,7 @@ function run(options={}){
  function File(n){this.fsName=String(n);Object.defineProperty(this,'exists',{get:()=>Object.hasOwn(files,this.fsName)});Object.defineProperty(this,'length',{get:()=>files[this.fsName]?.length||0});this.open=()=>true;this.write=t=>{files[this.fsName]=t;};this.close=()=>{};}
  function Folder(n){this.fsName=String(n);this.exists=n===folder;this.create=()=>{if(this.exists)return false;this.exists=true;return true;};}
  function ImportOptions(f){this.file=f;}
- const config={run_id:'a'.repeat(32),folder,width:1920,height:1080,bit_depth:32,fps:30,duration:2,mode:'animated'};
+ const config={run_id:'a'.repeat(32),folder,width:1920,height:1080,bit_depth:32,fps:30,duration:2,mode:'animated',geometry:options.geometry||'grid'};
  vm.runInNewContext(source+'\nelasticGridPerfFixture('+JSON.stringify(config)+');',{app,File,Folder,ImportOptions,CloseOptions:{DO_NOT_SAVE_CHANGES:0},GetSettingsFormat:{STRING:1}}, {timeout:1000});
  let capture=null;try{capture=JSON.parse(files[folder+'/capture.json']);}catch{}
  return {app,calls,files,capture};
@@ -34,15 +34,20 @@ for(const project of [
  const {calls,app}=run({project});
  assert.notEqual(app.exitCode,0);assert.equal(calls.save+calls.close+calls.newProject,0,'unsafe project untouched');
 }
-for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true}]){
+for(const opts of [{noEffect:true},{noBest:true},{noPng:true},{closeFail:true},{resize:true},{geometry:'bad'}]){
  const {app,capture}=run(opts);assert.notEqual(app.exitCode,0);assert.notEqual(capture?.status,'PREPARED');
 }
 {
  const {app,calls,capture,files}=run();
  assert.equal(app.exitCode,0);assert.equal(capture.status,'PREPARED');assert.equal(capture.saved,true);
+ assert.equal(capture.geometry,'grid');assert.equal(capture.color_management,'none-linearize-off');
  assert.equal(calls.save,1);assert.equal(calls.close,1);assert.equal(calls.newProject,1);assert.equal(calls.dialogs,0);
  assert.ok(Object.hasOwn(files,'/owned/EGFX_PERF.aep'));assert.equal(paramsUndefined(),true);
 }
+{
+ const {app,capture}=run({geometry:'four_corners'});
+ assert.equal(app.exitCode,0);assert.equal(capture.geometry,'four_corners');
+}
 function paramsUndefined(){return true;}
 assert.equal(run({localPng:true}).capture.output_template,'png');
-console.log('PASS: perf fixture ownership/template/save control-flow cases (mock only)');
+console.log('PASS: perf fixture ownership/template/geometry/save control-flow cases (mock only)');
