@@ -16,6 +16,10 @@
   performance fixtures; retain schema-1 historical fixtures. Verify actual PNG
   encoded depth/channels and preserve rejected render-process identity evidence.
   Do not accept incomplete/dithered RGB8 observations as target speed proof.
+- Add optional, bounded render callback observations for phase attribution and
+  fresh-render verification. Default builds do not log or add observer locks.
+  Pin active Cargo features into Build Identity so diagnostic artifacts cannot
+  share an identity with normal builds. Host diagnostic execution remains pending.
 - Adopt the user-selected central AE-Development-Rules baseline and resume
   Stage 8 without rewriting prior acceptance evidence.
 

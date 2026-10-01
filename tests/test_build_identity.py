@@ -192,6 +192,19 @@ class IdentityTests(unittest.TestCase):
         self.assertIn('cargo:rerun-if-env-changed=RUSTFLAGS', stdout.getvalue())
         self.assertIn(str(self.root / 'src/example.cpp'), stdout.getvalue())
 
+    def test_same_source_diagnostic_feature_has_distinct_identity(self):
+        record=bi.source_record(self.root)
+        def tag(env):
+            with patch.dict(os.environ,env,clear=True):
+                return bi.identity(record,'aarch64-apple-darwin','release',{'rustc':'fixed','cxx':'fixed'},bi.build_settings())
+        default=tag({'CARGO_FEATURE_NATIVE_PLANE':'1'})
+        diagnostic=tag({'CARGO_FEATURE_NATIVE_PLANE':'1','CARGO_FEATURE_RENDER_DIAGNOSTICS':'1'})
+        legacy=tag({})
+        self.assertEqual(default['source_sha256'],diagnostic['source_sha256'])
+        self.assertEqual(default['commit'],diagnostic['commit'])
+        self.assertEqual(len({x['build_id'] for x in (default,diagnostic,legacy)}),3)
+        self.assertEqual(default,tag({'UNRELATED_PRIVATE_VALUE':'not recorded','CARGO_FEATURE_NATIVE_PLANE':'1'}))
+
     def test_stamp_rejects_stale_or_ambiguous_cargo_metadata(self):
         bundle = self.bundle()
         out = Path(self.tmp.name) / 'out'

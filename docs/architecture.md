@@ -62,6 +62,25 @@ These caches are local to one render call. MFR frames do not share mutable
 mapping, rows or source pointers. Cancellation is polled on the calling thread,
 before preparation and at the same per-row frequency as the original sampler.
 
+## Optional callback observation
+
+Cargo `render-diagnostics` observes the existing Render/SmartPreRender/SmartRender
+branches without changing render decisions or introducing an Adobe API. The
+feature is absent from default builds. Phase endpoints use monotonic time and
+process-relative callback starts; per-process logs contain no project/source
+names or pixels. Private exclusive files are bounded at 4096 records and stop on
+write failure. The optional writer serializes after observed endpoints; its
+execution still perturbs the host and is unsuitable as acceptance timing.
+
+`tools/render_observation.py` pins Build ID and schema, refuses malformed or
+incomplete records, and labels partial/capped/empty observations explicitly.
+Callbacks are not unique frames; missing observations do not prove cache hits.
+Overlapping sampling intervals do not establish concurrent CPU execution.
+Active Cargo features participate in Build Identity. A diagnostic and default
+build cannot share a Build ID for the same source/toolchain/settings.
+See [observation design](performance-observation-design.md). Actual diagnostic
+host execution and uninstrumented target timing remain pending.
+
 ## Acceptance
 
 Quality and equal-condition profiling are governed by performance-quality-contract.md.

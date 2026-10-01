@@ -41,12 +41,27 @@ not obtained. Decoded RGB8 equality FAIL (max 1/255), including a baseline repea
 No target speed claim is accepted. Exact external native checks on the same
 pattern pass all 16 cases; this is not AE checkout proof. New fixtures now require
 verified straight RGBA16 with recorded color state and encoded-header validation.
-Python 240/240 and all 12 JSX control-flow files PASS; mocks are not host proof.
+Python 240/240 at tooling checkpoint 1fcb0f3 and all 12 JSX control-flow files PASS; mocks are not host proof.
 Original installed payload is restored; Adobe hosts stopped. GUI continuation
 is waiting for the user to unlock the Mac. RAM Preview remains NOT RUN. No cache purge, main merge
 or public release. Initial aefeb4b artifact is withheld after
 its x86 NaN-payload FAIL; corrected tests retain exact equality.
 See [the resumed performance record](performance-resume-2026-10-01.md).
+
+### Optional observation block — source validated, host NOT RUN
+
+All eight hosted checks at exact tooling checkpoint `1fcb0f3` PASS. Optional
+Cargo `render-diagnostics` now records bounded callback phase endpoints and
+process-relative starts; default builds do not enable it. No new Adobe API or
+render/parameter/state decision was introduced. Feature Rust 65/65, strict
+Clippy and Python 246/246 PASS. Active Cargo features now participate in Build Identity, keeping
+instrumented and ordinary artifacts distinct. The reader rejects malformed,
+partial and capped logs as performance evidence. Diagnostic logging perturbs
+execution; final timing must use the default artifact.
+
+Sealed packages and actual host observation remain pending. This block prepares
+fresh-render/cache and phase attribution; it does not close Stage 8 or establish
+RAM Preview/AE acceleration. See [design](performance-observation-design.md).
 
 ### Resume checkpoint — AI-STATE-001
 
@@ -61,8 +76,9 @@ See [the resumed performance record](performance-resume-2026-10-01.md).
   sampler, Apple Silicon/macOS 26.6.2 physical checks; AE 2025 / 25.6 target scope.
   No new SDK/host API use; reuse current integration evidence only for unchanged
   contracts. New API use requires source/signature/version verification.
-- Branch: `perf/plane-render-throughput`; source checkpoint `41283e3`. Subsequent
-  tooling/documentation checkpoint changes no renderer/host code. Preserve exact artifact
+- Branch: `perf/plane-render-throughput`; native source checkpoint `41283e3`, tooling checkpoint `1fcb0f3`. The next
+  observation checkpoint adds optional host instrumentation and feature-aware
+  identity; default sampling and host behavior remain unchanged. Preserve exact artifact
   identity above; recheck HEAD/tree before dependent actions.
 
 | Confirmed scope / permission | Source | Still applies |
@@ -71,7 +87,7 @@ See [the resumed performance record](performance-resume-2026-10-01.md).
 | Extremely fast Render/RAM Preview, no quality loss | User clarification, 2026-10-01; quality contract | No filter/precision/resolution downgrade |
 | Push performance branch and open draft PR | Explicit user answer, 2026-10-01 | [PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20), ongoing branch updates |
 | Reread current AI_ENTRYPOINT and continue | User instruction, 2026-10-01 | Adopt current v5.0.0 candidate baseline for continuing work |
-| Temporary installed-plugin replacement | Explicit user message, 2026-10-01 | Exact 41283e3 candidate, preserve original for rollback |
+| Temporary installed-plugin replacement | Explicit user message, 2026-10-01 | Bounded validation candidates, preserve original for rollback |
 | Close projects without saving in After Effects | Explicit user message and AE-only clarification, 2026-10-01 | AE project closure allowed; does not extend to other apps |
 | Finish development continuously with stage statuses | Explicit user instruction, 2026-10-01 | Continue applicable development/validation; report each completed block, then continue |
 
@@ -81,7 +97,7 @@ are outside the current authorization. Closing AE projects without saving is
 explicitly authorized. The task-state record points to the conversation; it is
 not independent authorization.
 
-Next: finish straight-RGBA16 host validation after Mac unlock, compare the missing legacy chain capture
+Next: seal distinct default/diagnostic builds, then finish straight-RGBA16 host validation after Mac unlock, compare the missing legacy chain capture
 on the original plugin, and run the existing straight-RGBA16 plane/3D/AEP matrix.
 Accept Render timings only after pixel parity; RAM Preview needs externally
 observed cache-build/playback measurements. Independent source/CI/documentation work continues alongside host validation. Stage 8 remains IN PROGRESS.

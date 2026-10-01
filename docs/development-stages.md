@@ -91,6 +91,9 @@ Current scoped blocks:
 - 8.1 Native exact sampler optimization: PASS, including 16 same-input pattern comparisons.
 - 8.2 Measurement safety/precision: Python 240/240 and 12 JSX control-flow files PASS;
   default straight RGBA16 and recorded color state. Real new-format execution pending.
+- 8.2a Optional callback attribution: source Rust 65/65 + strict Clippy PASS;
+  feature-aware identity and bounded reader tested. Sealed packages and actual
+  host execution pending; default builds do not log.
 - 8.3 Target pixel/plane/3D/AEP matrix: IN PROGRESS; legacy Adjustment capture missing.
 - 8.4 Target Render: NOT ACCEPTED; incomplete process-start series and RGB8 exact-pixel FAIL.
 - 8.5 RAM Preview cache-build/playback/invalidation: NOT RUN for this candidate.

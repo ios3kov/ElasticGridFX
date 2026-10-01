@@ -282,3 +282,25 @@ safety only). The production plugin source/package is unchanged from 41283e3.
 The Mac locked before the next GUI run. The user was asked to unlock manually;
 independent tooling/source work continues. Original is restored. Full target
 pixel matrix, RGBA16 Render series, RAM Preview and interaction gates remain open.
+
+
+## Optional callback attribution — source checkpoint
+
+All eight hosted checks at `1fcb0f3` PASS. The output-precision/process-observation
+corrections are committed separately from the native optimization.
+
+Add optional `render-diagnostics` instrumentation to existing callback branches;
+no new Adobe API, cache purge, render decision or parameter/state change. Default
+builds contain no diagnostic logging/locks. The bounded private CSV records phase
+endpoints, rational frame time, dimensions/depth/route, completion/output flags
+and process-relative starts; failed callbacks remain distinguishable. The reader
+pins Build ID/schema and rejects malformed/incomplete observations; full-cap logs
+are truncated. Missing callbacks cannot establish cache hits and observed interval
+overlap cannot prove CPU concurrency. Logging itself perturbs execution; repeat
+acceptance timing with the uninstrumented exact candidate.
+
+Feature identity is now explicit in Build Identity. A default and instrumented
+package from identical source must differ. Feature Rust 65/65, strict Clippy
+and Python 246/246 PASS. Package sealing, loaded identity, real callback capture and pixel parity
+remain pending. This source/tooling block does not accept target throughput or
+RAM Preview; the Mac is still locked and the original installed payload restored.

@@ -9,6 +9,8 @@ mod control_grid;
 mod ui_projection;
 mod plane;
 mod fit_layer;
+#[cfg(feature="render-diagnostics")]
+mod render_diagnostics;
 #[cfg(fstr_lifecycle_probe)]
 mod lifecycle_probe;
 #[cfg(test)]
@@ -23,6 +25,13 @@ compile_error!("Binding research requires lifecycle research context");
 compile_error!("Automatic binding requires binding parameters");
 mod build_identity {
     include!(concat!(env!("OUT_DIR"), "/build_identity.rs"));
+}
+
+#[cfg(feature="render-diagnostics")]
+fn diagnostic_path(state:&plane::State)->&'static str {
+    if state.corners.is_none() {"legacy_cpu"}
+    else if state.comp_space && !state.editable_corners {"plane_layer"}
+    else {"plane_region"}
 }
 
 fn set_return_msg_bytes(out_data: &mut ae::OutData, msg: &[u8]) {
@@ -1098,18 +1107,31 @@ impl AdobePluginGlobal for Plugin {
                 }
             }
             ae::Command::Render { in_layer, mut out_layer } => {
+                #[cfg(feature="render-diagnostics")]
+                let mut trace=render_diagnostics::Trace::new("render",in_data.current_time(),in_data.time_scale());
                 let grid = grid_snapshot(params)?;
                 let mut p = evaluated_params(params, in_data, &grid)?;
                 apply_spatial_context(in_data, &in_layer, &out_layer, &mut p);
                 let plane = plane::State::read(params, &in_data, false, true)?;
+                #[cfg(feature="render-diagnostics")]
+                {
+                    trace.configure(p.canvas_width,p.canvas_height,out_layer.bit_depth(),diagnostic_path(&plane));
+                    trace.mark(render_diagnostics::Phase::Parameters);trace.output_present();
+                }
                 if plane.corners.is_some() {
                     plane::render(Some(&in_layer), &mut out_layer, &p, &plane)?;
                 } else { render(&in_layer, &mut out_layer, &p)?; }
+                #[cfg(feature="render-diagnostics")]
+                {trace.mark(render_diagnostics::Phase::Sampling);trace.complete();}
             }
             ae::Command::SmartPreRender { mut extra } => {
+                #[cfg(feature="render-diagnostics")]
+                let mut trace=render_diagnostics::Trace::new("smart_pre",in_data.current_time(),in_data.time_scale());
                 let snapshot = smart_render_snapshot(params, in_data)?;
                 let output_request = extra.output_request();
                 let (cw, ch) = (snapshot.canvas_width, snapshot.canvas_height);
+                #[cfg(feature="render-diagnostics")]
+                {trace.configure(cw,ch,0,diagnostic_path(&snapshot.plane));trace.mark(render_diagnostics::Phase::Parameters);}
 
                 // Correctness-first SmartFX checkout: a guide warp can pull
                 // pixels across cell boundaries, and bicubic filtering needs
@@ -1124,6 +1146,8 @@ impl AdobePluginGlobal for Plugin {
                     0, 0, &request,
                     in_data.current_time(), in_data.time_step(), in_data.time_scale(),
                 )?;
+                #[cfg(feature="render-diagnostics")]
+                trace.mark(render_diagnostics::Phase::Input);
 
                 // Store the exact checked-out parameter state used for this
                 // SmartFX request. SmartRender must not read the ordinary
@@ -1140,18 +1164,31 @@ impl AdobePluginGlobal for Plugin {
                 let _ = input; // checkout establishes dependency even if AE returns compact storage
                 #[cfg(target_os = "macos")]
                 extra.set_gpu_render_possible(false);
+                #[cfg(feature="render-diagnostics")]
+                trace.complete();
             }
             ae::Command::SmartRender { extra } => {
+                #[cfg(feature="render-diagnostics")]
+                let mut trace=render_diagnostics::Trace::new("smart",in_data.current_time(),in_data.time_scale());
                 let snapshot = extra
                     .pre_render_data::<SmartRenderSnapshot>()
                     .ok_or(ae::Error::InternalStructDamaged)?;
+                #[cfg(feature="render-diagnostics")]
+                {trace.configure(snapshot.canvas_width,snapshot.canvas_height,0,diagnostic_path(&snapshot.plane));trace.mark(render_diagnostics::Phase::Parameters);}
                 let cb = extra.callbacks();
                 let input = cb.checkout_layer_pixels(0)?;
+                #[cfg(feature="render-diagnostics")]
+                trace.mark(render_diagnostics::Phase::Input);
                 // checkout_layer_pixels may legitimately return None for an empty
                 // adjustment-layer source. That is transparent input, not a reason
                 // to leave AE's output buffer untouched.
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(mut output) = cb.checkout_output()? {
+                        #[cfg(feature="render-diagnostics")]
+                        {
+                            trace.configure(snapshot.canvas_width,snapshot.canvas_height,output.bit_depth(),diagnostic_path(&snapshot.plane));
+                            trace.mark(render_diagnostics::Phase::Output);trace.output_present();
+                        }
                         let mut p = snapshot.render_params(in_data.as_ptr() as *mut c_void);
                         p.canvas_width = snapshot.canvas_width;
                         p.canvas_height = snapshot.canvas_height;
@@ -1166,15 +1203,21 @@ impl AdobePluginGlobal for Plugin {
                         if snapshot.plane.corners.is_some() {
                             plane::render(input.as_ref(), &mut output, &p, &snapshot.plane)?;
                         } else { render_sparse(input.as_ref(), &mut output, &p)?; }
+                        #[cfg(feature="render-diagnostics")]
+                        trace.mark(render_diagnostics::Phase::Sampling);
                     }
                     Ok(())
                 })();
                 let checkin = cb.checkin_layer_pixels(0);
+                #[cfg(feature="render-diagnostics")]
+                trace.mark(render_diagnostics::Phase::Checkin);
                 match (result, checkin) {
                     (Err(e), _) => return Err(e),
                     (Ok(_), Err(e)) => return Err(e),
                     (Ok(_), Ok(_)) => {}
                 }
+                #[cfg(feature="render-diagnostics")]
+                trace.complete();
             }
             #[cfg(target_os = "macos")]
             ae::Command::GpuDeviceSetup { mut extra } => {
