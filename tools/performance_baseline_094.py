@@ -157,7 +157,13 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
     if not 0 <= warmups <= 5 or not 5 <= samples <= 20 or timeout < 30:
         raise ValueError("invalid baseline timing settings")
 
-    evidence_root = checked_path(evidence_root, directory=True)
+    evidence_root = evidence_root.expanduser()
+    if evidence_root.exists():
+        evidence_root = checked_path(evidence_root, directory=True)
+    else:
+        parent = checked_path(evidence_root.parent, directory=True)
+        evidence_root = parent / evidence_root.name
+        evidence_root.mkdir(mode=0o700)
     package, manifest_path, manifest = candidate_files(candidate_dir)
     host = running_target()
     aerender = discover_aerender(host["app"])
@@ -233,8 +239,9 @@ def run_baseline(evidence_root: Path, candidate_dir: Path, matrix: str,
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--evidence-root", type=Path, required=True,
-                   help="Existing directory that will receive a unique test-owned run folder")
+    p.add_argument("--evidence-root", type=Path,
+                   default=Path.home()/"Desktop/FSTR-Stretch-0.9.4-Baselines",
+                   help="Evidence directory; created safely when its parent exists")
     p.add_argument("--candidate-dir", type=Path, required=True,
                    help=f"Directory containing {PACKAGE_NAME!r} and {MANIFEST_NAME!r}")
     p.add_argument("--matrix", choices=("smoke","core"), default="core")
