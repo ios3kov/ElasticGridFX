@@ -41,6 +41,29 @@ jobs:
           EG_SOAK_CYCLES: "5000"
         run: ctest --test-dir build --output-on-failure
 
+  tooling:
+    name: Tooling / project safety
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Python contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: JavaScript safety contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for test in tests/test_*.js; do
+            node "$test"
+          done
+      - name: Tests must not modify tracked files
+        run: git diff --exit-code
+
   static-analysis:
     name: Static analysis (portable C++)
     runs-on: ubuntu-latest
