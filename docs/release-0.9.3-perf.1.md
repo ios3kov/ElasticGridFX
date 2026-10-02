@@ -30,7 +30,10 @@ unmeasured. Actual guide edit/Undo and 60/60-frame Preview completion were check
 
 An ordinary control MFR render once aborted after 19/60 frames. Four bounded
 candidate/control enabled/bypass follow-ups completed; the cause remains unknown.
-No general MFR stability certification or crash fix is claimed. Track issue #21:
+Six additional ordinary MFR-requested-ON100 runs completed360/360 frames with
+exact output. Issue #21 is CLOSED as not reproduced by explicit user decision;
+original failure retained, cause unknown, no fix/general MFR certification.
+[Retry/closure record](mfr-closure-retry-2026-10-02.json).
 https://github.com/ios3kov/ElasticGridFX/issues/21
 No Windows, Intel, broad HDR/OCIO or physical GPU certification; GPU dispatch stays
 disabled. Old projects with animated Columns/Rows remain outside verified migration.

@@ -1,5 +1,25 @@
 # Current development / release status
 
+## Latest MFR disposition — 2026-10-02 — issue21 CLOSED, NOT REPRODUCED
+
+The human explicitly requested one bounded retry and closure if it did not
+recur. Three ordinary renders on the exact originally failing control and three
+on the retained candidate all completed60/60 frames (360 total), using the
+original hash-pinned AEP / AE25.6 / Full Final32-bpc / MFR-requested ON100. No
+new aerendercore crash report;300 encoded pairs exact and60 independently
+decoded frames match the retained prior reference. Actual callback concurrency
+is unmeasured; disk cache and ambient activity uncontrolled. No new speed test.
+
+Issue #21 is verified CLOSED with reason not_planned by the user's later
+decision, superseding earlier open/causal-fix closure criteria for disposition.
+The original19/60 SIGABRT remains retained, cause UNKNOWN, fix NONE; no general
+MFR certification or full Release Gate PASS. Reopen on a new exact-identity
+crash with project hash and pre-termination context. Temporary control rollback
+PASS; exact accelerated candidate retained, preserved user scene reopened.
+[Retry and closure record](mfr-closure-retry-2026-10-02.json).
+
+Earlier open-issue statements below are historical checkpoints.
+
 ## Postrelease project check — 2026-10-02 — scoped PASS
 
 One preserved user scene was checked through an owned copy on the exact retained

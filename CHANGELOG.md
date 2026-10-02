@@ -1,5 +1,14 @@
 # Changelog
 
+## MFR disposition — 2026-10-02
+
+- Complete six bounded MFR-requested-ON100 reproduction attempts on the original
+  failed scene: three exact-control and three retained-candidate runs,360/360
+  frames with exact output. No recurrence/new crash report. Close issue21 as
+  not reproduced by explicit user decision; preserve original failure/unknown
+  cause, with no native fix or general MFR certification claim.
+- Restore accelerated candidate atomically and reopen the preserved user scene.
+
 ## Postrelease validation — 2026-10-02
 
 - Verify one user-scene copy: selected-frame pixel parity after UI Undo and

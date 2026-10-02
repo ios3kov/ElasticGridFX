@@ -1,5 +1,10 @@
 # ElasticGridFX production stages
 
+Latest MFR disposition: issue21 CLOSED as NOT REPRODUCED by explicit user
+decision after six complete60-frame ordinary renders (three original control,
+three retained candidate). Cause unknown, no fix/general certification. Earlier
+open-status checkpoints below are historical. [Record](mfr-closure-retry-2026-10-02.json).
+
 Postrelease check2026-10-02: one owned user-scene copy PASS for selected-frame
 render parity, UI Undo, save/reopen and functional GUI Preview. Source preserved;
 full release/MFR gates remain open. [Record](postrelease-project-validation-2026-10-02.json).
