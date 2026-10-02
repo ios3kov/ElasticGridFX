@@ -88,11 +88,14 @@ jobs:
           if (-not (Select-String -Path dist/windows/dumpbin-headers.txt -Pattern "machine \(x64\)" -Quiet)) { throw "Not an x64 PE" }
           if (-not (Select-String -Path dist/windows/dumpbin-exports.txt -Pattern "\bEffectMain\b" -Quiet)) { throw "EffectMain export missing" }
 
-      - name: Inspect PiPL resource
+      - name: Verify PiPL resource byte-for-byte
         shell: pwsh
         run: |
           llvm-readobj --coff-resources "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/coff-resources.txt
           if (-not (Select-String -Path dist/windows/coff-resources.txt -Pattern "PiPL" -Quiet)) { throw "PiPL resource missing" }
+          $pipl = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/pipl.bin")
+          if ($pipl.Count -ne 1) { throw "Expected one release pipl.bin, found $($pipl.Count)" }
+          python tools/verify_windows_pipl.py --aex "dist/windows/FSTR Stretch.aex" --expected $pipl[0].FullName
 
       - name: Record scope
         shell: pwsh
