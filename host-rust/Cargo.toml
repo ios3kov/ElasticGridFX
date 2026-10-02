@@ -20,8 +20,11 @@ after-effects = "=0.4.0"
 serde = { version = "=1.0.229", features = ["derive"] }
 
 [build-dependencies]
-pipl = { git = "https://github.com/virtualritz/after-effects.git", rev = "83dcc93734fd5db1335b6ec83cba7a6505a39dcc", version = "0.1.1" }
+pipl = "=0.1.1"
 cc = "=1.5.1"
+
+[target.'cfg(windows)'.build-dependencies]
+pipl-fixed = { package = "pipl", git = "https://github.com/virtualritz/after-effects.git", rev = "83dcc93734fd5db1335b6ec83cba7a6505a39dcc", version = "0.1.1" }
 
 [dev-dependencies]
 bincode = { version = "=2.0.1", features = ["serde"] }
