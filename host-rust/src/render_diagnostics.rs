@@ -1,6 +1,7 @@
 //! Optional test-only callback observations; no host API or render decisions.
 use std::fs::{DirBuilder, File, OpenOptions};
 use std::io::{self, Write};
+#[cfg(unix)]
 use std::os::unix::fs::{DirBuilderExt, OpenOptionsExt};
 use std::path::Path;
 use std::sync::{Mutex, OnceLock};
@@ -24,12 +25,16 @@ impl Writer {
     }
     fn create_at(folder: &Path) -> io::Result<Self> {
         // Atomic create refuses existing directories/symlinks. Never reuse logs.
-        DirBuilder::new().mode(0o700).create(folder)?;
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .mode(0o600)
-            .open(folder.join("render.csv"))?;
+        let mut directory = DirBuilder::new();
+        #[cfg(unix)]
+        directory.mode(0o700);
+        directory.create(folder)?;
+
+        let mut options = OpenOptions::new();
+        options.write(true).create_new(true);
+        #[cfg(unix)]
+        options.mode(0o600);
+        let mut file = options.open(folder.join("render.csv"))?;
         writeln!(
             file,
             "# schema=1,build_id={}",
@@ -172,6 +177,7 @@ impl Drop for Trace {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(unix)]
     use std::os::unix::fs::PermissionsExt;
     #[test]
     fn log_directory_is_private_exclusive_and_contains_pinned_identity() {
@@ -185,14 +191,17 @@ mod tests {
         ));
         let writer = Writer::create_at(&folder).unwrap();
         let path = folder.join("render.csv");
-        assert_eq!(
-            std::fs::metadata(&folder).unwrap().permissions().mode() & 0o777,
-            0o700
-        );
-        assert_eq!(
-            std::fs::metadata(&path).unwrap().permissions().mode() & 0o777,
-            0o600
-        );
+        #[cfg(unix)]
+        {
+            assert_eq!(
+                std::fs::metadata(&folder).unwrap().permissions().mode() & 0o777,
+                0o700
+            );
+            assert_eq!(
+                std::fs::metadata(&path).unwrap().permissions().mode() & 0o777,
+                0o600
+            );
+        }
         assert!(
             std::fs::read_to_string(&path)
                 .unwrap()
