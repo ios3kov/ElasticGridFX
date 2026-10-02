@@ -32,7 +32,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
         with:
           persist-credentials: false
       - name: Preserve exact source and runner identity (NOT AE evidence)
@@ -45,7 +45,7 @@ jobs:
           { uname -a; xcodebuild -version; rustc --version; cargo --version; } > "$RUNNER_TEMP/first-application-evidence/environment.txt"
           shasum -a 256 "$RUNNER_TEMP/first-application-evidence/source.tar" > "$RUNNER_TEMP/first-application-evidence/source.sha256"
       - name: Upload source snapshot
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: First-application-source-${{ github.sha }}
           path: ${{ runner.temp }}/first-application-evidence/*
@@ -74,7 +74,7 @@ jobs:
           git diff --exit-code
       - name: Upload results (not an installable plugin or host PASS)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: First-application-results-${{ github.sha }}
           path: ${{ runner.temp }}/first-application-evidence/*

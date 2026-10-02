@@ -26,7 +26,9 @@ jobs:
     env:
       ELASTICGRID_METAL_COMPILE_ONLY: "1"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
       - name: Toolchain
         run: |
           xcodebuild -version
@@ -54,7 +56,7 @@ jobs:
           python3 tools/install_candidate.py > dist/mac/install-inspection.json
           python3 tools/ae_smoke_runner.py --run-root "$RUNNER_TEMP/egfx-smoke" > dist/mac/smoke-preparation.json
       - name: Upload plugin and reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-mac-source-gate
           if-no-files-found: error
@@ -83,7 +85,7 @@ jobs:
           } > dist/mac/source-state.txt
       - name: Upload diagnostic reports (not an installable candidate)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-mac-diagnostics-${{ github.sha }}
           if-no-files-found: error

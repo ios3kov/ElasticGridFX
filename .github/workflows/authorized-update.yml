@@ -14,7 +14,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
         with:
           persist-credentials: false
       - name: Replacement, rollback and native signature/xattr tests (NOT AE)
@@ -26,7 +26,7 @@ jobs:
           bash -n UPDATE_ELASTICGRID_MAC.command ROLLBACK_ELASTICGRID_MAC.command
           git diff --exit-code
       - name: Retrieve previously verified immutable candidate (never rebuild)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-mac-source-gate
           run-id: 36542759949
@@ -52,7 +52,7 @@ jobs:
           PY
       - name: Retain package and evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-update-fd69988-${{ github.sha }}
           if-no-files-found: error

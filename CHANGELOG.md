@@ -2,6 +2,10 @@
 
 ## Unreleased — resumed performance development
 
+- Pin all 23 GitHub Actions references to verified official commit identities;
+  disable five unused checkout-credential defaults. Keep existing action majors,
+  workflow behavior and validation gates unchanged.
+
 - Record five fresh matched target-AE total-time pairs at Full/Final/32 bpc:
   median 65.87 -> 48.77 s for 60 frames; all 360 pair/warmup RGBA16 outputs exact.
   Keep total export time separate from cold/per-frame/RAM Preview acceptance.

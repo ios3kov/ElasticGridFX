@@ -43,12 +43,15 @@ candidate remains unchanged. Diagnostic callback medians 348.734/33.595 ms
 are instrumented attribution, not final Render/RAM Preview timings.
 
 Previous tooling checkpoint c62bb7422547bfd911fb27be0375a52d55bccb7e: all eight CI
-checks PASS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
+checks PASS. Attribution checkpoint 6988fa7dfb3ba4b760fe6e9e60ac6b09a646697b:
+all seven applicable hosted checks PASS, including macOS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
 Python 248/248 run PASS. Live exact-head hosted checks are linked in
 [draft PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20). Offline code scan retains
-29 review candidates: 23 mutable Actions references, five checkout-credential
-defaults and one rate-limit heuristic on a test file (not an authentication service);
-no credential findings. This scanner does not assess release readiness.
+one review candidate after pinning all 23 Actions references and disabling five
+unused checkout-credential defaults. The remaining rate-limit heuristic points
+to a package-verification test assertion, manually confirmed as a false positive;
+no credential findings. [CI hardening evidence](ci-action-pins-2026-10-02.md).
+This scanner does not assess release readiness.
 Stage 8 remains IN PROGRESS. Existing observer spans show about 33.3 s outside
 SmartRender on both versions; this includes pre-render/logging/host/export work,
 not a directly identified bottleneck. [Attribution limits](performance-host-attribution-2026-10-02.json).

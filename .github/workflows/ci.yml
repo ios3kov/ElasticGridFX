@@ -22,7 +22,9 @@ jobs:
       matrix:
         compiler: [gcc, clang]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
       - name: Select compiler
         shell: bash
         run: |
@@ -45,7 +47,9 @@ jobs:
     name: Static analysis (portable C++)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
       - name: Shell syntax audit
         run: |
           find . -type f \( -name '*.command' -o -name '*.sh' \) -print0 | xargs -0 -n1 bash -n
@@ -60,7 +64,9 @@ jobs:
     name: ASan + UBSan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
       - name: Configure sanitizer build
         run: >
           cmake -S . -B build-san
@@ -83,7 +89,9 @@ jobs:
     name: ThreadSanitizer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
       - name: Configure TSan build
         run: >
           cmake -S . -B build-tsan
