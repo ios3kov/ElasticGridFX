@@ -221,13 +221,13 @@ fn hit_test(
     plane: &ViewPlane,
     event: &ae::EventExtra,
     mouse: ae::Point,
-) -> Result<Option<(isize, usize)>, ae::Error> {
+) -> Result<Option<(ae::sys::A_intptr_t, usize)>, ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(None);
     }
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
-    let mut best: Option<(f32, isize, usize)> = None;
+    let mut best: Option<(f32, ae::sys::A_intptr_t, usize)> = None;
 
     if let Some(corners) = plane.state.corner_controls() {
         for i in 0..4 {
