@@ -12,6 +12,7 @@ COMMON=(
   "$ROOT/src/core/CpuRenderer.cpp"
 )
 BRIDGE=( "$ROOT/src/bridge/elasticgrid_ffi.cpp" )
+PLANE=( "$ROOT/src/core/PlaneTransform.cpp" "$ROOT/src/core/PlaneWarp.cpp" "$ROOT/src/core/PlaneRenderer.cpp" )
 SAN=( -O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined )
 TSAN=( -O1 -g -fno-omit-frame-pointer -fsanitize=thread )
 
@@ -50,6 +51,14 @@ echo "[preflight 1/20] Static analysis — Clang analyzer/high warnings + cargo 
 echo "[preflight 2/20] Core tests — ASan + UBSan..."
 "$CXX" "${SAN[@]}" "${COMMON[@]}" "$ROOT/tests/test_core.cpp" -o "$BUILD/test_core_san"
 run_san "$BUILD/test_core_san"
+
+echo "[preflight] Plane axis cache pixel parity/cancellation/MFR — ASan + UBSan..."
+"$CXX" "${SAN[@]}" "${COMMON[@]}" "${PLANE[@]}" "$ROOT/tests/test_plane_axis_cache.cpp" -o "$BUILD/test_plane_axis_cache_san"
+run_san "$BUILD/test_plane_axis_cache_san"
+
+echo "[preflight] Plane independent-frame caches — ThreadSanitizer..."
+"$CXX" "${TSAN[@]}" "${COMMON[@]}" "${PLANE[@]}" "$ROOT/tests/test_plane_axis_cache.cpp" -o "$BUILD/test_plane_axis_cache_tsan"
+TSAN_OPTIONS=halt_on_error=1 "$BUILD/test_plane_axis_cache_tsan"
 
 echo "[preflight 3/20] Bridge tests — ASan + UBSan..."
 "$CXX" "${SAN[@]}" "${COMMON[@]}" "${BRIDGE[@]}" "$ROOT/tests/test_bridge.cpp" -o "$BUILD/test_bridge_san"

@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
         with:
           persist-credentials: false
       - name: Shell and read-only startup tests
@@ -33,7 +33,7 @@ jobs:
           python3 -c 'import hashlib,pathlib; p=pathlib.Path("CHECK_UPDATE_START_MAC.command"); print(hashlib.sha256(p.read_bytes()).hexdigest())' > "$RUNNER_TEMP/startup-evidence/script.sha256"
       - name: Retain exact diagnostic and logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: EGFX-startup-${{ runner.os }}-${{ github.sha }}
           if-no-files-found: error

@@ -18,6 +18,13 @@ SETTINGS = ('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS', 'CFLAGS', 'CXXFLAGS',
 GENERATED = {'.git', 'dist', 'build', '.preflight-macos', '.pytest_cache'}
 
 
+def build_settings():
+    # Cargo features change executable behavior even with identical source and
+    # release flags. Include active features, not unrelated environment values.
+    keys=set(SETTINGS) | {key for key in os.environ if re.fullmatch(r'CARGO_FEATURE_[A-Z0-9_]+',key)}
+    return {key:os.environ.get(key,'') for key in sorted(keys)}
+
+
 def encoded(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True).encode()
 
@@ -135,7 +142,8 @@ def generate(root, out, target, profile):
     record = source_record(root, snapshot)
     toolchain = dict(rustc=run([os.environ.get('RUSTC', 'rustc'), '--version']),
                      cxx=run([*shlex.split(os.environ.get('CXX', 'clang++')), '--version']).splitlines()[0])
-    meta = identity(record, target, profile, toolchain, {k: os.environ.get(k, '') for k in SETTINGS})
+    settings=build_settings()
+    meta = identity(record, target, profile, toolchain, settings)
     out.mkdir(parents=True, exist_ok=True)
     dump(out / 'BuildIdentity.json', meta)
     marker = 'ElasticGridBuildID=' + meta['build_id']
@@ -149,6 +157,7 @@ def generate(root, out, target, profile):
     # in BuildIdentity and the noninteractive diagnostic string.
     rust = ('pub const ABOUT_BYTES: &[u8] = &[' +
             ', '.join(f'0x{byte:02x}' for byte in about) + '];\n' +
+            '#[cfg(feature = "render-diagnostics")]\npub const BUILD_ID: &str = '+json.dumps(meta['build_id'])+';\n'+
             'pub const DIAGNOSTIC: &str = ' + json.dumps(diagnostic) + ';\n')
     (out / 'build_identity.rs').write_text(rust, encoding='ascii')
     for name in record['files']:
@@ -167,7 +176,7 @@ def generate(root, out, target, profile):
             path = (root / git(root, 'rev-parse', '--git-path', ref)).resolve()
             if path.exists():
                 print('cargo:rerun-if-changed=' + str(path))
-    for name in (*SETTINGS, 'ELASTICGRID_SOURCE_RECORD'):
+    for name in (*settings, 'ELASTICGRID_SOURCE_RECORD'):
         print('cargo:rerun-if-env-changed=' + name)
 
 

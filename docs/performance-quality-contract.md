@@ -31,6 +31,23 @@ Every performance-sensitive change requires a recoverable baseline, before/after
 
 ## Current state
 
+2026-10-02: direct human speed acceptance closes further measurement work for this
+development scope, including the pending exact latency and Full-control timing.
+These absent technical results are retained as NOT RUN, not PASS. Final quality
+and pixel/stability requirements remain unchanged. The ordinary control MFR
+incident remains unresolved, and public release requires its own gates.
+[Accepted decision and retained evidence](performance-user-acceptance-2026-10-02.json).
+
+Historical resume checkpoint:
+
+2026-10-01: the user resumes performance acceleration. The current source baseline
+is `2e3d066`; Stage 8 is IN PROGRESS. The fd69988 measurements below are retained
+historical evidence, predating the currently active plane renderer. Current work
+and exact verification: [performance-resume-2026-10-01.md](performance-resume-2026-10-01.md).
+No new AE or RAM Preview speed PASS is implied by standalone native benchmarks.
+
+### Historical fd69988 measurement checkpoint
+
 Pinned installed native candidate: fd69988 / EGFX-f442513cb6528f14295d6d45.
 Stage 7 target functional smoke passed; see current-status.md for exact evidence
 and scope. Stage 8 has an initial 1080p/32bpc/Final Bicubic process-start baseline.

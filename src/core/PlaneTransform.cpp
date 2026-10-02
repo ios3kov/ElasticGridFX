@@ -77,4 +77,8 @@ std::optional<PlanePoint> PlaneTransform::toSurface(PlanePoint local) const {
 std::optional<PlanePoint> PlaneTransform::toLocal(PlanePoint surface) const {
     return project(inverse_,{(surface.x-origin_.x)/scale_,(surface.y-origin_.y)/scale_});
 }
+bool PlaneTransform::axisAligned() const {
+    return forward_[1]==0 && forward_[3]==0 && forward_[6]==0 && forward_[7]==0 &&
+           inverse_[1]==0 && inverse_[3]==0 && inverse_[6]==0 && inverse_[7]==0;
+}
 } // namespace elasticgrid

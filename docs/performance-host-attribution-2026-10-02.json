@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "status": "DIAGNOSTIC_ONLY",
+  "scope": "Existing instrumented sequential plane_region sequence; endpoints include observer overhead, not ordinary timing or RAM Preview completion",
+  "samples": [
+    {
+      "version": "original_source_observer",
+      "build_id": "EGFX-70cb973b561335f81da67803",
+      "raw_record_sha256": "ec4e2b8648f1ff1d115c854e6deff34f3a9bd094fa44117f7bf34ec44afc93e6",
+      "callbacks": 60,
+      "callback_span_seconds": 54.71878075,
+      "median_sampling_ms": 348.7340415,
+      "median_input_checkout_ms": 0.0487505,
+      "median_output_checkout_ms": 0.0092285,
+      "sum_smart_render_callback_seconds": 21.423072624,
+      "outside_smart_render_callbacks_seconds": 33.295708126
+    },
+    {
+      "version": "candidate_observer",
+      "build_id": "EGFX-50e7279b47205ab9285ac7d9",
+      "raw_record_sha256": "2eae7ae62bd2b6b75a88fe90966aefd4cb3f24aec7d1504e40a2b446e8addb55",
+      "callbacks": 60,
+      "callback_span_seconds": 35.655498542,
+      "median_sampling_ms": 33.5954165,
+      "median_input_checkout_ms": 0.0424795,
+      "median_output_checkout_ms": 0.009958,
+      "sum_smart_render_callback_seconds": 2.213885039,
+      "outside_smart_render_callbacks_seconds": 33.441613503
+    }
+  ],
+  "limitations": [
+    "Outside-SmartRender time is residual wall time including SmartPreRender and observer logging; it is not direct PNG/export/AE preparation attribution.",
+    "Logging, AE host work and export can perturb the intervals.",
+    "Do not combine observer spans with separate ordinary fresh-phase totals or claim they share exact timing conditions.",
+    "No new renderer change is justified solely by this residual; profile actual remaining workloads first."
+  ]
+}

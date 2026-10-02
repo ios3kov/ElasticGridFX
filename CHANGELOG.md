@@ -1,5 +1,90 @@
 # Changelog
 
+## Unreleased — resumed performance development
+
+- Complete four stability-only MFR-requested-ON candidate/control × enabled/
+  bypass checks: all60 frames complete,120 independently decoded candidate
+  frames and120 encoded-exact control pairs. Preserve unreproduced prior crash
+  and unresolved cause; no speculative shipping patch. Recheck raw crash identity
+  and retain accelerated candidate/verified backup after temporary transactions.
+- Add a concise speed-comparison table with scope/Full-preset measurement limits.
+
+
+- Close additional speed testing by direct human acceptance; preserve missing
+  technical results and independent MFR incident. Record five candidate Full
+  Preview runs and Full/Skip0 readback; retain accelerated candidate installed
+  by explicit authorization, independently verify payload/signature/backup.
+- Consciously update rules baseline to published5.1.0 / v5.1.0 after entrypoint,
+  change and errata review; preserve historical evidence provenance.
+
+
+- Verify actual candidate guide displacement, fresh image and Undo restoration
+  in owned AE; record current Spacebar preset and preserve input/timing limits.
+  Close owned scene, restore prior Fast Preview and original signed plugin.
+  Retain60 exact decoded frames from the same-failing-AEP MFR diagnostic;
+  intermittent crash cause and ordinary five-pair ON acceptance stay open.
+  Retain one requested50%-CPU diagnostic with60 exact frames; both sampled
+  100%/50% succeed, so no causal fix or new throughput claim.
+
+- Record ten fresh-phase equal-zoom RAM Preview UI intervals and preserve all
+  outliers; separate observed cache-fill bounds from first-playable/guide gates.
+  Add guarded invalidation timestamps and reject nonnumeric phase inputs.
+- Retain incomplete ordinary MFR-ON series and matched control crash diagnostics;
+  verify240 complete-pair/19 partial/60 separate diagnostic RGBA16 frames exact.
+  Keep ordinary MFR throughput and crash root cause unresolved.
+
+- Pin all 23 GitHub Actions references to verified official commit identities;
+  disable five unused checkout-credential defaults. Keep existing action majors,
+  workflow behavior and validation gates unchanged.
+
+- Record five fresh matched target-AE total-time pairs at Full/Final/32 bpc:
+  median 65.87 -> 48.77 s for 60 frames; all 360 pair/warmup RGBA16 outputs exact.
+  Keep total export time separate from cold/per-frame/RAM Preview acceptance.
+- Add guarded two-turn RGBA16 queue-chain, fresh-phase and ordinary GUI preview
+  fixtures. Verify ten chain frames exact, full-cache 30-fps playback, wave
+  invalidation and Escape cancellation in actual AE; retain blocked guide-drag
+  and incomplete quantitative RAM Preview timing explicitly.
+
+- Prepare performance fixtures in separate guarded creation/finalization host
+  turns and require actual automatic plane-binding readiness before saving.
+  Refuse foreign/changed scenes and retain blocked preparation evidence.
+- Verify actual 40-frame GUI plane/3D/AEP matrix and 60-frame plane-region RGBA16
+  equality against original native source built with the same toolchain;
+  retain older-artifact strict failures and separate diagnostic phase timings.
+
+
+- Cache exact per-axis plane mapping/taps and horizontal sampling rows for
+  eligible axis-aligned planes; retain general projective sampling elsewhere.
+  Keep Final Bicubic, per-channel arithmetic order and saved/FFI compatibility.
+- Add a plane-specific benchmark and byte-exact optimized/reference checks for
+  all depths, sparse/expanded worlds, cancellation and independent frames.
+- Preserve historical NaN payload selection on x86 by recomputing exceptional
+  float channels with the original scalar sampling loop; retain finite HDR caches.
+- Run new cache tests in sanitizer/TSan gates and trigger Rust host regression
+  for all relevant native/host source changes. AE/RAM Preview speed acceptance
+  remains separate from standalone renderer measurements.
+- Require verified straight RGBA16 and explicit color context for new host
+  performance fixtures; retain schema-1 historical fixtures. Verify actual PNG
+  encoded depth/channels and preserve rejected render-process identity evidence.
+  Do not accept incomplete/dithered RGB8 observations as target speed proof.
+- Add optional, bounded render callback observations for phase attribution and
+  fresh-render verification. Default builds do not log or add observer locks.
+  Pin active Cargo features into Build Identity so diagnostic artifacts cannot
+  share an identity with normal builds. Actual headless AE identity/legacy callback
+  observations pass; they do not measure the optimized plane route.
+- Separate ordinary and diagnostic AE effect Develop builds (2/3) from the
+  accepted build 1 cache identity, without purging caches or changing saved data.
+  Verify existing PiPL/GlobalSetup version propagation and fresh host callbacks.
+- Declare Four Corners or footage Layer Plane performance workloads explicitly;
+  record read-back geometry in schema 3 and reject wrong callback routes,
+  dimensions/depth or incomplete frame coverage. Keep historical fixtures intact.
+- Retain the strict RGBA16 failure against the accepted older-toolchain artifact.
+  Same-current-toolchain accepted native source matches the candidate's 60 PNGs;
+  this isolates a build difference on the legacy workload, without accepting
+  plane output, target performance or RAM Preview.
+- Adopt the user-selected central AE-Development-Rules baseline and resume
+  Stage 8 without rewriting prior acceptance evidence.
+
 ## 0.9.1
 
 - Refresh plane controls automatically when the owning layer switches to 3D.

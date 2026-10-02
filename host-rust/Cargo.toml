@@ -12,6 +12,8 @@ crate-type = ["cdylib"]
 [features]
 default = ["native-plane"]
 native-plane = []
+# Test-only callback observation; never enabled by default.
+render-diagnostics = []
 
 [dependencies]
 after-effects = "=0.4.0"

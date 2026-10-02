@@ -5,6 +5,7 @@
 #include <limits>
 #include <stdexcept>
 #include <type_traits>
+#include <vector>
 
 namespace elasticgrid {
 namespace {
@@ -29,6 +30,15 @@ float weight(float x) {
     return 0;
 }
 struct Taps { int index[4]; float w[4]; int count; };
+struct AxisSample {
+    PlaneMapStatus status;
+    double source;
+    Taps taps;
+};
+struct HorizontalRow {
+    int source_y = -1;
+    std::vector<float> pixels;
+};
 int resolve(std::int64_t index,int extent,EdgeMode edge) {
     if(extent==1) return 0;
     if(edge==EdgeMode::Clamp) return static_cast<int>(std::clamp(index,std::int64_t(0),std::int64_t(extent-1)));
@@ -98,10 +108,69 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
         return src.data+static_cast<std::ptrdiff_t>(sy)*source_stride+
                static_cast<std::ptrdiff_t>(sx)*4;
     };
+    // Cache only structurally separable transforms. Use the original sourceFor
+    // and tap functions, preserving their precision and arithmetic order.
+    // Non-unit raster scales retain the general path: its joint identity check
+    // deliberately avoids a multiply/divide roundtrip on neutral pixels.
+    if(abort && abort(refcon)) throw RenderCancelled{};
+    auto anchor=warp && region.cache_axis_mapping &&
+        region.surface_units_x==1 && region.surface_units_y==1
+        ? warp->separableAnchor() : std::nullopt;
+    std::vector<AxisSample> x_samples,y_samples;
+    if(anchor) {
+        x_samples.reserve(static_cast<std::size_t>(dst.width));
+        y_samples.reserve(static_cast<std::size_t>(dst.height));
+        for(int x=0;x<dst.width;++x) {
+            const auto qx=static_cast<std::int64_t>(x)+region.output_x;
+            auto mapped=warp->sourceFor({static_cast<double>(qx),anchor->y});
+            const double coordinate=mapped.source?mapped.source->x:static_cast<double>(qx);
+            x_samples.push_back({mapped.status,coordinate,
+                taps(coordinate,region.canvas_width,region.edge,region.quality)});
+        }
+        for(int y=0;y<dst.height;++y) {
+            const auto qy=static_cast<std::int64_t>(y)+region.output_y;
+            auto mapped=warp->sourceFor({anchor->x,static_cast<double>(qy)});
+            const double coordinate=mapped.source?mapped.source->y:static_cast<double>(qy);
+            y_samples.push_back({mapped.status,coordinate,
+                taps(coordinate,region.canvas_height,region.edge,region.quality)});
+        }
+        // Extremely scaled geometry may fail at an intermediate projection.
+        // Retain the original combined validity/outside precedence in that case.
+        const auto invalid=[](const AxisSample& sample) {
+            return sample.status==PlaneMapStatus::InvalidProjection;
+        };
+        if(std::any_of(x_samples.begin(),x_samples.end(),invalid) ||
+           std::any_of(y_samples.begin(),y_samples.end(),invalid)) anchor.reset();
+    }
+    std::array<HorizontalRow,4> row_cache;
+    auto horizontalRow=[&](int source_y,const Taps& required) -> const float* {
+        for(auto& row:row_cache) if(row.source_y==source_y) return row.pixels.data();
+        auto available=std::find_if(row_cache.begin(),row_cache.end(),[&](const HorizontalRow& row) {
+            return std::find(required.index,required.index+required.count,row.source_y)==required.index+required.count;
+        });
+        // At most four distinct source rows are required; a cache miss must have
+        // a victim outside this set. Do not invalidate any previously returned row.
+        if(available==row_cache.end()) throw std::logic_error("plane row cache invariant");
+        auto& row=*available;
+        row.pixels.resize(static_cast<std::size_t>(dst.width)*4);
+        for(int x=0;x<dst.width;++x) {
+            const auto& xs=x_samples[static_cast<std::size_t>(x)].taps;
+            float* pixel=row.pixels.data()+static_cast<std::ptrdiff_t>(x)*4;
+            pixel[0]=pixel[1]=pixel[2]=pixel[3]=0;
+            for(int i=0;i<xs.count;++i) {
+                const T* sample=sourcePixel(xs.index[i],source_y);
+                for(int c=0;c<4;++c) pixel[c]+=sample[c]*xs.w[i];
+            }
+        }
+        row.source_y=source_y;
+        return row.pixels.data();
+    };
     PlaneRenderReport report;report.invalid_plane=!warp;
     for(int y=0;y<dst.height;++y) {
-        if(abort && abort(refcon)) throw RenderCancelled{};
+        if(y>0 && abort && abort(refcon)) throw RenderCancelled{};
         auto out=dst.data+static_cast<std::ptrdiff_t>(y)*output_stride;
+        const float* cached_rows[4]{};
+        bool rows_ready=false;
         for(int x=0;x<dst.width;++x) {
             const auto qx=static_cast<std::int64_t>(x)+region.output_x;
             const auto qy=static_cast<std::int64_t>(y)+region.output_y;
@@ -113,7 +182,15 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                 continue;
             }
             PlanePoint q{static_cast<double>(qx),static_cast<double>(qy)},p=q;
-            if(warp) {
+            if(anchor) {
+                const auto& xs=x_samples[static_cast<std::size_t>(x)];
+                const auto& ys=y_samples[static_cast<std::size_t>(y)];
+                if(xs.status==PlaneMapStatus::OutsidePlane || ys.status==PlaneMapStatus::OutsidePlane)
+                    ++report.outside_pixels;
+                else if(xs.status==PlaneMapStatus::InvalidProjection || ys.status==PlaneMapStatus::InvalidProjection)
+                    ++report.invalid_projection_pixels;
+                else p={xs.source,ys.source};
+            } else if(warp) {
                 PlanePoint surface{q.x*region.surface_units_x,q.y*region.surface_units_y};
                 auto mapped=warp->sourceFor(surface);
                 if(mapped.status==PlaneMapStatus::Mapped) {
@@ -144,16 +221,43 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                 std::memcpy(pixel,sourcePixel(static_cast<int>(qx),static_cast<int>(qy)),4*sizeof(T));
                 continue;
             }
-            auto xs=taps(p.x,region.canvas_width,region.edge,region.quality);
-            auto ys=taps(p.y,region.canvas_height,region.edge,region.quality);
-            for(int c=0;c<4;++c) {
-                float value=0;
-                for(int j=0;j<ys.count;++j) {
-                    float horizontal=0;
-                    for(int i=0;i<xs.count;++i) horizontal+=sourcePixel(xs.index[i],ys.index[j])[c]*xs.w[i];
-                    value+=horizontal*ys.w[j];
+            const auto xs=anchor?x_samples[static_cast<std::size_t>(x)].taps:
+                taps(p.x,region.canvas_width,region.edge,region.quality);
+            const auto ys=anchor?y_samples[static_cast<std::size_t>(y)].taps:
+                taps(p.y,region.canvas_height,region.edge,region.quality);
+            const T* samples[4][4]{};
+            if(anchor) {
+                if(!rows_ready) {
+                    for(int j=0;j<ys.count;++j) cached_rows[j]=horizontalRow(ys.index[j],ys);
+                    rows_ready=true;
                 }
+            } else for(int j=0;j<ys.count;++j) for(int i=0;i<xs.count;++i)
+                samples[j][i]=sourcePixel(xs.index[i],ys.index[j]);
+            // Interleave independent channels so the compiler can vectorize
+            // RGBA without reassociating any one channel's sums or tap order.
+            float values[4]{};
+            for(int j=0;j<ys.count;++j) {
+                float horizontal[4]{};
+                if(anchor) std::memcpy(horizontal,cached_rows[j]+static_cast<std::ptrdiff_t>(x)*4,sizeof(horizontal));
+                else for(int i=0;i<xs.count;++i) for(int c=0;c<4;++c)
+                    horizontal[c]+=samples[j][i][c]*xs.w[i];
+                for(int c=0;c<4;++c) values[c]+=horizontal[c]*ys.w[j];
+            }
+            for(int c=0;c<4;++c) {
+                float value=values[c];
                 if constexpr(std::is_floating_point_v<T>) {
+                    // A SIMD sum can select a different NaN payload than the
+                    // historical scalar sum on x86. Recompute only NaN channels
+                    // with the original sampling loop; finite HDR stays cached.
+                    if(std::isnan(value)) {
+                        value=0;
+                        for(int j=0;j<ys.count;++j) {
+                            float horizontal=0;
+                            for(int i=0;i<xs.count;++i)
+                                horizontal+=sourcePixel(xs.index[i],ys.index[j])[c]*xs.w[i];
+                            value+=horizontal*ys.w[j];
+                        }
+                    }
                     pixel[c]=value; // float alpha/HDR/negative values remain unclamped
                 } else {
                     constexpr float maximum=std::is_same_v<T,std::uint16_t>?32768.f:255.f;

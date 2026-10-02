@@ -188,7 +188,9 @@ fn main() {
             subversion: 9,
             bugversion: 3,
             stage: Stage::Develop,
-            build: 1,
+            // Isolate fresh performance/observer frames from accepted build 1
+            // and from each other through AE's documented effect-version key.
+            build: if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 3 } else { 2 },
         },
         Property::AE_Effect_Info_Flags(0),
         Property::AE_Effect_Global_OutFlags(

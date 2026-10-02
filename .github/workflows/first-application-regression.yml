@@ -3,12 +3,21 @@ name: First application regression
 on:
   workflow_dispatch:
   push:
-    branches: [fix/first-application-516, fix/grid-density-preserve-animation, fix/fit-layer-coordinates]
+    branches: [main, fix/first-application-516, fix/grid-density-preserve-animation, fix/fit-layer-coordinates, perf/plane-render-throughput]
+    paths:
+      - host-rust/**
+      - src/**
+      - tests/**
+      - tools/**
+      - CMakeLists.txt
+      - .github/workflows/first-application-regression.yml
   pull_request:
     paths:
-      - host-rust/src/binding_probe.rs
-      - host-rust/src/first_application_tests.rs
-      - tests/test_first_application*.py
+      - host-rust/**
+      - src/**
+      - tests/**
+      - tools/**
+      - CMakeLists.txt
       - .github/workflows/first-application-regression.yml
 
 permissions:
@@ -23,7 +32,7 @@ jobs:
     runs-on: macos-14
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
         with:
           persist-credentials: false
       - name: Preserve exact source and runner identity (NOT AE evidence)
@@ -36,7 +45,7 @@ jobs:
           { uname -a; xcodebuild -version; rustc --version; cargo --version; } > "$RUNNER_TEMP/first-application-evidence/environment.txt"
           shasum -a 256 "$RUNNER_TEMP/first-application-evidence/source.tar" > "$RUNNER_TEMP/first-application-evidence/source.sha256"
       - name: Upload source snapshot
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: First-application-source-${{ github.sha }}
           path: ${{ runner.temp }}/first-application-evidence/*
@@ -47,6 +56,8 @@ jobs:
           set -euo pipefail
           cargo test --locked --manifest-path host-rust/Cargo.toml 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/rust-tests.log"
           cargo clippy --locked --manifest-path host-rust/Cargo.toml --all-targets -- -D warnings -A clippy::drop_non_drop -A clippy::question_mark 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/clippy.log"
+          cargo test --locked --manifest-path host-rust/Cargo.toml --features render-diagnostics 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/diagnostic-tests.log"
+          cargo clippy --locked --manifest-path host-rust/Cargo.toml --all-targets --features render-diagnostics -- -D warnings -A clippy::drop_non_drop -A clippy::question_mark 2>&1 | tee "$RUNNER_TEMP/first-application-evidence/diagnostic-clippy.log"
       - name: Portable core regression
         shell: bash
         run: |
@@ -63,7 +74,7 @@ jobs:
           git diff --exit-code
       - name: Upload results (not an installable plugin or host PASS)
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: First-application-results-${{ github.sha }}
           path: ${{ runner.temp }}/first-application-evidence/*

@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "status": "FUNCTIONAL_LIFECYCLE_PASS_TIMING_INCOMPLETE",
+  "environment": {
+    "ae": "25.6x101",
+    "macos": "26.6.2",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": 17179869184
+  },
+  "scope": "Actual Cua keyboard/menu UI observations plus separately guarded SDK setup; SDK readback is not a preview-completion oracle",
+  "settings": {
+    "composition": [
+      1920,
+      1080
+    ],
+    "fps": 30,
+    "frames": 60,
+    "project_bit_depth": 32,
+    "render_quality": "Final",
+    "resolution": "Full",
+    "fast_preview": "FP_OFF",
+    "shortcut": "Spacebar",
+    "cache_before_playback": false,
+    "range_observed": "Work Area Extended By Current Time",
+    "start_time_seconds": 0,
+    "wave_speed": 0.5
+  },
+  "sessions": [
+    {
+      "status": "CLOSED",
+      "version": "candidate",
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+        "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+        "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+      "previous_fast": "FP_ADAPTIVE_RESOLUTION",
+      "identity_status": "PASS",
+      "uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+      "jsx_sha256": "99bac751292b0d636c7de6da59382c895a87bf560c7bb16e0fb412fd58ff247b",
+      "raw_record_sha256": "d1fbc7b06f4986a4f3d063f23c9427a357eaaa6e5ddfde333dc71837c5e25fb8",
+      "latest": {
+        "action": "cleanup",
+        "binding_ready": true,
+        "bit_depth": 32,
+        "columns": 8,
+        "duration": 2,
+        "fps": 30,
+        "full_final": true,
+        "height": 1080,
+        "memory_in_use": 1998089959,
+        "phase": 142.740005493164,
+        "previous_fast": "FP_OFF",
+        "rows": 8,
+        "run_id": "27fa339793dd48aa8c18463e7fe2e740",
+        "scope": "setup/readback only; UI proves preview completion",
+        "wave_speed": 0.5,
+        "width": 1920,
+        "work_area_duration": 2,
+        "work_area_start": 0
+      }
+    },
+    {
+      "status": "CLOSED",
+      "version": "baseline",
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-a733d95d2018fb8bc321b6d8",
+        "commit": "98e383997147c612b8010b406ec379e162975928",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+        "source_sha256": "9a238afcd99336a74d94e51c6819d75ad3a8cd69f094551ded82c60c4f5d2a26",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+      "previous_fast": "FP_ADAPTIVE_RESOLUTION",
+      "identity_status": "PASS",
+      "uuid": "22704D84-3AB5-3C47-90AB-EABF9DAA05B1",
+      "jsx_sha256": "99bac751292b0d636c7de6da59382c895a87bf560c7bb16e0fb412fd58ff247b",
+      "raw_record_sha256": "943ac02c98fafbadc48ba0a8cc7693ddd8f8dd58377bd0eba1c98a9bfdd084ce",
+      "latest": {
+        "action": "cleanup",
+        "binding_ready": true,
+        "bit_depth": 32,
+        "columns": 8,
+        "duration": 2,
+        "fps": 30,
+        "full_final": true,
+        "height": 1080,
+        "memory_in_use": 2667936876,
+        "phase": 142.740005493164,
+        "previous_fast": "FP_OFF",
+        "rows": 8,
+        "run_id": "b26caf4675c14db2bfe21829dbd69a32",
+        "scope": "setup/readback only; UI proves preview completion",
+        "wave_speed": 0.5,
+        "width": 1920,
+        "work_area_duration": 2,
+        "work_area_start": 0
+      }
+    },
+    {
+      "status": "CLOSED",
+      "version": "candidate",
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+        "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+        "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+      "previous_fast": "FP_ADAPTIVE_RESOLUTION",
+      "identity_status": "PASS",
+      "uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+      "jsx_sha256": "99bac751292b0d636c7de6da59382c895a87bf560c7bb16e0fb412fd58ff247b",
+      "raw_record_sha256": "d8ff7ea9c2b3bda73485ba6cbb5850cb4acd093659d939cf029fdb809c98f84f",
+      "latest": {
+        "action": "cleanup",
+        "binding_ready": true,
+        "bit_depth": 32,
+        "columns": 8,
+        "duration": 2,
+        "fps": 30,
+        "full_final": true,
+        "height": 1080,
+        "memory_in_use": 4216742451,
+        "phase": 154.110000610352,
+        "previous_fast": "FP_OFF",
+        "rows": 8,
+        "run_id": "3018ab75b8684adda1a009f47ce8169b",
+        "scope": "setup/readback only; UI proves preview completion",
+        "wave_speed": 0.5,
+        "width": 1920,
+        "work_area_duration": 2,
+        "work_area_start": 0
+      }
+    }
+  ],
+  "observations": [
+    {
+      "version": "candidate",
+      "event": "fresh phase 131.37 start",
+      "utc": "2026-10-02T09:57:58.823Z",
+      "observation": "Partial green RAM stripe and playing frame 1; Full/32 bpc"
+    },
+    {
+      "version": "candidate",
+      "event": "complete playback",
+      "utc": "2026-10-02T09:58:14.331Z",
+      "observation": "Info: Playing 60 of 60, fps 30 (realtime), full green range, viewer time 01:02"
+    },
+    {
+      "version": "candidate",
+      "event": "stop",
+      "utc": "2026-10-02T09:58:20.223Z",
+      "observation": "Playing text disappears, overlays return, time 00:21"
+    },
+    {
+      "version": "candidate",
+      "event": "cached restart",
+      "utc": "2026-10-02T09:58:25.642Z",
+      "observation": "Playing 60 of 60, moving time/playhead without rebuilding range"
+    },
+    {
+      "version": "candidate",
+      "event": "fresh phase 142.74 rebuild",
+      "utc": "2026-10-02T09:58:44.979Z",
+      "observation": "Playing 3 of 60, Concurrent frames rendering: 3, partial green range"
+    },
+    {
+      "version": "baseline",
+      "event": "fresh phase 131.37 start",
+      "utc": "2026-10-02T10:01:06.067Z",
+      "observation": "Only initial green frame; first capture before Playing text appeared"
+    },
+    {
+      "version": "baseline",
+      "event": "partial-range stop",
+      "utc": "2026-10-02T10:01:13.212Z",
+      "observation": "Overlays return at frame 29; partial green range"
+    },
+    {
+      "version": "baseline",
+      "event": "resume",
+      "utc": "2026-10-02T10:01:20.707Z",
+      "observation": "Guide overlays disappear; range still partial"
+    },
+    {
+      "version": "baseline",
+      "event": "complete playback",
+      "utc": "2026-10-02T10:01:33.514Z",
+      "observation": "Info: Playing 60 of 60, fps 30 (realtime), full green range"
+    },
+    {
+      "version": "baseline",
+      "event": "fresh phase 142.74 start/cancel",
+      "utc": "2026-10-02T10:01:59.135Z",
+      "cancel_utc": "2026-10-02T10:01:59.671Z",
+      "observation": "Escape returns overlays while range is still initial-frame-only; host remains responsive"
+    },
+    {
+      "version": "candidate",
+      "event": "fresh phase 154.11 start/cancel",
+      "utc": "2026-10-02T10:03:54.486Z",
+      "cancel_utc": "2026-10-02T10:03:55.260Z",
+      "observation": "Before Escape: Playing 8 of 60, Concurrent frames rendering: 2; after Escape Playing text disappears, overlays return, range remains partial (in-flight frames may complete)"
+    }
+  ],
+  "limitations": [
+    "No five matched quantitative RAM Preview samples or precise first-playable timing; screenshot observations include UI/tool overhead.",
+    "Candidate first session viewer zoom 100%, control and cancellation session zoom 50%; both Full render resolution. These are functional observations, not an equal-condition timing comparison.",
+    "Default Skip/frame-rate lower controls and global idle-cache preference were not fully read back; no preference or user cache purge.",
+    "MFR concurrency visible in Info for candidate GUI; aerender series separately requested MFR OFF.",
+    "Cua native custom-canvas click/drag returns AXError.notImplemented; actual guide-drag-to-fresh-frame latency remains BLOCKED. No OS event-injection fallback.",
+    "UI screenshots are in the tool transcript; this JSON is a human inspection record, not an automated image classifier."
+  ],
+  "remaining": {
+    "ram_preview_timing": "INCOMPLETE",
+    "first_playable_frame_timing": "INCOMPLETE",
+    "guide_drag_latency": "BLOCKED: custom-canvas input unavailable",
+    "4k_target_ae_timing": "NOT RUN"
+  },
+  "restore": [
+    {
+      "receipt_id": "EGFX-update-8a31bd67e0dd4221a695e5b483472cab",
+      "state": "ROLLED_BACK",
+      "record_sha256": "5337bc175fcef43d71cf1093aa9fb39a92bb07fe0d78d78bbd78b85e3857c02b"
+    },
+    {
+      "receipt_id": "EGFX-update-20e47d69eb354e3f95024495cf429c05",
+      "state": "ROLLED_BACK",
+      "record_sha256": "fa7d96121a4c28a2384cf64ac0d25c9f4c75d1f69ba67db4a425e8ebf5963d6c"
+    },
+    {
+      "receipt_id": "EGFX-update-9b678486546d4f1987371ad2d580da0f",
+      "state": "ROLLED_BACK",
+      "record_sha256": "1145de6715a1c3849358f5746af89548a72db2c43f00c31ee55d0da2651ca4c4"
+    }
+  ]
+}

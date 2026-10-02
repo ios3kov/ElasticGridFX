@@ -1,8 +1,73 @@
 # Performance targets and current baseline
 
+Сравнение на AE25.6 / M1 Pro, 1080p /32-bpc / Final:
+
+| Проверка | До | После | Что подтверждено |
+|---|---:|---:|---|
+| Полный экспорт60 PNG кадров, MFR requested OFF |65,87с|48,77с|На25,97% меньше времени; все360 кадров пар/прогрева точные|
+| Заполнение RAM Preview, первая серия UI-наблюдений |(11,546;12,924]с|(1,753;6,007]с|Границы медианы по снимкам;4 пары быстрее,1 неопределённая|
+
+Экспорт включает запуск AE и запись PNG. У первой серии Preview настройка
+Resolution отдельно не подтверждена, поэтому это не сертифицированное сравнение
+при Full и не точная задержка первого кадра. Позднее Full/Skip0 подтверждены,
+пять запусков ускоренной сборки завершены; новую контрольную серию пользователь
+остановил, приняв скорость. Все выбросы и ограничения сохранены ниже.
+
 Targets are engineering acceptance criteria, not marketing claims.
 
-## Current CPU development baseline
+## Current acceptance — 2026-10-02
+
+The human directly accepted speed tests and stopped additional timing series.
+Development speed requirement: USER_ACCEPTED; exact unmeasured latency and the
+unrun new Full control comparison remain NOT RUN. Full/Skip0 preset is now
+observed on both installed variants; five candidate Full runs reach60/60 at30fps.
+The accelerated candidate is retained installed by explicit authorization, with
+original backup verified. MFR crash/stability and public release gates remain
+independent; no quality relaxation or universal speed claim.
+[Decision and Full evidence](performance-user-acceptance-2026-10-02.json).
+
+## Prior target-path measurement checkpoint — 2026-10-01
+
+Source 41283e3 accelerates the currently integrated native plane sampler. On the
+physical M1 Pro / 16 GiB target, five alternating native Final comparisons give
+32.0415 ms at 1080p/32 bpc and 127.145 ms at 4K/32 bpc for eligible deformed
+planes. The general sparse-perspective case is 180.010 ms at 1080p. These are
+full native C-bridge medians; they exclude AE checkout, conversion, export and
+RAM Preview. Exact settings, samples and pixel parity are in
+[the corrected comparison](performance-plane-corrected-comparison-2026-10-01.json).
+They do not establish real-time host performance or the Metal targets below.
+
+Actual target AE 25.6 / M1 Pro / 16 GiB: five matched fresh-phase ordinary
+MFR-requested-OFF 1080p/32-bpc/Full/Final 60-frame aerender pairs give median total time
+65.870721 -> 48.766815 s (25.97% reduction). Startup/PNG export/polling included;
+no cold-cache or per-frame claim. All 360 pair/warmup outputs exact.
+[Raw scoped comparison](performance-host-render-2026-10-02.json).
+GUI RAM Preview plays all 60 frames at 30 fps on both versions, with cache
+invalidation and cancellation verified. Cache-build/first-playable latency is
+not accepted as observer-free latency from screenshot bounds. Ten same-zoom
+fresh-phase UI runs now bracket median full-cache readiness at
+(11.546,12.924] -> (1.753,6.007]s; four pairs improve, one overlaps. All outliers
+and capture/order/cache limits remain in [interval evidence](performance-host-preview-intervals-2026-10-02.json).
+Ordinary MFR-requested-ON throughput remains INCOMPLETE after a control host
+crash; complete and separate diagnostic pixel scopes remain exact.
+A further one-variable diagnostic requests50% CPU with the same failing AEP,
+ordinary control and external sample points: all60 decoded frames exact.
+Both sampled100% and50% complete; neither localizes the intermittent cause or
+accepts a lower-budget fix. Original plugin restored after this transaction.
+[MFR scopes](performance-host-mfr-2026-10-02.json).
+Actual candidate guide edit and Undo PASS in native AE using explicitly authorized
+bounded input. Later current Spacebar readback shows Skip0 / Resolution Auto;
+Full preview override was open at this checkpoint; later Full readback passes.
+Missing exact latency is retained and further timing closed by human acceptance.
+[Gesture and preset scope](performance-host-guide-2026-10-02.json).
+Host-specific absolute targets are unverified; current speed scope is user accepted;
+the native medians do not establish them.
+
+The older CPU path numbers below are historical and do not describe the active
+plane sampler. AE GPU dispatch remains disabled; physical Metal backend tests
+are separate supporting evidence.
+
+## Historical CPU development baseline
 
 Linux/x86-64 development container, 3840×2160, full C bridge including grid/wave evaluation,
 LUT/sampling-plan preparation and pixel render. Repeated-run approximate values:

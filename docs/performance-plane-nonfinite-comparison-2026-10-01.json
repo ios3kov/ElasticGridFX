@@ -1,0 +1,326 @@
+{
+  "scope": "native exceptional-float byte parity, x86 via Rosetta; NOT AE",
+  "baseline_commit": "2e3d066729eab4a6a6e23e5a45e8d20f60606f1a",
+  "cases": [
+    {
+      "architecture": "arm64",
+      "mode": "region",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "6c7167af9a102b4d3a64ff96fd48da06147f3a67c96e2a88b7921244eff6ca71",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "6c7167af9a102b4d3a64ff96fd48da06147f3a67c96e2a88b7921244eff6ca71",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "region",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "3a279c643448be44d31167add9e1a308ffb81e38087ee45bcb27b5917b7261ba",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "3a279c643448be44d31167add9e1a308ffb81e38087ee45bcb27b5917b7261ba",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "layer",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "6c7167af9a102b4d3a64ff96fd48da06147f3a67c96e2a88b7921244eff6ca71",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "6c7167af9a102b4d3a64ff96fd48da06147f3a67c96e2a88b7921244eff6ca71",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "layer",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "3a279c643448be44d31167add9e1a308ffb81e38087ee45bcb27b5917b7261ba",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "3a279c643448be44d31167add9e1a308ffb81e38087ee45bcb27b5917b7261ba",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "perspective",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "a71a9444f7cb279324ca6b522de974c032075c8884a51637daa72f7890406620",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "a71a9444f7cb279324ca6b522de974c032075c8884a51637daa72f7890406620",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "perspective",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "f069347c1646f069162869b1bebe29ab3dd639c68c2d0158fc8308c243ff6f6d",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "f069347c1646f069162869b1bebe29ab3dd639c68c2d0158fc8308c243ff6f6d",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "identity",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "e140cb64c38d6fadc16a10ccbfdb16a14a6b06449f19d3b728eb928ef7151baf",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "e140cb64c38d6fadc16a10ccbfdb16a14a6b06449f19d3b728eb928ef7151baf",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "arm64",
+      "mode": "identity",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "c5e0fd3d259e8a994a144e9738c07f56a4a3ff02bd31f54f7611581393dc624b",
+          "binary_sha256": "a7da81631e27df5bfd2b8ad872a5215af526586bb446a0af990722cef782a7f1",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "c5e0fd3d259e8a994a144e9738c07f56a4a3ff02bd31f54f7611581393dc624b",
+          "binary_sha256": "385fb42431cfd014c9bc6804d9ac233ad587098f292ed8202fe2ab8c5b6d35d0",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "region",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "f39eefc8ade9917da0cb6d08d2923784dd5eb9edd2d09d91dcc0abefc974ae90",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "f39eefc8ade9917da0cb6d08d2923784dd5eb9edd2d09d91dcc0abefc974ae90",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "region",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "74746d6c88105afb3cdd4cdfad09b8a9cd61c5eac58d48a704c1a6c4805c0491",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "74746d6c88105afb3cdd4cdfad09b8a9cd61c5eac58d48a704c1a6c4805c0491",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "layer",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "f39eefc8ade9917da0cb6d08d2923784dd5eb9edd2d09d91dcc0abefc974ae90",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "f39eefc8ade9917da0cb6d08d2923784dd5eb9edd2d09d91dcc0abefc974ae90",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "layer",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "74746d6c88105afb3cdd4cdfad09b8a9cd61c5eac58d48a704c1a6c4805c0491",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "74746d6c88105afb3cdd4cdfad09b8a9cd61c5eac58d48a704c1a6c4805c0491",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "perspective",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "a148ed746b7436b499bc029c9d15365121872f4219ac546f7e9db505063f7808",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "a148ed746b7436b499bc029c9d15365121872f4219ac546f7e9db505063f7808",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "perspective",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "7cc1321f2be84737eda767059294f35ea9c1057195c7b26eaa10b0f50665b324",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "7cc1321f2be84737eda767059294f35ea9c1057195c7b26eaa10b0f50665b324",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 427,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "identity",
+      "storage": "dense",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "e140cb64c38d6fadc16a10ccbfdb16a14a6b06449f19d3b728eb928ef7151baf",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "e140cb64c38d6fadc16a10ccbfdb16a14a6b06449f19d3b728eb928ef7151baf",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    },
+    {
+      "architecture": "x86_64",
+      "mode": "identity",
+      "storage": "sparse",
+      "byte_equal": true,
+      "records": {
+        "baseline": {
+          "pixels_sha256": "c5e0fd3d259e8a994a144e9738c07f56a4a3ff02bd31f54f7611581393dc624b",
+          "binary_sha256": "a5b2a3249ea38a44e1d99d15a9105f0684bdb1f323314639508d5c61b6041759",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        },
+        "candidate": {
+          "pixels_sha256": "c5e0fd3d259e8a994a144e9738c07f56a4a3ff02bd31f54f7611581393dc624b",
+          "binary_sha256": "132f14ddad205533946e41f19107998df2450035536300f7d838095946d6a2ab",
+          "outside_pixels": 0,
+          "invalid_projection_pixels": 0
+        }
+      }
+    }
+  ]
+}

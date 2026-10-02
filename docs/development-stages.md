@@ -79,7 +79,61 @@ runner 7371408, immutable plugin fd69988, same AE PID 42039, identity and
 ten-frame pixel smoke PASS. See current-status.md for hashes and scope.
 Earlier blocked reports remain historical and are not rewritten as PASS.
 
-## Stage 8 of 10 — Render / RAM Preview profiling and optimization — SKIPPED BY USER
+## Stage 8 of 10 — speed scope USER_ACCEPTED; reliability followup OPEN
+
+2026-10-01: user explicitly resumed acceleration without quality loss.
+Current work/evidence: [performance-resume-2026-10-01.md](performance-resume-2026-10-01.md).
+Native bounded optimization and eight CI source gates PASS at 41283e3.
+2026-10-02 direct human speed acceptance closes further timing. Missing technical
+results retain their actual status; quality/stability and release are separate. The user requested uninterrupted
+development with stage status reports, then continued work.
+
+Current scoped blocks (2026-10-02 unlocked host):
+- 8.1 Native exact sampler optimization: PASS, including exceptional floats and same-input checks.
+- 8.2 Measurement safety/precision: Python 248/248 at c62bb74 and 15 JSX suites PASS;
+  actual two-turn binding-ready schema-3 preparation and straight RGBA16 PASS.
+- 8.2a Optional callback attribution: both observers cover all 60 plane_region frames;
+  loaded identity PASS. Sampling medians 348.734/33.595 ms are diagnostics only.
+- 8.2b Source/build isolation: same-toolchain 40-frame matrix, 60-frame sequence,
+  ten queue-chain states and 360 fresh-pair PNGs exact. Older-artifact FAIL retained.
+- 8.3 Target plane/3D/AEP matrix and queue Adjustment/Corner Pin chain: scoped PASS.
+  Historical saveFrameToPng failure remains a separate retained harness limitation.
+- 8.4 Target Render total time: five MFR-requested-OFF ordinary fresh-phase pairs PASS;
+  65.870721 -> 48.766815 s median, 25.97% less time. Per-frame/cold-cache timing open.
+- 8.4a Ordinary MFR-requested-ON series INCOMPLETE: three measured pairs plus warmup;
+  fourth control crashes with19/60 frames, correctly rejected. Complete240 and
+  partial19 decoded frames exact. Separate instrumented60-frame ON pair exact;
+  ordinary throughput/root cause remain open.
+- 8.5 RAM Preview: full-cache60-frame/30-fps playback, cached restart and wave
+  invalidation functional PASS. Ten equal-zoom fresh-phase UI intervals recorded;
+  median bounds (11.546,12.924] -> (1.753,6.007]s, four improved/one inconclusive
+  pair. Capture overhead/order/cache limits retained; observer-free cache-build,
+  first-playable timing remain technically INCOMPLETE, with further timing
+  closed by human acceptance. Later Full/Skip0 readback is covered in8.7.
+- 8.6 Escape cancellation and actual guide edit/fresh image/Undo PASS. Exact
+  guide latency was not measured; further timing closed by human acceptance.
+- 8.4b Stability-only candidate/control × enabled/bypass isolation: four60/60
+  scoped PASS;120 candidate RGBA16 decoded and120 control pairs encoded-exact.
+  Prior crash not reproduced; cause/fix unresolved. Planned experiment complete;
+  new distinguishing signal required before more retries. Candidate retained.
+  [Isolation](mfr-stability-isolation-2026-10-02.json).
+- 8.7 Full/Skip0 preset readback PASS; five candidate Full runs60/60 at30fps.
+  New Full control timings NOT RUN because the human accepted speed scope.
+  [Decision and retained candidate](performance-user-acceptance-2026-10-02.json).
+
+All eight CI checks at c62bb7422547bfd911fb27be0375a52d55bccb7e PASS; CI-hardening
+checkpoint c4efa51f0c0f2d5bd8e2900c83ca8169851503af also eight PASS. Later edits
+require their own exact-head checks. Immutable f611312 candidate and same-toolchain
+uninstrumented control retain full physical-Mac/package evidence.
+[Matrix/chain](performance-host-matrix-2026-10-02.json),
+[Render samples](performance-host-render-2026-10-02.json),
+[Preview lifecycle](performance-host-preview-2026-10-02.json).
+[Preview interval series](performance-host-preview-intervals-2026-10-02.json),
+[MFR retained failure/diagnostics](performance-host-mfr-2026-10-02.json).
+Earlier bounded transactions restored/verified the original. The final ordinary
+candidate is intentionally retained installed by the later human decision, with
+original backup independently verified.
+No main merge or release is implied.
 
 2026-09-29: user explicitly requested skipping performance acceleration.
 Retain collected measurements as historical evidence; incomplete RAM Preview,
@@ -202,7 +256,8 @@ production release occurs without explicit user instruction.
 ## Current overall progress
 
 Stages 1–7 retain their recorded evidence; Stage 9 is accepted within the
-documented scope. Stage 8 is skipped by user (not PASS).
+documented scope. Stage 8 was historically skipped and resumed; speed scope is now USER_ACCEPTED,
+while the independent ordinary MFR incident remains unresolved (not fixed).
 Stage 10 is COMPLETE for the agreed 0.9.3 macOS Apple Silicon / AE 25.6
 development scope. This does not certify Windows/Intel, other AE versions,
 broad HDR/OCIO, physical GPU execution, or public signing/notarization.

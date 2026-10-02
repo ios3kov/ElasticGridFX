@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -34,7 +34,7 @@ jobs:
           sha256sum "$RUNNER_TEMP/elasticgrid-evidence/source.bundle" > "$RUNNER_TEMP/elasticgrid-evidence/source.sha256"
           printf 'Test Run ID: %s-%s\nAE runtime: NOT RUN (Linux runner)\n' "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" > "$RUNNER_TEMP/elasticgrid-evidence/scope.txt"
       - name: Preserve source for reproducible diagnosis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-source-${{ github.sha }}
           path: ${{ runner.temp }}/elasticgrid-evidence/
@@ -44,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          { node tests/test_ae_project_safety.js; node tests/test_smoke_safety.js; node tests/test_smoke_loader_safety.js; node tests/test_plane_smoke_safety.js; node tests/test_perf_fixture_safety.js; } 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
+          { for test in tests/test_*.js; do node "$test"; done; } 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/script-safety.log"
       - name: Source contracts and build identity regression
         shell: bash
         run: |
@@ -61,7 +61,7 @@ jobs:
           ctest --test-dir build-final-validation --output-on-failure --output-junit "$RUNNER_TEMP/elasticgrid-evidence/portable.xml" 2>&1 | tee "$RUNNER_TEMP/elasticgrid-evidence/portable.log"
       - name: Preserve actual test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
         with:
           name: ElasticGridFX-validation-${{ github.sha }}
           path: |

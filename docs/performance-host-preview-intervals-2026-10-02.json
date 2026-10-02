@@ -1,0 +1,743 @@
+{
+  "status": "TEN_UI_OBSERVED_CACHE_FILL_INTERVALS",
+  "baseline_workspace": "preview-a5003de6db3844a9a1641975ea26782d",
+  "samples": [
+    {
+      "version": "baseline",
+      "phase": 273,
+      "start_before_utc_ms": 1790939726886,
+      "start_after_utc_ms": 1790939726968,
+      "screenshot_count": 31,
+      "partial": {
+        "index": 29,
+        "before_utc_ms": 1790939731520,
+        "after_utc_ms": 1790939731608,
+        "playing": 23
+      },
+      "full": {
+        "index": 30,
+        "before_utc_ms": 1790939738188,
+        "after_utc_ms": 1790939738318,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 4.552,
+        "upper": 11.432
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 273,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790939721991,
+        "invalidation_end_utc_ms": 1790939721994
+      },
+      "invalidation_record_sha256": "73041a1ef79387dd08566e46b5de9cebe8dc7cf3bf3a4220ce4c78c3f391d821"
+    },
+    {
+      "version": "baseline",
+      "phase": 284,
+      "start_before_utc_ms": 1790939759578,
+      "start_after_utc_ms": 1790939759591,
+      "screenshot_count": 158,
+      "partial": {
+        "index": 70,
+        "before_utc_ms": 1790939769917,
+        "after_utc_ms": 1790939770050,
+        "playing": 57
+      },
+      "full": {
+        "index": 80,
+        "before_utc_ms": 1790939771580,
+        "after_utc_ms": 1790939771766,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 10.326,
+        "upper": 12.188
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 284,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790939752882,
+        "invalidation_end_utc_ms": 1790939752885
+      },
+      "invalidation_record_sha256": "1dd50d9f72cadea9c57a3549f5e9cd0f16ae05a4db6008cb48b421f6b233e579"
+    },
+    {
+      "version": "baseline",
+      "phase": 295,
+      "start_before_utc_ms": 1790939838413,
+      "start_after_utc_ms": 1790939838423,
+      "screenshot_count": 151,
+      "partial": {
+        "index": 70,
+        "before_utc_ms": 1790939849969,
+        "after_utc_ms": 1790939850067,
+        "playing": 55
+      },
+      "full": {
+        "index": 80,
+        "before_utc_ms": 1790939851206,
+        "after_utc_ms": 1790939851337,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 11.546,
+        "upper": 12.924
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 295,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790939832880,
+        "invalidation_end_utc_ms": 1790939832892
+      },
+      "invalidation_record_sha256": "68e9540cef50a66f2b5036a68c584a53bcd7105c2418e0495a04b247187fa456"
+    },
+    {
+      "version": "baseline",
+      "phase": 306,
+      "start_before_utc_ms": 1790939895142,
+      "start_after_utc_ms": 1790939895165,
+      "screenshot_count": 151,
+      "partial": {
+        "index": 85,
+        "before_utc_ms": 1790939909590,
+        "after_utc_ms": 1790939909680,
+        "playing": 59
+      },
+      "full": {
+        "index": 95,
+        "before_utc_ms": 1790939910856,
+        "after_utc_ms": 1790939910999,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 14.425,
+        "upper": 15.857
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 306,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790939888024,
+        "invalidation_end_utc_ms": 1790939888030
+      },
+      "invalidation_record_sha256": "dde12dd4cc612b941d69767c172126e8390e8d7877db77a4f37140f21a3cd102"
+    },
+    {
+      "version": "baseline",
+      "phase": 317,
+      "start_before_utc_ms": 1790939949566,
+      "start_after_utc_ms": 1790939949587,
+      "screenshot_count": 152,
+      "partial": {
+        "index": 70,
+        "before_utc_ms": 1790939961222,
+        "after_utc_ms": 1790939961398,
+        "playing": 55
+      },
+      "full": {
+        "index": 90,
+        "before_utc_ms": 1790939963791,
+        "after_utc_ms": 1790939963915,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 11.635,
+        "upper": 14.349
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 317,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790939941197,
+        "invalidation_end_utc_ms": 1790939941203
+      },
+      "invalidation_record_sha256": "90152fea5fbda7e7dbd50b583dfd465ea598b195a287e6f8a2e62bf46de3f2b9"
+    },
+    {
+      "version": "candidate",
+      "phase": 273,
+      "start_before_utc_ms": 1790940106468,
+      "start_after_utc_ms": 1790940106477,
+      "screenshot_count": 180,
+      "partial": {
+        "index": 5,
+        "before_utc_ms": 1790940108230,
+        "after_utc_ms": 1790940108519,
+        "playing": 28
+      },
+      "full": {
+        "index": 20,
+        "before_utc_ms": 1790940110612,
+        "after_utc_ms": 1790940110742,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 1.753,
+        "upper": 4.274
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 273,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790940100738,
+        "invalidation_end_utc_ms": 1790940100753
+      },
+      "invalidation_record_sha256": "cd6260466637170e3d6f97fd0db2fe4de168a0e0458e345a3ccd97d28da94e23"
+    },
+    {
+      "version": "candidate",
+      "phase": 284,
+      "start_before_utc_ms": 1790940159890,
+      "start_after_utc_ms": 1790940159937,
+      "screenshot_count": 180,
+      "partial": {
+        "index": 5,
+        "before_utc_ms": 1790940161386,
+        "after_utc_ms": 1790940161558,
+        "playing": 24
+      },
+      "full": {
+        "index": 25,
+        "before_utc_ms": 1790940164261,
+        "after_utc_ms": 1790940164356,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 1.449,
+        "upper": 4.466
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 284,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790940150118,
+        "invalidation_end_utc_ms": 1790940150132
+      },
+      "invalidation_record_sha256": "fce0e1fb4defbbe424fcf2244309e79cd76f00565d68c9d0f5a28649af4bc512"
+    },
+    {
+      "version": "candidate",
+      "phase": 295,
+      "start_before_utc_ms": 1790940198807,
+      "start_after_utc_ms": 1790940198814,
+      "screenshot_count": 148,
+      "partial": {
+        "index": 25,
+        "before_utc_ms": 1790940203679,
+        "after_utc_ms": 1790940203809,
+        "playing": 52
+      },
+      "full": {
+        "index": 40,
+        "before_utc_ms": 1790940205904,
+        "after_utc_ms": 1790940205992,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 4.865,
+        "upper": 7.185
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 295,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790940191729,
+        "invalidation_end_utc_ms": 1790940191734
+      },
+      "invalidation_record_sha256": "da1112bbe2a65bf823539da2e32abe45636ecb690572ef354f8006d6526cdc96"
+    },
+    {
+      "version": "candidate",
+      "phase": 306,
+      "start_before_utc_ms": 1790940253315,
+      "start_after_utc_ms": 1790940253372,
+      "screenshot_count": 175,
+      "partial": {
+        "index": 5,
+        "before_utc_ms": 1790940255058,
+        "after_utc_ms": 1790940255152,
+        "playing": 3
+      },
+      "full": {
+        "index": 30,
+        "before_utc_ms": 1790940259223,
+        "after_utc_ms": 1790940259322,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 1.686,
+        "upper": 6.007
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 306,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790940243546,
+        "invalidation_end_utc_ms": 1790940243556
+      },
+      "invalidation_record_sha256": "1f743c081db07cfab882090f0d56aa860d82120d732cfb9771035d615d3d9325"
+    },
+    {
+      "version": "candidate",
+      "phase": 317,
+      "start_before_utc_ms": 1790940301655,
+      "start_after_utc_ms": 1790940301716,
+      "screenshot_count": 158,
+      "partial": {
+        "index": 60,
+        "before_utc_ms": 1790940313271,
+        "after_utc_ms": 1790940313403,
+        "playing": 56
+      },
+      "full": {
+        "index": 100,
+        "before_utc_ms": 1790940317922,
+        "after_utc_ms": 1790940318015,
+        "playing": 60,
+        "fps": 30
+      },
+      "spacebar_to_ready_seconds": {
+        "lower": 11.555,
+        "upper": 16.36
+      },
+      "invalidation": {
+        "action": "invalidate",
+        "binding_ready": true,
+        "full_final": true,
+        "previous_fast": "FP_OFF",
+        "bit_depth": 32,
+        "width": 1920,
+        "height": 1080,
+        "fps": 30,
+        "duration": 2,
+        "work_area_start": 0,
+        "work_area_duration": 2,
+        "phase": 317,
+        "columns": 8,
+        "rows": 8,
+        "wave_speed": 0.5,
+        "scope": "setup/readback only; UI proves preview completion",
+        "invalidation_start_utc_ms": 1790940293506,
+        "invalidation_end_utc_ms": 1790940293515
+      },
+      "invalidation_record_sha256": "236b9ba42ac528d8efbd60b9caf084c7a6e7a44346c0cc2975b0b2b8c412d9d8"
+    }
+  ],
+  "method": "Native Cua screenshot intervals classified by human-readable Playing x of 60 and fps; no automatic event oracle",
+  "candidate_workspace": "preview-e95f31bd9e714921bc8b2dde069f0a6f",
+  "schema": 1,
+  "date": "2026-10-02",
+  "acceptance_scope": "Observed screenshot-bracketed Spacebar-to-full-cache only; first-playable, guide and observer-free latency gates remain open",
+  "environment": {
+    "ae": "25.6x101",
+    "macos": "26.6.2",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": 17179869184
+  },
+  "sessions": [
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-a733d95d2018fb8bc321b6d8",
+        "commit": "98e383997147c612b8010b406ec379e162975928",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+        "source_sha256": "9a238afcd99336a74d94e51c6819d75ad3a8cd69f094551ded82c60c4f5d2a26",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+      "identity_status": "PASS",
+      "jsx_sha256": "84fafe72793f2fb57d21f099c89909847e3d96c0ebb56f1b12e5c93a0f7d39b5",
+      "latest": {
+        "action": "cleanup",
+        "binding_ready": true,
+        "bit_depth": 32,
+        "columns": 8,
+        "duration": 2,
+        "fps": 30,
+        "full_final": true,
+        "height": 1080,
+        "invalidation_end_utc_ms": null,
+        "invalidation_start_utc_ms": null,
+        "memory_in_use": 2163592228,
+        "phase": 317,
+        "previous_fast": "FP_OFF",
+        "rows": 8,
+        "run_id": "a5003de6db3844a9a1641975ea26782d",
+        "scope": "setup/readback only; UI proves preview completion",
+        "wave_speed": 0.5,
+        "width": 1920,
+        "work_area_duration": 2,
+        "work_area_start": 0
+      },
+      "previous_fast": "FP_ADAPTIVE_RESOLUTION",
+      "process_key_sha256": "b6a6bc4a1ae01db048b3234972557ccbb501faeed68366acdd7ee8116ceda8a1",
+      "status": "CLOSED",
+      "uuid": "22704D84-3AB5-3C47-90AB-EABF9DAA05B1",
+      "version": "baseline",
+      "workspace_id": "preview-a5003de6db3844a9a1641975ea26782d",
+      "raw_record_sha256": "957377fe23921beb7728eb85e2119229451ad6cdfae5fcdbb2d6ddc98ca2fd1e",
+      "cleanup_record_sha256": "d51c17886c596cde8ab55c95fc03be55ba6d68fc667367deb0921eb37851d92d",
+      "previous_fast_restored": "VERIFIED_BY_GUARDED_CLEANUP"
+    },
+    {
+      "build": {
+        "artifact_type": "AE native effect (.plugin)",
+        "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+        "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+        "profile": "release",
+        "schema": 1,
+        "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+        "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+        "source_state": "clean",
+        "target": "aarch64-apple-darwin",
+        "toolchain": {
+          "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+          "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+        },
+        "version": "0.9.3"
+      },
+      "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+      "identity_status": "PASS",
+      "jsx_sha256": "84fafe72793f2fb57d21f099c89909847e3d96c0ebb56f1b12e5c93a0f7d39b5",
+      "latest": {
+        "action": "cleanup",
+        "binding_ready": true,
+        "bit_depth": 32,
+        "columns": 8,
+        "duration": 2,
+        "fps": 30,
+        "full_final": true,
+        "height": 1080,
+        "invalidation_end_utc_ms": null,
+        "invalidation_start_utc_ms": null,
+        "memory_in_use": 2130293284,
+        "phase": 317,
+        "previous_fast": "FP_OFF",
+        "rows": 8,
+        "run_id": "e95f31bd9e714921bc8b2dde069f0a6f",
+        "scope": "setup/readback only; UI proves preview completion",
+        "wave_speed": 0.5,
+        "width": 1920,
+        "work_area_duration": 2,
+        "work_area_start": 0
+      },
+      "previous_fast": "FP_ADAPTIVE_RESOLUTION",
+      "process_key_sha256": "3349468e27f8ca0ca8ad1002dbc01fbb5983ce6b4c163570cbf9e147291b80d9",
+      "status": "CLOSED",
+      "uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+      "version": "candidate",
+      "workspace_id": "preview-e95f31bd9e714921bc8b2dde069f0a6f",
+      "raw_record_sha256": "4393332facf63f6e37b39d2d37da85c78277936d11ab03fceeccb0befbb3fcfd",
+      "cleanup_record_sha256": "af9a42fae7d15540d907415c5270a087db4b562aa95e66bad9eb930eeeba6b98",
+      "previous_fast_restored": "VERIFIED_BY_GUARDED_CLEANUP"
+    }
+  ],
+  "settings": {
+    "composition": [
+      1920,
+      1080
+    ],
+    "fps": 30,
+    "frames": 60,
+    "bit_depth": 32,
+    "quality": "Final",
+    "resolution": "Full",
+    "fast_preview": "FP_OFF",
+    "viewer_zoom_percent": 75.4,
+    "workspace": "Standard",
+    "screenshot_pixels": [
+      3024,
+      1898
+    ],
+    "wave_phase_pairs": [
+      273,
+      284,
+      295,
+      306,
+      317
+    ],
+    "wave_speed": 0.5,
+    "grid": [
+      8,
+      8
+    ]
+  },
+  "pairs": [
+    {
+      "phase": 273,
+      "baseline_interval": {
+        "lower": 4.552,
+        "upper": 11.432
+      },
+      "candidate_interval": {
+        "lower": 1.753,
+        "upper": 4.274
+      },
+      "result": "IMPROVEMENT_OBSERVED"
+    },
+    {
+      "phase": 284,
+      "baseline_interval": {
+        "lower": 10.326,
+        "upper": 12.188
+      },
+      "candidate_interval": {
+        "lower": 1.449,
+        "upper": 4.466
+      },
+      "result": "IMPROVEMENT_OBSERVED"
+    },
+    {
+      "phase": 295,
+      "baseline_interval": {
+        "lower": 11.546,
+        "upper": 12.924
+      },
+      "candidate_interval": {
+        "lower": 4.865,
+        "upper": 7.185
+      },
+      "result": "IMPROVEMENT_OBSERVED"
+    },
+    {
+      "phase": 306,
+      "baseline_interval": {
+        "lower": 14.425,
+        "upper": 15.857
+      },
+      "candidate_interval": {
+        "lower": 1.686,
+        "upper": 6.007
+      },
+      "result": "IMPROVEMENT_OBSERVED"
+    },
+    {
+      "phase": 317,
+      "baseline_interval": {
+        "lower": 11.635,
+        "upper": 14.349
+      },
+      "candidate_interval": {
+        "lower": 11.555,
+        "upper": 16.36
+      },
+      "result": "INCONCLUSIVE_OVERLAPPING_BOUNDS"
+    }
+  ],
+  "median_intervals_seconds": {
+    "baseline": {
+      "lower": 11.546,
+      "upper": 12.924
+    },
+    "candidate": {
+      "lower": 1.753,
+      "upper": 6.007
+    }
+  },
+  "conservative_ratio_of_medians_lower_bound": 1.92209089395705,
+  "source_record_sha256": "a2dd9cc6c6b66dd49dcb2792f460cd7a5b0a9515b7d6675b2daa4908791b3065",
+  "limitations": [
+    "UI captures perturb preview; not observer-free performance acceptance.",
+    "Baseline five precede candidate five; order not counterbalanced, ambient and disk/OS caches uncontrolled.",
+    "Matched integer fresh phases; fractional273.14 preparation rejected by unchanged readback tolerance and excluded.",
+    "First baseline has wider model/tool round-trip gap, retained.",
+    "Slow candidate phase317 retained; overlapping pair inconclusive.",
+    "UTC millisecond bounds around native keyboard/screenshots, not monotonic host event stream.",
+    "Early30fps label/green bar insufficient: completion requires Info Playing60of60 and30fps.",
+    "Preview preset/frame skip/global idle-cache preference not independently read back.",
+    "Selected screenshots inspected in Cua transcript/session; no hashed screenshot files claimed.",
+    "No exact first-playable, cold-cache/per-frame or actual guide gesture acceptance."
+  ],
+  "restoration": [
+    {
+      "receipt_id": "EGFX-update-378f86e8191d47dd8e3f583f6bdeac39",
+      "state": "ROLLED_BACK",
+      "record_sha256": "f14df7e7d8ae18fafc4472ea9e58f335078969657b95b2049a1042f21aa8cb7c"
+    },
+    {
+      "receipt_id": "EGFX-update-3d747f22a5be4861877d40bc6a884f77",
+      "state": "ROLLED_BACK",
+      "record_sha256": "f145ec9d9481855be3fbb966d8d073154603c413efb8d0df20698d70d311f32b"
+    }
+  ],
+  "interrupted_predecessor": {
+    "workspace_id": "preview-a1dd806f9e584668b7bdbfc205b925c7",
+    "status": "HOST_PROCESS_ENDED_UNOBSERVED",
+    "raw_record_sha256": "7fffc18426c8bfaa350ad1cb54ce43c42eca664253aaa361514e94f0fac7e07e",
+    "cleanup": "NOT_READ_BACK",
+    "cause": "UNRESOLVED; no GUI AE crash report identified",
+    "excluded_from_series": true,
+    "restoration": [
+      {
+        "receipt_id": "EGFX-update-c9431bb9c84046e892794492c86198ad",
+        "state": "ROLLED_BACK",
+        "record_sha256": "dd5366cea7df6b2bbc5ff6ea247562def8e2f306333e5036dffc4b784629a7fa"
+      }
+    ]
+  },
+  "control_artifact": {
+    "build": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-a733d95d2018fb8bc321b6d8",
+      "commit": "98e383997147c612b8010b406ec379e162975928",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+      "source_sha256": "9a238afcd99336a74d94e51c6819d75ad3a8cd69f094551ded82c60c4f5d2a26",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "version": "0.9.3"
+    },
+    "diagnostics_enabled": false,
+    "effect_develop_build": 5,
+    "native_diff_from_accepted": "empty",
+    "preflight_log_sha256": "22b100d1850621e51443c94259fe3d6685e47df856cc44d3fe2e895bd994dea4",
+    "raw_package_sha256": "68c3038dca273fc34da958f9dc6b5532b047afdc6572ff6d5e6931528c1ec4ab",
+    "runtime": "PASS: mapped ordinary identity in twelve-run series and GUI queue/preview controls",
+    "status": "FULL_MAC_BUILD_AND_PACKAGE_PASS"
+  },
+  "candidate_package_sha256": "b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a",
+  "baseline_package_sha256": "fc93a05d1f5bd7dcc5268d1aaaa72331906f6ba4bbd8f672243637158ca9e12a"
+}
