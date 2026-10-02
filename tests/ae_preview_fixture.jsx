@@ -30,14 +30,19 @@ function egfxPreviewFixture(config) {
         c.comment=owner;c.resolutionFactor=[1,1];c.workAreaStart=0;c.workAreaDuration=2;c.time=0;
         options.fastPreview=FastPreviewType.FP_OFF;l.selected=true;e.selected=true;
     }
+    var invalidationStart=null,invalidationEnd=null;
     if(config.action==='invalidate'){
-        if(!isFinite(config.phase)||config.phase<120||config.phase>350||c.resolutionFactor[0]!==1||c.resolutionFactor[1]!==1||options.fastPreview!==FastPreviewType.FP_OFF)throw Error('Invalidation contract');
+        if(typeof config.phase!=='number'||!isFinite(config.phase)||config.phase<120||config.phase>350||c.resolutionFactor[0]!==1||c.resolutionFactor[1]!==1||options.fastPreview!==FastPreviewType.FP_OFF)throw Error('Invalidation contract');
+        invalidationStart=(new Date()).getTime();
         e.property('Wave Phase').setValue(config.phase);
         if(Math.abs(e.property('Wave Phase').value-config.phase)>0.00001)throw Error('Phase not applied');
         c.time=0;
+        invalidationEnd=(new Date()).getTime();
     }
     var ready=options.fastPreview===FastPreviewType.FP_OFF&&c.resolutionFactor[0]===1&&c.resolutionFactor[1]===1;
     var body='{"run_id":"'+config.run_id+'","action":"'+config.action+'","binding_ready":true,"full_final":'+ready+',"previous_fast":"'+previousFast+'","bit_depth":'+p.bitsPerChannel+',"width":'+c.width+',"height":'+c.height+',"fps":'+c.frameRate+',"duration":'+c.duration+',"work_area_start":'+c.workAreaStart+',"work_area_duration":'+c.workAreaDuration+',"phase":'+e.property('Wave Phase').value+',"columns":'+e.property('Columns').value+',"rows":'+e.property('Rows').value+',"wave_speed":'+e.property('Wave Speed').value+',"memory_in_use":'+app.memoryInUse+',"scope":"setup/readback only; UI proves preview completion"}';
+    // Wall-clock bounds bracket the parameter operation, not rendering/display.
+    body=body.substr(0,body.length-1)+',"invalidation_start_utc_ms":'+invalidationStart+',"invalidation_end_utc_ms":'+invalidationEnd+'}';
     if(config.action==='cleanup'){
         if(!/^(FP_OFF|FP_ADAPTIVE_RESOLUTION|FP_DRAFT|FP_FAST_DRAFT|FP_WIREFRAME)$/.test(config.previous_fast))throw Error('Restore mode missing');
         options.fastPreview=FastPreviewType[config.previous_fast];

@@ -97,19 +97,29 @@ Current scoped blocks (2026-10-02 unlocked host):
   ten queue-chain states and 360 fresh-pair PNGs exact. Older-artifact FAIL retained.
 - 8.3 Target plane/3D/AEP matrix and queue Adjustment/Corner Pin chain: scoped PASS.
   Historical saveFrameToPng failure remains a separate retained harness limitation.
-- 8.4 Target Render total time: five matched ordinary fresh-phase pairs PASS;
+- 8.4 Target Render total time: five MFR-requested-OFF ordinary fresh-phase pairs PASS;
   65.870721 -> 48.766815 s median, 25.97% less time. Per-frame/cold-cache timing open.
-- 8.5 RAM Preview: full-cache 60-frame/30-fps playback, cached restart and wave
-  invalidation functional PASS; quantitative cache-build/first-playable timing INCOMPLETE.
+- 8.4a Ordinary MFR-requested-ON series INCOMPLETE: three measured pairs plus warmup;
+  fourth control crashes with19/60 frames, correctly rejected. Complete240 and
+  partial19 decoded frames exact. Separate instrumented60-frame ON pair exact;
+  ordinary throughput/root cause remain open.
+- 8.5 RAM Preview: full-cache60-frame/30-fps playback, cached restart and wave
+  invalidation functional PASS. Ten equal-zoom fresh-phase UI intervals recorded;
+  median bounds (11.546,12.924] -> (1.753,6.007]s, four improved/one inconclusive
+  pair. Capture overhead/order/cache limits retained; observer-free cache-build,
+  preset/frame-skip readback and first-playable timing remain INCOMPLETE.
 - 8.6 Escape cancellation before full cache PASS; actual guide gesture/latency
   BLOCKED by Cua custom-canvas input (AXError.notImplemented). Overall scope stays open.
 
-All eight CI checks at c62bb7422547bfd911fb27be0375a52d55bccb7e PASS; new tooling
-checkpoint checks pending. Immutable f611312 candidate and same-toolchain
+All eight CI checks at c62bb7422547bfd911fb27be0375a52d55bccb7e PASS; CI-hardening
+checkpoint c4efa51f0c0f2d5bd8e2900c83ca8169851503af also eight PASS. Later edits
+require their own exact-head checks. Immutable f611312 candidate and same-toolchain
 uninstrumented control retain full physical-Mac/package evidence.
 [Matrix/chain](performance-host-matrix-2026-10-02.json),
 [Render samples](performance-host-render-2026-10-02.json),
 [Preview lifecycle](performance-host-preview-2026-10-02.json).
+[Preview interval series](performance-host-preview-intervals-2026-10-02.json),
+[MFR retained failure/diagnostics](performance-host-mfr-2026-10-02.json).
 Each bounded temporary transaction restores and verifies the original plugin.
 No main merge or release is implied.
 

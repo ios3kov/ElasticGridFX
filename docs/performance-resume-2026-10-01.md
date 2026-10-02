@@ -426,3 +426,49 @@ injection or SDK parameter mutation substitutes for it. All owned projects
 closed without saving, prior Fast Preview restored, original plugin restored
 and Adobe processes stopped. See [observations](performance-host-preview-2026-10-02.json).
 Stage 8 stays IN PROGRESS; no merge/release or universal 4K speed claim.
+
+
+## MFR and preview interval checkpoint — 2026-10-02
+
+Current adopted rules baseline: AE-Development-Rules5 candidate,
+`b27f45467e0a9152fc82c1072438dfed07f0c36e`; Critical native Development with
+bounded authorized Validation. Product/render quality and saved-data contracts
+remain unchanged. The five accepted ordinary total-time pairs requested MFR OFF.
+
+New ordinary MFR ON100% series retains9 complete runs, four complete pairs
+(warmup+three measured) and one unpaired candidate. The fourth control crashes
+with19/60 output files despite launcher exit0. Coverage gate rejects it. All240
+complete-pair and19 partial straight-RGBA16 frames decode exact. Sanitized OS
+crash identifies the control image and Adobe render-task termination frames;
+this does not establish root cause. Diagnostic ON observer pair has60 complete
+plane_region frames and exact decoded output; logging/profiling perturbs timing.
+No completed-five-pair ON aggregate or causal ON/OFF speed comparison.
+[Complete scopes and rejected sample](performance-host-mfr-2026-10-02.json).
+
+Ten new GUI preview runs share Full/Final/32 bpc,75.4% zoom and integer fresh
+phases. Completion requires native Info Playing60of60 and30fps; earlier fps
+labels alone are not accepted. Times are conservative UTC screenshot brackets,
+not exact event durations. All five controls precede all five candidates, with
+ambient/cache state uncontrolled and UI observer overhead.
+
+| Phase | Control readiness seconds | Candidate readiness seconds | Pair bounds |
+| --- | --- | --- | --- |
+|273|(4.552,11.432]|(1.753,4.274]|Improvement observed|
+|284|(10.326,12.188]|(1.449,4.466]|Improvement observed|
+|295|(11.546,12.924]|(4.865,7.185]|Improvement observed|
+|306|(14.425,15.857]|(1.686,6.007]|Improvement observed|
+|317|(11.635,14.349]|(11.555,16.360]|Inconclusive overlap|
+
+Median interval bounds: (11.546,12.924] -> (1.753,6.007]s. Slow phase317 and
+broad first-control tool-round-trip interval stay included. This observed series
+does not accept observer-free cache timing, exact first-playable latency or
+frame-skip/preset readback. Actual guide input remains BLOCKED by custom-canvas
+AXError.notImplemented. [All interval records](performance-host-preview-intervals-2026-10-02.json).
+
+Both new preview sessions close with prior Fast Preview restored and verified.
+An interrupted predecessor ended without an observed shutdown; cleanup/readback
+is not claimed and its cause remains unresolved. All plugin transactions,
+including that predecessor, are rolled back/verified; original payload restored,
+Adobe hosts stopped. Eight hosted checks at exact CI-hardeningc4efa51 PASS.
+Next: same-failing-AEP bounded MFR control isolation and preview control/latency
+validation. Stage8 IN PROGRESS; no merge, release or cache purge.

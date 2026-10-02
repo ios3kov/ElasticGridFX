@@ -14,13 +14,20 @@ RAM Preview. Exact settings, samples and pixel parity are in
 They do not establish real-time host performance or the Metal targets below.
 
 Actual target AE 25.6 / M1 Pro / 16 GiB: five matched fresh-phase ordinary
-1080p/32-bpc/Full/Final 60-frame aerender pairs give median total time
+MFR-requested-OFF 1080p/32-bpc/Full/Final 60-frame aerender pairs give median total time
 65.870721 -> 48.766815 s (25.97% reduction). Startup/PNG export/polling included;
 no cold-cache or per-frame claim. All 360 pair/warmup outputs exact.
 [Raw scoped comparison](performance-host-render-2026-10-02.json).
 GUI RAM Preview plays all 60 frames at 30 fps on both versions, with cache
 invalidation and cancellation verified. Cache-build/first-playable latency is
-not accepted from screenshot bounds; actual guide dragging is blocked by the
+not accepted as observer-free latency from screenshot bounds. Ten same-zoom
+fresh-phase UI runs now bracket median full-cache readiness at
+(11.546,12.924] -> (1.753,6.007]s; four pairs improve, one overlaps. All outliers
+and capture/order/cache limits remain in [interval evidence](performance-host-preview-intervals-2026-10-02.json).
+Ordinary MFR-requested-ON throughput remains INCOMPLETE after a control host
+crash; complete and separate diagnostic pixel scopes remain exact.
+[MFR scopes](performance-host-mfr-2026-10-02.json).
+Actual guide dragging is blocked by the
 available custom-canvas automation. Stage 8 remains IN PROGRESS.
 [Preview scope](performance-host-preview-2026-10-02.json).
 Host-specific absolute targets remain open until these latency gates are measured;

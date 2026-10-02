@@ -117,3 +117,14 @@ guards. Its report does not assert preview completion: native UI observation
 provides that limited evidence. Mocks exercise safety/control flow, not AE display.
 See [Render](performance-host-render-2026-10-02.json) and
 [Preview](performance-host-preview-2026-10-02.json) for remaining latency limits.
+
+Guarded preview invalidation reports UTC millisecond bounds around parameter
+application only. These do not time rendering/display. Native screenshot
+observations bracket full-cache readiness separately, retaining capture overhead
+and run-order/cache limits. No early fps label serves as completion proof.
+[Ten preview intervals](performance-host-preview-intervals-2026-10-02.json).
+Ordinary MFR-ON output is rejected unless complete, even when aerender exits0.
+The interrupted control series and matched crash remain unresolved; diagnostic
+observer runs establish route/coverage/pixels only. Overlapping MFR callback
+durations cannot be summed and subtracted from wall time.
+[MFR scopes and crash](performance-host-mfr-2026-10-02.json).

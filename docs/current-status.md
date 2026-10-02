@@ -3,7 +3,7 @@
 ## Stage 8 resumed — 2026-10-01 — IN PROGRESS
 
 Latest completed host block, 2026-10-02: unlocked AE 25.6x101 on M1 Pro / 16 GiB.
-Five fresh matched ordinary 1080p/32-bpc/Full/Final 60-frame aerender pairs:
+Five fresh matched ordinary MFR-requested-OFF 1080p/32-bpc/Full/Final 60-frame aerender pairs:
 median total time **65.870721 -> 48.766815 s** (1.3507x ratio of medians,
 25.97% less time; paired-ratio median 1.3303x). All 300 measured frames and
 60 warmup frames are encoded byte-identical; independent calibrated RGBA16
@@ -27,14 +27,36 @@ Actual GUI RAM Preview: full 60-frame green range, Info "30 fps (realtime)"
 on candidate and same-toolchain control; cached restart, wave invalidation and
 Escape cancellation before full cache completion PASS. Full/Final/32-bpc and
 FP_OFF are read back through guarded SDK setup; completion comes from UI
-observations. Quantitative five-pair cache-build/first-playable latency remains
-INCOMPLETE; screenshots have observer overhead and viewer zoom differed.
+observations. The initial lifecycle series had different viewer zooms and is
+retained as functional evidence only. A new ten-run series matches 75.4% zoom,
+Full/Final/32 bpc and five integer fresh phases. Screenshot-bracketed median
+Spacebar-to-full-cache intervals are **(11.546,12.924] -> (1.753,6.007] s**.
+Four paired bounds show improvement; phase317 overlaps and is inconclusive.
+The slow candidate and broad first-control interval remain included. This is
+an observed comparison with capture overhead, fixed run order and uncontrolled
+ambient/cache state, not observer-free latency acceptance. Exact first-playable
+latency and preview preset/frame-skip readback remain open.
+[All ten observations, bounds and identities](performance-host-preview-intervals-2026-10-02.json).
 Actual guide-drag timing is BLOCKED: Cua's native custom-canvas input returns
 AXError.notImplemented. No OS event injection or surrogate parameter change is
 accepted as a guide gesture. [Lifecycle observations and limits](performance-host-preview-2026-10-02.json).
 
+Ordinary MFR-requested-ON series: INCOMPLETE after three measured matched pairs
+and one warmup pair. The fourth control process produced only 19/60 frames;
+launcher exit0 was correctly rejected. Its OS crash report matches the exact
+control image/process: SIGABRT, Adobe BEE render-task termination frames; root
+cause remains unresolved. All 240 complete-pair frames and the 19 partial files
+decode exact. A separate instrumented ON pair covers/decodes all 60 frames
+exactly, with overlapping plane_region callbacks; it does not establish ordinary
+MFR throughput or resolve the crash. No five-pair ON aggregate is reported.
+[Retained samples, sanitized crash and diagnostic pair](performance-host-mfr-2026-10-02.json).
+
 The original installed 2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e payload is restored
-and verified after every bounded transaction; Adobe hosts stopped. The source
+and verified after every bounded transaction; Adobe hosts stopped. Two new
+preview sessions close with prior Fast Preview read back/restored. An interrupted
+predecessor ended without an observed shutdown; its cleanup was not read back,
+its cause is unresolved, and it is excluded from the ten-run series. Its plugin
+transaction is rolled back/verified. The source
 control 98e3839 / EGFX-a733d95d2018fb8bc321b6d8 has unchanged accepted native src/
 and the same Clang 21 / Rust 1.98.1 / release settings as the candidate, a separate
 Develop-5 cache key and no enabled observer. Full physical-Mac 20-stage build,
@@ -43,7 +65,8 @@ candidate remains unchanged. Diagnostic callback medians 348.734/33.595 ms
 are instrumented attribution, not final Render/RAM Preview timings.
 
 Previous tooling checkpoint c62bb7422547bfd911fb27be0375a52d55bccb7e: all eight CI
-checks PASS. Attribution checkpoint 6988fa7dfb3ba4b760fe6e9e60ac6b09a646697b:
+checks PASS. CI hardening checkpoint c4efa51f0c0f2d5bd8e2900c83ca8169851503af:
+all eight exact-head hosted checks PASS. Attribution checkpoint 6988fa7dfb3ba4b760fe6e9e60ac6b09a646697b:
 all seven applicable hosted checks PASS, including macOS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
 Python 248/248 run PASS. Live exact-head hosted checks are linked in
 [draft PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20). Offline code scan retains
@@ -55,9 +78,11 @@ This scanner does not assess release readiness.
 Stage 8 remains IN PROGRESS. Existing observer spans show about 33.3 s outside
 SmartRender on both versions; this includes pre-render/logging/host/export work,
 not a directly identified bottleneck. [Attribution limits](performance-host-attribution-2026-10-02.json).
-Next: quantitative equal-condition RAM Preview generation/first-playable timing
-and actual guide-drag-to-fresh-frame validation once custom-canvas input works;
-inspect remaining host/export work before changing the sampler again.
+Next: isolate the ordinary MFR control failure with the same pinned failing AEP
+and bounded diagnostics, then validate ordinary MFR throughput. Complete preview
+preset/readback and first-playable timing; actual guide-drag-to-fresh-frame
+validation needs working custom-canvas input. Inspect remaining host/export
+work before changing the sampler again.
 Quantitative RAM Preview, first-frame latency and actual guide gesture remain
 separate acceptance gates. No main merge, public release or cache purge.
 

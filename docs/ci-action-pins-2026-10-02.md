@@ -37,6 +37,8 @@ push using credentials left in its checkout.
   `release_readiness` remains `not_assessed`.
 - Actual execution with these pins is tracked by exact-head checks in
   [draft PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20).
+  All eight hosted checks at c4efa51f0c0f2d5bd8e2900c83ca8169851503af PASS,
+  including the macOS source/package gate; this does not certify later edits.
 
 Private original/post-fix reports are retained as
 `outputs/host-checkpoint-code-audit-2026-10-02.json` and

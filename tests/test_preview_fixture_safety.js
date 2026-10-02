@@ -23,7 +23,9 @@ function run(options={}){
 }
 for(const action of ['open','read','invalidate','cleanup']){const r=run({action});assert.equal(r.error,undefined);assert.equal(r.report.full_final,true);assert.equal(r.report.binding_ready,true);assert.equal(r.report.scope,'setup/readback only; UI proves preview completion');}
 for(const options of [{foreign:true},{geometry:true},{wrongSource:true},{depth:true},{lowQuality:true},{unready:true},{expressionError:true},{wrongKind:true}]){const r=run({...options,action:'invalidate'});assert.ok(r.error);assert.equal(r.calls.parameter+r.calls.close,0,'unproven scene untouched');}
-for(const options of [{half:true},{adaptive:true},{phase:0},{phase:999},{layerViewer:true}]){const r=run({...options,action:'invalidate'});assert.ok(r.error);assert.equal(r.calls.parameter,0);}
+for(const options of [{half:true},{adaptive:true},{phase:0},{phase:999},{phase:NaN},{phase:Infinity},{phase:'131.37'},{layerViewer:true}]){const r=run({...options,action:'invalidate'});assert.ok(r.error);assert.equal(r.calls.parameter,0);}
+const invalidation=run({action:'invalidate'});assert.ok(Number.isFinite(invalidation.report.invalidation_start_utc_ms));assert.ok(Number.isFinite(invalidation.report.invalidation_end_utc_ms));
+assert.equal(run({action:'read'}).report.invalidation_start_utc_ms,null,'readback is not an invalidation event');
 const dirty=run({action:'open',dirty:true});assert.ok(dirty.error);assert.equal(dirty.calls.open,0);
 const open=run({action:'open',adaptive:true});assert.equal(open.report.previous_fast,'FP_ADAPTIVE_RESOLUTION');assert.equal(open.viewerOptions.fastPreview,1);
 const cleanup=run({action:'cleanup'});assert.equal(cleanup.calls.close,1);assert.equal(cleanup.calls.newProject,1);assert.equal(cleanup.viewerOptions.fastPreview,2);

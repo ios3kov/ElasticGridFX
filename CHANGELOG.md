@@ -2,6 +2,13 @@
 
 ## Unreleased — resumed performance development
 
+- Record ten fresh-phase equal-zoom RAM Preview UI intervals and preserve all
+  outliers; separate observed cache-fill bounds from first-playable/guide gates.
+  Add guarded invalidation timestamps and reject nonnumeric phase inputs.
+- Retain incomplete ordinary MFR-ON series and matched control crash diagnostics;
+  verify240 complete-pair/19 partial/60 separate diagnostic RGBA16 frames exact.
+  Keep ordinary MFR throughput and crash root cause unresolved.
+
 - Pin all 23 GitHub Actions references to verified official commit identities;
   disable five unused checkout-credential defaults. Keep existing action majors,
   workflow behavior and validation gates unchanged.
