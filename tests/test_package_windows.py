@@ -11,7 +11,7 @@ import package_windows as p
 
 
 class WindowsPackageTests(unittest.TestCase):
-    def identity(self, build_id='a'*32):
+    def identity(self, build_id='EGFX-'+'a'*24):
         return {
             'build_id':build_id,
             'target':'x86_64-pc-windows-msvc',
@@ -40,7 +40,7 @@ class WindowsPackageTests(unittest.TestCase):
             root=Path(tmp)
             dll=root/'elasticgrid_ae.dll'
             identity=root/'BuildIdentity.json'
-            dll.write_bytes(b'MZ fixture\0ElasticGridBuildID='+b'a'*32+b'\0')
+            dll.write_bytes(b'MZ fixture\0ElasticGridBuildID='+b'EGFX-'+b'a'*24+b'\0')
             bad=self.identity('d'*32)
             identity.write_text(json.dumps(bad),encoding='utf-8')
             with self.assertRaises(ValueError):
