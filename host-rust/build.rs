@@ -169,7 +169,7 @@ fn main() {
         out_flags2 |= OutFlags2::SupportsGpuRenderF32;
     }
 
-    pipl::plugin_build(vec![
+    plugin_build(vec![
         Property::Kind(PIPLType::AEEffect),
         Property::Name("FSTR Stretch"),
         Property::Category("FSTR Effects"),
