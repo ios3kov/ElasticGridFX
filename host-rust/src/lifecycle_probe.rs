@@ -161,11 +161,31 @@ fn main_thread() -> bool {
     unsafe extern "C" { fn pthread_main_np() -> i32; }
     unsafe { pthread_main_np() != 0 }
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "windows")]
+static MAIN_THREAD_ID: std::sync::OnceLock<std::thread::ThreadId> = std::sync::OnceLock::new();
+
+#[cfg(target_os = "windows")]
+fn capture_main_thread() {
+    let _ = MAIN_THREAD_ID.set(std::thread::current().id());
+}
+
+#[cfg(target_os = "windows")]
+fn main_thread() -> bool {
+    MAIN_THREAD_ID.get().is_some_and(|id| *id == std::thread::current().id())
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn main_thread() -> bool { false }
 
 impl Probe {
     pub fn observe(&mut self, cmd: &ae::Command, input: &ae::InData) {
+        #[cfg(target_os = "windows")]
+        if matches!(cmd, ae::Command::GlobalSetup) {
+            // PF_Cmd_GLOBAL_SETUP is the process-lifetime registration point.
+            // Capture its thread identity before any AEGP suite acquisition so
+            // later sequence callbacks can never accidentally promote a worker.
+            capture_main_thread();
+        }
         let label = match cmd {
             ae::Command::GlobalSetup => "global",
             ae::Command::SequenceSetup => "setup",
