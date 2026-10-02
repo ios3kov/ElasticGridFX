@@ -472,3 +472,57 @@ including that predecessor, are rolled back/verified; original payload restored,
 Adobe hosts stopped. Eight hosted checks at exact CI-hardeningc4efa51 PASS.
 Next: same-failing-AEP bounded MFR control isolation and preview control/latency
 validation. Stage8 IN PROGRESS; no merge, release or cache purge.
+
+
+### Same-failing-AEP diagnostic isolation
+
+Ordinary unchanged control98e3839 and the exact previously failing AEP
+2ede888ab4b8ba4d32d1d3358e078544a7cfdb036c8a8479500575176dd60831
+were tested once with external short Apple samples at5/15/30 output files.
+No output-module override or production-source change. All60 frames complete
+and decode exact against the retained ordinary candidate run. This does not
+resolve an intermittent crash or accept ordinary timing. Each sampled interval
+contains PNGIO compression/filter work (longest_match, png_write_find_filter,
+deflate_slow); stack counts are waiting-inclusive, not CPU percentages or wall
+attribution. Receipt EGFX-update-39386de1009a43ed816e21db5fc28001 ROLLED_BACK;
+original payload verified. A read-only Preview-panel attempt retained unobserved
+lower controls; Standard/Info restored, empty own AE project closed. No historical
+frame-skip/first-playable claim is upgraded from this later partial readback.
+
+
+### Owned guide input and current Preview readback completed
+
+Hosted CI at8747979b7023793da2789b9d4a92f6cac0074c1a: all eight exact-head
+checks PASS. Ordinary f611312 loaded identity PASS at Full/Final/32bpc.
+Human action-time confirmations and normal macOS authentication granted the two
+bounded local helpers. Initial automatic-review rejection was resolved before
+access change; no TCC edit/bypass. Addressed delivery attempts did not prove a
+changed guide and are excluded. The routed public CGEvent helper verifies exact
+AE foreground/executable/PID and test-composition bounds throughout the gesture.
+Native UI confirms vertical guide displacement, fresh changed pattern and Cmd+Z
+restoration, with Info Undo / Change Effect Value: functional PASS. Single native
+Frame Render Time66ms is a UI label, not input-to-display latency acceptance.
+
+Later current Spacebar Preview settings read back through Minimal/Preview pane:
+Cache Before Playback off, Skip0, Resolution Auto, frame-rate label(30), Play From
+Current Time, Full Screen off, stop-caching playback off, Move Time To Preview
+Time on. This does not certify the historical ten-run preset or a Full override.
+An unexpected grave input changed only the owned layer timing and was immediately
+undone/read back; no saved source change, excluded from measurements. Standard
+workspace returned. Prior FP_ADAPTIVE_RESOLUTION restored/read back, owned scene
+CLOSED without saving, AE quit. Receipt4b2302ad9b9b480cbef0b90d1995c435 ROLLED_BACK;
+original payload/signature independently inspected. Helper grants retained for
+remaining authorized owned-AE tests. See [scope](performance-host-guide-2026-10-02.json).
+Quantitative first-playable and guide latency remain NOT PASSED; Stage8 IN PROGRESS.
+
+### One-variable requested CPU-budget diagnostic
+
+Same pinned failing AEP and ordinary control, same external sample points as the
+previous diagnostic; only MFR requested CPU budget100 ->50 changed. All60 frames
+complete and independently decode exact. Sampled peak render-process RSS
+1,581,875,200 bytes versus2,367,750,144 at the sampled100% diagnostic; neither is
+whole-system/true-peak memory, and actual CPU concurrency was not measured.
+Both diagnostics succeed, so no causal failure localization or lower-budget fix
+is accepted. Ordinary five-pair ON series remains INCOMPLETE. Receipt
+EGFX-update-181c517eefee4211839a3caa8895cefb ROLLED_BACK; original payload/signature
+verified. No production source/queue/quality change.

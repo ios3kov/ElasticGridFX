@@ -2,6 +2,17 @@
 
 ## Stage 8 resumed — 2026-10-01 — IN PROGRESS
 
+Completed guide checkpoint: ordinary candidate f611312 / EGFX-6147dc406abc596e7f2d1b60
+passed an actual native guide edit and Undo in owned AE at Full/Final/32bpc.
+The scene preview-2de67dc7e8b64314977ca836bfc20bec is CLOSED; prior
+FP_ADAPTIVE_RESOLUTION restored/read back before closure. Receipt
+EGFX-update-4b2302ad9b9b480cbef0b90d1995c435 is ROLLED_BACK and the original
+payload/signature independently inspected. The human explicitly authorized
+bounded standard CGEvent input only in AE and granted both local helpers via
+normal System Settings after action-time confirmations. Initial refused or
+unconfirmed delivery attempts remain excluded. No permission bypass was used.
+[Gesture, current Preview settings and scope](performance-host-guide-2026-10-02.json).
+
 Latest completed host block, 2026-10-02: unlocked AE 25.6x101 on M1 Pro / 16 GiB.
 Five fresh matched ordinary MFR-requested-OFF 1080p/32-bpc/Full/Final 60-frame aerender pairs:
 median total time **65.870721 -> 48.766815 s** (1.3507x ratio of medians,
@@ -35,11 +46,16 @@ Four paired bounds show improvement; phase317 overlaps and is inconclusive.
 The slow candidate and broad first-control interval remain included. This is
 an observed comparison with capture overhead, fixed run order and uncontrolled
 ambient/cache state, not observer-free latency acceptance. Exact first-playable
-latency and preview preset/frame-skip readback remain open.
+latency remains open. Later current preset readback observes Skip0 and Resolution
+Auto; it does not retroactively certify the interval series or a Full override.
 [All ten observations, bounds and identities](performance-host-preview-intervals-2026-10-02.json).
-Actual guide-drag timing is BLOCKED: Cua's native custom-canvas input returns
-AXError.notImplemented. No OS event injection or surrogate parameter change is
-accepted as a guide gesture. [Lifecycle observations and limits](performance-host-preview-2026-10-02.json).
+Actual candidate guide edit/fresh-image and Undo now PASS by native UI observation.
+Routed authorized CGEvent moved an internal guide; the pattern changed, then
+Cmd+Z restored both and Info reported Undo / Change Effect Value. The single
+Frame Render Time66ms label is not gesture-to-display latency. Quantitative
+guide response and first-playable gates remain open. Current Spacebar preset
+readback: Cache Before Playback off, Skip0, Resolution Auto, frame-rate label(30).
+[Functional gesture and current settings](performance-host-guide-2026-10-02.json).
 
 Ordinary MFR-requested-ON series: INCOMPLETE after three measured matched pairs
 and one warmup pair. The fourth control process produced only 19/60 frames;
@@ -48,7 +64,16 @@ control image/process: SIGABRT, Adobe BEE render-task termination frames; root
 cause remains unresolved. All 240 complete-pair frames and the 19 partial files
 decode exact. A separate instrumented ON pair covers/decodes all 60 frames
 exactly, with overlapping plane_region callbacks; it does not establish ordinary
-MFR throughput or resolve the crash. No five-pair ON aggregate is reported.
+MFR throughput or resolve the crash. A further bounded test of the exact failing
+AEP with the ordinary control and external5/15/30-frame sampling completed all60
+frames, independently decoded exact against the ordinary candidate. Failure was
+not reproduced under these diagnostic conditions; root cause remains unresolved.
+PNGIO compression/filter symbols occur in all three external samples, identifying
+export work but not its wall-time share. No five-pair ON aggregate is reported.
+A further one-variable diagnostic requests50% CPU with the same failing AEP,
+ordinary control and external sample points: all60 decoded frames exact.
+Both sampled100% and50% complete; neither localizes the intermittent cause or
+accepts a lower-budget fix. Original plugin restored after this transaction.
 [Retained samples, sanitized crash and diagnostic pair](performance-host-mfr-2026-10-02.json).
 
 The original installed 2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e payload is restored
@@ -66,7 +91,9 @@ are instrumented attribution, not final Render/RAM Preview timings.
 
 Previous tooling checkpoint c62bb7422547bfd911fb27be0375a52d55bccb7e: all eight CI
 checks PASS. CI hardening checkpoint c4efa51f0c0f2d5bd8e2900c83ca8169851503af:
-all eight exact-head hosted checks PASS. Attribution checkpoint 6988fa7dfb3ba4b760fe6e9e60ac6b09a646697b:
+all eight exact-head hosted checks PASS. New fixture/evidence checkpoint
+8747979b7023793da2789b9d4a92f6cac0074c1a also all eight PASS, including macOS.
+Attribution checkpoint 6988fa7dfb3ba4b760fe6e9e60ac6b09a646697b:
 all seven applicable hosted checks PASS, including macOS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
 Python 248/248 run PASS. Live exact-head hosted checks are linked in
 [draft PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20). Offline code scan retains
@@ -80,11 +107,11 @@ SmartRender on both versions; this includes pre-render/logging/host/export work,
 not a directly identified bottleneck. [Attribution limits](performance-host-attribution-2026-10-02.json).
 Next: isolate the ordinary MFR control failure with the same pinned failing AEP
 and bounded diagnostics, then validate ordinary MFR throughput. Complete preview
-preset/readback and first-playable timing; actual guide-drag-to-fresh-frame
-validation needs working custom-canvas input. Inspect remaining host/export
+Full preview override and first-playable timing; measure guide-to-display
+response separately from the now-passing actual gesture/Undo behavior. Inspect remaining host/export
 work before changing the sampler again.
-Quantitative RAM Preview, first-frame latency and actual guide gesture remain
-separate acceptance gates. No main merge, public release or cache purge.
+Quantitative RAM Preview, first-frame latency and guide response timing remain
+separate acceptance gates; functional guide edit/Undo is complete. No main merge, public release or cache purge.
 
 The user explicitly resumed extremely fast Render / RAM Preview with unchanged
 Final quality. This supersedes the earlier skip for new work; it does not change

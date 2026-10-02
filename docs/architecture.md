@@ -128,3 +128,12 @@ The interrupted control series and matched crash remain unresolved; diagnostic
 observer runs establish route/coverage/pixels only. Overlapping MFR callback
 durations cannot be summed and subtracted from wall time.
 [MFR scopes and crash](performance-host-mfr-2026-10-02.json).
+
+A temporary local owned-AE mouse helper supplied an explicitly authorized guide
+gesture when custom-canvas automation lacked drag support. It is outside the
+shipping plugin and checks accessibility trust, exact foreground executable/PID
+and bounded composition coordinates throughout delivery. UI observation confirms
+changed guide/pattern and Undo restoration; delivery timestamps and a single
+Frame Render Time label do not time display. Current native Preview readback
+shows Skip0 / Resolution Auto and is scoped separately from earlier runs.
+[Gesture/readback boundary](performance-host-guide-2026-10-02.json).

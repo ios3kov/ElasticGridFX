@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "status": "FUNCTIONAL_GUIDE_EDIT_AND_UNDO_PASS",
+  "acceptance_scope": "One actual candidate guide gesture and Undo observed in native AE UI; no quantitative guide-to-display latency or baseline gesture speed acceptance",
+  "environment": {
+    "ae": "25.6x101",
+    "cpu": "Apple M1 Pro",
+    "memory_bytes": 17179869184
+  },
+  "build": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+    "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+    "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.3"
+  },
+  "loaded_identity": {
+    "status": "PASS",
+    "uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+    "process_key_sha256": "20c9c725f07794b786e5e18d4d814b56bb35b56da586c165edbb48ccd34aebde"
+  },
+  "fixture": {
+    "source_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+    "session_id": "2de67dc7e8b64314977ca836bfc20bec",
+    "width": 1920,
+    "height": 1080,
+    "project_bit_depth": 32,
+    "quality": "Final",
+    "resolution": "Full",
+    "fast_preview": "FP_OFF",
+    "viewer_zoom_percent": 100,
+    "grid": [
+      8,
+      8
+    ],
+    "phase": 35
+  },
+  "gesture": {
+    "input": {
+      "status": "SENT_WHILE_OWNED_AE_FOREGROUND_ONLY",
+      "start_utc_seconds": 1790943260.6041322,
+      "end_utc_seconds": 1790943261.0379338,
+      "scope": "input delivery only; native Cua and owned state readback must prove actual gesture/render"
+    },
+    "from_logical_global": [
+      488,
+      284
+    ],
+    "to_logical_global": [
+      508,
+      284
+    ],
+    "native_ui_observations": [
+      "Internal vertical guide moved right and rendered pattern changed visibly.",
+      "Native timeline displayed Frame Render Time66ms after this gesture.",
+      "Cua Cmd+Z displayed Info Undo / Change Effect Value; guide and pattern returned to previous appearance."
+    ],
+    "frame_render_time_label_ms": 66,
+    "frame_render_time_label_scope": "Single native UI label only; not mouse-to-display latency, not a repeated timing distribution or baseline comparison",
+    "undo_status": "PASS_VISUAL_RESTORATION",
+    "pixel_equality_scope": "Visual functional restoration only; byte-exact exported quality evidence is in other host records"
+  },
+  "current_preview_preset": {
+    "status": "CURRENT_UI_READBACK_PASS",
+    "shortcut": "Spacebar",
+    "cache_before_playback": false,
+    "range_label": "Work Area Extended by Current... (native truncated label)",
+    "play_from": "Current Time",
+    "frame_rate_label": "(30)",
+    "skip": 0,
+    "resolution": "Auto",
+    "full_screen": false,
+    "if_caching_play_cached_frames": false,
+    "move_time_to_preview_time": true,
+    "scope": "Later current UI settings; does not retroactively certify earlier ten interval runs or a Full preview-resolution override"
+  },
+  "authorization": {
+    "standard_cgevent": "Human explicitly authorized input only in owned AE test.",
+    "accessibility": "Human separately approved each of the two local helpers at action time; normal System Settings UI/authentication used.",
+    "initial_approval_rejection": "Initial Open rejected by automatic approval review; new explicit action-time confirmation obtained before access change.",
+    "scope_checks": [
+      "AX trust required; no automatic prompt, TCC database mutation or bypass.",
+      "Exact AE executable/PID and foreground checked at each step.",
+      "Routed gesture confined to test composition bounds and80-point maximum displacement."
+    ],
+    "grants_lifecycle": "Two explicitly authorized helper grants retained for remaining owned AE checks; no broader grant."
+  },
+  "excluded_attempts": [
+    "Absent Accessibility or wrong foreground: refused before input.",
+    "Addressed postToPid delivery did not confirm an actual guide edit; excluded.",
+    "Literal grave key was rejected; separate grave input changed owned layer timing and was immediately undone/read back; excluded from measurements."
+  ],
+  "lifecycle": {
+    "owned_session": "CLOSED",
+    "previous_fast_preview": "FP_ADAPTIVE_RESOLUTION",
+    "fast_preview_restoration": "Guarded cleanup restores previous Fast Preview and checks the readback before closing.",
+    "original_plugin_receipt_id": "EGFX-update-4b2302ad9b9b480cbef0b90d1995c435",
+    "receipt_state": "ROLLED_BACK",
+    "original_build_id": "EGFX-bd19dee13315abc0b7e6090e",
+    "original_signature_and_identity": "PASS independent inspection after rollback",
+    "source_aep_unsaved": true
+  },
+  "source_records_sha256": {
+    "preview.json": "a25c0b0f1a0164381896e7afc42e1cb18c6e8ec21ba404268c05fc8a5f96d362",
+    "cleanup-d804092f6a4448c3.json": "a64359f5aab66153aca822b88c1cb07ce38bdcfc3845f88c9e4e3ad3ce25f860",
+    "owned-gesture-f7156568ebb948d5934df7f618a4c639.json": "41edab02306e985ddd15b6358b50b5345fd660823cf860a85b2dbd9889bad803",
+    "receipt.json": "aaaead0f11386c7ff6e8aee92a4c17fce08277b5f94005c41b0caf2cc1ed3f27"
+  },
+  "local_helper_sources_sha256": {
+    "ae_owned_drag_routed.swift": "3d9d1521c1c281ff52c4d89fe2c1ec59e117b962e7b71cbbb8b5d6ef8d553b5f",
+    "ae_owned_mouse_routed.py": "ad3f22a3d32e800bee2d1cec4e06bcf13f21f351a15c33c601217e753284b4eb"
+  },
+  "limits": [
+    "No observer-free first-frame or guide-to-display timing.",
+    "One gesture only; no baseline guide comparison or repeated input distribution.",
+    "Auto preset observed; full-quality per-preview override acceptance remains open.",
+    "UI screenshot observations retained in conversation; private paths and PIDs excluded from this public record."
+  ]
+}

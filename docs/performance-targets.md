@@ -26,10 +26,15 @@ fresh-phase UI runs now bracket median full-cache readiness at
 and capture/order/cache limits remain in [interval evidence](performance-host-preview-intervals-2026-10-02.json).
 Ordinary MFR-requested-ON throughput remains INCOMPLETE after a control host
 crash; complete and separate diagnostic pixel scopes remain exact.
+A further one-variable diagnostic requests50% CPU with the same failing AEP,
+ordinary control and external sample points: all60 decoded frames exact.
+Both sampled100% and50% complete; neither localizes the intermittent cause or
+accepts a lower-budget fix. Original plugin restored after this transaction.
 [MFR scopes](performance-host-mfr-2026-10-02.json).
-Actual guide dragging is blocked by the
-available custom-canvas automation. Stage 8 remains IN PROGRESS.
-[Preview scope](performance-host-preview-2026-10-02.json).
+Actual candidate guide edit and Undo PASS in native AE using explicitly authorized
+bounded input. Later current Spacebar readback shows Skip0 / Resolution Auto;
+Full preview override and first-playable/guide latency remain open. Stage8 IN PROGRESS.
+[Gesture and preset scope](performance-host-guide-2026-10-02.json).
 Host-specific absolute targets remain open until these latency gates are measured;
 the native medians do not establish them.
 

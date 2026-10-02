@@ -2,6 +2,14 @@
 
 ## Unreleased — resumed performance development
 
+- Verify actual candidate guide displacement, fresh image and Undo restoration
+  in owned AE; record current Spacebar preset and preserve input/timing limits.
+  Close owned scene, restore prior Fast Preview and original signed plugin.
+  Retain60 exact decoded frames from the same-failing-AEP MFR diagnostic;
+  intermittent crash cause and ordinary five-pair ON acceptance stay open.
+  Retain one requested50%-CPU diagnostic with60 exact frames; both sampled
+  100%/50% succeed, so no causal fix or new throughput claim.
+
 - Record ten fresh-phase equal-zoom RAM Preview UI intervals and preserve all
   outliers; separate observed cache-fill bounds from first-playable/guide gates.
   Add guarded invalidation timestamps and reject nonnumeric phase inputs.
