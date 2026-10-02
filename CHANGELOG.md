@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.3-perf.1 — local validation package preparation, 2026-10-02
+
+- Package unchanged tested0.9.3 Develop Build2 with validation notes, notices
+  and exact identity. Verify extracted signature and installed-payload parity.
+- Retain MFR issue #21 and Developer ID/notarization/distribution blockers.
+  This is a package revision, not a public release or binary version bump.
+
 ## Unreleased — resumed performance development
 
 - Complete four stability-only MFR-requested-ON candidate/control × enabled/

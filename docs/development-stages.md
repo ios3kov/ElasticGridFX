@@ -1,5 +1,10 @@
 # ElasticGridFX production stages
 
+Release preparation2026-10-02: local validation package0.9.3-perf.1 ready
+with unchanged tested0.9.3 Develop Build2. Public release BLOCKED on
+Developer ID/notarization/clean distribution and incomplete final gates;
+MFR issue #21 remains open. See [package notes](release-0.9.3-perf.1.md).
+
 Authoritative process: ../DEVELOPMENT_RULES.md.
 
 This is the project-wide stage map used for the required “Stage X of Y” status.

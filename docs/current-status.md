@@ -1,5 +1,29 @@
 # Current development / release status
 
+## Release preparation — 2026-10-02 — local package ready; public release BLOCKED
+
+PR #20 merged as cb429e1ffab06cd79cb0873ba8909b2a8369198d, with identical
+Git tree to reviewed f78a5de (all seven hosted checks PASS). The human then
+authorized proposed test-release preparation. Critical native / Release
+preparation; adopted rules5.1.0 and Release sections26/28 apply.
+
+Prepared local package revision **0.9.3-perf.1** around unchanged tested
+0.9.3 Develop Build2 / f611312 / EGFX-6147dc406abc596e7f2d1b60. Wrapper,
+inner ZIP, extracted payload/signature and installed-payload identity PASS.
+No new native build, installation or host timing series. The package revision
+is explicitly separate from embedded plugin version.
+
+Public distribution BLOCKED: Developer ID Application unavailable;
+notarization and quarantined clean download/install NOT RUN; final applicable
+release regression/migration scope INCOMPLETE. The available local Apple
+Development identity is not a substitute. Intermittent MFR issue #21 stays
+open with no causal finding/fix. No public GitHub Release or tag created.
+Next: obtain Developer ID/notarization access, then sign a new fixed candidate
+and verify it separately without transferring previous artifact PASS.
+[Package notes](release-0.9.3-perf.1.md) and
+[hashes/packaging checks](validation-package-0.9.3-perf.1.json).
+
+
 ## Completed bounded MFR isolation — 2026-10-02
 
 Direct human “делай” applied to the remaining MFR investigation. AI_ENTRYPOINT
