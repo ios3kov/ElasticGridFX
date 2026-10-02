@@ -20,7 +20,7 @@ after-effects = "=0.4.0"
 serde = { version = "=1.0.229", features = ["derive"] }
 
 [build-dependencies]
-pipl = "=0.1.1"
+pipl = { git = "https://github.com/virtualritz/after-effects.git", rev = "83dcc93734fd5db1335b6ec83cba7a6505a39dcc", version = "0.1.1" }
 cc = "=1.5.1"
 
 [dev-dependencies]
