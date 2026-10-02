@@ -1,0 +1,106 @@
+name: Windows Port
+
+on:
+  push:
+    branches: [feat/windows-x64-aex]
+    paths:
+      - "src/**"
+      - "host-rust/**"
+      - "tools/package_windows.py"
+      - "tests/test_package_windows.py"
+      - ".github/workflows/windows-port.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-port-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-x64:
+    name: Windows x64 compile and artifact gate
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up MSVC x64
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        with:
+          arch: x64
+
+      - name: Environment
+        shell: pwsh
+        run: |
+          python --version
+          python3 --version
+          rustc --version
+          cargo --version
+          cl 2>&1 | Select-Object -First 2
+          cmake --version
+
+      - name: Configure portable core
+        run: cmake -S . -B build-win -A x64 -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
+
+      - name: Build portable core
+        run: cmake --build build-win --config Release --parallel 2
+
+      - name: Test portable core
+        env:
+          EG_FUZZ_SCALE: "0.1"
+          EG_SOAK_CYCLES: "5000"
+        run: ctest --test-dir build-win -C Release --output-on-failure
+
+      - name: Test Windows packager
+        run: python -m unittest tests.test_package_windows
+
+      - name: Check locked Rust graph
+        run: cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml > NUL
+
+      - name: Test Rust host
+        run: cargo test --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
+
+      - name: Build Windows host
+        run: cargo build --release --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
+
+      - name: Package AEX
+        shell: pwsh
+        run: |
+          $dll = Resolve-Path "host-rust/target/x86_64-pc-windows-msvc/release/elasticgrid_ae.dll"
+          $identities = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/BuildIdentity.json")
+          if ($identities.Count -ne 1) { throw "Expected one release BuildIdentity.json, found $($identities.Count)" }
+          python tools/package_windows.py --dll $dll --identity $identities[0].FullName --out dist/windows
+
+      - name: Inspect PE and EffectMain export
+        shell: pwsh
+        run: |
+          dumpbin /headers "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-headers.txt
+          dumpbin /exports "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-exports.txt
+          if (-not (Select-String -Path dist/windows/dumpbin-headers.txt -Pattern "machine \(x64\)" -Quiet)) { throw "Not an x64 PE" }
+          if (-not (Select-String -Path dist/windows/dumpbin-exports.txt -Pattern "\bEffectMain\b" -Quiet)) { throw "EffectMain export missing" }
+
+      - name: Inspect PiPL resource
+        shell: pwsh
+        run: |
+          llvm-readobj --coff-resources "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/coff-resources.txt
+          if (-not (Select-String -Path dist/windows/coff-resources.txt -Pattern "PiPL" -Quiet)) { throw "PiPL resource missing" }
+
+      - name: Record scope
+        shell: pwsh
+        run: |
+          @"
+          Windows PE compile: CHECKED BY THIS JOB
+          Portable core tests: CHECKED BY THIS JOB
+          Rust host tests: CHECKED BY THIS JOB
+          PiPL resource structure: CHECKED BY THIS JOB
+          After Effects load: NOT RUN
+          After Effects runtime/UI/render/MFR/Undo: NOT RUN
+          "@ | Set-Content -Encoding utf8 dist/windows/VALIDATION_SCOPE.txt
