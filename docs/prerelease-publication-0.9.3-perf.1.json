@@ -1,0 +1,34 @@
+{
+  "status": "PUBLISHED_TEST_PRERELEASE",
+  "release_url": "https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1",
+  "tag_name": "v0.9.3-perf.1",
+  "target_commitish": "cb429e1ffab06cd79cb0873ba8909b2a8369198d",
+  "draft": false,
+  "prerelease": true,
+  "artifact_sha256": "a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14",
+  "public_download": "EXACT_HASH_PASS",
+  "signing": "AD_HOC",
+  "developer_id": "NOT DONE BY USER DECISION",
+  "notarization": "NOT RUN BY USER DECISION",
+  "full_release_gate": "NOT PASSED",
+  "assets": [
+    {
+      "id": 605711026,
+      "name": "FSTR-Stretch-0.9.3-perf.1-macOS-arm64-TEST.zip",
+      "sha256": "a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14",
+      "size": 396115
+    },
+    {
+      "id": 605711063,
+      "name": "validation-package-record.json",
+      "sha256": "59ba67b826b87438f6847317b17180cf8fcd39e7413b4321e6c164b016ef572e",
+      "size": 2279
+    },
+    {
+      "id": 605711086,
+      "name": "SHA256SUMS.txt",
+      "sha256": "412c6e5d201aa9f400f093ccc08e8fb6afe018ca25ced521f200ace3d9556c87",
+      "size": 113
+    }
+  ]
+}

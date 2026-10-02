@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.3-perf.1 — experimental TEST prerelease published, 2026-10-02
+
+- Publish unchanged tested0.9.3 Develop Build2 by explicit user decision
+  without Developer ID/notarization. Omitted gates retain NOT DONE/NOT RUN;
+  stable release readiness is not claimed. MFR issue #21 remains open.
+- Retain public archive download/hash verification and package/install notes.
+
 ## 0.9.3-perf.1 — local validation package preparation, 2026-10-02
 
 - Package unchanged tested0.9.3 Develop Build2 with validation notes, notices

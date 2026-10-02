@@ -1,5 +1,29 @@
 # Current development / release status
 
+## Published experimental prerelease — 2026-10-02
+
+The human explicitly directed release without Developer ID/notarization after
+being informed of the adopted rules requirement. This later instruction
+supersedes that publication hold for this TEST prerelease only; it does not
+turn omitted checks into PASS or certify the full Release Gate.
+
+Published v0.9.3-perf.1, prerelease=true / draft=false, target cb429e1:
+https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1
+Public TEST archive SHA-256 a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14.
+Downloaded public asset matches exactly. Original inner ZIP, signed payload
+and tested f611312 / EGFX-6147dc406abc596e7f2d1b60 remain unchanged; AE version
+0.9.3 Develop Build2. Previous local VALIDATION wrapper remains historical.
+No plugin replacement, certificate change or security bypass performed.
+
+Developer ID NOT DONE, notarization NOT RUN by user decision; quarantined
+Gatekeeper/clean installation and final broad release gates remain unpassed.
+MFR issue #21 stays open; no cause/fix claim. Stable release not certified.
+[Current release notes](release-0.9.3-perf.1.md) and
+[verified publication](prerelease-publication-0.9.3-perf.1.json).
+
+### Historical preparation hold — superseded for this TEST prerelease
+
+
 ## Release preparation — 2026-10-02 — local package ready; public release BLOCKED
 
 PR #20 merged as cb429e1ffab06cd79cb0873ba8909b2a8369198d, with identical

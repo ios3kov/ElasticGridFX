@@ -1,0 +1,46 @@
+{
+  "artifact": "FSTR-Stretch-0.9.3-perf.1-macOS-arm64-TEST.zip",
+  "artifact_bytes": 396115,
+  "artifact_sha256": "a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14",
+  "blockers": [
+    "Developer ID Application unavailable",
+    "notarization NOT RUN",
+    "quarantined clean download/install NOT RUN",
+    "final release regression/migration scope INCOMPLETE",
+    "intermittent MFR control crash unresolved: issue #21"
+  ],
+  "effect_version": "Develop Build 2",
+  "files": {
+    "FSTR Stretch.artifact.json": "9b16990a94a19061825672c5132cebe945f663d687f401b27f7835b994021256",
+    "FSTR Stretch.plugin.zip": "b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a",
+    "README.md": "73e0dcb5640d55f8b93a0b56c32ade3a7ef2d30568804383137a84182e14111b",
+    "THIRD_PARTY_NOTICES.md": "aeabe4b1f8f0bbbf74cb647a22b539d8188e834dbe35d7ae61d17c00a5950a9b"
+  },
+  "inner_zip_sha256": "b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a",
+  "new_host_runs": "NOT RUN: no new binary or payload; existing exact-artifact host evidence retained",
+  "package_revision": "0.9.3-perf.1",
+  "packaging_checkpoint": "4af667eaf57c1f74822fb51b045935891c8e45cf",
+  "plugin_build": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+    "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+    "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.3"
+  },
+  "plugin_version": "0.9.3",
+  "public_distribution": true,
+  "release_status": "USER_AUTHORIZED_TEST_PRERELEASE; FULL_GATE_NOT_PASSED",
+  "schema": 1,
+  "signing": "ad-hoc; local Apple Development identity is not Developer ID",
+  "user_decision": "2026-10-02: public test release without Developer ID/notarization; checks not waived into PASS",
+  "validation_status": "PASS: exact immutable payload, extracted signature and installed-payload identity"
+}

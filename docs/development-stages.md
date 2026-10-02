@@ -1,5 +1,10 @@
 # ElasticGridFX production stages
 
+2026-10-02: experimental TEST prerelease v0.9.3-perf.1 PUBLISHED by explicit
+user exception without Developer ID/notarization. Public asset hash matches.
+Full Release Gate NOT PASSED; MFR #21 stays open.
+[Publication](prerelease-publication-0.9.3-perf.1.json).
+
 Release preparation2026-10-02: local validation package0.9.3-perf.1 ready
 with unchanged tested0.9.3 Develop Build2. Public release BLOCKED on
 Developer ID/notarization/clean distribution and incomplete final gates;
