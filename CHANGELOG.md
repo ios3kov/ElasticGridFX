@@ -1,5 +1,9 @@
 # Changelog
 
+- 2026-10-02: user reports clean-environment install and legacy animated
+  Columns/Rows checks passed; record USER-REPORTED acceptance and promote
+  existing 0.9.3-perf.1 release with the explicit signing exception.
+
 - 2026-10-02: verified browser-downloaded quarantined public package loading and
   static baseline-project save/reopen/render parity; existing Mac scope only.
   See docs/public-install-project-check-2026-10-02.json.
