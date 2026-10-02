@@ -3,7 +3,7 @@ use super::*;
 const HIT_SLOP: f32 = 9.0;
 const GRIP_LENGTH: f32 = 48.0;
 const GUIDE_GAP: f32 = 12.0;
-const DRAG_NONE: isize = 0;
+const DRAG_NONE: ae::sys::A_intptr_t = 0;
 const DRAG_COLUMNS: isize = 1;
 const DRAG_ROWS: isize = 2;
 const DRAG_CORNER: isize = 3;
