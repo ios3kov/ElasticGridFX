@@ -483,7 +483,7 @@ fn drag_inner(
     let displayed = control_grid::read(in_data,params)?;
     // A reentrant density change must not redirect an in-flight drag to another handle.
     if event.continue_refcon(2) != displayed.grid.columns as ae::sys::A_intptr_t ||
-        event.continue_refcon(3) != displayed.grid.rows as isize {
+        event.continue_refcon(3) != displayed.grid.rows as ae::sys::A_intptr_t {
         event.set_send_drag(false); return Ok(());
     }
     let (positions,refs,lines,pins,target) = if axis == DRAG_COLUMNS {
