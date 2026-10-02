@@ -10,7 +10,7 @@ import re
 import shutil
 
 
-MARKER = re.compile(rb"ElasticGridBuildID=([0-9a-f]+)")
+MARKER = re.compile(rb"ElasticGridBuildID=(EGFX-[0-9a-f]{24})")
 
 
 def sha256(path: Path) -> str:
