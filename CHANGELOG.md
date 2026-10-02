@@ -1,5 +1,12 @@
 # Changelog
 
+## Postrelease validation — 2026-10-02
+
+- Verify one user-scene copy: selected-frame pixel parity after UI Undo and
+  save/reopen, animated keys/settings retained, native GUI Preview functional.
+  Preserve source locally and retain unchanged installed candidate. This bounded
+  check does not close MFR #21 or certify broad release/migration gates.
+
 ## 0.9.3-perf.1 — experimental TEST prerelease published, 2026-10-02
 
 - Publish unchanged tested0.9.3 Develop Build2 by explicit user decision

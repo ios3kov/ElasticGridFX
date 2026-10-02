@@ -1,5 +1,9 @@
 # ElasticGridFX production stages
 
+Postrelease check2026-10-02: one owned user-scene copy PASS for selected-frame
+render parity, UI Undo, save/reopen and functional GUI Preview. Source preserved;
+full release/MFR gates remain open. [Record](postrelease-project-validation-2026-10-02.json).
+
 2026-10-02: experimental TEST prerelease v0.9.3-perf.1 PUBLISHED by explicit
 user exception without Developer ID/notarization. Public asset hash matches.
 Full Release Gate NOT PASSED; MFR #21 stays open.

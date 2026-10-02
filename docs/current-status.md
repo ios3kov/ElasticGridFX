@@ -1,5 +1,18 @@
 # Current development / release status
 
+## Postrelease project check — 2026-10-02 — scoped PASS
+
+One preserved user scene was checked through an owned copy on the exact retained
+0.9.3 Develop Build2 / EGFX-6147dc406abc596e7f2d1b60, AE25.6x101. Native8-bpc
+sRGB settings and all three animated grid keys survived save/reopen. UI Undo
+restored amplitude0 and the prior deformation. Four selected frames rendered
+in each of baseline/Undo/reopen phases; all eight decoded straight RGBA16
+comparisons are byte-exact. Native GUI Preview played the animation with full
+work-area cache and stopped normally; no new FPS/latency or preset certification.
+The source snapshot hash stayed unchanged and it is reopened in AE. User AEPs,
+raw logs and pixels stay local. MFR #21 and broad release gates remain open.
+[Scoped record](postrelease-project-validation-2026-10-02.json).
+
 ## Published experimental prerelease — 2026-10-02
 
 The human explicitly directed release without Developer ID/notarization after
