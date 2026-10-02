@@ -1,5 +1,9 @@
 # Changelog
 
+- 2026-10-02: verified browser-downloaded quarantined public package loading and
+  static baseline-project save/reopen/render parity; existing Mac scope only.
+  See docs/public-install-project-check-2026-10-02.json.
+
 ## MFR disposition — 2026-10-02
 
 - Complete six bounded MFR-requested-ON100 reproduction attempts on the original

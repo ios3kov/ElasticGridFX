@@ -1,5 +1,25 @@
 # ElasticGridFX production stages
 
+## Latest distribution and saved-project check — 2026-10-02 — scoped PASS
+
+PR #22 merged at f459a249df0cab9c41179548dd8b173ec155e933; shipping source
+f611312 and public archive remain unchanged. Browser-downloaded public ZIP matches
+its published hash. Quarantine propagated through both ZIP extractions and was
+retained during a reversible atomic reinstall. AE25.6 loaded the exact candidate
+(UUID verified in memory), with no security-setting changes. That accelerated
+public copy remains installed; the previous accelerated copy is preserved.
+
+A copied baseline AEP from EGFX-bd19dee13315abc0b7e6090e opened, saved and
+reopened with all checked static parameters preserved. Its selected Full/Final
+native8-bpc frame matches the old reference exactly after RGBA16 decoding.
+The preserved user source stayed unchanged and was reopened. This is an existing
+Mac/user check, not clean-environment certification. No authenticated legacy
+fixture with animated Columns/Rows was available; that migration is NOT RUN.
+Developer ID/notarization remain omitted by user decision. TEST prerelease
+retained; stable release and broad HDR/OCIO certification not claimed.
+[Distribution and project record](public-install-project-check-2026-10-02.json).
+
+
 Latest MFR disposition: issue21 CLOSED as NOT REPRODUCED by explicit user
 decision after six complete60-frame ordinary renders (three original control,
 three retained candidate). Cause unknown, no fix/general certification. Earlier
