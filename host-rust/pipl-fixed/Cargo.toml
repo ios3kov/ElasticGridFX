@@ -1,0 +1,9 @@
+[package]
+name = "pipl-fixed"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+pipl-upstream = { package = "pipl", version = "=0.1.1" }
+winres = "=0.1.12"
