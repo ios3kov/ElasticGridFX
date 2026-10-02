@@ -1,4 +1,7 @@
+#[cfg(not(target_os = "windows"))]
 use pipl::*;
+#[cfg(target_os = "windows")]
+use pipl_fixed::*;
 use std::path::PathBuf;
 
 const PF_PLUG_IN_VERSION: u16 = 13;
