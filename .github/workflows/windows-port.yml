@@ -7,6 +7,7 @@ on:
       - "src/**"
       - "host-rust/**"
       - "tools/package_windows.py"
+      - "tools/verify_windows_pipl.py"
       - "tests/test_package_windows.py"
       - ".github/workflows/windows-port.yml"
   workflow_dispatch:
