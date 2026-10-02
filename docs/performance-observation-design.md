@@ -116,7 +116,7 @@ renderer default, saved plugin state or production API change. Reuse verified
 create/openInViewer/comment/expression checks from ae_native_plane_final.jsx
 and ae_binding_probe.jsx; existing save/close/output APIs remain unchanged.
 
-API-SOURCE-001 review for the fixture: the Adobe-authored scripting guide
+API-SOURCE-001 review for the fixture: the community-maintained guide derived from Adobe scripting documentation
 [FootageItem.file](https://ae-scripting.docsforadobe.dev/item/footageitem/#footageitemfile)
 defines a read-only File/null source, used only for owned-input verification.
 [CompItem.openInViewer](https://ae-scripting.docsforadobe.dev/item/compitem/#compitemopeninviewer)
@@ -137,3 +137,111 @@ its existing AE effect cache identity from accepted 1, candidate 2 and observers
 API change. Retain prior original-source gates and run the complete clean Mac
 build/repro/package checks for the new exact source. Validate source/quality
 before matched timing; restore the original after every bounded experiment.
+
+Legacy chain harness plan: retain the historical saveFrameToPng failure on both
+accepted and candidate artifacts. Add a separate owned empty-project fixture
+with creation and capture in different host turns, so Adjustment Layer binding
+is proven before nonneutral rendering. Capture the same seven direct states
+and three downstream Corner Pin states through the existing guarded straight
+RGBA16 Render Queue method; retain requested/read-back times and encoded depth.
+Use unchanged smoke pixel assertions plus exact before/after same-toolchain
+comparison. No pending-plane fallback, depth reduction or weakened oracle. All
+APIs are already exercised in ae_runtime_smoke.jsx and ae_plane_smoke.jsx; this
+is harness validation, not a new native/plugin API. Only owned test projects
+are closed without saving; foreign/changed structures fail before mutation.
+
+Preview validation plan: open only the pinned owned scene in regular GUI AE,
+prove loaded ordinary identity, 32-bpc/full resolution/Final quality and existing
+ready binding. Use the normal Preview UI/shortcut and externally observe cache
+coverage, first displayed motion and cached playback separately. Retain timestamp
+bounds from observations; do not label UI observation intervals precise callback
+latencies. Rebuild only the owned scene after a parameter change; no global purge.
+The community-maintained [ViewOptions.fastPreview](https://ae-scripting.docsforadobe.dev/other/viewoptions/#viewoptionsfastpreview)
+provides FP_OFF (Final Quality) on a Composition viewer, with readback; other
+viewer types must fail. [Viewer.type](https://ae-scripting.docsforadobe.dev/other/viewer/#viewertype)
+is verified before using this option. These documented ExtendScript reads/options
+control the owned test viewer, not PF rendering or a Preview completion API.
+Actual playback/cache completion requires the external UI evidence.
+
+Ordinary fixed-AEP series found a cache confounder: original-source warmup
+71.648 s followed by a 43.350 s measured run, versus candidate 46.655/45.416 s.
+Those exports retain exact image files but cannot establish fresh renderer
+throughput. Stop the owned Python measurement driver with normal interrupt;
+allow its current AE render to finish and restore the original in finally.
+Keep incomplete/cache-sensitive records, not a speed PASS.
+
+Fresh-invalidation plan: prepare six owned copies through regular guarded GUI
+AE, one warmup pair and five measured pairs. Each pair uses the identical
+hash-checked AEP for both versions; only Wave Phase differs between pairs,
+with identical geometry, depth, quality and animation range. Distinct existing
+Develop 2/5 versions and never-rendered phase values avoid the observed same-key
+reuse without purging user caches. Require encoded equality for every matched
+60-frame pair, record all phase values/project hashes, and calculate paired
+speedups plus spread. Cross-pair content variation remains an explicit limit.
+
+Source provenance clarification: the scripting guide is maintained by
+docsforadobe from Adobe documentation. Adobe's official
+[Scripts page](https://helpx.adobe.com/ca/after-effects/desktop/automate-in-after-effects/automate-animation/scripts.html)
+links the scripting reference; its modern UXP ViewOptions page describes a
+different engine and is not substituted for ExtendScript compatibility proof.
+Adobe's [Preview documentation](https://helpx.adobe.com/mena_en/after-effects/desktop/view-and-preview/preview-video-and-audio/previewing.html)
+defines the user-visible cache/playback and Fast Preview quality controls.
+Actual AE 25.6 readback and external UI behavior remain required.
+
+The uninstrumented original-source Develop-5 control at 98e3839 /
+EGFX-a733d95d2018fb8bc321b6d8 passes the complete 20-stage Mac build,
+clean reproducibility, signature and extracted-package verification. Its native
+src/ diff from accepted 2ccc5f6 is empty. Build identity confirms the same Clang
+21 / Rust 1.98.1 / ordinary build settings as f611312. Earlier bootstrap attempts
+that updated the stable Rust alias or lacked pinned Clippy were rejected; the
+default was restored to installed 1.98.1 and no 1.99 artifact is used.
+
+Original accepted plugin now passes the independent two-turn 10-frame queue
+chain fixture at project 32 bpc and straight RGBA16, export scale 1.0, unchanged
+smoke assertions. The first report-writing failure remains retained; its
+cleanup completed, and the fix serializes primitive readiness before closed
+AE objects become invalid and recreates the report File after cleanup.
+
+## Actual unlocked host block — 2026-10-02
+
+Separate ordinary Develop-5 control uses accepted native src/ unchanged, Clang 21
+and Rust 1.98.1 matching candidate Develop-2; diagnostic feature is disabled.
+Full physical-Mac/package and reproducibility gates PASS. A fixed-AEP ordinary
+series is retained INCOMPLETE after cache reuse masked work. Six fresh Wave Phase
+variants were saved in AE only after binding readiness; both versions use the
+identical AEP inside each pair, with varying phase between pairs and no purge.
+Five measured pairs (plus one warmup pair) pass exact mapped image/disk package
+identity, exits, complete 60-frame RGBA16 output and byte equality. Medians
+65.870721 -> 48.766815 s, ratio 1.3507x, reduction 25.97%; median paired ratio
+1.3303x. All 360 distinct pair/warmup baseline PNGs independently decoded at
+calibrated straight RGBA16; corresponding candidate files are encoded identical.
+Startup/export/polling and ambient/cache limits are explicit.
+See [samples](performance-host-render-2026-10-02.json).
+
+The two-turn queue fixture passes unchanged seven pixel assertions on all three
+builds, including Adjustment Layer -> ElasticGrid -> Corner Pin, actual project
+32 bpc/straight RGBA16. All ten same-toolchain before/after frames decoded exact.
+The original saveFrameToPng harness failure is retained, not weakened or converted
+to a renderer PASS. See [matrix/chain](performance-host-matrix-2026-10-02.json).
+
+Actual GUI preview at Full/Final/32 bpc/FP_OFF reaches Playing 60 of 60 and
+30 fps (realtime) on candidate and control; cached restart, wave invalidation
+and Escape interruption with a still-partial cache are observed. SDK setup
+reports only readiness/settings, while UI proves the observed lifecycle.
+No precise cache-generation/first-playable timing or five matched RAM pairs:
+UI/tool delays, incomplete lower-panel control readback and differing viewer
+zoom prevent equal-condition speed acceptance. Native custom-canvas click/drag
+returns AXError.notImplemented, blocking a real guide gesture; no OS input
+injection or SDK parameter mutation substitutes for it. All owned projects
+closed without saving, prior Fast Preview restored, original plugin restored
+and Adobe processes stopped. See [observations](performance-host-preview-2026-10-02.json).
+Stage 8 stays IN PROGRESS; no merge/release or universal 4K speed claim.
+
+Review after the captured host runs added pre-mutation refusal of stale variant
+reports and nonfinite/repeated/source-identical phases. Negative guard mocks PASS;
+the successful six-phase creation path is unchanged. Host records preserve the
+SHA of the script actually executed, separately from this subsequent guard edit.
+All 15 JSX suites and fresh Python 248/248 PASS. The first sandboxed Python run
+was incomplete on three OS process/image checks; full permitted execution PASS.
+Offline scanner review retains existing mutable Actions/checkouts and a test-only
+rate-limit heuristic, with no credential finding; no release certification.

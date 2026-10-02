@@ -13,10 +13,18 @@ RAM Preview. Exact settings, samples and pixel parity are in
 [the corrected comparison](performance-plane-corrected-comparison-2026-10-01.json).
 They do not establish real-time host performance or the Metal targets below.
 
-Actual target-AE alternating Render measurements and host pixel checks are in
-progress. RAM Preview generation/playback and drag latency remain NOT RUN for
-this candidate. Freeze host targets only after a valid controlled baseline; do
-not derive them from these native medians. Stage 8 remains IN PROGRESS.
+Actual target AE 25.6 / M1 Pro / 16 GiB: five matched fresh-phase ordinary
+1080p/32-bpc/Full/Final 60-frame aerender pairs give median total time
+65.870721 -> 48.766815 s (25.97% reduction). Startup/PNG export/polling included;
+no cold-cache or per-frame claim. All 360 pair/warmup outputs exact.
+[Raw scoped comparison](performance-host-render-2026-10-02.json).
+GUI RAM Preview plays all 60 frames at 30 fps on both versions, with cache
+invalidation and cancellation verified. Cache-build/first-playable latency is
+not accepted from screenshot bounds; actual guide dragging is blocked by the
+available custom-canvas automation. Stage 8 remains IN PROGRESS.
+[Preview scope](performance-host-preview-2026-10-02.json).
+Host-specific absolute targets remain open until these latency gates are measured;
+the native medians do not establish them.
 
 The older CPU path numbers below are historical and do not describe the active
 plane sampler. AE GPU dispatch remains disabled; physical Metal backend tests

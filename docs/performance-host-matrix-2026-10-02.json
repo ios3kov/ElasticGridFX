@@ -1768,8 +1768,9 @@
   },
   "limitations": [
     "Same-toolchain exact proof does not erase old-artifact FAIL",
-    "No accepted Render/RAM Preview timings",
-    "Legacy saveFrameToPng chain frame missing on original too; full chain gate remains open"
+    "Matrix is not speed evidence; separate fresh ordinary total-time comparison and limited GUI lifecycle records are available",
+    "Legacy saveFrameToPng failure retained; separate two-turn queue chain passes unchanged pixel assertions and same-toolchain exact equality",
+    "Straight RGBA16 export does not certify native HDR float"
   ],
   "ready_fixture": {
     "bit_depth": 32,
@@ -3254,5 +3255,751 @@
         "candidate_sha256": "184ecdfb3c196eead752242375fc0eb914fe638813a533cb5bc2fbbf635a49b8"
       }
     ]
+  },
+  "accepted_original_queue_chain": {
+    "status": "PASS",
+    "build": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+      "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+      "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+        "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+      },
+      "version": "0.9.3"
+    },
+    "identity_status": "PASS",
+    "precision_status": "RGBA16_PASS",
+    "jsx_sha256": "48c081578cb7dd5df8b8b2ac943f5f3660a775b98771deb045326874690eaad7",
+    "capture": {
+      "binding_ready": true,
+      "error_line": null,
+      "error_number": null,
+      "frames": [
+        {
+          "name": "bypass",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "identity",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "static_a",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "static_b",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.75,
+          "requested_time": 0.75
+        },
+        {
+          "name": "animated_a",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.125,
+          "requested_time": 0.125
+        },
+        {
+          "name": "animated_b",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.625,
+          "requested_time": 0.625
+        },
+        {
+          "name": "reset",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "chain_before_corner",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "chain_corner_identity",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        },
+        {
+          "name": "chain_corner_moved",
+          "output_bit_depth": 16,
+          "project_bit_depth": 32,
+          "queue_time": 0.25,
+          "requested_time": 0.25
+        }
+      ],
+      "run_id": "f1302255fad54b36a769394cf68af97b",
+      "scope": "owned queue fixture; pixel assertions external",
+      "stage": "captured",
+      "status": "CAPTURED"
+    },
+    "pixels": {
+      "checks": {
+        "animated_a_animated_b": {
+          "changed_fraction": 0.6354661220879564,
+          "max_abs": 1.0,
+          "mean_abs": 0.05114701001980079,
+          "status": "PASS"
+        },
+        "bypass_identity": {
+          "changed_fraction": 0.0,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "status": "PASS"
+        },
+        "chain_before_corner_chain_corner_identity": {
+          "changed_fraction": 0.0,
+          "max_abs": 3.0517578125e-05,
+          "mean_abs": 1.6870628784355936e-09,
+          "status": "PASS"
+        },
+        "chain_corner_identity_chain_corner_moved": {
+          "changed_fraction": 0.9851324809115624,
+          "max_abs": 1.0,
+          "mean_abs": 0.22765975497278865,
+          "status": "PASS"
+        },
+        "identity_reset": {
+          "changed_fraction": 0.0,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "status": "PASS"
+        },
+        "identity_static_a": {
+          "changed_fraction": 0.4004474563925129,
+          "max_abs": 0.9019455313682556,
+          "mean_abs": 0.036357005823982144,
+          "status": "PASS"
+        },
+        "static_a_static_b": {
+          "changed_fraction": 0.0,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "status": "PASS"
+        }
+      },
+      "export_rgb_scale": 1.0,
+      "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification",
+      "status": "PASS"
+    }
+  },
+  "queue_chain": {
+    "scope": "Ten owned 319x241 queue states, including Adjustment Layer -> ElasticGrid -> Corner Pin; project 32 bpc / straight RGBA16, unchanged pixel assertions; not HDR float proof",
+    "captures": [
+      {
+        "build": {
+          "artifact_type": "AE native effect (.plugin)",
+          "build_id": "EGFX-bd19dee13315abc0b7e6090e",
+          "commit": "2ccc5f674b8b94b534d4c3ad6abdec3524e3624f",
+          "profile": "release",
+          "schema": 1,
+          "settings_sha256": "eca9ac987d54c3ac13636ae98936b766c1f677af6c0eb19132f120956287fb7b",
+          "source_sha256": "efdd146d3324f650e91ad435b26977898a3574f78a866a66f95bec6e47eff9a4",
+          "source_state": "clean",
+          "target": "aarch64-apple-darwin",
+          "toolchain": {
+            "cxx": "Apple clang version 15.0.0 (clang-1500.3.9.4)",
+            "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)"
+          },
+          "version": "0.9.3"
+        },
+        "capture": {
+          "binding_ready": true,
+          "error_line": null,
+          "error_number": null,
+          "frames": [
+            {
+              "name": "bypass",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.75,
+              "requested_time": 0.75
+            },
+            {
+              "name": "animated_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.125,
+              "requested_time": 0.125
+            },
+            {
+              "name": "animated_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.625,
+              "requested_time": 0.625
+            },
+            {
+              "name": "reset",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_before_corner",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_moved",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            }
+          ],
+          "run_id": "f1302255fad54b36a769394cf68af97b",
+          "scope": "owned queue fixture; pixel assertions external",
+          "stage": "captured",
+          "status": "CAPTURED"
+        },
+        "identity_status": "PASS",
+        "jsx_sha256": "48c081578cb7dd5df8b8b2ac943f5f3660a775b98771deb045326874690eaad7",
+        "pixels": {
+          "checks": {
+            "animated_a_animated_b": {
+              "changed_fraction": 0.6354661220879564,
+              "max_abs": 1.0,
+              "mean_abs": 0.05114701001980079,
+              "status": "PASS"
+            },
+            "bypass_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "chain_before_corner_chain_corner_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 3.0517578125e-05,
+              "mean_abs": 1.6870628784355936e-09,
+              "status": "PASS"
+            },
+            "chain_corner_identity_chain_corner_moved": {
+              "changed_fraction": 0.9851324809115624,
+              "max_abs": 1.0,
+              "mean_abs": 0.22765975497278865,
+              "status": "PASS"
+            },
+            "identity_reset": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "identity_static_a": {
+              "changed_fraction": 0.4004474563925129,
+              "max_abs": 0.9019455313682556,
+              "mean_abs": 0.036357005823982144,
+              "status": "PASS"
+            },
+            "static_a_static_b": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            }
+          },
+          "export_rgb_scale": 1.0,
+          "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification",
+          "status": "PASS"
+        },
+        "precision_status": "RGBA16_PASS",
+        "scope": "owned two-turn straight RGBA16 queue smoke; not timing/HDR proof",
+        "status": "PASS",
+        "uuid": "CB903F7F-0C9C-37EA-A549-52463FFCB509",
+        "version": "original",
+        "raw_record_sha256": "837d0dd2f2d5002ee88caf63d3265ecffc9ed06c2287983b5166f397e531c757"
+      },
+      {
+        "build": {
+          "artifact_type": "AE native effect (.plugin)",
+          "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+          "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+          "profile": "release",
+          "schema": 1,
+          "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+          "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+          "source_state": "clean",
+          "target": "aarch64-apple-darwin",
+          "toolchain": {
+            "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+            "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+          },
+          "version": "0.9.3"
+        },
+        "capture": {
+          "binding_ready": true,
+          "error_line": null,
+          "error_number": null,
+          "frames": [
+            {
+              "name": "bypass",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.75,
+              "requested_time": 0.75
+            },
+            {
+              "name": "animated_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.125,
+              "requested_time": 0.125
+            },
+            {
+              "name": "animated_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.625,
+              "requested_time": 0.625
+            },
+            {
+              "name": "reset",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_before_corner",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_moved",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            }
+          ],
+          "run_id": "19459e73625945319e81d5579ae0310a",
+          "scope": "owned queue fixture; pixel assertions external",
+          "stage": "captured",
+          "status": "CAPTURED"
+        },
+        "identity_status": "PASS",
+        "jsx_sha256": "48c081578cb7dd5df8b8b2ac943f5f3660a775b98771deb045326874690eaad7",
+        "pixels": {
+          "checks": {
+            "animated_a_animated_b": {
+              "changed_fraction": 0.6354661220879564,
+              "max_abs": 1.0,
+              "mean_abs": 0.05114700624881598,
+              "status": "PASS"
+            },
+            "bypass_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "chain_before_corner_chain_corner_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 3.0517578125e-05,
+              "mean_abs": 1.1908679141898307e-09,
+              "status": "PASS"
+            },
+            "chain_corner_identity_chain_corner_moved": {
+              "changed_fraction": 0.9851324809115624,
+              "max_abs": 1.0,
+              "mean_abs": 0.22765975497278865,
+              "status": "PASS"
+            },
+            "identity_reset": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "identity_static_a": {
+              "changed_fraction": 0.4004474563925129,
+              "max_abs": 0.9019455313682556,
+              "mean_abs": 0.03635700572474315,
+              "status": "PASS"
+            },
+            "static_a_static_b": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            }
+          },
+          "export_rgb_scale": 1.0,
+          "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification",
+          "status": "PASS"
+        },
+        "precision_status": "RGBA16_PASS",
+        "scope": "owned two-turn straight RGBA16 queue smoke; not timing/HDR proof",
+        "status": "PASS",
+        "uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+        "version": "candidate",
+        "raw_record_sha256": "18f7d305233de2f49da0adcdc3524f2002be0b57ec783bf8cd228aad3db224da"
+      },
+      {
+        "build": {
+          "artifact_type": "AE native effect (.plugin)",
+          "build_id": "EGFX-a733d95d2018fb8bc321b6d8",
+          "commit": "98e383997147c612b8010b406ec379e162975928",
+          "profile": "release",
+          "schema": 1,
+          "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+          "source_sha256": "9a238afcd99336a74d94e51c6819d75ad3a8cd69f094551ded82c60c4f5d2a26",
+          "source_state": "clean",
+          "target": "aarch64-apple-darwin",
+          "toolchain": {
+            "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+            "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+          },
+          "version": "0.9.3"
+        },
+        "capture": {
+          "binding_ready": true,
+          "error_line": null,
+          "error_number": null,
+          "frames": [
+            {
+              "name": "bypass",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "static_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.75,
+              "requested_time": 0.75
+            },
+            {
+              "name": "animated_a",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.125,
+              "requested_time": 0.125
+            },
+            {
+              "name": "animated_b",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.625,
+              "requested_time": 0.625
+            },
+            {
+              "name": "reset",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_before_corner",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_identity",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            },
+            {
+              "name": "chain_corner_moved",
+              "output_bit_depth": 16,
+              "project_bit_depth": 32,
+              "queue_time": 0.25,
+              "requested_time": 0.25
+            }
+          ],
+          "run_id": "e979d773142d41f6be7cfdb21ff138a0",
+          "scope": "owned queue fixture; pixel assertions external",
+          "stage": "captured",
+          "status": "CAPTURED"
+        },
+        "identity_status": "PASS",
+        "jsx_sha256": "48c081578cb7dd5df8b8b2ac943f5f3660a775b98771deb045326874690eaad7",
+        "pixels": {
+          "checks": {
+            "animated_a_animated_b": {
+              "changed_fraction": 0.6354661220879564,
+              "max_abs": 1.0,
+              "mean_abs": 0.05114700624881598,
+              "status": "PASS"
+            },
+            "bypass_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "chain_before_corner_chain_corner_identity": {
+              "changed_fraction": 0.0,
+              "max_abs": 3.0517578125e-05,
+              "mean_abs": 1.1908679141898307e-09,
+              "status": "PASS"
+            },
+            "chain_corner_identity_chain_corner_moved": {
+              "changed_fraction": 0.9851324809115624,
+              "max_abs": 1.0,
+              "mean_abs": 0.22765975497278865,
+              "status": "PASS"
+            },
+            "identity_reset": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            },
+            "identity_static_a": {
+              "changed_fraction": 0.4004474563925129,
+              "max_abs": 0.9019455313682556,
+              "mean_abs": 0.03635700572474315,
+              "status": "PASS"
+            },
+            "static_a_static_b": {
+              "changed_fraction": 0.0,
+              "max_abs": 0.0,
+              "mean_abs": 0.0,
+              "status": "PASS"
+            }
+          },
+          "export_rgb_scale": 1.0,
+          "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification",
+          "status": "PASS"
+        },
+        "precision_status": "RGBA16_PASS",
+        "scope": "owned two-turn straight RGBA16 queue smoke; not timing/HDR proof",
+        "status": "PASS",
+        "uuid": "22704D84-3AB5-3C47-90AB-EABF9DAA05B1",
+        "version": "baseline",
+        "raw_record_sha256": "483173f2c22b031e47c856bab38bfe09e406b22a8f5ed8cbff7dda71a0ed458c"
+      }
+    ],
+    "same_toolchain_exact": {
+      "schema": 1,
+      "status": "PASS",
+      "scope": "exact decoded straight RGBA16 before/after; encoded PNG is not native HDR float proof",
+      "decoder_version": "ffmpeg version 9.0.1 Copyright (c) 2000-2026 the FFmpeg developers",
+      "decoder_binary_sha256": "9f5ddd4f8b36eb07b0c5d60ab6ea1e618bedd70bc45feab82b4dc23be1596ad1",
+      "calibration_sha256": "91a95fc7446579378c7dd5e3a81e970ddccda5ac8d2455014822c5871d77bcfe",
+      "tool_sha256": "a4db35f64bb7a8f885d96c97e86cc31033b09689fe30450e6a7ecd8f2fe23c38",
+      "frames": [
+        {
+          "frame": "animated_a.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "54e3fb4c88964ca03dc74adcea03bc80bee823a53d5486797b59fb4a683514e6",
+          "candidate_sha256": "54e3fb4c88964ca03dc74adcea03bc80bee823a53d5486797b59fb4a683514e6"
+        },
+        {
+          "frame": "animated_b.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "72686ee0a6d7f9ecdc72e57ca7c36e0899ff6759fd4ceea83c693471aaf14623",
+          "candidate_sha256": "72686ee0a6d7f9ecdc72e57ca7c36e0899ff6759fd4ceea83c693471aaf14623"
+        },
+        {
+          "frame": "bypass.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d",
+          "candidate_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d"
+        },
+        {
+          "frame": "chain_before_corner.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce",
+          "candidate_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce"
+        },
+        {
+          "frame": "chain_corner_identity.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "10340acbc91b5cfaa7ce121a3be6c9388b7cb4a625cbdf602e9cce01e31ba7e7",
+          "candidate_sha256": "10340acbc91b5cfaa7ce121a3be6c9388b7cb4a625cbdf602e9cce01e31ba7e7"
+        },
+        {
+          "frame": "chain_corner_moved.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "75271a12dcb1d22e19a10ea1791b21e78ff79ed523e02e715270d285dc1f23c4",
+          "candidate_sha256": "75271a12dcb1d22e19a10ea1791b21e78ff79ed523e02e715270d285dc1f23c4"
+        },
+        {
+          "frame": "identity.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d",
+          "candidate_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d"
+        },
+        {
+          "frame": "reset.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d",
+          "candidate_sha256": "e25cc7b9a1d12ab9581fb106289dd9e62470c375bec629470665530f0c01642d"
+        },
+        {
+          "frame": "static_a.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce",
+          "candidate_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce"
+        },
+        {
+          "frame": "static_b.png",
+          "width": 319,
+          "height": 241,
+          "byte_exact": true,
+          "max_code_difference": 0,
+          "changed_channels": 0,
+          "changed_alpha": 0,
+          "baseline_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce",
+          "candidate_sha256": "b2268a1406f2b5fa935d8b148d68c0962cb9d640f05cd729b2c706febb0232ce"
+        }
+      ]
+    }
   }
 }

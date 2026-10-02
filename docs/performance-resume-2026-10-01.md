@@ -391,3 +391,38 @@ accepted total render/playback performance. Original restored after observers;
 ordinary pilot and unique uninstrumented Develop-5 control precede paired timing.
 Python 248/248, 12 JSX suites PASS. Legacy chain capture and RAM Preview remain
 open. [Scoped machine evidence](performance-host-matrix-2026-10-02.json).
+
+## Actual unlocked host block — 2026-10-02
+
+Separate ordinary Develop-5 control uses accepted native src/ unchanged, Clang 21
+and Rust 1.98.1 matching candidate Develop-2; diagnostic feature is disabled.
+Full physical-Mac/package and reproducibility gates PASS. A fixed-AEP ordinary
+series is retained INCOMPLETE after cache reuse masked work. Six fresh Wave Phase
+variants were saved in AE only after binding readiness; both versions use the
+identical AEP inside each pair, with varying phase between pairs and no purge.
+Five measured pairs (plus one warmup pair) pass exact mapped image/disk package
+identity, exits, complete 60-frame RGBA16 output and byte equality. Medians
+65.870721 -> 48.766815 s, ratio 1.3507x, reduction 25.97%; median paired ratio
+1.3303x. All 360 distinct pair/warmup baseline PNGs independently decoded at
+calibrated straight RGBA16; corresponding candidate files are encoded identical.
+Startup/export/polling and ambient/cache limits are explicit.
+See [samples](performance-host-render-2026-10-02.json).
+
+The two-turn queue fixture passes unchanged seven pixel assertions on all three
+builds, including Adjustment Layer -> ElasticGrid -> Corner Pin, actual project
+32 bpc/straight RGBA16. All ten same-toolchain before/after frames decoded exact.
+The original saveFrameToPng harness failure is retained, not weakened or converted
+to a renderer PASS. See [matrix/chain](performance-host-matrix-2026-10-02.json).
+
+Actual GUI preview at Full/Final/32 bpc/FP_OFF reaches Playing 60 of 60 and
+30 fps (realtime) on candidate and control; cached restart, wave invalidation
+and Escape interruption with a still-partial cache are observed. SDK setup
+reports only readiness/settings, while UI proves the observed lifecycle.
+No precise cache-generation/first-playable timing or five matched RAM pairs:
+UI/tool delays, incomplete lower-panel control readback and differing viewer
+zoom prevent equal-condition speed acceptance. Native custom-canvas click/drag
+returns AXError.notImplemented, blocking a real guide gesture; no OS input
+injection or SDK parameter mutation substitutes for it. All owned projects
+closed without saving, prior Fast Preview restored, original plugin restored
+and Adobe processes stopped. See [observations](performance-host-preview-2026-10-02.json).
+Stage 8 stays IN PROGRESS; no merge/release or universal 4K speed claim.

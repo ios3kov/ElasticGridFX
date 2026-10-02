@@ -2,6 +2,14 @@
 
 ## Unreleased — resumed performance development
 
+- Record five fresh matched target-AE total-time pairs at Full/Final/32 bpc:
+  median 65.87 -> 48.77 s for 60 frames; all 360 pair/warmup RGBA16 outputs exact.
+  Keep total export time separate from cold/per-frame/RAM Preview acceptance.
+- Add guarded two-turn RGBA16 queue-chain, fresh-phase and ordinary GUI preview
+  fixtures. Verify ten chain frames exact, full-cache 30-fps playback, wave
+  invalidation and Escape cancellation in actual AE; retain blocked guide-drag
+  and incomplete quantitative RAM Preview timing explicitly.
+
 - Prepare performance fixtures in separate guarded creation/finalization host
   turns and require actual automatic plane-binding readiness before saving.
   Refuse foreign/changed scenes and retain blocked preparation evidence.

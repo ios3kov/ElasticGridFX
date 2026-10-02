@@ -2,23 +2,56 @@
 
 ## Stage 8 resumed — 2026-10-01 — IN PROGRESS
 
-Latest host block, 2026-10-02: Mac unlocked; all eight CI checks at b492e60 PASS.
+Latest completed host block, 2026-10-02: unlocked AE 25.6x101 on M1 Pro / 16 GiB.
+Five fresh matched ordinary 1080p/32-bpc/Full/Final 60-frame aerender pairs:
+median total time **65.870721 -> 48.766815 s** (1.3507x ratio of medians,
+25.97% less time; paired-ratio median 1.3303x). All 300 measured frames and
+60 warmup frames are encoded byte-identical; independent calibrated RGBA16
+decode PASS. Startup/PNG export/polling are included; ambient activity and
+OS/disk caches remain uncontrolled. Wave Phase varies between pairs, and the
+same hash-pinned AEP is used within each pair. This accepts only that scoped
+total-time comparison, not cold-cache/per-frame or RAM Preview latency.
+[Samples, identities, distributions and limits](performance-host-render-2026-10-02.json).
+
 All 40 GUI plane/3D/AEP frames pass functional assertions on original, ordinary
 f611312 and same-current-toolchain original native source. Same-toolchain
-before/after decoded RGBA16 is exact across all 40; older-artifact comparison
-retains 29 changed color channels in six frames, max 2/65535, alpha exact.
-Two guarded host turns now prepare a fresh binding-ready schema-3 AEP. Both
-original-source and optimized observers prove loaded identity, all 60 exact
-plane_region frames and straight RGBA16; independent decoded equality PASS.
-Diagnostic sampling medians 348.734/33.595 ms are instrumented phase evidence,
-not accepted Render/RAM Preview timings. [Scoped records](performance-host-matrix-2026-10-02.json).
-Legacy missing chain capture reproduces on original; that harness gate remains
-open. First unready AEP/pilot failures remain retained. Original installed
-payload was restored and verified after both observer transactions and the
-ordinary candidate pilot. Ordinary candidate identity/60-frame RGBA16 equality
-PASS. Uninstrumented same-toolchain original-source timing control is being
-rebuilt with Develop 5 and pinned Rust 1.98.1.
-Python 248/248 and all 12 JSX suites PASS, including changed-project guards.
+before/after decoded RGBA16 is exact across all 40, the 60-frame plane sequence,
+and all ten queue-chain states including Adjustment Layer -> ElasticGrid ->
+Corner Pin. Queue assertions pass on all three builds at actual 32 bpc with
+straight RGBA16 export. Older-artifact strict FAIL remains retained (29 changed
+color channels in six matrix frames, max 2/65535, alpha exact); the unchanged
+saveFrameToPng harness failure is retained separately from the successful queue
+fixture. [Matrix and chain evidence](performance-host-matrix-2026-10-02.json).
+
+Actual GUI RAM Preview: full 60-frame green range, Info "30 fps (realtime)"
+on candidate and same-toolchain control; cached restart, wave invalidation and
+Escape cancellation before full cache completion PASS. Full/Final/32-bpc and
+FP_OFF are read back through guarded SDK setup; completion comes from UI
+observations. Quantitative five-pair cache-build/first-playable latency remains
+INCOMPLETE; screenshots have observer overhead and viewer zoom differed.
+Actual guide-drag timing is BLOCKED: Cua's native custom-canvas input returns
+AXError.notImplemented. No OS event injection or surrogate parameter change is
+accepted as a guide gesture. [Lifecycle observations and limits](performance-host-preview-2026-10-02.json).
+
+The original installed 2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e payload is restored
+and verified after every bounded transaction; Adobe hosts stopped. The source
+control 98e3839 / EGFX-a733d95d2018fb8bc321b6d8 has unchanged accepted native src/
+and the same Clang 21 / Rust 1.98.1 / release settings as the candidate, a separate
+Develop-5 cache key and no enabled observer. Full physical-Mac 20-stage build,
+reproducibility, signature and extracted package PASS. Immutable f611312
+candidate remains unchanged. Diagnostic callback medians 348.734/33.595 ms
+are instrumented attribution, not final Render/RAM Preview timings.
+
+Previous tooling checkpoint c62bb7422547bfd911fb27be0375a52d55bccb7e: all eight CI
+checks PASS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
+Python 248/248 run PASS. Hosted checks for the next commit are pending. Offline code scan retains
+29 review candidates: 23 mutable Actions references, five checkout-credential
+defaults and one rate-limit heuristic on a test file (not an authentication service);
+no credential findings. This scanner does not assess release readiness.
+Stage 8 remains IN PROGRESS. Next: review/publish this evidence checkpoint;
+inspect remaining host overhead without competing work during measurements.
+Quantitative RAM Preview, first-frame latency and actual guide gesture remain
+separate acceptance gates. No main merge, public release or cache purge.
 
 The user explicitly resumed extremely fast Render / RAM Preview with unchanged
 Final quality. This supersedes the earlier skip for new work; it does not change
@@ -43,6 +76,8 @@ Its complete physical-Mac 20-stage preflight, Rust 61/61/Clippy, real Metal,
 dependency audit, two clean reproducible builds, signed bundle and extracted ZIP
 checks PASS. Linux GCC/Clang/static/ASan+UBSan/TSan and two regression CI jobs PASS;
 hosted macOS source gate PASS. All eight checks at source 41283e3 PASS.
+
+### Historical initial corrected-artifact host block
 
 Validation artifact: Build `EGFX-ce45a845413a943552df0258`, source `41283e3`, ZIP
 SHA-256 `a3c001599dc615996a666eac2a6976b2576adf4a0d5ccd4f85cc1daf86dbf362`.

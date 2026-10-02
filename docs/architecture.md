@@ -103,3 +103,17 @@ binding streams before deformation/save. The existing native deferred binding
 and its pending-render refusal are unchanged. Actual AE proves complete
 plane_region coverage for all 60 schema-3 frames; observer timing stays separate
 from ordinary Render/RAM Preview acceptance.
+
+## Host measurement boundary — 2026-10-02
+
+Performance AEPs are created/finalized in separate guarded SDK turns after
+real automatic plane binding. Fresh phase variants preserve each pair's pinned
+source/geometry/Full/Final state, avoiding uncontrolled fixed-frame reuse without
+purging user caches. Default candidate and original-source control have distinct
+Develop cache identities and the same compiler/settings; observers are separate
+artifacts. The two-turn queue chain captures ten strict RGBA16 states; GUI
+preview setup/readback has ownership, Full/Final, invalidation and restoration
+guards. Its report does not assert preview completion: native UI observation
+provides that limited evidence. Mocks exercise safety/control flow, not AE display.
+See [Render](performance-host-render-2026-10-02.json) and
+[Preview](performance-host-preview-2026-10-02.json) for remaining latency limits.

@@ -88,23 +88,28 @@ Target AE speed acceptance remains IN PROGRESS. The user requested uninterrupted
 development with stage status reports, then continued work.
 
 Current scoped blocks (2026-10-02 unlocked host):
-- 8.1 Native exact sampler optimization: PASS, including 16 same-input pattern comparisons.
-- 8.2 Measurement safety/precision: Python 248/248 and all 12 JSX suites PASS;
-  actual two-host-turn binding-ready schema-3 preparation and straight RGBA16 PASS.
-- 8.2a Optional callback attribution: all 60 plane_region frames verified for
-  same-toolchain original native source and optimized observer; loaded identity PASS.
-  Sampling phase medians 348.734/33.595 ms are instrumented diagnostics only.
-- 8.2b Source/build isolation: same-current-toolchain 40-frame GUI matrix and
-  60-frame plane sequence are decoded RGBA16 exact. Older artifact FAIL retained.
-- 8.3 Target plane/3D/AEP matrix: 40 frames functional PASS on all three builds;
-  separate legacy Adjustment capture harness remains open (also missing on original).
-- 8.4 Target Render: IN PROGRESS; ordinary quality pilot and uniquely versioned
-  uninstrumented original-source control precede five matched timing pairs.
-- 8.5 RAM Preview cache-build/playback/invalidation: NOT RUN for this candidate.
-- 8.6 UI response/cancel lifecycle and final scoped candidate validation: pending.
+- 8.1 Native exact sampler optimization: PASS, including exceptional floats and same-input checks.
+- 8.2 Measurement safety/precision: Python 248/248 at c62bb74 and 15 JSX suites PASS;
+  actual two-turn binding-ready schema-3 preparation and straight RGBA16 PASS.
+- 8.2a Optional callback attribution: both observers cover all 60 plane_region frames;
+  loaded identity PASS. Sampling medians 348.734/33.595 ms are diagnostics only.
+- 8.2b Source/build isolation: same-toolchain 40-frame matrix, 60-frame sequence,
+  ten queue-chain states and 360 fresh-pair PNGs exact. Older-artifact FAIL retained.
+- 8.3 Target plane/3D/AEP matrix and queue Adjustment/Corner Pin chain: scoped PASS.
+  Historical saveFrameToPng failure remains a separate retained harness limitation.
+- 8.4 Target Render total time: five matched ordinary fresh-phase pairs PASS;
+  65.870721 -> 48.766815 s median, 25.97% less time. Per-frame/cold-cache timing open.
+- 8.5 RAM Preview: full-cache 60-frame/30-fps playback, cached restart and wave
+  invalidation functional PASS; quantitative cache-build/first-playable timing INCOMPLETE.
+- 8.6 Escape cancellation before full cache PASS; actual guide gesture/latency
+  BLOCKED by Cua custom-canvas input (AXError.notImplemented). Overall scope stays open.
 
-All eight CI checks at b492e60 PASS. Existing immutable f611312 ordinary/observer
-artifacts retain physical-Mac/package evidence. [Actual matrix and plane records](performance-host-matrix-2026-10-02.json).
+All eight CI checks at c62bb7422547bfd911fb27be0375a52d55bccb7e PASS; new tooling
+checkpoint checks pending. Immutable f611312 candidate and same-toolchain
+uninstrumented control retain full physical-Mac/package evidence.
+[Matrix/chain](performance-host-matrix-2026-10-02.json),
+[Render samples](performance-host-render-2026-10-02.json),
+[Preview lifecycle](performance-host-preview-2026-10-02.json).
 Each bounded temporary transaction restores and verifies the original plugin.
 No main merge or release is implied.
 
