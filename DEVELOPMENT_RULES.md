@@ -70,3 +70,12 @@ reports both remaining distribution/legacy-project checks passed; evidence is
 USER-REPORTED. Promote the existing v0.9.3-perf.1 GitHub release without rebuilding
 or changing assets. Full standards certification is not claimed; omitted signing
 checks remain omitted, and the historical MFR abort cause remains unknown.
+
+## Current documentation closeout — 2026-10-02
+
+Light documentation scope under frozen6.0.0; Process/Core, Engineering §§24/25
+and Workflow apply. The user authorized README, user-guide and final-cycle
+retrospective reconciliation. Reusable findings are contributed to the central
+AE knowledge base separately; this does not change this project's baseline.
+No new discovery/reference audit, API, build, installation or host timing gate.
+The earlier performance/release decisions above retain their historical scope.

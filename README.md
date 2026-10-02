@@ -1,20 +1,19 @@
-> **Accepted development candidate 0.9.3:** exact runtime candidate
-> `2ccc5f6 / EGFX-bd19dee13315abc0b7e6090e` passed the automated gates and
-> user target-AE acceptance, then was merged through PR #10 → #12 → #15.
-> The public release remains **0.9.1**; 0.9.3 is not published yet. Public macOS
-> distribution is still blocked on Developer ID signing, notarization and a
-> Gatekeeper-clean quarantined-download test.
-> [Current status](docs/current-status.md) · [0.9.3 retrospective](docs/retrospective-0.9.3.md).
-
 # FSTR Stretch
 
 Native After Effects grid deformation effect, listed under **FSTR Effects**.
 Repository/internal name: ElasticGridFX. C++ CPU renderer with a Rust AE host.
 
-## Current release: 0.9.1
+## Current release: 0.9.3-perf.1
 
-[Download the published macOS Apple Silicon release](https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.1).
-See [release evidence and installation/rollback](docs/release-0.9.1.md).
+[Download the macOS Apple Silicon release](https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1) ·
+[User guide / руководство](docs/USER_GUIDE.md) ·
+[Release evidence](docs/release-0.9.3-perf.1.md)
+
+Published as Latest Release on 2026-10-02. The package revision is **0.9.3-perf.1**;
+After Effects About identifies the unchanged plugin as **0.9.3 Develop Build 2**.
+The ZIP filename retains `TEST` from initial publication; assets were not renamed
+or rebuilt when the release was promoted. Repository instructions below and the
+user guide supersede the archived README's historical prerelease/signing-policy text.
 
 - **Layer Plane:** grid interaction and deformation follow the layer plane,
   including ordinary native 3D text/raster layers and camera perspective.
@@ -22,26 +21,46 @@ See [release evidence and installation/rollback](docs/release-0.9.1.md).
   not corner-pin the entire source image. In 3D, Layer Plane is enforced and
   corner controls are disabled; saved 2D values are preserved.
 - **Grid Positions:** keyframe animation and Undo/Redo remain available.
+  Columns/Rows are static topology settings for new animation.
 - **Final (Bicubic):** CPU rendering with 8/16/32-bpc paths. GPU dispatch is disabled.
-- 0.9.1 fixes live 3D panel refresh and undeformed native-text perimeter fringes.
+- **Exact plane-render optimization:** eligible geometry uses cached axis mapping
+  and Bicubic rows without reducing quality or changing saved parameter contracts.
 
-Verified target: AE 2025 **25.6.0**, macOS Apple Silicon, square pixels and
-ordinary flat text/raster layers. This is not Windows/Intel, other AE versions,
-per-character 3D or universal HDR/OCIO certification. The bundle is ad-hoc signed,
-not Developer ID signed or notarized; do not bypass macOS security protections.
+Verified runtime scope: AE 2025 **25.6x101**, macOS **26.6.2**, Apple Silicon
+(M1 Pro / 16 GiB in measured runs), square pixels and ordinary flat text/raster
+layers. Other AE/macOS versions, Windows/Intel, per-character 3D and broad HDR/OCIO
+configurations are not certified. Clean-environment installation and legacy animated
+Columns/Rows acceptance are **USER-REPORTED**, with environment details unspecified.
 
-The published 0.9.1 record is historical relative to the accepted 0.9.3
-development candidate. Final 0.9.3 target-host RAM Preview and cancellation
-checks are closed as USER-REPORTED PASS. Performance optimization was skipped at
-that checkpoint and resumed on 2026-10-01; see [current performance work](docs/performance-resume-2026-10-01.md).
-New target-AE speed verification is pending. Persistent grid display while the effect/layer is unselected
-remains deferred.
+The bundle is ad-hoc signed. Developer ID and notarization are not prerequisites
+under the adopted AE-Development-Rules **6.0.0**. Browser-downloaded quarantined
+installation and exact-candidate loading were checked on the existing test Mac;
+this is not a promise of warning-free installation on every Mac.
+
+## Performance results
+
+Five matched AE Full/Final/32-bpc, 1080p, 60-frame PNG exports with MFR requested
+OFF reduced median total time from **65.870721 to 48.766815 seconds**
+(**25.97% less**, 1.3507× ratio of medians). This includes startup and PNG export.
+All 360 paired measured/warmup outputs decode exactly. RAM Preview completed
+60/60 frames and played at the composition's 30 fps; observed cache-fill bounds
+are documented separately from exact first-playable latency.
+
+The user accepted the speed scope. No further timing series is planned.
+A standalone native speedup is not an AE/Preview speedup guarantee.
+[Comparison table and measurement limits](docs/retrospective-0.9.3-perf.1.md#performance-comparison).
+
+A rare MFR control abort did not recur in the six requested retries; issue
+[#21](https://github.com/ios3kov/ElasticGridFX/issues/21) was closed as not reproduced.
+Its cause remains unknown and no crash fix or general MFR certification is claimed.
+Persistent grid display while the effect/layer is unselected remains deferred.
 
 ## Artifact identity
 
-- Plugin source: `e1848d5348c8059c0307c5d8c1241163ffd92ab1`
-- Build ID: `EGFX-879b31e5a95527a385827c24`
-- Release ZIP SHA-256: `23b75997e310e0acbefcde69570e177199c23d415f67abf00ee064d28efe4d2a`
+- Plugin source: `f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761`
+- Build ID: `EGFX-6147dc406abc596e7f2d1b60`
+- Public outer ZIP SHA-256: `a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14`
+- Inner plugin ZIP SHA-256: `b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a`
 
 The release contains the tested archive, not a rebuilt documentation checkpoint.
 The root `SHA256SUMS.txt` covers tracked repository files except itself; it is
@@ -52,15 +71,16 @@ excluding itself, using sorted repository-relative paths.
 ## Development and evidence
 
 - [Current status and scope](docs/current-status.md)
-- [0.9.3 technical retrospective / AE know-how](docs/retrospective-0.9.3.md)
+- [Performance/release technical retrospective](docs/retrospective-0.9.3-perf.1.md)
+- [Reusable AE engineering know-how](docs/AE_ENGINEERING_KNOWHOW.md)
+- [Historical 0.9.3 development retrospective](docs/retrospective-0.9.3.md)
 - [Ten-stage map](docs/development-stages.md)
 - [Final gate: current verdict and historical evidence](docs/stage10-final-gate-2026-09-30.md)
 - [Architecture](docs/architecture.md) and [approved plane requirements](docs/perspective-plane-plan.md)
 - [Development rules](DEVELOPMENT_RULES.md)
 
 Dated reports and candidate-specific diagnostics are retained for traceability.
-Their old PASS/BLOCKED states describe those candidates, not the current release.
-Do not use historical pinned installers to install 0.9.1.
+Their old PASS/BLOCKED states describe those checkpoints, not the current release.
 
 ## Developer verification
 

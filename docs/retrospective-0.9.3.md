@@ -1,5 +1,10 @@
 # FSTR Stretch 0.9.3 — техническая ретроспектива и AE know-how
 
+> **Historical checkpoint:** this retrospective covers the earlier 0.9.3 candidate
+> only. Its release/signing verdicts describe the rules and state on 2026-10-01.
+> See the [performance/release retrospective](retrospective-0.9.3-perf.1.md)
+> for the current candidate and adopted rules 6.0.0.
+
 Дата: 2026-10-01  
 Scope: вся разработка ElasticGridFX / FSTR Stretch до принятого 0.9.3 development candidate.
 

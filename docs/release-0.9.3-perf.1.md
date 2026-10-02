@@ -19,6 +19,13 @@ for this documentation/policy update. Broad untested compatibility is not claime
 [Publication and baseline record](release-publication-rules6-2026-10-02.json).
 
 
+[Current installation and usage guide](USER_GUIDE.md) ·
+[Performance/release retrospective](retrospective-0.9.3-perf.1.md).
+
+The immutable asset filename still includes TEST, and its inner README contains
+historical prerelease text. Current repository instructions supersede that text;
+the published assets and plugin bytes remain unchanged.
+
 ## Release acceptance — 2026-10-02 — USER-REPORTED
 
 The human replied “проверил. все ок” to both remaining checks: installation on a
@@ -54,6 +61,12 @@ Developer ID/notarization remain omitted by user decision. TEST prerelease
 retained; stable release and broad HDR/OCIO certification not claimed.
 [Distribution and project record](public-install-project-check-2026-10-02.json).
 
+
+## Historical TEST prerelease checkpoint — superseded
+
+The following sections retain the initial publication/preparation record under
+rules 5.1.0. They are not current installation instructions or release blockers.
+Use the [current user guide](USER_GUIDE.md) and the publication record above.
 
 Prepared 2026-10-02 for macOS Apple Silicon and After Effects 2025 (25.6 tested).
 This is a public TEST PRERELEASE, not a stable or fully release-certified build.

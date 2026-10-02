@@ -1,5 +1,29 @@
 # Current development / release status
 
+## Documentation closeout — 2026-10-02
+
+Scope: Light documentation / Development under adopted rules6.0.0,
+AI_ENTRYPOINT first; Process §§1–13/27, Engineering §24/25.1/25.2/34 and Workflow.
+No product-contract, API, native-code, build, install or speed-test changes.
+The human authorized fixing the three documentation gaps after the full rules read.
+
+README now points to published0.9.3-perf.1 and the exact f611312 candidate;
+[USER_GUIDE](USER_GUIDE.md) covers current controls and end-user workflows.
+The [new retrospective](retrospective-0.9.3-perf.1.md) closes the performance/release
+cycle, and [reusable know-how](AE_ENGINEERING_KNOWHOW.md) records the prepared transfer to the
+central engineering repository (published for central review in PR16). Old retrospective and release checkpoints remain
+historical. The archive README/TEST filename remain immutable; current installation
+instructions explicitly supersede their historical policy/status text.
+
+Acceptance checks: source/evidence consistency, local Markdown targets/anchors,
+whitespace diff and repository SHA256 manifest; no new AE runtime test required.
+Local checks PASS:119 Markdown targets/anchors, current identity/status consistency,
+whitespace diff and regenerated repository SHA256 manifest. Static code scanner
+completed with one reviewed false-positive auth/rate-limit heuristic on a local
+unit test (`tests/test_target_ae_acceptance.py:54`), not a network endpoint;
+scanner exit1 means review_required, not release certification. Source unchanged.
+GitHub exact-head CI remains a separate check for this documentation commit.
+
 ## Current published release and rules — 2026-10-02
 
 v0.9.3-perf.1 is verified published: draft=false, prerelease=false, Latest Release.
