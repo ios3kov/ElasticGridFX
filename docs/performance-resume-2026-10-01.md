@@ -560,3 +560,22 @@ The failed control native src is unchanged original code; disabled diagnostic
 cfg blocks in its Rust host are retained. Do not infer that the new sampler caused
 or cannot cause host failure. A new distinguishing pre-termination signal or
 effect-enabled/bypass stability isolation is needed before another causal change.
+
+## 2026-10-02 — bounded MFR effect/artifact isolation completed
+
+Direct human “делай” after MFR plan; no more speed testing. Two saved copies of
+exact failing source AEP (phase256.850006) differ only in Effect.enabled for this
+experiment; source/geometry/queue/quality guarded and hashes pinned. Candidate
+then exact failed control each render enabled/bypassed at requested ON100:
+all four60/60 PASS.120 candidate frames calibrated/decoded;120 control/candidate
+encoded pairs exact. Enabled matches historical same-phase output and60 unique
+frames; bypass one static sequence. Concurrency not measured; capture perturbs.
+Raw crash identity/hash rechecked:36 threads, BEE WorkQueue faulting thread,
+no recorded ElasticGrid stack frame and only generic abort() message. No cause
+or exoneration follows from that absence. The prior failure did not reproduce;
+no shipping fix, CPU cap or MFR disablement. Stop planned four-cell experiment;
+next retry requires a distinguishing pre-termination signal/minimal reproducer.
+Temporary transactions rolled back; ordinary accelerated candidate retained,
+receipt2186fd3402f54285a391e33f378a75f0; independent package/signature/unique install/
+original backup PASS, Adobe hosts stopped. Source AEP unchanged.
+[Full isolation evidence](mfr-stability-isolation-2026-10-02.json).

@@ -2,6 +2,14 @@
 
 ## Unreleased — resumed performance development
 
+- Complete four stability-only MFR-requested-ON candidate/control × enabled/
+  bypass checks: all60 frames complete,120 independently decoded candidate
+  frames and120 encoded-exact control pairs. Preserve unreproduced prior crash
+  and unresolved cause; no speculative shipping patch. Recheck raw crash identity
+  and retain accelerated candidate/verified backup after temporary transactions.
+- Add a concise speed-comparison table with scope/Full-preset measurement limits.
+
+
 - Close additional speed testing by direct human acceptance; preserve missing
   technical results and independent MFR incident. Record five candidate Full
   Preview runs and Full/Skip0 readback; retain accelerated candidate installed

@@ -1,5 +1,36 @@
 # Current development / release status
 
+## Completed bounded MFR isolation — 2026-10-02
+
+Direct human “делай” applied to the remaining MFR investigation. AI_ENTRYPOINT
+read first; adopted rules5.1.0, Critical native diagnostics / Development.
+Four planned runs (ordinary candidate/control × enabled/bypassed effect) all
+PASS60/60 at requested MFR ON100, Full/Final/32-bpc/straight RGBA16 PNG on the
+same-source guarded/hash-pinned AEP copies. Actual callback concurrency is not
+measured. All120 candidate frames independently decode; all120 control/candidate
+encoded pairs are exact. Enabled60 match the retained same-phase ordinary
+candidate and are60 unique frames; bypass60 are one static sequence, distinct.
+
+The original19/60 control crash did not recur in any of these four runs. Raw
+crash hash/UUID rechecked: BEE WorkQueue General Render Thread,36 recorded
+threads, no ElasticGrid frame on their stacks, generic abort() message only.
+This does not exonerate the plugin or identify AE/Camera Raw as the cause.
+No shipping fix is justified; no MFR disablement or hidden CPU budget change.
+The planned isolation is complete, cause remains unresolved. Further retries
+require a new pre-termination callback/error signal or a minimal reproducer.
+Speed acceptance stays closed; this is stability evidence only.
+
+Final ordinary f611312 / EGFX-6147dc406abc596e7f2d1b60 is retained installed,
+receipt EGFX-update-2186fd3402f54285a391e33f378a75f0. Temporary candidate9a11d806
+and control16ef537d transactions are ROLLED_BACK; final payload/package/signature,
+sole installed plugin and original backup independently PASS; Adobe hosts stopped.
+The source AEP hash is unchanged. No user project, shared settings, permissions,
+main or release change. Source/CI checkpoint2236e8d66a29d9cfcb9b747001b53ea339f83e5d
+all seven reported hosted checks PASS; this new docs checkpoint has separate CI.
+[Four runs, pixel validation, crash review and final identity](mfr-stability-isolation-2026-10-02.json).
+
+### Prior speed-acceptance checkpoint (historical installed receipt)
+
 ## Current checkpoint — 2026-10-02 — speed accepted; MFR reliability open
 
 The human explicitly said “считай тесты на скорость мы прошли”: speed scope is

@@ -5681,5 +5681,11 @@
       "No shipping plugin or output quality change; ordinary five-pair ON acceptance remains incomplete.",
       "Diagnostic sampling, polling and export included; elapsed time not benchmark acceptance."
     ]
+  },
+  "later_stability_isolation": {
+    "date": "2026-10-02",
+    "report": "mfr-stability-isolation-2026-10-02.json",
+    "scope": "Four stability-only candidate/control × enabled/bypass runs PASS60/60;120 calibrated decoded candidate frames and120 encoded-exact control pairs",
+    "cause": "UNRESOLVED; prior failure not reproduced; no shipping fix or new timing aggregate"
   }
 }

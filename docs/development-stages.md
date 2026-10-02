@@ -112,6 +112,11 @@ Current scoped blocks (2026-10-02 unlocked host):
   closed by human acceptance. Later Full/Skip0 readback is covered in8.7.
 - 8.6 Escape cancellation and actual guide edit/fresh image/Undo PASS. Exact
   guide latency was not measured; further timing closed by human acceptance.
+- 8.4b Stability-only candidate/control × enabled/bypass isolation: four60/60
+  scoped PASS;120 candidate RGBA16 decoded and120 control pairs encoded-exact.
+  Prior crash not reproduced; cause/fix unresolved. Planned experiment complete;
+  new distinguishing signal required before more retries. Candidate retained.
+  [Isolation](mfr-stability-isolation-2026-10-02.json).
 - 8.7 Full/Skip0 preset readback PASS; five candidate Full runs60/60 at30fps.
   New Full control timings NOT RUN because the human accepted speed scope.
   [Decision and retained candidate](performance-user-acceptance-2026-10-02.json).
