@@ -1,5 +1,9 @@
 # Changelog
 
+- 2026-10-02: reconcile published0.9.3-perf.1 README; add current end-user guide,
+  performance/release retrospective and reusable AE know-how transfer. Preserve
+  historical evidence and unchanged release assets; no rebuild or new speed runs.
+
 - 2026-10-02: 0.9.3-perf.1 promoted to Latest Release with unchanged assets;
   consciously adopt rules6.0.0, which removes certificate/notarization prerequisites.
 
