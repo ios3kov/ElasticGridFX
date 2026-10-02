@@ -1,0 +1,20 @@
+{
+  "id": 401857530,
+  "url": "https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1",
+  "tag": "v0.9.3-perf.1",
+  "prerelease": false,
+  "draft": false,
+  "latest": true,
+  "name": "FSTR Stretch 0.9.3-perf.1 — macOS arm64",
+  "archive_sha256": "a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14",
+  "assets_unchanged": true,
+  "source_unchanged": true,
+  "user_acceptance": "USER-REPORTED",
+  "date": "2026-10-02",
+  "rules_version": "6.0.0",
+  "rules_commit": "bb8b769404ddd5b97462812a4e6b430e8bfefe13",
+  "adoption": "Conscious update after human correction and immutable tag/diff review",
+  "signing_policy": "Not required by 6.0.0; ad-hoc is allowed after applicable install/runtime checks",
+  "user_authorization": "Direct human: разрешаю; ordinary Latest Release",
+  "broad_compatibility": "Only stated tested scope; no blanket HDR/OCIO/GPU certification"
+}

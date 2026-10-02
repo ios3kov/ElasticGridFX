@@ -1,5 +1,8 @@
 # Changelog
 
+- 2026-10-02: 0.9.3-perf.1 promoted to Latest Release with unchanged assets;
+  consciously adopt rules6.0.0, which removes certificate/notarization prerequisites.
+
 - 2026-10-02: user reports clean-environment install and legacy animated
   Columns/Rows checks passed; record USER-REPORTED acceptance and promote
   existing 0.9.3-perf.1 release with the explicit signing exception.

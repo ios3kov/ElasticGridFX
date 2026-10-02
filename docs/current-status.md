@@ -1,5 +1,24 @@
 # Current development / release status
 
+## Current published release and rules — 2026-10-02
+
+v0.9.3-perf.1 is verified published: draft=false, prerelease=false, Latest Release.
+All three asset IDs/hashes are unchanged, archive SHA-256
+`a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14`.
+The human explicitly authorized this status after reporting both remaining checks
+passed; that acceptance remains USER-REPORTED.
+
+The adopted baseline is now AE-Development-Rules6.0.0, immutable v6.0.0 /
+`bb8b769404ddd5b97462812a4e6b430e8bfefe13`. Developer ID/notarization are
+not prerequisites under its Release §28. The unchanged ad-hoc candidate is
+published without a signing-policy exception under this baseline. Actual download,
+quarantined install, loaded identity and native checks retain their recorded scope.
+Historical 5.1.0 signing-blocker/exception statements below are superseded for
+current policy, not retroactively rewritten. No new build or AE testing is needed
+for this documentation/policy update. Broad untested compatibility is not claimed.
+[Publication and baseline record](release-publication-rules6-2026-10-02.json).
+
+
 ## Release acceptance — 2026-10-02 — USER-REPORTED
 
 The human replied “проверил. все ок” to both remaining checks: installation on a

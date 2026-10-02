@@ -5,14 +5,17 @@ https://github.com/ios3kov/AE-Development-Rules
 
 Start with [AI_ENTRYPOINT.md](https://github.com/ios3kov/AE-Development-Rules/blob/main/AI_ENTRYPOINT.md), then select the rules applicable to the actual task. This file is a project pointer and additions, not a modified copy of the standard.
 
-Baseline consciously updated on 2026-10-02: **5.1.0**, immutable tag `v5.1.0`
-peeled commit `54fa9966fd4eab10f35f1fbc8aa18f94ff42925b` (tag object
-`91737f9a05d52b62dfb8de33bad3f9fab5d4cd08`). AI_ENTRYPOINT was read first;
-changes from b27f454 and versioned errata were reviewed. The current map adds
-explicit state/automation/completion, feature overlays and progress-based stop
-criteria. Existing controls already cover this task; this checkpoint updates
-routing/documentation, with no identity-engine or artifact-format migration.
-Prior 5.0.0 candidate / b27f454 and 4.1.0 / 05bd9a8 remain historical provenance.
+Baseline consciously updated on 2026-10-02: **6.0.0**, immutable tag `v6.0.0`,
+peeled commit `bb8b769404ddd5b97462812a4e6b430e8bfefe13`.
+AI_ENTRYPOINT was read first; the 5.1.0→6.0.0 diff, Release §§26/28 and
+Engineering §34 migration instructions were reviewed. macOS distribution no
+longer requires Developer ID, notarization or Apple distribution services;
+absence is not a release blocker. Exact artifact identity, actual documented
+install/AE loading, runtime checks and truthful Evidence remain required.
+The product does not invoke the changed starter-kit distribution wrappers;
+no caller/interface migration is necessary. Native product tools stay unchanged.
+Prior 5.1.0 / 54fa9966fd4eab10f35f1fbc8aa18f94ff42925b and older Evidence
+remain historical provenance. No historical test verdicts are rewritten.
 
 ## Current continuation: quality-preserving performance
 
