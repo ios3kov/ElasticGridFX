@@ -1,5 +1,24 @@
 # Current development / release status
 
+
+## Windows x64 port — Development checkpoint — 2026-10-02
+
+Branch `feat/windows-x64-aex` is based on `main@9d0162de64d01ceb41f6a1374a73544729ed0ec2`.
+This Windows scope consciously adopts AE-Development-Rules 6.2.0 /
+`d966078a9e45fee7ec9ad14f211a9da753d64b8a`; historical records keep their
+original baselines. Windows CPU only; Windows GPU and persistent grid are out of scope.
+No merge, release, publication or installation is authorized.
+
+First Windows run `37052513941`: MSVC configure/build PASS, portable C++ **21/21 PASS**,
+package regression PASS and locked Cargo graph PASS. Rust host then exposed a Windows
+`A_intptr_t` vs `isize` UI refcon mismatch; release AEX/AE checks were NOT RUN.
+That ABI mismatch and the Windows Custom-UI PiPL resource path are now corrected on the
+branch. Current exact-head Windows compile/artifact gate is pending. AE load/UI/render/
+MFR/save-reopen/Undo and Windows performance remain **NOT RUN**.
+
+See [Windows port status](windows-port-status.md).
+
+
 ## Documentation closeout — 2026-10-02
 
 Scope: Light documentation / Development under adopted rules6.0.0,
