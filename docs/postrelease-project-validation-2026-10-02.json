@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "status": "PASS",
+  "scope": "One preserved user scene tested only through an owned copy; scoped functional validation, not full release certification",
+  "release_revision": "0.9.3-perf.1",
+  "embedded_version": "0.9.3 Develop Build2",
+  "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+  "loaded_uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+  "ae_version": "25.6x101",
+  "project": {
+    "width": 1920,
+    "height": 1080,
+    "duration_seconds": 5,
+    "frame_rate": 25,
+    "bit_depth": 8,
+    "working_space": "sRGB IEC61966-2.1",
+    "linearize": false,
+    "grid_keys": 3,
+    "grid_key_times": [
+      0,
+      1.4,
+      2.84
+    ],
+    "columns": 4,
+    "rows": 4
+  },
+  "checks": {
+    "render": "PASS: four selected frames completed in each of three phases",
+    "edit_undo": "PASS: amplitude 0 -> 15 -> UI Cmd+Z -> 0; visible deformation restored",
+    "save_reopen": "PASS: key times and project settings retained",
+    "pixels": "PASS: eight comparisons across four frames; zero differences in decoded straight RGBA16 channels",
+    "ram_preview": "PASS: native GUI playback observed at different times with animated deformation and full work-area green cache; stopped normally; no FPS or latency acceptance claim",
+    "preservation": "PASS: source snapshot hash unchanged and source snapshot reopened; candidate plugin retained"
+  },
+  "pixel_frames": [
+    {
+      "frame_index": 0,
+      "time": 0,
+      "width": 1920,
+      "height": 1080,
+      "decoded_sha256": "bbd1a673e22a7b55227d36ad5102ded93f0edeaf9eea8ace2e8522a7140d583d",
+      "undo_exact": true,
+      "reopen_exact": true,
+      "max_channel_difference": 0
+    },
+    {
+      "frame_index": 35,
+      "time": 1.4,
+      "width": 1920,
+      "height": 1080,
+      "decoded_sha256": "2c79e9c61709fbadab05be6619fbaceac971e1fca606227a7b065b1cff543774",
+      "undo_exact": true,
+      "reopen_exact": true,
+      "max_channel_difference": 0
+    },
+    {
+      "frame_index": 72,
+      "time": 2.88,
+      "width": 1920,
+      "height": 1080,
+      "decoded_sha256": "3dc72d17c9969d244c1f47a42930c332a29af2ae324460bc5c0619d2d08880d0",
+      "undo_exact": true,
+      "reopen_exact": true,
+      "max_channel_difference": 0
+    },
+    {
+      "frame_index": 124,
+      "time": 4.96,
+      "width": 1920,
+      "height": 1080,
+      "decoded_sha256": "3dc72d17c9969d244c1f47a42930c332a29af2ae324460bc5c0619d2d08880d0",
+      "undo_exact": true,
+      "reopen_exact": true,
+      "max_channel_difference": 0
+    }
+  ],
+  "decoder_calibration_sha256": "91a95fc7446579378c7dd5e3a81e970ddccda5ac8d2455014822c5871d77bcfe",
+  "limitations": [
+    "Project remained native8-bpc; 16-bit PNG export is not native16-bpc/HDR proof.",
+    "AE warned that export color depth exceeded project depth. Remaining renders suppressed dialogs only in the owned copy, with DONE/frame assertions.",
+    "Preview preset resolution/skip were not independently read back in this new scene; Full viewer label alone is not preset certification.",
+    "Four selected render frames and observed Preview are not exhaustive full-frame or broad project migration coverage.",
+    "MFR issue21 remains open; no causal finding/fix or new speed benchmark.",
+    "Developer ID, notarization and clean quarantined installation retain earlier omitted/unpassed status."
+  ],
+  "privacy": "Project files, raw probe logs and frame images remain local; no user project uploaded"
+}

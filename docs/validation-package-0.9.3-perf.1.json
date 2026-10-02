@@ -1,0 +1,45 @@
+{
+  "artifact": "FSTR-Stretch-0.9.3-perf.1-macOS-arm64-VALIDATION.zip",
+  "artifact_bytes": 395937,
+  "artifact_sha256": "6def1f173d0fcdd03fd6ac1afb28cc43e2e36978749821c940331dbde9741d49",
+  "blockers": [
+    "Developer ID Application unavailable",
+    "notarization NOT RUN",
+    "quarantined clean download/install NOT RUN",
+    "final release regression/migration scope INCOMPLETE",
+    "intermittent MFR control crash unresolved: issue #21"
+  ],
+  "effect_version": "Develop Build 2",
+  "files": {
+    "FSTR Stretch.artifact.json": "9b16990a94a19061825672c5132cebe945f663d687f401b27f7835b994021256",
+    "FSTR Stretch.plugin.zip": "b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a",
+    "README.md": "46a01875f989f3eb2263b6931124b73a0171ef85af1ad8ec7a00fc8cd490af66",
+    "THIRD_PARTY_NOTICES.md": "aeabe4b1f8f0bbbf74cb647a22b539d8188e834dbe35d7ae61d17c00a5950a9b"
+  },
+  "inner_zip_sha256": "b67947316a1b871050a7cb45b40502f7d3550d1074734e0547e3954fa0b3a25a",
+  "new_host_runs": "NOT RUN: no new binary or payload; existing exact-artifact host evidence retained",
+  "package_revision": "0.9.3-perf.1",
+  "packaging_checkpoint": "cb429e1ffab06cd79cb0873ba8909b2a8369198d",
+  "plugin_build": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+    "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+    "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.3"
+  },
+  "plugin_version": "0.9.3",
+  "public_distribution": false,
+  "release_status": "BLOCKED",
+  "schema": 1,
+  "signing": "ad-hoc; local Apple Development identity is not Developer ID",
+  "validation_status": "PASS: exact immutable payload, extracted signature and installed-payload identity"
+}

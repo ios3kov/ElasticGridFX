@@ -1,5 +1,24 @@
 # ElasticGridFX production stages
 
+Latest MFR disposition: issue21 CLOSED as NOT REPRODUCED by explicit user
+decision after six complete60-frame ordinary renders (three original control,
+three retained candidate). Cause unknown, no fix/general certification. Earlier
+open-status checkpoints below are historical. [Record](mfr-closure-retry-2026-10-02.json).
+
+Postrelease check2026-10-02: one owned user-scene copy PASS for selected-frame
+render parity, UI Undo, save/reopen and functional GUI Preview. Source preserved;
+full release/MFR gates remain open. [Record](postrelease-project-validation-2026-10-02.json).
+
+2026-10-02: experimental TEST prerelease v0.9.3-perf.1 PUBLISHED by explicit
+user exception without Developer ID/notarization. Public asset hash matches.
+Full Release Gate NOT PASSED; MFR #21 stays open.
+[Publication](prerelease-publication-0.9.3-perf.1.json).
+
+Release preparation2026-10-02: local validation package0.9.3-perf.1 ready
+with unchanged tested0.9.3 Develop Build2. Public release BLOCKED on
+Developer ID/notarization/clean distribution and incomplete final gates;
+MFR issue #21 remains open. See [package notes](release-0.9.3-perf.1.md).
+
 Authoritative process: ../DEVELOPMENT_RULES.md.
 
 This is the project-wide stage map used for the required “Stage X of Y” status.

@@ -1,5 +1,35 @@
 # Changelog
 
+## MFR disposition — 2026-10-02
+
+- Complete six bounded MFR-requested-ON100 reproduction attempts on the original
+  failed scene: three exact-control and three retained-candidate runs,360/360
+  frames with exact output. No recurrence/new crash report. Close issue21 as
+  not reproduced by explicit user decision; preserve original failure/unknown
+  cause, with no native fix or general MFR certification claim.
+- Restore accelerated candidate atomically and reopen the preserved user scene.
+
+## Postrelease validation — 2026-10-02
+
+- Verify one user-scene copy: selected-frame pixel parity after UI Undo and
+  save/reopen, animated keys/settings retained, native GUI Preview functional.
+  Preserve source locally and retain unchanged installed candidate. This bounded
+  check does not close MFR #21 or certify broad release/migration gates.
+
+## 0.9.3-perf.1 — experimental TEST prerelease published, 2026-10-02
+
+- Publish unchanged tested0.9.3 Develop Build2 by explicit user decision
+  without Developer ID/notarization. Omitted gates retain NOT DONE/NOT RUN;
+  stable release readiness is not claimed. MFR issue #21 remains open.
+- Retain public archive download/hash verification and package/install notes.
+
+## 0.9.3-perf.1 — local validation package preparation, 2026-10-02
+
+- Package unchanged tested0.9.3 Develop Build2 with validation notes, notices
+  and exact identity. Verify extracted signature and installed-payload parity.
+- Retain MFR issue #21 and Developer ID/notarization/distribution blockers.
+  This is a package revision, not a public release or binary version bump.
+
 ## Unreleased — resumed performance development
 
 - Complete four stability-only MFR-requested-ON candidate/control × enabled/

@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "status": "NOT_REPRODUCED_IN_SIX_RUNS",
+  "scope": "Bounded retry requested by human: three original-control and three retained-candidate ordinary renders; stop on first failure, no speed acceptance",
+  "authorization": {
+    "source": "Direct user instruction in this chat",
+    "quote": "\u0434\u0430\u0432\u0430\u0439 \u043f\u043e\u043f\u0440\u043e\u0431\u0443\u0435\u043c \u0432\u043e\u0441\u043f\u0440\u043e\u0438\u0437\u0432\u0435\u0441\u0442\u0438. \u0435\u0441\u043b\u0438 \u043f\u043e\u0432\u0442\u043e\u0440\u0438\u0442\u044c \u043d\u0435 \u0443\u0434\u0430\u0441\u0442\u0441\u044f, \u0442\u043e \u0438 \u0437\u0430\u043a\u0440\u043e\u0435\u043c",
+    "effect": "Bounded retry and issue closure if not reproduced; replaces prior causal-fix closure criterion for issue disposition only"
+  },
+  "rules": {
+    "version": "5.1.0",
+    "commit": "54fa9966fd4eab10f35f1fbc8aa18f94ff42925b",
+    "entrypoint_first": true,
+    "risk": "Critical native diagnostics",
+    "delivery": "Development / bounded host validation"
+  },
+  "fixture": {
+    "bit_depth": 32,
+    "composition": "EGFX_PERF",
+    "expected_render_path": "plane_region",
+    "fixture_id": "egfx-perf-1920x1080-32bpc-animated-16out-four-corners-phase-4",
+    "fps": 30.0,
+    "frame_end": 59,
+    "frame_start": 0,
+    "height": 1080,
+    "linearize": false,
+    "output_bit_depth": 16,
+    "output_channels": "RGBA",
+    "output_color": "Straight (Unmatted)",
+    "output_format": "PNG sequence",
+    "output_pattern": "frame_[#####].png",
+    "plane_corners": [
+      0,
+      0,
+      1919,
+      0,
+      1919,
+      1079,
+      0,
+      1079
+    ],
+    "plane_mode": "four-corners",
+    "project": "EGFX_PERF.aep",
+    "project_sha256": "2ede888ab4b8ba4d32d1d3358e078544a7cfdb036c8a8479500575176dd60831",
+    "quality": "Final Bicubic",
+    "rqindex": 1,
+    "schema": 3,
+    "width": 1920,
+    "working_space": "None"
+  },
+  "builds": {
+    "candidate": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+      "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+      "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "version": "0.9.3"
+    },
+    "control": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-a733d95d2018fb8bc321b6d8",
+      "commit": "98e383997147c612b8010b406ec379e162975928",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+      "source_sha256": "9a238afcd99336a74d94e51c6819d75ad3a8cd69f094551ded82c60c4f5d2a26",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "version": "0.9.3"
+    }
+  },
+  "runs": [
+    {
+      "version": "control",
+      "index": 0,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    },
+    {
+      "version": "control",
+      "index": 1,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    },
+    {
+      "version": "control",
+      "index": 2,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    },
+    {
+      "version": "candidate",
+      "index": 3,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    },
+    {
+      "version": "candidate",
+      "index": 4,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    },
+    {
+      "version": "candidate",
+      "index": 5,
+      "status": "PASS",
+      "frames": 60,
+      "mapped_candidate": true,
+      "output_digest": "3ffdfffb5aa4de6634acf429015c55ccc4700cce3fe74919ec046b5c88fd4f85",
+      "host_frame_reports": 60,
+      "mfr_requested": "ON",
+      "requested_cpu_percent": 100
+    }
+  ],
+  "quality": {
+    "status": "PASS",
+    "complete_frames": 360,
+    "independently_decoded_frames": 60,
+    "encoded_exact_pairs": 300,
+    "prior_decoded_exact_frames": 60,
+    "calibration_sha256": "91a95fc7446579378c7dd5e3a81e970ddccda5ac8d2455014822c5871d77bcfe"
+  },
+  "new_aerendercore_crash_reports": 0,
+  "source_fixture_unchanged": true,
+  "temporary_control_receipt": "EGFX-update-35912e79287b4a9e84d25392120eba41",
+  "temporary_rollback": "PASS",
+  "final_accelerated_candidate_verified": true,
+  "user_source_snapshot_unchanged": true,
+  "user_scene_reopened": true,
+  "original_incident": {
+    "frames": 19,
+    "expected_frames": 60,
+    "signal": "SIGABRT",
+    "raw_report_sha256": "43eb0a1fce26e0a12815592009881e5d96d7f0e3053df682a5e0bc5aaa4e08fa",
+    "retained": true,
+    "root_cause": "UNKNOWN",
+    "fix": "NONE"
+  },
+  "issue": {
+    "number": 21,
+    "url": "https://github.com/ios3kov/ElasticGridFX/issues/21",
+    "state": "closed",
+    "state_reason": "not_planned",
+    "closed_at": "2026-10-02T14:36:46Z",
+    "disposition": "NOT REPRODUCED / CLOSED BY USER DECISION; NOT FIXED",
+    "comment_id": 5954774817,
+    "reopen_condition": "New exact-identity crash with AEP hash and pre-termination context"
+  },
+  "limits": [
+    "Actual callback concurrency not measured",
+    "Ordinary mapped path + verified disk payload; no new live UUID sample",
+    "Cache/ambient activity not controlled",
+    "No reproduced failure does not prove cause fixed or broad MFR reliability",
+    "No general MFR certification or full Release Gate PASS",
+    "No native code, settings/cache workaround, security permission or release-asset change",
+    "Private AEPs/logs/frame images remain local"
+  ],
+  "private_runner_sha256": "509564c25552be65490ed12ba4cd748a56b5677b69506955df2d5d64de39e31e",
+  "private_reproduction_record_sha256": "ef2b081878265de0284ab2918ed6e751ac10e9ee5d1ca63d365b579f23b66ecc",
+  "private_quality_record_sha256": "20851ae53c67c239f7bb0d60a28f6cd2ffdc5d56463b4dcffe967c1706fce898"
+}

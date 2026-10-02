@@ -1,5 +1,86 @@
 # Current development / release status
 
+## Latest MFR disposition — 2026-10-02 — issue21 CLOSED, NOT REPRODUCED
+
+The human explicitly requested one bounded retry and closure if it did not
+recur. Three ordinary renders on the exact originally failing control and three
+on the retained candidate all completed60/60 frames (360 total), using the
+original hash-pinned AEP / AE25.6 / Full Final32-bpc / MFR-requested ON100. No
+new aerendercore crash report;300 encoded pairs exact and60 independently
+decoded frames match the retained prior reference. Actual callback concurrency
+is unmeasured; disk cache and ambient activity uncontrolled. No new speed test.
+
+Issue #21 is verified CLOSED with reason not_planned by the user's later
+decision, superseding earlier open/causal-fix closure criteria for disposition.
+The original19/60 SIGABRT remains retained, cause UNKNOWN, fix NONE; no general
+MFR certification or full Release Gate PASS. Reopen on a new exact-identity
+crash with project hash and pre-termination context. Temporary control rollback
+PASS; exact accelerated candidate retained, preserved user scene reopened.
+[Retry and closure record](mfr-closure-retry-2026-10-02.json).
+
+Earlier open-issue statements below are historical checkpoints.
+
+## Postrelease project check — 2026-10-02 — scoped PASS
+
+One preserved user scene was checked through an owned copy on the exact retained
+0.9.3 Develop Build2 / EGFX-6147dc406abc596e7f2d1b60, AE25.6x101. Native8-bpc
+sRGB settings and all three animated grid keys survived save/reopen. UI Undo
+restored amplitude0 and the prior deformation. Four selected frames rendered
+in each of baseline/Undo/reopen phases; all eight decoded straight RGBA16
+comparisons are byte-exact. Native GUI Preview played the animation with full
+work-area cache and stopped normally; no new FPS/latency or preset certification.
+The source snapshot hash stayed unchanged and it is reopened in AE. User AEPs,
+raw logs and pixels stay local. MFR #21 and broad release gates remain open.
+[Scoped record](postrelease-project-validation-2026-10-02.json).
+
+## Published experimental prerelease — 2026-10-02
+
+The human explicitly directed release without Developer ID/notarization after
+being informed of the adopted rules requirement. This later instruction
+supersedes that publication hold for this TEST prerelease only; it does not
+turn omitted checks into PASS or certify the full Release Gate.
+
+Published v0.9.3-perf.1, prerelease=true / draft=false, target cb429e1:
+https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1
+Public TEST archive SHA-256 a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14.
+Downloaded public asset matches exactly. Original inner ZIP, signed payload
+and tested f611312 / EGFX-6147dc406abc596e7f2d1b60 remain unchanged; AE version
+0.9.3 Develop Build2. Previous local VALIDATION wrapper remains historical.
+No plugin replacement, certificate change or security bypass performed.
+
+Developer ID NOT DONE, notarization NOT RUN by user decision; quarantined
+Gatekeeper/clean installation and final broad release gates remain unpassed.
+MFR issue #21 stays open; no cause/fix claim. Stable release not certified.
+[Current release notes](release-0.9.3-perf.1.md) and
+[verified publication](prerelease-publication-0.9.3-perf.1.json).
+
+### Historical preparation hold — superseded for this TEST prerelease
+
+
+## Release preparation — 2026-10-02 — local package ready; public release BLOCKED
+
+PR #20 merged as cb429e1ffab06cd79cb0873ba8909b2a8369198d, with identical
+Git tree to reviewed f78a5de (all seven hosted checks PASS). The human then
+authorized proposed test-release preparation. Critical native / Release
+preparation; adopted rules5.1.0 and Release sections26/28 apply.
+
+Prepared local package revision **0.9.3-perf.1** around unchanged tested
+0.9.3 Develop Build2 / f611312 / EGFX-6147dc406abc596e7f2d1b60. Wrapper,
+inner ZIP, extracted payload/signature and installed-payload identity PASS.
+No new native build, installation or host timing series. The package revision
+is explicitly separate from embedded plugin version.
+
+Public distribution BLOCKED: Developer ID Application unavailable;
+notarization and quarantined clean download/install NOT RUN; final applicable
+release regression/migration scope INCOMPLETE. The available local Apple
+Development identity is not a substitute. Intermittent MFR issue #21 stays
+open with no causal finding/fix. No public GitHub Release or tag created.
+Next: obtain Developer ID/notarization access, then sign a new fixed candidate
+and verify it separately without transferring previous artifact PASS.
+[Package notes](release-0.9.3-perf.1.md) and
+[hashes/packaging checks](validation-package-0.9.3-perf.1.json).
+
+
 ## Completed bounded MFR isolation — 2026-10-02
 
 Direct human “делай” applied to the remaining MFR investigation. AI_ENTRYPOINT
