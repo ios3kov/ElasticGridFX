@@ -245,3 +245,18 @@ All 15 JSX suites and fresh Python 248/248 PASS. The first sandboxed Python run
 was incomplete on three OS process/image checks; full permitted execution PASS.
 Offline scanner review retains existing mutable Actions/checkouts and a test-only
 rate-limit heuristic, with no credential finding; no release certification.
+
+## Residual host-time investigation — 2026-10-02
+
+Existing exact plane observer sequence: SmartRender callback sums are 21.4231 s
+(original native source) and 2.2139 s (candidate), inside respective observed
+first-to-last callback spans 54.7188/35.6555 s. Residual outside SmartRender
+is 33.2957/33.4416 s. Input/output checkout medians inside SmartRender are
+~0.05/~0.01 ms; parameter evaluation is in the separate SmartPreRender path.
+This supports further host/export attribution before another sampler change.
+The residual also includes SmartPreRender, logging and host work: it does not
+identify the responsible AE/export stage. Instrumented sequence spans cannot
+be combined with the separate ordinary fresh-phase timing medians.
+[Scoped diagnostic calculation](performance-host-attribution-2026-10-02.json).
+No new renderer optimization, GPU enablement or quality tradeoff follows from
+this observation alone. Remaining quantitative GUI/guide gates stay open.

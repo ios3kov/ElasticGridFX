@@ -44,12 +44,17 @@ are instrumented attribution, not final Render/RAM Preview timings.
 
 Previous tooling checkpoint c62bb7422547bfd911fb27be0375a52d55bccb7e: all eight CI
 checks PASS. Current additions: 15 JSX guard/control-flow suites and a fresh physical-Mac
-Python 248/248 run PASS. Hosted checks for the next commit are pending. Offline code scan retains
+Python 248/248 run PASS. Live exact-head hosted checks are linked in
+[draft PR #20](https://github.com/ios3kov/ElasticGridFX/pull/20). Offline code scan retains
 29 review candidates: 23 mutable Actions references, five checkout-credential
 defaults and one rate-limit heuristic on a test file (not an authentication service);
 no credential findings. This scanner does not assess release readiness.
-Stage 8 remains IN PROGRESS. Next: review/publish this evidence checkpoint;
-inspect remaining host overhead without competing work during measurements.
+Stage 8 remains IN PROGRESS. Existing observer spans show about 33.3 s outside
+SmartRender on both versions; this includes pre-render/logging/host/export work,
+not a directly identified bottleneck. [Attribution limits](performance-host-attribution-2026-10-02.json).
+Next: quantitative equal-condition RAM Preview generation/first-playable timing
+and actual guide-drag-to-fresh-frame validation once custom-canvas input works;
+inspect remaining host/export work before changing the sampler again.
 Quantitative RAM Preview, first-frame latency and actual guide gesture remain
 separate acceptance gates. No main merge, public release or cache purge.
 
