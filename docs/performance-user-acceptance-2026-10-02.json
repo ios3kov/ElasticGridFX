@@ -1,0 +1,493 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "scope": "Existing speed requirement accepted by the human for development; this is not an unperformed technical test PASS or release authorization",
+  "decision": {
+    "status": "USER_ACCEPTED",
+    "source": "Direct human messages in this task on 2026-10-02",
+    "speed_quote": "считай тесты на скорость мы прошли",
+    "installation_quote": "возвращать потом старый не надо",
+    "rules_quote": "Сначала прочитай AI_ENTRYPOINT.md и сам определи, какие правила сейчас применимы",
+    "effect": "Stop further speed timing; retain accelerated candidate and original backup. Keep unchanged quality and independent stability requirements. No merge or release authorized."
+  },
+  "rules": {
+    "version": "5.1.0",
+    "commit": "54fa9966fd4eab10f35f1fbc8aa18f94ff42925b",
+    "tag": "v5.1.0",
+    "tag_object": "91737f9a05d52b62dfb8de33bad3f9fab5d4cd08",
+    "adoption": "Conscious update after AI_ENTRYPOINT-first read, diff/errata review and current tag verification; historical evidence retains its original baseline",
+    "routing": {
+      "artifact": "native AE effect",
+      "risk": "Critical for native renderer / MFR; Light for this documentation checkpoint",
+      "delivery": "Development plus bounded local Validation; not Release",
+      "features": [
+        "quality",
+        "testing",
+        "performance",
+        "diagnostics",
+        "adoption"
+      ],
+      "sections": [
+        "Process 1-4,6-13,27",
+        "Engineering 14-21,24,31-34,38",
+        "Native 23",
+        "Validation 26",
+        "Workflow 8"
+      ],
+      "product_contract_covers_scope": true,
+      "new_discovery": false,
+      "reference_audit_triggered": false,
+      "new_host_api_calls": false,
+      "artifact_record_format": "Existing project v1 identity/transaction engine retained unchanged; no use of new standard v2 artifact tooling"
+    },
+    "generated_routes": {
+      "checkpoint": {
+        "context": {
+          "components": [
+            "native"
+          ],
+          "reference": "none",
+          "product_contract": true,
+          "contract_covers_scope": true,
+          "changes_product_contract": false,
+          "task": "documentation",
+          "risk": "light",
+          "delivery": "development",
+          "features": [
+            "adoption",
+            "quality",
+            "testing"
+          ]
+        },
+        "selected": {
+          "risk": "light",
+          "delivery": "development",
+          "product_discovery": false,
+          "reference_audit": false,
+          "implementation_task": false,
+          "rules": [
+            "CORE-SCOPE",
+            "GIT",
+            "DOCS",
+            "EVIDENCE",
+            "STATE",
+            "WORKFLOW",
+            "STANDARD-VERSION",
+            "ADOPTION",
+            "QUALITY",
+            "TEST-CASES",
+            "TEST-CONTROL"
+          ]
+        }
+      },
+      "stability_review": {
+        "context": {
+          "components": [
+            "native"
+          ],
+          "reference": "none",
+          "product_contract": true,
+          "contract_covers_scope": true,
+          "changes_product_contract": false,
+          "task": "research",
+          "risk": "critical",
+          "delivery": "development",
+          "features": [
+            "diagnostics",
+            "quality",
+            "testing"
+          ]
+        },
+        "selected": {
+          "risk": "critical",
+          "delivery": "development",
+          "product_discovery": false,
+          "reference_audit": false,
+          "implementation_task": false,
+          "rules": [
+            "CORE-SCOPE",
+            "GIT",
+            "IDENTITY",
+            "REGRESSION",
+            "EVIDENCE",
+            "CODE-SAFETY",
+            "NATIVE-RUNTIME",
+            "AUTOMATION",
+            "COMPLETION",
+            "STATE",
+            "WORKFLOW",
+            "STANDARD-VERSION",
+            "BASELINE",
+            "TEST-CONTROL",
+            "COMPAT",
+            "PERF",
+            "TEST-CASES",
+            "REPRO",
+            "API-SOURCES",
+            "CRASH-DIAGNOSTICS",
+            "DEBUGGING",
+            "QUALITY"
+          ]
+        }
+      },
+      "scoped_host_validation": {
+        "context": {
+          "components": [
+            "native"
+          ],
+          "reference": "none",
+          "product_contract": true,
+          "contract_covers_scope": true,
+          "changes_product_contract": false,
+          "task": "improvement",
+          "risk": "critical",
+          "delivery": "validation",
+          "features": [
+            "quality",
+            "testing",
+            "performance",
+            "diagnostics"
+          ]
+        },
+        "selected": {
+          "risk": "critical",
+          "delivery": "validation",
+          "product_discovery": false,
+          "reference_audit": false,
+          "implementation_task": true,
+          "rules": [
+            "CORE-SCOPE",
+            "GIT",
+            "IDENTITY",
+            "REGRESSION",
+            "EVIDENCE",
+            "CODE-SAFETY",
+            "NATIVE-RUNTIME",
+            "AUTOMATION",
+            "COMPLETION",
+            "STATE",
+            "WORKFLOW",
+            "STANDARD-VERSION",
+            "BASELINE",
+            "TEST-CONTROL",
+            "COMPAT",
+            "PERF",
+            "TEST-CASES",
+            "REPRO",
+            "GATES",
+            "API-SOURCES",
+            "QUALITY",
+            "CRASH-DIAGNOSTICS",
+            "DEBUGGING"
+          ]
+        }
+      }
+    }
+  },
+  "preview_full": {
+    "test_status": "PASS",
+    "basis": "Human selected Full; native Cua observed Spacebar preset Full on candidate and after control AE restart",
+    "settings": {
+      "resolution": "Full",
+      "skip": 0,
+      "frame_rate_label": "(30)",
+      "cache_before_playback": false,
+      "viewer_zoom_percent": 50,
+      "composition_resolution_factor": [
+        1,
+        1
+      ],
+      "bit_depth": 32,
+      "render_quality": "Final (Bicubic)",
+      "fast_preview": "FP_OFF"
+    },
+    "candidate_build": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+      "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+      "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "version": "0.9.3"
+    },
+    "candidate_loaded_uuid": "C8A4F55A-6B1A-3535-A82E-8BF33D465D2F",
+    "candidate_process_key_sha256": "15121ad0040a0335fcc177a9fc6f59493ad218b93091f29f189a94e29361bcb6",
+    "fixture_project_sha256": "02ba50abfc3cea46a491c61a138e164bcc84f8b617f094ff23fa1ad5a38a5018",
+    "samples": [
+      {
+        "version": "candidate",
+        "phase": 325,
+        "start_before_utc_ms": 1790944527798,
+        "start_after_utc_ms": 1790944527895,
+        "observations": [
+          {
+            "before_utc_ms": 1790944528573,
+            "after_utc_ms": 1790944528761,
+            "playing": null,
+            "fps": null
+          },
+          {
+            "before_utc_ms": 1790944528831,
+            "after_utc_ms": 1790944529027,
+            "playing": 3,
+            "fps": null
+          },
+          {
+            "before_utc_ms": 1790944529041,
+            "after_utc_ms": 1790944529454,
+            "playing": 7,
+            "fps": 30
+          },
+          {
+            "before_utc_ms": 1790944555539,
+            "after_utc_ms": 1790944555740,
+            "playing": 60,
+            "fps": 30
+          }
+        ],
+        "full_cache_interval_seconds": {
+          "lower_exclusive": 1.146,
+          "upper_inclusive": 27.942
+        },
+        "first_observed_playing_upper_seconds": 1.229
+      },
+      {
+        "version": "candidate",
+        "phase": 331,
+        "start_before_utc_ms": 1790944597027,
+        "start_after_utc_ms": 1790944597043,
+        "observations": [
+          {
+            "before_utc_ms": 1790944597785,
+            "after_utc_ms": 1790944598134,
+            "playing": 6,
+            "fps": 30
+          },
+          {
+            "before_utc_ms": 1790944599609,
+            "after_utc_ms": 1790944600299,
+            "playing": 35,
+            "fps": 30
+          },
+          {
+            "before_utc_ms": 1790944601249,
+            "after_utc_ms": 1790944601375,
+            "playing": 60,
+            "fps": 30
+          }
+        ],
+        "full_cache_interval_seconds": {
+          "lower_exclusive": 2.566,
+          "upper_inclusive": 4.348
+        },
+        "first_observed_playing_upper_seconds": 1.107
+      },
+      {
+        "version": "candidate",
+        "phase": 337,
+        "start_before_utc_ms": 1790944631463,
+        "start_after_utc_ms": 1790944631478,
+        "observations": [
+          {
+            "before_utc_ms": 1790944632164,
+            "after_utc_ms": 1790944632675,
+            "playing": 6,
+            "fps": null
+          },
+          {
+            "before_utc_ms": 1790944634610,
+            "after_utc_ms": 1790944635604,
+            "playing": 51,
+            "fps": 19.417
+          },
+          {
+            "before_utc_ms": 1790944636638,
+            "after_utc_ms": 1790944636827,
+            "playing": 60,
+            "fps": 30
+          }
+        ],
+        "full_cache_interval_seconds": {
+          "lower_exclusive": 3.132,
+          "upper_inclusive": 5.364
+        },
+        "first_observed_playing_upper_seconds": 1.212
+      },
+      {
+        "version": "candidate",
+        "phase": 343,
+        "start_before_utc_ms": 1790944663164,
+        "start_after_utc_ms": 1790944663438,
+        "observations": [
+          {
+            "before_utc_ms": 1790944664004,
+            "after_utc_ms": 1790944664173,
+            "playing": null,
+            "fps": null
+          },
+          {
+            "before_utc_ms": 1790944665434,
+            "after_utc_ms": 1790944665710,
+            "playing": 19,
+            "fps": 30
+          },
+          {
+            "before_utc_ms": 1790944667891,
+            "after_utc_ms": 1790944668122,
+            "playing": 28,
+            "fps": 6.954
+          },
+          {
+            "before_utc_ms": 1790944682340,
+            "after_utc_ms": 1790944682566,
+            "playing": 60,
+            "fps": 30
+          }
+        ],
+        "full_cache_interval_seconds": {
+          "lower_exclusive": 4.453,
+          "upper_inclusive": 19.402
+        },
+        "first_observed_playing_upper_seconds": 2.546
+      },
+      {
+        "version": "candidate",
+        "phase": 349,
+        "start_before_utc_ms": 1790944705296,
+        "start_after_utc_ms": 1790944705330,
+        "observations": [
+          {
+            "before_utc_ms": 1790944706223,
+            "after_utc_ms": 1790944706395,
+            "playing": 3,
+            "fps": null
+          },
+          {
+            "before_utc_ms": 1790944706924,
+            "after_utc_ms": 1790944708194,
+            "playing": 6,
+            "fps": 30
+          },
+          {
+            "before_utc_ms": 1790944709053,
+            "after_utc_ms": 1790944709168,
+            "playing": 7,
+            "fps": 2.108
+          },
+          {
+            "before_utc_ms": 1790944723705,
+            "after_utc_ms": 1790944723958,
+            "playing": 60,
+            "fps": 30
+          }
+        ],
+        "full_cache_interval_seconds": {
+          "lower_exclusive": 3.723,
+          "upper_inclusive": 18.662
+        },
+        "first_observed_playing_upper_seconds": 1.099
+      }
+    ],
+    "baseline_runs": 0,
+    "comparison_status": "NOT RUN — stopped by explicit human speed acceptance before control timing",
+    "first_display_latency_status": "NOT RUN as exact event latency; retained first observed Playing upper bounds only",
+    "median_candidate_full_cache_interval_seconds": {
+      "lower_exclusive": 3.132,
+      "upper_inclusive": 18.662
+    },
+    "limits": [
+      "UTC screenshot brackets, capture overhead and gaps; no exact display-event timing",
+      "All broad and slow observations retained, including below-realtime partial playback",
+      "Phase invalidation can render frame zero before Spacebar; observed Playing is not cold-first-frame proof",
+      "No baseline comparison or new Full speedup percentage inferred",
+      "Ambient activity/cache uncontrolled"
+    ],
+    "raw_observations_sha256": "5ce3be46e6a8fa6e51ba7ab251a116729a225f8f6215fea1428b44bc052b26d9"
+  },
+  "cleanup": {
+    "candidate_scene_status": "CLOSED",
+    "control_scene_status": "CLOSED",
+    "prior_fast_preview_restored_verified": true,
+    "prior_mode": "FP_ADAPTIVE_RESOLUTION",
+    "control_receipt": "EGFX-update-f772d45fcbfb4eef9322275a7a44441a",
+    "control_transaction_status": "ROLLED_BACK",
+    "control_cleanup_sha256": "d87f7f7e478baf962cdc1102addebb2ff77486c30aca2343fe06fbc43d5a6150"
+  },
+  "installed_candidate": {
+    "status": "PASS",
+    "installed": {
+      "artifact_type": "AE native effect (.plugin)",
+      "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+      "commit": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+      "profile": "release",
+      "schema": 1,
+      "settings_sha256": "43b79a50459046aac53887b99adb8dc198b1bf55d51c8ca001d4fbf1ee087fe5",
+      "source_sha256": "384f21d4ef595d3ea7b71500e9afa765bf1510ecfada46db67f8968e44e1c261",
+      "source_state": "clean",
+      "target": "aarch64-apple-darwin",
+      "toolchain": {
+        "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+        "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+      },
+      "version": "0.9.3"
+    },
+    "receipt": "EGFX-update-9a11d806b48c4a9abe48ab36c97f1897",
+    "backup_original_verified": true,
+    "signature": "PASS",
+    "unique_installed_payload": true,
+    "adobe_hosts_stopped": true,
+    "binary_sha256": "7a1c2d7c96039cf3bbad3437a90519563394817d5fe4d641e22d1d9a9d3e84d1",
+    "final_choice": "KEEP_CANDIDATE_BY_EXPLICIT_USER_AUTHORIZATION"
+  },
+  "retained_evidence": {
+    "ordinary_render": "performance-host-render-2026-10-02.json",
+    "quality": "performance-host-matrix-2026-10-02.json",
+    "previous_preview_intervals": "performance-host-preview-intervals-2026-10-02.json",
+    "guide_undo": "performance-host-guide-2026-10-02.json",
+    "mfr_failure_and_diagnostics": "performance-host-mfr-2026-10-02.json"
+  },
+  "remaining": {
+    "speed_measurements": "Closed by direct human acceptance; no more timing series planned in this scope",
+    "mfr_stability": "OPEN: ordinary control aborted with19/60 frames; root cause unresolved, sampled100%/50% diagnostics completed but do not fix/exonerate",
+    "release_readiness": "NOT ACCEPTED: main unchanged; signing/notarization/distribution and applicable release gates remain separate"
+  },
+  "mfr_bounded_source_review": {
+    "date": "2026-10-02",
+    "status": "REVIEW_COMPLETE_CAUSE_UNRESOLVED",
+    "scope": "Static ownership/exception-boundary review only; not runtime proof or a fix",
+    "source_checkpoint": "e8ee90c6fb448a0e3a8230e02339c0ab684121a1",
+    "reviewed_candidate_files_unchanged_since": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+    "files": [
+      {
+        "path": "src/core/PlaneRenderer.cpp",
+        "sha256": "4acc01647974a7c1f848169a2fabb60abfbbb57177f19552164509f8d5da55ba",
+        "finding": "Mapping vectors and four row caches are automatic objects inside renderRegion. Returned row pointers are consumed within the same call/row; no added retained shared row cache."
+      },
+      {
+        "path": "src/bridge/plane_ffi.cpp",
+        "sha256": "be501fb154cd4577e6bedb3f1601ad40a284492f3d930b919910c04b2b29de10",
+        "finding": "Plane render wrapper converts cancellation/invalid-argument/other C++ exceptions to status codes before exported noexcept entry returns."
+      },
+      {
+        "path": "host-rust/src/lib.rs",
+        "sha256": "26fdc6cef7de4cef6e5364741a272cd2bf3f330ccb8e7055071357564dd0c027",
+        "finding": "SmartPreRender copies parameter/grid state into owned pre_render_data. SmartRender accesses this snapshot; after checkout_layer_pixels succeeds, the render Result closure reaches checkin_layer_pixels even on ordinary Result errors."
+      }
+    ],
+    "negative_evidence": "The rejected ordinary control has unchanged original native src and did not contain the new row cache. This does not localize the host failure or exonerate shared host/FFI behavior. Observer cfg code in the control host remains disabled.",
+    "decision": "No speculative code patch, MFR disablement, hidden CPU cap or repeated unchanged timing series.",
+    "next_distinguishing_signal": "A controlled stability-only reproduction separating the same input/output pipeline with effect enabled and bypassed, or a new exact-identity callback/error/crash signal before termination. This is a followup plan, not performed evidence.",
+    "limits": [
+      "Static review cannot exclude SDK resource lifetime, allocation or host shutdown faults",
+      "Current snapshot Result/checkin shape does not prove cleanup on Rust panic/foreign faults",
+      "Earlier sampled100%/50% successes do not reproduce the intermittent failure or establish a CPU-budget cause"
+    ]
+  }
+}

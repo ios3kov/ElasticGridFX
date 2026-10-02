@@ -526,3 +526,37 @@ Both diagnostics succeed, so no causal failure localization or lower-budget fix
 is accepted. Ordinary five-pair ON series remains INCOMPLETE. Receipt
 EGFX-update-181c517eefee4211839a3caa8895cefb ROLLED_BACK; original payload/signature
 verified. No production source/queue/quality change.
+
+## 2026-10-02 — explicit speed acceptance and retained candidate
+
+Direct human: “считай тесты на скорость мы прошли” and “возвращать потом старый
+не надо”. Stop timing work; speed scope USER_ACCEPTED. Retain all actual Test
+statuses, old outliers and unresolved MFR incident; no change to quality or release.
+Human-selected Full/Skip0 observed before and after restart; five candidate Full
+phases325/331/337/343/349 reached60/60 at30fps. No new control times collected.
+Both owned scenes close with prior Fast Preview restored/checked. Control
+transaction rolled back; ordinary f611312 candidate installed and independently
+verified, backup intact, Adobe hosts stopped. Receipt9a11d806b48c4a9abe48ab36c97f1897.
+
+Rules consciously updated after AI_ENTRYPOINT-first read and b27f454 diff/errata
+review to published5.1.0 / v5.1.0 peeled54fa9966fd4eab10f35f1fbc8aa18f94ff42925b.
+Native Critical; current record Light; Development/local Validation. Applies
+quality/testing/diagnostics/adoption, preserved identity/regression/state controls.
+No new host API, product discovery, artifact-format migration or public release.
+
+Requirement trace: existing user no-loss acceleration →41283e3 exact plane cache
+→native/AE same-toolchain output parity + scoped real Render25.97% reduction and
+Preview completion →existing evidence plus direct speed acceptance. MFR stable
+complete output →ordinary series rejected19/60 + crash/100%/50% diagnostics
+→open causal investigation. Known negative results require a new distinguishing
+signal before more retries, under Workflow8. e8ee90c6 all seven reported CI PASS.
+[Decision, identities, Full samples and limits](performance-user-acceptance-2026-10-02.json).
+
+Bounded static review of the candidate's plane cache/FFI/SmartFX ownership is
+complete and recorded in the linked JSON. No retained shared row cache or
+escaping C++ render exception is introduced; normal Result failures reach pixel
+checkin. This is source evidence only, not crash exoneration or a runtime fix.
+The failed control native src is unchanged original code; disabled diagnostic
+cfg blocks in its Rust host are retained. Do not infer that the new sampler caused
+or cannot cause host failure. A new distinguishing pre-termination signal or
+effect-enabled/bypass stability isolation is needed before another causal change.

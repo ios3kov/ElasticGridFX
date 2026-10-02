@@ -1,6 +1,43 @@
 # Current development / release status
 
-## Stage 8 resumed — 2026-10-01 — IN PROGRESS
+## Current checkpoint — 2026-10-02 — speed accepted; MFR reliability open
+
+The human explicitly said “считай тесты на скорость мы прошли”: speed scope is
+**USER_ACCEPTED**, with no further timing runs planned. This changes the acceptance
+scope; it does not fabricate a Test: PASS for missing exact latency or MFR timing.
+Quality remains unchanged. Five fresh candidate Full-preset Preview runs all
+reach60/60 at30fps; the control was opened but not timed because the human closed
+speed testing. All slow/broad intervals remain retained; no new Full comparison.
+The human selected Preview Resolution Full, observed natively and preserved
+across the control restart; Skip0/Full preset readback now PASS.
+
+Both owned Full scenes are CLOSED and prior FP_ADAPTIVE_RESOLUTION restored and
+checked. Control receipt f772d45f is ROLLED_BACK. Under the later direct decision
+“возвращать потом старый не надо”, ordinary f611312 / EGFX-6147dc406abc596e7f2d1b60
+is now installed and intentionally retained, receipt
+EGFX-update-9a11d806b48c4a9abe48ab36c97f1897. Complete payload/package, binary
+7a1c2d7c96039cf3bbad3437a90519563394817d5fe4d641e22d1d9a9d3e84d1,
+signature, sole installed payload and original backup independently PASS.
+Adobe hosts stopped at verification. This is a development/validation artifact.
+
+Rules reread AI_ENTRYPOINT first and consciously updated to5.1.0 / immutable
+v5.1.0 peeled54fa9966fd4eab10f35f1fbc8aa18f94ff42925b, after changes/errata review.
+Critical native risk; Development plus scoped Validation; quality/testing/
+diagnostics overlays apply. No new discovery, reference audit, API or release.
+Previous exact head e8ee90c6fb448a0e3a8230e02339c0ab684121a1 has all seven reported
+hosted checks PASS; new docs checkpoint requires its own CI.
+[Human decisions, Full observations, cleanup and installed identity](performance-user-acceptance-2026-10-02.json).
+
+Remaining independent risk: ordinary MFR control SIGABRT with19/60 outputs.
+It remains an unresolved host incident; diagnostic successes and speed acceptance
+do not fix it. Bounded source/ownership review is complete: cache objects are call-local,
+C++ render exceptions return status, and normal SmartRender Result errors reach
+pixel checkin. This static review does not establish the crash cause or a fix.
+Next distinguishing signal is effect-enabled/bypass stability isolation or an
+exact-identity callback/error signal before termination; no unchanged timing loop. Public release remains unaccepted; no
+main merge, public release or cache purge.
+
+### Earlier host checkpoints (historical; superseded final installed choice)
 
 Completed guide checkpoint: ordinary candidate f611312 / EGFX-6147dc406abc596e7f2d1b60
 passed an actual native guide edit and Undo in owned AE at Full/Final/32bpc.
@@ -105,13 +142,9 @@ This scanner does not assess release readiness.
 Stage 8 remains IN PROGRESS. Existing observer spans show about 33.3 s outside
 SmartRender on both versions; this includes pre-render/logging/host/export work,
 not a directly identified bottleneck. [Attribution limits](performance-host-attribution-2026-10-02.json).
-Next: isolate the ordinary MFR control failure with the same pinned failing AEP
-and bounded diagnostics, then validate ordinary MFR throughput. Complete preview
-Full preview override and first-playable timing; measure guide-to-display
-response separately from the now-passing actual gesture/Undo behavior. Inspect remaining host/export
-work before changing the sampler again.
-Quantitative RAM Preview, first-frame latency and guide response timing remain
-separate acceptance gates; functional guide edit/Undo is complete. No main merge, public release or cache purge.
+The timing/latency followups listed at this earlier checkpoint are superseded by
+the direct speed acceptance above. Retain their actual results and limits.
+Functional guide edit/Undo is complete; MFR stability remains independently open.
 
 The user explicitly resumed extremely fast Render / RAM Preview with unchanged
 Final quality. This supersedes the earlier skip for new work; it does not change

@@ -2,7 +2,18 @@
 
 Targets are engineering acceptance criteria, not marketing claims.
 
-## Current target-path checkpoint — 2026-10-01
+## Current acceptance — 2026-10-02
+
+The human directly accepted speed tests and stopped additional timing series.
+Development speed requirement: USER_ACCEPTED; exact unmeasured latency and the
+unrun new Full control comparison remain NOT RUN. Full/Skip0 preset is now
+observed on both installed variants; five candidate Full runs reach60/60 at30fps.
+The accelerated candidate is retained installed by explicit authorization, with
+original backup verified. MFR crash/stability and public release gates remain
+independent; no quality relaxation or universal speed claim.
+[Decision and Full evidence](performance-user-acceptance-2026-10-02.json).
+
+## Prior target-path measurement checkpoint — 2026-10-01
 
 Source 41283e3 accelerates the currently integrated native plane sampler. On the
 physical M1 Pro / 16 GiB target, five alternating native Final comparisons give
@@ -33,9 +44,10 @@ accepts a lower-budget fix. Original plugin restored after this transaction.
 [MFR scopes](performance-host-mfr-2026-10-02.json).
 Actual candidate guide edit and Undo PASS in native AE using explicitly authorized
 bounded input. Later current Spacebar readback shows Skip0 / Resolution Auto;
-Full preview override and first-playable/guide latency remain open. Stage8 IN PROGRESS.
+Full preview override was open at this checkpoint; later Full readback passes.
+Missing exact latency is retained and further timing closed by human acceptance.
 [Gesture and preset scope](performance-host-guide-2026-10-02.json).
-Host-specific absolute targets remain open until these latency gates are measured;
+Host-specific absolute targets are unverified; current speed scope is user accepted;
 the native medians do not establish them.
 
 The older CPU path numbers below are historical and do not describe the active

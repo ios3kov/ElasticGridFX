@@ -2,6 +2,14 @@
 
 ## Unreleased — resumed performance development
 
+- Close additional speed testing by direct human acceptance; preserve missing
+  technical results and independent MFR incident. Record five candidate Full
+  Preview runs and Full/Skip0 readback; retain accelerated candidate installed
+  by explicit authorization, independently verify payload/signature/backup.
+- Consciously update rules baseline to published5.1.0 / v5.1.0 after entrypoint,
+  change and errata review; preserve historical evidence provenance.
+
+
 - Verify actual candidate guide displacement, fresh image and Undo restoration
   in owned AE; record current Spacebar preset and preserve input/timing limits.
   Close owned scene, restore prior Fast Preview and original signed plugin.

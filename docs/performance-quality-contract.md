@@ -31,6 +31,15 @@ Every performance-sensitive change requires a recoverable baseline, before/after
 
 ## Current state
 
+2026-10-02: direct human speed acceptance closes further measurement work for this
+development scope, including the pending exact latency and Full-control timing.
+These absent technical results are retained as NOT RUN, not PASS. Final quality
+and pixel/stability requirements remain unchanged. The ordinary control MFR
+incident remains unresolved, and public release requires its own gates.
+[Accepted decision and retained evidence](performance-user-acceptance-2026-10-02.json).
+
+Historical resume checkpoint:
+
 2026-10-01: the user resumes performance acceleration. The current source baseline
 is `2e3d066`; Stage 8 is IN PROGRESS. The fd69988 measurements below are retained
 historical evidence, predating the currently active plane renderer. Current work
