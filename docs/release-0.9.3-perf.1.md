@@ -1,4 +1,20 @@
-# FSTR Stretch 0.9.3-perf.1 — public experimental prerelease
+# FSTR Stretch 0.9.3-perf.1 — public release with user signing exception
+
+## Release acceptance — 2026-10-02 — USER-REPORTED
+
+The human replied “проверил. все ок” to both remaining checks: installation on a
+clean Mac/separate account and a real legacy project with animated Columns/Rows
+(open, output, save). Both are recorded as USER-REPORTED PASS, not independently
+reproduced checks; exact environment, project hash and raw evidence were not supplied.
+The accepted scope is the unchanged v0.9.3-perf.1 / f611312 /
+EGFX-6147dc406abc596e7f2d1b60 package already linked in this conversation.
+
+GitHub release promotion uses the existing tag and immutable archive. Developer ID
+and notarization remain omitted by explicit user decision. This publication status
+does not certify the full AE-Development-Rules Release Gate or broad HDR/OCIO/GPU
+compatibility. Historical NOT RUN / TEST statements below describe earlier checkpoints.
+[Human acceptance](release-user-acceptance-2026-10-02.json).
+
 
 ## Latest distribution and saved-project check — 2026-10-02 — scoped PASS
 

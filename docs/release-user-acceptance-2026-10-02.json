@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "date": "2026-10-02",
+  "evidence": "USER-REPORTED",
+  "verbatim": "проверил. все ок",
+  "context": "Reply to the two remaining checks: clean Mac or separate account install, and a real legacy project with animated Columns/Rows opening/output/save",
+  "artifact_tag": "v0.9.3-perf.1",
+  "archive_sha256": "a563f8e14961e19ee0740d5eb063c89e4bbec830ac1053d23fa09de02f2a6d14",
+  "build_id": "EGFX-6147dc406abc596e7f2d1b60",
+  "plugin_source": "f611312bd7b76ebe5bc5f2bd8b48b44f50c0c761",
+  "checks": {
+    "clean_environment_install": "USER-REPORTED PASS",
+    "legacy_animated_columns_rows": "USER-REPORTED PASS"
+  },
+  "independently_reproduced": false,
+  "unprovided_details": [
+    "Exact clean environment/account",
+    "Legacy AEP hash",
+    "Raw host logs and pixels",
+    "Separate downloaded artifact hash"
+  ],
+  "distribution_decision": "Promote existing GitHub release without rebuilding or replacing any assets; retain explicit signing exception",
+  "developer_id": "OMITTED BY USER",
+  "notarization": "OMITTED BY USER",
+  "full_rules_release_gate": "NOT CERTIFIED; user acceptance does not convert omitted platform checks to PASS",
+  "known_MFR": "Issue21 closed as not reproduced; cause unknown, no fix claim"
+}

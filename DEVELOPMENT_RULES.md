@@ -57,3 +57,13 @@ latency/Full control measurements remain NOT RUN. MFR failure/stability is a
 separate open risk, not waived by speed acceptance. No quality compromise,
 main merge or public release is authorized.
 [Decision and verified installation](docs/performance-user-acceptance-2026-10-02.json).
+
+## Later release decisions — 2026-10-02
+
+The earlier no-merge/no-release statement above is historical. Subsequent direct
+human instructions authorized merges and publication without Developer ID or
+notarization. PR22 and PR23 merged after exact-head CI passed. The human now
+reports both remaining distribution/legacy-project checks passed; evidence is
+USER-REPORTED. Promote the existing v0.9.3-perf.1 GitHub release without rebuilding
+or changing assets. Full standards certification is not claimed; omitted signing
+checks remain omitted, and the historical MFR abort cause remains unknown.
