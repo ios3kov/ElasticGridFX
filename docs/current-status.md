@@ -2,6 +2,24 @@
 
 ## Stage 8 resumed — 2026-10-01 — IN PROGRESS
 
+Latest host block, 2026-10-02: Mac unlocked; all eight CI checks at b492e60 PASS.
+All 40 GUI plane/3D/AEP frames pass functional assertions on original, ordinary
+f611312 and same-current-toolchain original native source. Same-toolchain
+before/after decoded RGBA16 is exact across all 40; older-artifact comparison
+retains 29 changed color channels in six frames, max 2/65535, alpha exact.
+Two guarded host turns now prepare a fresh binding-ready schema-3 AEP. Both
+original-source and optimized observers prove loaded identity, all 60 exact
+plane_region frames and straight RGBA16; independent decoded equality PASS.
+Diagnostic sampling medians 348.734/33.595 ms are instrumented phase evidence,
+not accepted Render/RAM Preview timings. [Scoped records](performance-host-matrix-2026-10-02.json).
+Legacy missing chain capture reproduces on original; that harness gate remains
+open. First unready AEP/pilot failures remain retained. Original installed
+payload was restored and verified after both observer transactions and the
+ordinary candidate pilot. Ordinary candidate identity/60-frame RGBA16 equality
+PASS. Uninstrumented same-toolchain original-source timing control is being
+rebuilt with Develop 5 and pinned Rust 1.98.1.
+Python 248/248 and all 12 JSX suites PASS, including changed-project guards.
+
 The user explicitly resumed extremely fast Render / RAM Preview with unchanged
 Final quality. This supersedes the earlier skip for new work; it does not change
 the historical 0.9.3 acceptance or approve a new artifact.

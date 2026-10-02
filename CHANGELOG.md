@@ -2,6 +2,14 @@
 
 ## Unreleased — resumed performance development
 
+- Prepare performance fixtures in separate guarded creation/finalization host
+  turns and require actual automatic plane-binding readiness before saving.
+  Refuse foreign/changed scenes and retain blocked preparation evidence.
+- Verify actual 40-frame GUI plane/3D/AEP matrix and 60-frame plane-region RGBA16
+  equality against original native source built with the same toolchain;
+  retain older-artifact strict failures and separate diagnostic phase timings.
+
+
 - Cache exact per-axis plane mapping/taps and horizontal sampling rows for
   eligible axis-aligned planes; retain general projective sampling elsewhere.
   Keep Final Bicubic, per-channel arithmetic order and saved/FFI compatibility.

@@ -377,3 +377,17 @@ checks remain BLOCKED / NOT RUN while the Mac is locked. No merge, release or
 cache purge. [Public diagnostic](performance-host-diagnostic-2026-10-02.json)
 retains records, identities, hashes, comparisons and limitations without project
 paths, private samples or pixels.
+
+## Unlocked host checkpoint — 2026-10-02
+
+All eight exact b492e60 CI checks PASS. Actual 40-frame plane/3D/AEP matrix PASS
+on original, ordinary candidate and same-current-toolchain original source.
+The latter matches the candidate exactly in decoded RGBA16 for all 40 frames;
+the older-artifact 29-channel FAIL is retained separately. A fresh two-host-turn
+fixture has ready native binding and both observers confirm all 60 plane_region
+frames, depth, identity and output precision. Independent decoded comparison
+PASS across all 60. Sampling-phase medians 348.734/33.595 ms are diagnostic, not
+accepted total render/playback performance. Original restored after observers;
+ordinary pilot and unique uninstrumented Develop-5 control precede paired timing.
+Python 248/248, 12 JSX suites PASS. Legacy chain capture and RAM Preview remain
+open. [Scoped machine evidence](performance-host-matrix-2026-10-02.json).

@@ -21,7 +21,7 @@ class Fixture(unittest.TestCase):
  def test_inspect_builds_exact_benchmark_schema(self):
   folder,meta=pf.prepare(self.root,1920,1080,32,'static')
   (folder/'EGFX_PERF.aep').write_bytes(b'aep')
-  capture=dict(run_id=meta['run_id'],status='PREPARED',stage='prepared',saved=True,ae_version='x',
+  capture=dict(run_id=meta['run_id'],status='PREPARED',stage='prepared',saved=True,binding_ready=True,ae_version='x',
                width=1920,height=1080,fps=30,duration=2,bit_depth=32,mode='static',composition='EGFX_PERF',
                rqindex=1,render_template='Best Settings',output_template='PNG Sequence',
                output_format='PNG Sequence',output_pattern='frame_[#####].png',
@@ -36,7 +36,7 @@ class Fixture(unittest.TestCase):
   self.assertEqual(ab.load_fixture(folder,folder/'fixture.json')['project_path'],folder/'EGFX_PERF.aep')
   for field,value in [('output_precision',8),('output_depth','Millions of Colors'),('output_channels','RGB'),
                       ('output_color','Premultiplied (Matted)'),('working_space','sRGB'),('linearize',True),
-                      ('plane_mode','layer'),('plane_corners',[0,0,100,0,100,100,0,100]),('expected_render_path','legacy_cpu')]:
+                      ('plane_mode','layer'),('plane_corners',[0,0,100,0,100,100,0,100]),('expected_render_path','legacy_cpu'),('binding_ready',False)]:
    invalid=dict(capture);invalid[field]=value;(folder/'capture.json').write_text(json.dumps(invalid))
    with self.subTest(field=field),self.assertRaises(ValueError):pf.inspect(folder,meta)
  def test_capture_mismatch_refuses(self):

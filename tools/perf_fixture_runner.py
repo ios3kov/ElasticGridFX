@@ -33,6 +33,7 @@ def prepare(root:Path,width:int,height:int,bit_depth:int,mode:str,output_precisi
     config=dict(run_id=run_id,folder=str(folder.resolve()),width=width,height=height,
                 bit_depth=bit_depth,fps=30,duration=2,mode=mode,output_precision=output_precision,plane_mode=plane_mode)
     (folder/'run.jsx').write_text(source+'\nelasticGridPerfFixture('+json.dumps(config)+');\n')
+    (folder/'create.jsx').write_text(source+'\nelasticGridPerfFixtureCreate('+json.dumps(config)+');\n')
     meta=dict(schema=1,run_id=run_id,status='NOT RUN',actual_ae_execution=False,
               config={k:v for k,v in config.items() if k!='folder'},
               jsx_sha256=bi.digest(source.encode()),pattern_sha256=ab.file_digest(folder/'pattern.png'))
@@ -44,7 +45,7 @@ def inspect(folder:Path,meta:dict)->dict:
     capture=bi.safe_file(folder,'capture.json')
     if capture.stat().st_size>16384: raise ValueError('oversized fixture capture')
     data=json.loads(capture.read_text(encoding='utf-8-sig'))
-    if data.get('run_id')!=meta['run_id'] or data.get('status')!='PREPARED' or data.get('stage')!='prepared' or data.get('saved') is not True:
+    if data.get('run_id')!=meta['run_id'] or data.get('status')!='PREPARED' or data.get('stage')!='prepared' or data.get('saved') is not True or data.get('binding_ready') is not True:
         raise ValueError('fixture preparation did not complete')
     cfg=meta['config']
     for key in ('width','height','bit_depth','mode'):
@@ -105,10 +106,17 @@ end timeout
 return resultCode
 end run
 '''.replace('IDENTIFIER',identifier)
-    result=subprocess.run(['/usr/bin/osascript','-',str(folder/'run.jsx')],input=apple,capture_output=True,text=True,timeout=185)
-    (folder/'transport.log').write_text(result.stdout+'\n'+result.stderr)
-    if result.returncode or result.stdout.strip()!='0':
-        raise ValueError('AE fixture preparation failed; retained private transport log')
+    # Separate host turns allow the already-shipped deferred binding to run.
+    # No sleep inside AE, hidden-expression writes or unready-frame fallback.
+    for phase in ('create','run'):
+        result=subprocess.run(['/usr/bin/osascript','-',str(folder/(phase+'.jsx'))],input=apple,capture_output=True,text=True,timeout=185)
+        (folder/(phase+'-transport.log')).write_text(result.stdout+'\n'+result.stderr)
+        if result.returncode or result.stdout.strip()!='0':
+            raise ValueError('AE fixture '+phase+' phase failed; retained private transport log')
+        if phase=='create':
+            created=json.loads(bi.safe_file(folder,'creation.json').read_text(encoding='utf-8-sig'))
+            if created.get('run_id')!=meta['run_id'] or created.get('status')!='CREATED':
+                raise ValueError('owned fixture creation not proven')
     fixture=inspect(folder,meta)
     meta.update(status='PREPARED',actual_ae_execution=True,fixture=fixture)
     return meta
@@ -133,6 +141,9 @@ def main()->int:
             meta=execute(folder,meta,a.ae_app,a.installed_bundle,a.package,a.manifest)
         bi.dump(folder/'prepare.json',meta)
     except (OSError,ValueError,KeyError,subprocess.SubprocessError) as e:
+        if 'folder' in locals() and 'meta' in locals():
+            meta.update(status='BLOCKED',actual_ae_execution=False,reason=str(e))
+            bi.dump(folder/'prepare.json',meta)
         print('BLOCKED: '+str(e),file=sys.stderr);return 3
     print(json.dumps(dict(status=meta['status'],workspace=str(folder),fixture=str(folder/'fixture.json') if meta['status']=='PREPARED' else None),indent=2))
     return 0 if (not a.execute_in_test_ae or meta['status']=='PREPARED') else 3

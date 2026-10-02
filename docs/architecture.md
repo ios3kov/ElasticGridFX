@@ -95,3 +95,11 @@ Quality and equal-condition profiling are governed by performance-quality-contra
 Portable tests, native compilation and install receipts have separate scopes;
 none replaces actual loaded-identity, AE effect-chain, render/preview, hardware
 Metal and project-lifecycle evidence. No current source build is release approval.
+
+Performance fixture preparation uses two distinct guarded AE script turns. The
+first creates only an empty-project-owned scene; the second verifies UUID,
+source file, geometry, one layer/effect and already-installed error-free hidden
+binding streams before deformation/save. The existing native deferred binding
+and its pending-render refusal are unchanged. Actual AE proves complete
+plane_region coverage for all 60 schema-3 frames; observer timing stays separate
+from ordinary Render/RAM Preview acceptance.

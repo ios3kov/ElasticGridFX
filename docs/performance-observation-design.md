@@ -88,3 +88,52 @@ current-toolchain decoded equality stays FAIL (max 2/65535, no alpha difference)
 This is not plane optimization acceptance or evidence of quality loss caused by
 the new sampler. Preserve the failure and investigate precise FP/build conditions
 if needed; do not relax the quality contract. See [sanitized records](performance-host-diagnostic-2026-10-02.json).
+
+## Owned fixture readiness — 2026-10-02
+
+Actual 40-frame GUI matrix passes on accepted original, ordinary f611312 and
+same-current-toolchain original native source. Original older-toolchain versus
+candidate has 29 changed color channels in six frames (max 2/65535, alpha exact).
+Same-current-toolchain original source versus candidate is decoded RGBA16 exact
+for all 40 frames. Cross-toolchain FAIL remains recorded separately.
+
+The first schema-3 AEP was saved/closed within one host turn. Headless execution
+on both original and candidate produced no frames and a BadCallbackParameter
+516 warning despite exit 0. After opening only that owned AEP through regular
+AE UI, the hidden plane marker reads 1, expression enabled/error-free, mode 2.
+The existing tests/ae_native_plane_final.jsx explicitly separates creation and
+capture into host turns for the deferred idle binding; the performance fixture
+must follow that same contract. This is fixture readiness, not permission to
+write hidden expressions manually or bypass the pending-render rejection.
+
+Plan: split creation/finalization into separate guarded native script calls;
+leave only the structurally owned synthetic scene open after creation. Match
+UUID composition comment, exact imported pattern, one layer/effect and expected
+hidden stream names/enabled/error-free marker before applying deformation and
+saving. Missing/not-ready binding refuses a PREPARED fixture. Preserve the
+failed first AEP and pilot logs; create a fresh workspace. No filter, bit depth,
+renderer default, saved plugin state or production API change. Reuse verified
+create/openInViewer/comment/expression checks from ae_native_plane_final.jsx
+and ae_binding_probe.jsx; existing save/close/output APIs remain unchanged.
+
+API-SOURCE-001 review for the fixture: the Adobe-authored scripting guide
+[FootageItem.file](https://ae-scripting.docsforadobe.dev/item/footageitem/#footageitemfile)
+defines a read-only File/null source, used only for owned-input verification.
+[CompItem.openInViewer](https://ae-scripting.docsforadobe.dev/item/compitem/#compitemopeninviewer)
+and [Property.expressionError](https://ae-scripting.docsforadobe.dev/property/property/#propertyexpressionerror)
+match the existing native-final probe's viewer/dependency-readiness checks.
+These are ExtendScript object APIs on the AE 2025/25.6 target, not new PF render
+calls. Actual target execution is required separately from mocks/docs.
+
+Two guarded host turns now produced a fresh binding-ready schema-3 AEP in
+actual AE 25.6. Its initial original-source diagnostic run validates all 60
+plane_region callbacks and straight RGBA16 headers. Original installed payload
+was restored and verified after the run. Instrumented time is not acceptance.
+
+Next timing control: build the same accepted native source with the current
+toolchain and diagnostics disabled, using research Develop build 5 to separate
+its existing AE effect cache identity from accepted 1, candidate 2 and observers
+3/4. Only the existing PiPL version literal changes; no native source or Adobe
+API change. Retain prior original-source gates and run the complete clean Mac
+build/repro/package checks for the new exact source. Validate source/quality
+before matched timing; restore the original after every bounded experiment.
