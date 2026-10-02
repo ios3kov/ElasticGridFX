@@ -37,6 +37,19 @@ def run(args, cwd=None):
     return subprocess.check_output(args, cwd=cwd, stderr=subprocess.PIPE, timeout=30).decode().strip()
 
 
+def cxx_version():
+    default = 'cl.exe' if os.name == 'nt' else 'clang++'
+    command = shlex.split(os.environ.get('CXX', default))
+    if os.name == 'nt' and Path(command[0]).name.lower() in ('cl', 'cl.exe'):
+        completed = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                   timeout=30, check=False, text=True)
+        lines = (completed.stderr + '\n' + completed.stdout).strip().splitlines()
+        if not lines:
+            raise RuntimeError('MSVC compiler banner unavailable')
+        return lines[0]
+    return run([*command, '--version']).splitlines()[0]
+
+
 def git(root, *args):
     return run(['git', '-C', str(root), *args])
 
@@ -141,7 +154,7 @@ def generate(root, out, target, profile):
     snapshot = os.environ.get('ELASTICGRID_SOURCE_RECORD')
     record = source_record(root, snapshot)
     toolchain = dict(rustc=run([os.environ.get('RUSTC', 'rustc'), '--version']),
-                     cxx=run([*shlex.split(os.environ.get('CXX', 'clang++')), '--version']).splitlines()[0])
+                     cxx=cxx_version())
     settings=build_settings()
     meta = identity(record, target, profile, toolchain, settings)
     out.mkdir(parents=True, exist_ok=True)
