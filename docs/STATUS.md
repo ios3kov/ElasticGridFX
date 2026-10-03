@@ -403,3 +403,21 @@ Reset remains visible below the removed300-unit cutoff. Narrow comparison
 finds one logical unit less width than Fit Layer (two Retina pixels); right
 gutter corrected from6 to5, retaining maximum130. New candidate/check pending.
 No extra saved workspace or project was created; restore Default after checking.
+
+
+### Narrow-panel Reset closure — 2026-10-03
+
+6314811 / EGFX-c42b0f5c0b8c8a9017d664b4 installed and loaded identity PASS,
+binary SHA256 dca36441b0cb4f21a567356ec9ce0cbfc32b06e155c3b053e9ff427f7e9b1d4a.
+69 Rust tests PASS. Native Cua observation in AE25.6x101 confirms Default
+wide260-pixel and Small Screen narrow242-pixel Reset match Fit Layer exactly
+in horizontal bounds, height and pill shape. Reset remains visible below the
+old300-logical-unit rejection; switching back to Default retains visibility.
+Original Default workspace restored without saving a workspace/project.
+Evidence: outputs/next-update-reset-resize-final-mac/resize-result.json and
+loaded-identity/. Previous ac45b60 strict Clippy PASS; final change is only the
+right gutter and corresponding test bound. Windows and continuous native mouse
+resize still NOT RUN; finite available width is required for any readable
+button. No new Reset pixel/keys/MFR claim for this geometry-only candidate.
+U3 narrow-panel disappearance is resolved on the verified Mac layouts. U5/U7/
+U8/U9 plus legacy migration/integration remain open; update is not complete.
