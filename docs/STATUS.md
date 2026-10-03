@@ -922,3 +922,12 @@ worker deferral and closed failure for incomplete schemas. No render or
 UpdateParamsUI writes are added. Native group merging is a hypothesis, not
 verified behavior. Current installed plugin remains Dev20. Installers wait
 for plugin validation; all work remains local.
+
+Dev24 native candidate 203a4c3 / EGFX-8d8352fddcca4461285ffced failed
+when adding the second effect: AE returned `child not found in parent`.
+Its main-thread creation-time binding hypothesis is rejected. The source
+restores deferred-only initialization for Dev28; this restores the safe
+creation route, not ordinary Undo acceptance. Dev24 is not a deliverable.
+Native failure retained at outputs/update-094-dev24-mac/lifecycle/two-failure.txt.
+Source tests: Rust84 PASS, strict Clippy PASS, Python272 PASS after repeating
+three environment-blocked native-process probes with authorized access.

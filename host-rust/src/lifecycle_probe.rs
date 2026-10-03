@@ -205,16 +205,7 @@ impl Probe {
         let result = if !main_thread() { "worker: no AEGP calls".to_owned() }
         else if matches!(cmd, ae::Command::SequenceSetup) {
             self.pending.store(true, Ordering::Release);
-            // A new UI-created effect is still inside AE's Apply Effect action.
-            // Bind its exact PF reference now, so initialization can share that
-            // native undo group. Worker setup remains deferred; no suite calls
-            // or handles cross threads. Incomplete creation schemas fail closed
-            // before writes and are retried by the existing scoped idle route.
-            #[cfg(fstr_auto_binding)]
-            let result = self.bind_created_effect(input);
-            #[cfg(not(fstr_auto_binding))]
-            let result: Result<(), ae::Error> = Err(ae::Error::BadCallbackParameter);
-            format!("main: initial binding {result:?}; deferred verification")
+            "main: deferred; no AEGP calls".to_owned()
         } else {
             #[cfg(fstr_auto_binding)]
             if matches!(cmd,ae::Command::SequenceResetup) {
@@ -235,20 +226,6 @@ impl Probe {
         }
         if self.records.len() == 4 { self.records.remove(0); }
         self.records.push(record);
-    }
-
-    #[cfg(fstr_auto_binding)]
-    fn bind_created_effect(&self, input: &ae::InData) -> Result<(), ae::Error> {
-        if !main_thread() { return Err(ae::Error::BadCallbackParameter); }
-        let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;
-        let effects = ae::aegp::suites::Effect::new()?;
-        let interface = ae::aegp::suites::PFInterface::new()?;
-        let layer = interface.effect_layer(input.effect_ref())?;
-        let effect = interface.new_effect_for_effect(input.effect_ref(), id)?;
-        let result = binding_probe::bind(id, effect, layer, input.pica_basic_suite_ptr())
-            .map(|_| ()) .map_err(|_| ae::Error::BadCallbackParameter);
-        let disposed = effects.dispose_effect(effect);
-        result.and(disposed)
     }
 
     fn inspect(&mut self, cmd: &ae::Command, input: &ae::InData) -> Result<i32, ae::Error> {
