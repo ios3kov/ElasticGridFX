@@ -1,4 +1,9 @@
-# Current development / release status
+# Historical development and release checkpoints
+
+For the current summary, read [Current status](STATUS.md). The dated entries
+below preserve earlier evidence and decisions; later decisions may supersede
+their original PASS, BLOCKED and release-policy statements. No historical verdict
+has been changed. See the [documentation index](README.md) for navigation.
 
 ## Documentation closeout — 2026-10-02
 

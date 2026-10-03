@@ -70,7 +70,8 @@ excluding itself, using sorted repository-relative paths.
 
 ## Development and evidence
 
-- [Current status and scope](docs/current-status.md)
+- [Current status and scope](docs/STATUS.md)
+- [Documentation index and historical evidence](docs/README.md)
 - [Performance/release technical retrospective](docs/retrospective-0.9.3-perf.1.md)
 - [Reusable AE engineering know-how](docs/AE_ENGINEERING_KNOWHOW.md)
 - [Historical 0.9.3 development retrospective](docs/retrospective-0.9.3.md)
