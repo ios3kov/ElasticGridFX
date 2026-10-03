@@ -298,6 +298,38 @@ fn draw_segment(
     Ok(())
 }
 
+// Range annotations use only this callback's current evaluator and transform.
+fn draw_range(in_data:&ae::InData,params:&mut ae::Parameters<Params>,event:&ae::EventExtra,
+    plane:&ViewPlane,supplier:&ae::drawbot::Supplier,surface:&ae::drawbot::Surface)->Result<(),ae::Error> {
+    let saved=grid_snapshot(params)?;let anchor=range_feedback::anchor(event,&saved);
+    let p=evaluated_params(params,*in_data,&saved)?;
+    let (columns,rows)=plane::evaluated_axes(&p)?;
+    let axis=if anchor.column {&columns}else{&rows};
+    let Some((lo,hi))=range_feedback::bounds(anchor,p.tension_radius,axis.len()) else{return Ok(());};
+    let color=ae::drawbot::ColorRgba{red:0.2,green:0.7,blue:1.0,alpha:1.0};
+    let pen=supplier.new_pen(&color,0.8)?;let cap=supplier.new_pen(&color,2.5)?;
+    let width=in_data.width().max(1) as f32;let height=in_data.height().max(1) as f32;
+    for source in [lo,hi,anchor.source] {
+        let position=control_grid::position_at(axis,source,p.stretch_easing,p.easing_distance)?;
+        let (a,b)=if anchor.column {
+            (grid_to_frame(in_data,event,plane,position*width,0.0)?,
+             grid_to_frame(in_data,event,plane,position*width,height)?)
+        }else{
+            (grid_to_frame(in_data,event,plane,0.0,position*height)?,
+             grid_to_frame(in_data,event,plane,width,position*height)?)
+        };
+        if source==anchor.source {
+            // A short edge cap denotes a reference, not another draggable guide.
+            let length=((b.x-a.x).powi(2)+(b.y-a.y).powi(2)).sqrt();
+            if length.is_finite() && length>1e-3 {
+                let fraction=(8.0/length).min(1.0);
+                draw_segment(supplier,surface,&cap,a,ae::drawbot::PointF32{
+                    x:a.x+(b.x-a.x)*fraction,y:a.y+(b.y-a.y)*fraction})?;
+            }
+        }else{draw_segment(supplier,surface,&pen,a,b)?;}
+    }Ok(())
+}
+
 fn draw_viewer(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
@@ -386,6 +418,7 @@ fn draw_viewer(
         }
     }
 
+    draw_range(in_data,params,event,&plane,&supplier,&surface)?;
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
 }
@@ -436,6 +469,13 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
+        if axis==DRAG_COLUMNS || axis==DRAG_ROWS {
+            let saved=grid_snapshot(params)?;
+            let (refs,side)=if axis==DRAG_COLUMNS {(&controls.column_refs,saved.column_lines.len())}
+                else{(&controls.row_refs,saved.row_lines.len())};
+            let anchor=range_feedback::Anchor{column:axis==DRAG_COLUMNS,source:refs[index]/(side-1) as f32};
+            range_feedback::write(event,range_feedback::record(&saved,anchor));
+        }
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
         event.set_continue_refcon(2, grid.columns as _);
@@ -521,11 +561,14 @@ fn drag_inner(
     if index == 0 || index+1 >= positions.len() {
         event.set_send_drag(false); return Ok(());
     }
+    let anchor=range_feedback::Anchor{column:axis==DRAG_COLUMNS,source:refs[index]/(lines.len()-1) as f32};
     control_grid::drag_live(lines,pins,refs[index],target,&elastic,&render,axis==DRAG_COLUMNS)?;
     // Only a real deformation edit may write the animated arbitrary parameter.
     if grid != before {
         control_layout::freeze_for_drag(in_data,params,axis==DRAG_COLUMNS)?;
+        let marker=range_feedback::record(&grid,anchor);
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
+        range_feedback::write(event,marker);
         event.set_event_out_flags(
             ae::EventOutFlags::HANDLED_EVENT
                 | ae::EventOutFlags::ALWAYS_UPDATE

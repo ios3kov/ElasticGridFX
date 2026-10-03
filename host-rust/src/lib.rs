@@ -6,6 +6,7 @@ use std::ffi::c_void;
 
 mod ui;
 mod control_grid;
+mod range_feedback;
 mod control_layout;
 mod version_row;
 #[cfg(feature="preview-overlay-probe")]
@@ -1176,7 +1177,9 @@ impl AdobePluginGlobal for Plugin {
                         ui::draw(&in_data, params, &mut extra)?;
                     }
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra)?,
-                    ae::Event::Deactivate | ae::Event::CloseContext | ae::Event::MouseExited => ui::release_cursor(),
+                    ae::Event::NewContext => range_feedback::clear(&extra),
+                    ae::Event::CloseContext => {range_feedback::clear(&extra);ui::release_cursor();},
+                    ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}
                 }
             }

@@ -117,3 +117,31 @@ coefficient/wire-v4 proposals are superseded. U7 remains a separate open gate.
 See [native evidence](live-influence-mac-dev4-2026-10-03.json).
 
 [Ordinary Dev8 native evidence](live-influence-mac-dev8-2026-10-03.json).
+
+
+## U5 viewer range marker — implementation contract
+
+Use exact SDK25.6 AE_EffectUI.h PF_Context.plugin_state[4] (plug-in specific
+scalar data) only inside its owning recognized viewer callback. Initialize on
+NEW_CONTEXT; clear on CLOSE_CONTEXT. No drawing handle, host pointer, transform,
+thread or project stream is retained. Four scalar slots carry a marker tag, axis,
+normalized source-reference bits and a bounded retained-grid fingerprint. This
+fingerprint discards stale marker geometry; it is not security identity or a
+claim of host instance isolation. A marker valid for identical geometry is only
+visual and never routes input or changes parameters.
+
+Click records the selected source reference; successful drag refreshes the marker
+for the edited stored grid. A different animated grid discards that marker and
+uses the strongest current baked displacement as a visual reference (neutral:
+center column). This does not infer past gesture history. Radius boundaries are
+the compact field kernel's source range, not a claim that spacing projection or
+combined sequential edits have no influence outside them. Evaluate both boundaries
+through the same current field/Wave/easing as the guides and convert using only
+this DRAW callback's plane/host coordinates. Never cache viewer transforms.
+
+Two colored boundary strokes and a center marker describe the kernel range while
+the selected effect is edited; no user control is added. Respect DONT_DRAW,
+invalid planes and unavailable projection. These annotations do not implement
+unselected/playback Show Grid. Unit-check scalar state coherence, malformed
+marker refusal, range bounds, endpoint and fractional field sampling first.
+Native exact-candidate overlay and unchanged exported pixels remain required.

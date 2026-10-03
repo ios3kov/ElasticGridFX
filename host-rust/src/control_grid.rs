@@ -16,6 +16,22 @@ unsafe extern "C" {
         count: i32,easing: f32,distance: f32,positions: *mut f32,refs: *mut f32,capacity: i32) -> i32;
 }
 
+// Query a source reference against the already evaluated immutable axis using
+// the existing core's exact viewer/WarpMath inversion, including easing.
+pub(crate) fn position_at(lines:&[f32],source:f32,easing:f32,distance:f32)->Result<f32,ae::Error> {
+    if !(3..=MAX_GUIDES+2).contains(&lines.len()) || !source.is_finite() || !(0.0..=1.0).contains(&source) {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    let q=if source==0.0 || source==1.0 {0.5}else{source};
+    let normalized=[0.0,q,1.0];let mut positions=[0.0;3];let mut refs=[0.0;3];
+    // SAFETY: immutable validated dimensions, stack-owned nonaliasing outputs;
+    // the bounded core call does not retain any input/output pointer.
+    let rc=unsafe{eg_control_axis_read_layout(lines.as_ptr(),lines.len() as i32,
+        normalized.as_ptr(),3,easing,distance,positions.as_mut_ptr(),refs.as_mut_ptr(),3)};
+    if rc!=0{return Err(ae::Error::BadCallbackParameter);}
+    Ok(positions[if source==0.0 {0}else if source==1.0 {2}else{1}])
+}
+
 pub(crate) fn reflow_axis(lines: &[f32],count: usize,easing: f32,distance: f32)
     -> Result<Vec<f32>,ae::Error> {
     if !(1..=MAX_GUIDES).contains(&count) || !(3..=MAX_GUIDES+2).contains(&lines.len()) {

@@ -758,3 +758,29 @@ of a failed plugin check. [Exact record](live-influence-mac-dev8-2026-10-03.json
 U5 affected-range drawing and real scalar mouse scrubbing remain open. U7 Show
 Grid, Windows integration and installers remain incomplete; current priority is
 remaining plugin behavior, not installer work. No remote operation was performed.
+
+
+### U5 range feedback — source integration
+
+The range-marker contract in live-influence-design.md precedes the implementation:
+SDK25.6 PF_Context.plugin_state stores only four scalar values inside known owning
+callbacks, initialized/cleared with context lifecycle. No host/drawing pointer,
+transform or project value is retained. The stored-grid fingerprint discards
+stale geometry; a strongest-displacement/neutral-center fallback does not claim
+recovery of past gesture intent. This marker never routes editing input.
+
+Blue kernel-range boundaries and a short source-reference edge cap use current
+field/Wave/easing and current DRAW transforms, respecting DONT_DRAW and invalid
+planes/projection. Endpoints/fractional boundary positions use the existing real
+core inversion through a bounded stack-backed query. Native drag refreshes scalar
+marker state only after publishing the validated current-time grid edit. Render
+and serialized streams are untouched. Show Grid remains a separate open gate.
+
+Initial default Rust78 PASS: stale/malformed scalar state refusal, bounded ranges,
+neutral reference, real fractional/eased core queries, invalid axes and all prior
+host/core Rust regressions. Versioned source aims for ordinary Dev12 (diagnostics13,
+PREVIEW probe14, negative control15). Exact native overlay/export acceptance and
+final strict checks are pending; installed accepted ordinary remains Dev8.
+
+Final versioned range-source checks: PREVIEW-probe Rust80 and strict Clippy PASS.
+Initial default Rust78 PASS; exact native range/export verification remains next.
