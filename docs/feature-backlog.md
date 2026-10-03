@@ -388,3 +388,9 @@ post-journal failure retains the record and both trees. Fault/refusal tests must
 prove no replacement after verification failure or lock contention and no
 restore over a changed current payload. This is an internal coordinator, not
 the final frontend/collector or a claim of full privileged installation safety.
+The native snapshot-v1 collector now covers regular bundle bytes, sorted names,
+mode/owner/group/flags and extended attributes with bounded nofollow traversal.
+Extended ACLs, links and unsupported object types are refused. Native fixture
+and read-only installed-bundle checks are recorded in STATUS.md. Coordinator
+tests use authentic pre-mutation snapshots; durable metadata and distribution
+authentication are still frontend obligations, not established by a SHA alone.

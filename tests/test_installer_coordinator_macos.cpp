@@ -1,4 +1,5 @@
 #include "ExchangeCoordinator.h"
+#include "PayloadSnapshot.h"
 #include <cassert>
 #include <cerrno>
 #include <filesystem>
@@ -42,6 +43,12 @@ struct Verification {
     Fixture* fixture;
     int calls=0, rejectAt=0;
     int pauseAt=0, notify=-1;
+    PayloadSnapshot previous{},candidate{};
+    explicit Verification(Fixture* f,int c=0,int r=0,int p=0,int n=-1)
+        : fixture(f),calls(c),rejectAt(r),pauseAt(p),notify(n) {
+        assert(!snapshotPayload(f->a,"target.plugin",previous));
+        assert(!snapshotPayload(f->b,"prior.plugin",candidate));
+    }
     static int run(void* opaque,RecoveryPosition position) noexcept {
         auto& v=*static_cast<Verification*>(opaque);
         ++v.calls;
@@ -51,11 +58,12 @@ struct Verification {
             for (;;) pause();
         }
         if (v.calls==v.rejectAt) return EPERM;
-        std::string active,backup;
-        std::ifstream(v.fixture->root/"active"/"target.plugin"/"payload")>>active;
-        std::ifstream(v.fixture->root/"backup"/"prior.plugin"/"payload")>>backup;
+        PayloadSnapshot active{},backup{};
+        if(int e=snapshotPayload(v.fixture->a,"target.plugin",active)) return e;
+        if(int e=snapshotPayload(v.fixture->b,"prior.plugin",backup)) return e;
         const bool swapped=position==RecoveryPosition::Exchanged;
-        return active==(swapped ? "new" : "old") && backup==(swapped ? "old" : "new") ? 0 : EIO;
+        return active.sha256==(swapped ? v.candidate.sha256 : v.previous.sha256) &&
+               backup.sha256==(swapped ? v.previous.sha256 : v.candidate.sha256) ? 0 : EIO;
     }
 };
 int main() {
@@ -128,11 +136,13 @@ int main() {
     }
     for (int stoppedAt : {2,3}) {
         Fixture f(root,stoppedAt==2 ? "killed-prepared" : "killed-installed");
+        Verification recovery{&f}; // Preserve the authenticated pre-install snapshots.
         int ready[2]; assert(!pipe(ready));
         const auto child=fork(); assert(child>=0);
         if (!child) {
             close(ready[0]);
-            Verification v{&f,0,0,stoppedAt,ready[1]};
+            Verification v=recovery;
+            v.pauseAt=stoppedAt; v.notify=ready[1];
             replaceVerified(f.paths(),f.expected,Verification::run,&v);
             _exit(13); // Must stop at the selected coordinator checkpoint.
         }
@@ -144,10 +154,9 @@ int main() {
         close(ready[0]); assert(!kill(child,SIGKILL));
         int status=0; assert(waitpid(child,&status,0)==child);
         assert(received && WIFSIGNALED(status) && WTERMSIG(status)==SIGKILL);
-        Verification v{&f};
-        const auto inspected=recoverVerified(f.paths(),f.expected,Verification::run,&v,RecoveryAction::Inspect);
+        const auto inspected=recoverVerified(f.paths(),f.expected,Verification::run,&recovery,RecoveryAction::Inspect);
         assert(inspected.state==(stoppedAt==2 ? TransactionState::Unchanged : TransactionState::Installed));
-        const auto recovered=recoverVerified(f.paths(),f.expected,Verification::run,&v,RecoveryAction::Restore);
+        const auto recovered=recoverVerified(f.paths(),f.expected,Verification::run,&recovery,RecoveryAction::Restore);
         assert(recovered.state==(stoppedAt==2 ? TransactionState::Unchanged : TransactionState::Restored));
         f.unchanged();
     }

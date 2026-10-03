@@ -566,3 +566,44 @@ durable snapshot metadata, finalization/new-install path, power-loss and syscall
 failure cases, elevation/UI, Mac package and Windows implementation/runtime.
 No installed Adobe plugin, project, system permission or remote branch changed.
 Next: implement full-payload collection before connecting any real installer UI.
+
+### U8 native payload snapshot — local development
+
+PayloadSnapshot implements read-only snapshot-v1 using system CommonCrypto
+SHA256 over sorted relative names, file type/mode/owner/group/flags, xattr names
+and values and regular-file bytes. Root device/inode binds collection separately.
+Traversal uses directory FDs and nofollow opens, rechecks stat identity/change
+timestamps and returns no partial output on error. Bounds:4096 entries, depth32,
+256MiB/file,512MiB total file bytes,64KiB attribute names/object,1MiB/attribute,
+32MiB total attributes. Links, multi-link files, special files, cross-volume
+children and any extended ACL are refused; unsupported metadata is not dropped.
+This snapshot detects changes; it does not authenticate a publisher or validate
+fixed installation roots. The frontend must preserve trusted original snapshot
+metadata durably before mutation; reconstructing expectations from current files
+after a crash is forbidden.
+
+Initial native test failed with errno2 because acl_get_fd_np cannot distinguish
+missing ACL metadata through its NULL result alone. Replaced that assumption with
+fstatx_np plus explicit filesec_query_property(FILESEC_ACL); unsupported ACLs
+remain refused. SDK headers and Apple's Libc implementation were inspected:
+[ACL retrieval](https://github.com/apple-oss-distributions/Libc/blob/main/posix1e/acl_file.c).
+No Apple source was copied into the project; only public system APIs are called.
+
+Release native snapshot test PASS: identical bytes/metadata deterministic;
+same-size content, mode and xattr changes affect SHA; renaming the root preserves
+digest and inode; links/FIFO/ACL rejected; excessive file size/depth rejected;
+failed collection preserves caller output. Coordinator fixture verification now
+uses these snapshots rather than comparing a mock payload string. Pre-install
+snapshots are retained in the parent before SIGKILL tests; neither restored nor
+installed expectations are inferred from post-crash files. All three installer
+CTest targets PASS: outputs/update-094-installer-snapshot-tests.txt.
+
+Read-only collection of the actual installed FSTR Stretch.plugin also PASS:
+11 entries,1063171 file bytes, snapshot-v1 SHA256
+3fe8d933de3424c6953333b70721c5d73ffeb9a0beb47a60fb86cbc4f02b2358.
+Evidence: outputs/update-094-installed-payload-snapshot.json; standalone diagnostic
+outputs/payload_inspect.cpp. This digest differs in schema from artifact ZIP/hash
+or Build ID; it is not a new AE-loaded identity or installation acceptance.
+No plugin bytes, permissions or project were changed. Fixed-root/process scan,
+package trust/signature/identity collector, durable authenticated recovery metadata,
+new-install/finalization, native frontend and Windows remain incomplete.
