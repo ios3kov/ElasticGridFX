@@ -6,6 +6,8 @@ on:
     paths:
       - "src/**"
       - "host-rust/**"
+      - "docs/**"
+      - "THIRD_PARTY_NOTICES.md"
       - "tools/package_windows.py"
       - "tools/verify_windows_pipl.py"
       - "tools/finalize_windows_validation.py"
