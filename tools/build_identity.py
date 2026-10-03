@@ -171,7 +171,7 @@ def generate(root, out, target, profile):
     # in BuildIdentity and the noninteractive diagnostic string.
     rust = ('pub const ABOUT_BYTES: &[u8] = &[' +
             ', '.join(f'0x{byte:02x}' for byte in about) + '];\n' +
-            '#[cfg(feature = "render-diagnostics")]\npub const BUILD_ID: &str = '+json.dumps(meta['build_id'])+';\n'+
+            '#[cfg(any(feature = "render-diagnostics", feature = "preview-overlay-probe"))]\npub const BUILD_ID: &str = '+json.dumps(meta['build_id'])+';\n'+
             'pub const DIAGNOSTIC: &str = ' + json.dumps(diagnostic) + ';\n')
     (out / 'build_identity.rs').write_text(rust, encoding='ascii')
     for name in record['files']:

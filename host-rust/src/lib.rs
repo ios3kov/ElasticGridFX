@@ -8,6 +8,8 @@ mod ui;
 mod control_grid;
 mod control_layout;
 mod version_row;
+#[cfg(feature="preview-overlay-probe")]
+mod preview_overlay_probe;
 mod ui_projection;
 mod plane;
 mod fit_layer;
@@ -105,7 +107,6 @@ struct Plugin {
     lifecycle_probe: lifecycle_probe::Probe,
 }
 
-ae::define_effect!(Plugin, (), Params);
 
 #[derive(Clone, Debug, Serialize, PartialEq, PartialOrd)]
 pub(crate) struct GridArb {
@@ -910,6 +911,14 @@ fn render_metal(
     }
 }
 
+// Isolate the SDK wrapper's generated entry point and its trait implementation.
+// after-effects0.4.0 plugin_base.rs:349 explicitly drops a borrow carrier and
+// expands a legacy error branch. These two style lints belong to that macro.
+#[allow(clippy::drop_non_drop, clippy::question_mark)]
+mod effect_entry {
+use super::*;
+ae::define_effect!(Plugin, (), Params);
+
 impl AdobePluginGlobal for Plugin {
     fn params_setup(
         &self,
@@ -1060,13 +1069,11 @@ impl AdobePluginGlobal for Plugin {
             param.set_ui_flags(ae::ParamUIFlags::TOPIC); -1
         })?;
 
-        in_data.interact().register_ui(
-            ae::CustomUIInfo::new().events(
-                ae::CustomEventFlags::COMP |
-                ae::CustomEventFlags::LAYER |
-                ae::CustomEventFlags::EFFECT,
-            ),
-        )?;
+        let events = ae::CustomEventFlags::COMP | ae::CustomEventFlags::LAYER |
+            ae::CustomEventFlags::EFFECT;
+        #[cfg(feature="preview-overlay-probe")]
+        let events = events | ae::CustomEventFlags::PREVIEW;
+        in_data.interact().register_ui(ae::CustomUIInfo::new().events(events))?;
 
         Ok(())
     }
@@ -1138,6 +1145,12 @@ impl AdobePluginGlobal for Plugin {
                 extra.dispatch::<version_row::Data, Params>(Params::VersionRow)?;
             }
             ae::Command::Event { mut extra } => {
+                #[cfg(feature="preview-overlay-probe")]
+                if preview_overlay_probe::observe(&in_data, &extra) {
+                    // Wrapper WindowType omits PREVIEW/NONE. Never convert those
+                    // or use an unknown drawing context in this read-only probe.
+                    return Ok(());
+                }
                 #[cfg(feature = "render-diagnostics")]
                 grid_row::observe(&mut extra);
                 match extra.event() {
@@ -1324,9 +1337,12 @@ impl AdobePluginGlobal for Plugin {
     }
 }
 
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ae::ArbitraryData;
 
     #[derive(Serialize, Deserialize)]
     struct LegacyGridArb {

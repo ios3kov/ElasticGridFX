@@ -300,3 +300,45 @@ The original fixture hash is no longer claimed immutable in this continuation.
 User projects were not involved. Historical frames/results retain their original
 identities; further work uses a new fixture path and explicit DO_NOT_SAVE_CHANGES
 for project close. No previous PASS is transferred to this new fixture.
+
+
+### Mac checkpoint db97762 — 0.9.4 Dev 1
+
+Build EGFX-883ae0b0eae4536bb555bc3d, native-plane ordinary release-profile test
+build. Bundle integrity and loaded UUID/path identity PASS. Four old-project PNG
+frames match the previous candidate exactly. Density7/6 changes neither pixels
+nor the three Grid Positions keys at0/.5/1. Save/reopen of a new AEP retains
+counts, keys and exact current-time pixels. Required hidden-arbitrary registration
+now prevents the earlier Unsupported effect control warning during this bounded
+open/save/reopen cycle. UI shows Version0.9.4 Dev1 and hides the four controls.
+
+Fresh fixture: outputs/update-094-density-final-mac/density-fixture.aep; its saved
+roundtrip copy is outputs/update-094-registration-mac/density-saved.aep. The
+initial original fixture was accidentally saved during keyboard quitting; no
+immutable-original claim extends across that event. Subsequent project close
+uses the explicit owned-project DO_NOT_SAVE_CHANGES API.
+
+After Mac unlock, actual guide dragging at density7/6 changes current pixels
+and adds only the .2 key; the 0/.5/1 frames remain exact. The first capture
+scenario failed Redo and is retained in drag-undo-redo-result.json. Repeated
+validation without assigning comp.time during capture passes Undo/Redo: three
+original keys and exact baseline pixels after Undo, four keys and exact dragged
+pixels after Redo. Precise causality of the earlier harness interference is not
+claimed. Evidence: read-only-undo-redo-result.json. Saving a fresh gesture-saved.aep
+and reopening retains counts7/6, four keys and exact current pixels
+(gesture-roundtrip-result.json PASS). Initial no-change/refused attempts remain
+historical input-delivery evidence. U5/U7/U8/U9/U10 and Windows remain incomplete.
+
+Local source gates: 74 Rust tests PASS; strict default-feature Clippy PASS;
+14 host-contract tests PASS. The earlier full Python266 and JavaScript16-file
+gates cover the initial0.9.4 implementation; later changes were Rust/native UI
+registration and the added host-contract guard. Diagnostics-feature suite78 PASS; full Python rerun remains separate. All work stays local.
+
+
+### Old-deformation live response — confirmed 2026-10-03
+
+The user rejected new-moves-only Affected Lines. U5 must also respond for existing
+saved deformation; preserving exact initial appearance/keys remains required.
+The stored baked axes cannot reconstruct gesture history. Investigate geometric
+field response and validate its observable behavior before saved-format changes.
+See live-influence-design.md. The old pending legacy question is superseded.

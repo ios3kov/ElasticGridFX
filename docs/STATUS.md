@@ -7,7 +7,13 @@ their older holds and release-policy statements do not override the state below.
 ## Active local update — rules8.0.0
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
-remains incomplete across macOS/Windows. Source version is 0.9.4 Dev 1; installation of these latest changes is pending.
+remains incomplete across macOS/Windows. Installed test version is **0.9.4 Dev 1**, source db97762,
+Build ID EGFX-883ae0b0eae4536bb555bc3d. Exact loaded identity PASS on Mac AE25.6.
+Hidden shape/strength/smoothing controls and visible Version row confirmed.
+Owned-fixture density7/6, immutable pixels/three keys and save/reopen PASS.
+Interactive drag/Undo remains pending: automated input did not change the scene,
+and subsequent native Cua gesture reported noWindowsAvailable. No integration
+or Windows runtime acceptance is claimed.
 Local source checks: 73 Rust tests, 266 Python tests, 16 JavaScript safety files
 and strict Clippy PASS. These are not After Effects or Windows runtime acceptance.
 See the U0–U11 table in
@@ -444,3 +450,30 @@ Installed6314811 remains the Reset-resize candidate; subsequent edits in this
 checkpoint are documentation plus test-only design coverage. Local-only scope
 continues. Show Grid public overlay feasibility, installers, Windows and legacy
 integration are still open, so the full requested update remains incomplete.
+
+
+### Density gesture native checkpoint — db97762
+
+Installed0.9.4 Dev1 / EGFX-883ae0b0eae4536bb555bc3d: actual drag after density7/6
+changes only current-time deformation, preserves the three original-key frames,
+and inserts .2 key. Undo and Redo restore exact key times and pixels. Captures
+that assign comp.time initially failed Redo; this historical harness result is
+retained, precise cause not claimed. Read-only-time captures pass. A fresh saved
+copy reopens with exact pixels, counts and four keys. Evidence:
+outputs/update-094-registration-mac/read-only-undo-redo-result.json and
+gesture-roundtrip-result.json. This is bounded Mac acceptance; Windows NOT RUN.
+Diagnostics-feature Rust78 PASS. U5 live influence, U7 Show Grid, U8 installers,
+U9 Windows and full integration remain open; whole update is not complete.
+
+
+### Public preview callback experiment — source checkpoint
+
+Opt-in preview-overlay-probe registers SDK25.6 PF_CustomEFlag_PREVIEW. Logs only
+callback/window/time in a private exclusive bounded file; unknown/null contexts
+never enter ordinary UI conversion or drawing. Production default has no probe.
+Shared probe Rust76 PASS; identity23 and host-contract14 PASS; strict Clippy
+PASS with two style lints confined to the reviewed SDK-generated entry module.
+Default Rust74 and full Python267 PASS. Source checks/build/host observation
+are separate gates. Probe version0.9.4 Dev3, no Show Grid feasibility PASS yet.
+The user confirms old baked deformation must respond to Affected Lines too;
+new-edits-only was rejected. U5 numerical/compatibility design remains open.

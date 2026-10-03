@@ -26,9 +26,11 @@ coefficients, evaluating the influence kernel from current scalar parameters.
 Old saved states do not contain the source moves. Reconstructing them from the
 baked grid is not an exact migration, especially after monotonic projection,
 zero strength/radius, or successive drags. Do not infer gesture history or
-silently convert old animation keys. The human has been asked whether old
-appearance should remain exact with live influence for new edits only; that
-legacy behavior remains a pending product decision.
+silently convert old animation keys. The user explicitly rejected new-edits-only behavior on2026-10-03: Affected
+Lines must also respond on old baked deformation. Preserve the initial saved
+appearance and existing keys; investigate a geometric field response rather than
+claiming recovery of missing gesture history. This supersedes the earlier pending
+legacy question. The numerical representation is still unaccepted/unimplemented.
 
 The legacy virtual references are nested source-knot selections/subdivisions,
 not arbitrary pointer coordinates. For each retained topology, all permitted
@@ -71,7 +73,7 @@ coefficients, animation keys, or rendering quality.
    drag reversal, fractional handles and density changes using the actual core.
 2. Define/freeze versioned bounded serialization and mixed legacy/new-key
    interpolation. Reject malformed lengths/tags before publishing state.
-3. Resolve the human legacy decision and document downgrade limitations before
+3. Satisfy the confirmed old-deformation response and document downgrade limits before
    writing a new saved format. Preserve old output and keys in the agreed scope.
 4. Feed evaluated axes into immutable native-plane/SmartFX snapshots and the
    viewer from one implementation; retain thread ownership and caches.

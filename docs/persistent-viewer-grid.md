@@ -68,3 +68,19 @@ This is not a claim that all possible implementations are impossible.
 Research/source review PASS within this narrow scope. Runtime feasibility and all
 PV acceptance tests NOT_RUN. User's decision to perform visual QA does not make
 these technical acceptance conditions PASS. No release claim.
+
+
+## Isolated PREVIEW callback probe — 2026-10-03
+
+SDK25.6 AE_EffectUI.h:79/89 declares PF_CustomEFlag_PREVIEW=8 and
+PF_Window_PREVIEW=3. Exact after-effects0.4.0 CustomEventFlags includes PREVIEW,
+but WindowType omits PREVIEW/NONE; its conversion would panic for these contexts.
+An opt-in preview-overlay-probe build registers the public flag and records raw
+callback/window/time observations only. It guards null contexts, avoids wrapper
+conversion for unknown windows, and never retains/draws into a preview context.
+Ordinary builds do not register PREVIEW or compile this writer. Logs use an
+exclusive private per-process folder, bounded4096 records and Build ID. Full log
+or missing log cannot prove absence of callbacks. Probe version0.9.4 Dev3.
+No Show Grid checkbox or production drawing hook is claimed. Selected, deselected
+and playback phases need actual host observations; compilation is not feasibility
+PASS. Negative observations cover only this public flag in the tested host.

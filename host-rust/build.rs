@@ -193,7 +193,8 @@ fn main() {
             bugversion: std::env::var("CARGO_PKG_VERSION_PATCH").unwrap().parse().unwrap(),
             stage: Stage::Develop,
             // Distinguish ordinary/diagnostic development candidates in AE caches.
-            build: if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 2 } else { 1 },
+            build: if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() { 3 }
+                else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 2 } else { 1 },
         },
         Property::AE_Effect_Info_Flags(0),
         Property::AE_Effect_Global_OutFlags(

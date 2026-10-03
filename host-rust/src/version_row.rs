@@ -7,10 +7,12 @@ pub(crate) struct Data(u8);
 impl ae::ArbitraryData<Data> for Data {
     fn interpolate(&self,_other:&Self,_value:f64)->Self {Self::default()}
 }
-#[cfg(not(feature = "render-diagnostics"))]
+#[cfg(not(any(feature = "render-diagnostics",feature="preview-overlay-probe")))]
 const LABEL: &str = concat!(env!("CARGO_PKG_VERSION"), " Dev 1");
-#[cfg(feature = "render-diagnostics")]
+#[cfg(all(feature = "render-diagnostics",not(feature="preview-overlay-probe")))]
 const LABEL: &str = concat!(env!("CARGO_PKG_VERSION"), " Dev 2");
+#[cfg(feature="preview-overlay-probe")]
+const LABEL: &str = concat!(env!("CARGO_PKG_VERSION"), " Dev 3 Probe");
 pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(),ae::Error> {
     if event.effect_area()!=ae::EffectArea::Title {return Ok(());}
     let frame=event.param_title_frame();
