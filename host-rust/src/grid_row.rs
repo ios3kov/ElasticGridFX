@@ -30,10 +30,8 @@ pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
     let mut path = supplier.new_path()?;
     path.add_rounded_rect(&rect, 4.0)?;
     surface.fill_path(&background, &path, ae::drawbot::FillType::Winding)?;
-    // Preserve the parameter title when servicing its custom topic drawing.
-    surface.draw_string(&text, &font, "Grid Positions", &PointF32 {
-        x: frame.left as f32 + 2.0, y: rect.top + (rect.height + size) * 0.5 - 2.0,
-    }, TextAlignment::Left, TextTruncation::End, rect.left - frame.left as f32 - 6.0)?;
+    // AE already draws the title and stopwatch even for topic-only UI.
+    // Draw only Reset, leaving the native caption/animation hit area intact.
     surface.draw_string(&text, &font, "Reset", &PointF32 {
         x: rect.left + rect.width * 0.5, y: rect.top + (rect.height + size) * 0.5 - 2.0,
     }, TextAlignment::Center, TextTruncation::None, rect.width)?;

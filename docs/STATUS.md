@@ -196,3 +196,17 @@ Shared UI/static-choice source checkpoint: 65 Rust tests PASS, strict Clippy PAS
 (with the existing documented drop-non-drop/question-mark allowances), diff
 whitespace check PASS. These are local Mac source checks, not Windows compilation
 or AE panel/migration acceptance.
+
+### Native panel/static choices — 2026-10-03
+
+Clean Mac source54c215b, build EGFX-bd6fc793fc4111918cb06880 installed with
+verified archive/signature and previous-candidate backup outside Adobe.
+AE25.6x101 native fixture assertions PASS: all four static choices report
+canVaryOverTime=false, reject setValueAtTime, retain zero keys and the same
+value; Grid Positions still permits animation. Screenshot confirms no
+stopwatches on these four choices, no Grid Positions disclosure, and inline
+Reset. Screenshot also exposed duplicate custom/native title text; removed
+custom caption drawing. This subsequent source fix requires a new panel check.
+Old animated-choice project compatibility, actual Reset key/Undo semantics
+and Windows host behavior remain NOT RUN. Local evidence retained in
+outputs/next-update-ui-mac; no release claim.
