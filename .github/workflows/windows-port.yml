@@ -140,4 +140,5 @@ jobs:
             tests/ae_runtime_smoke.jsx
             tests/ae_project_roundtrip.jsx
             tests/ae_first_application.jsx
+            docs/windows-ae-validation.md
             host-rust/Cargo.lock
