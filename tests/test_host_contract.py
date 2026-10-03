@@ -27,17 +27,28 @@ class HostContract(unittest.TestCase):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
                          LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND +
-                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow'])
+                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
         self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY[:3] +
                          ['ResetGridPositions'] + LEGACY[3:10] + ['WaveGroupStart'] +
-                         LEGACY[10:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow'])
+                         LEGACY[10:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
         self.assertIn('Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true', SETUP)
-        self.assertEqual(direct[-1], 'VersionRow')
+        self.assertEqual(direct[-2:], ['VersionRow', 'ShowGrid'])
         for name in STAGE9_APPEND[1:-1]:
             self.assertIn(f'(Params::{name},', SETUP)
+
+    def test_show_grid_defaults_off_and_smartfx_owns_its_dependencies(self):
+        self.assertIn('f.set_default(false); f.set_value(false)', block('ShowGrid'))
+        self.assertIn('USE_VALUE_FOR_OLD_PROJECTS', block('ShowGrid'))
+        self.assertNotIn('INVISIBLE', block('ShowGrid'))
+        pre = SOURCE.split('fn smart_render_snapshot(', 1)[1].split('#[repr(C)]', 1)[0]
+        self.assertIn('show_grid: show_grid::State::read(params, true)?', pre)
+        smart = SOURCE.split('ae::Command::SmartRender { extra } => {', 1)[1].split('ae::Command::GpuDeviceSetup', 1)[0]
+        self.assertIn('snapshot.show_grid.render(&mut output, &p, &snapshot.grid, &snapshot.plane)?;', smart)
+        self.assertNotIn('params.get(', smart)
+        self.assertNotIn('params.checkout(', smart)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
         self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
@@ -90,7 +101,7 @@ class HostContract(unittest.TestCase):
                 self.assertNotIn('CONTROL_ONLY', definition)
 
     def test_static_choices_and_animated_grid_waves_keep_approved_policy(self):
-        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow')
+        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid')
         for name in static:
             self.assertIn('CANNOT_TIME_VARY', block(name))
         self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), len(static))

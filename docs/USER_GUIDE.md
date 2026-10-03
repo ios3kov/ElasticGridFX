@@ -169,3 +169,13 @@ Wave Phase. Обычный статичный Grid Positions сам по себ�
 из папки MediaCore/FSTR FX. После перезапуска эффект исчезнет из списка.
 В проектах, где он использовался, AE сообщит об отсутствующем эффекте.
 Сначала сохраните резервные копии таких проектов.
+
+
+## Development0.9.4: Show Grid
+
+This control is under local development and is not part of the published0.9.3
+release. **Show Grid** is off by default. Turn it on to display the grid even
+when another layer/effect is selected and during Preview playback. The grid
+becomes part of the picture and will also appear in exported files, nested
+compositions and downstream effects. Turn it off before exporting if you want
+only the deformed picture. Selected-effect interactive guides work as before.

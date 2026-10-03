@@ -2,7 +2,8 @@
 
 Original research: 2026-09-29, target AE 25.6 arm64. Resumed 2026-10-03 under
 the next-update request, now covering macOS Apple Silicon and Windows x64.
-Status: FEASIBILITY OPEN; not implemented and not PASS. Historical deferral
+Status: pixel-visualization implementation authorized by superseding user decision
+on2026-10-04; shared source implemented, native acceptance pending. Historical deferral
 applied to Stage 9/10 only. See feature-backlog.md U7 for the active requirement.
 
 Preserve the current requirements below. The supplied
@@ -223,3 +224,32 @@ and floats are only a lead; no recovered proprietary routines are copied. The
 reference demonstrates persistent visibility, but has not established the
 additive export-free drawing route needed by our contract. Retain Show Grid in
 this update; no automatic scope relaxation follows from this finding.
+
+
+## Superseding product contract — 2026-10-04
+
+The user explicitly removed “never in output file”. PV-3's export/cache exclusion
+and the consequent additive-only drawing constraint are superseded for0.9.4.
+Earlier negative research is retained for its original contract, not a blocker
+for the newly authorized implementation.
+
+Current contract: per-effect **Show Grid**, static checkbox, defaultoff for both
+new and legacy instances. Whenon, draw the currently evaluated grid into plugin
+output pixels, so it remains visible regardless of selection and in RAM Preview,
+exports, nested compositions and downstream effects. Whenoff, pixel output is
+unchanged and the existing selected-effect interactive guides remain. No
+auto-selection, guide layer or composition-renderer replacement. Saved keys and
+original parameter IDs remain unchanged. Both Mac and Windows share the code.
+
+Implementation plan: append a new stream, snapshot its value/counts/static viewer
+layout in SmartPreRender; composite thin blue premultiplied strokes after the
+existing CPU renderer, using the same evaluated/Wave/eased displayed axes and
+plane geometry as interactive UI. Never read ordinary parameters from SmartRender.
+Defaultoff has zero raster work; no FFI ABI change. Handle8/16/32-bit worlds,
+padding/compact output origins, transparent alpha, plane projection and cancel.
+Do not advertise GPU capability (current CPU-only SmartPreRender remains).
+
+Acceptance: source tests for off pixel parity, stroke depth/alpha and tile origins;
+current-time layout/Wave/plane matching; native new checkbox/default/switching,
+deselected/playback and actual PNG inclusion; reopen/key preservation; exact
+candidate identity. Windows native execution remains a separate required gate.

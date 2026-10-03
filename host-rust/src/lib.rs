@@ -6,6 +6,7 @@ use std::ffi::c_void;
 
 mod ui;
 mod control_grid;
+mod show_grid;
 mod range_feedback;
 mod control_layout;
 mod version_row;
@@ -100,6 +101,7 @@ pub(crate) enum Params {
     AutomaticSpacing,
     ControlLayout,
     VersionRow,
+    ShowGrid,
 }
 
 #[derive(Default)]
@@ -454,6 +456,7 @@ struct EgRenderParams {
 struct SmartRenderSnapshot {
     grid: GridArb,
     plane: plane::State,
+    show_grid: show_grid::State,
     tension_radius: f32,
     falloff: i32,
     elasticity_strength: f32,
@@ -545,6 +548,7 @@ fn smart_render_snapshot(
 
     Ok(SmartRenderSnapshot {
         grid,
+        show_grid: show_grid::State::read(params, true)?,
         plane: plane::State::read(params, &in_data, true, true)?,
         tension_radius: checked_float(params, Params::TensionRadius)? as f32,
         falloff: checked_popup(params, Params::Falloff)?,
@@ -1073,6 +1077,11 @@ impl AdobePluginGlobal for Plugin {
             param.set_ui_flags(ae::ParamUIFlags::TOPIC); -1
         })?;
 
+        params.add_with_flags(Params::ShowGrid, "Show Grid", ae::CheckBoxDef::setup(|f| {
+            f.set_label("On"); f.set_default(false); f.set_value(false);
+        }), ae::ParamFlag::CANNOT_TIME_VARY | ae::ParamFlag::USE_VALUE_FOR_OLD_PROJECTS,
+            ae::ParamUIFlags::empty())?;
+
         let events = ae::CustomEventFlags::COMP | ae::CustomEventFlags::LAYER |
             ae::CustomEventFlags::EFFECT;
         // AE25.6 owned-fixture isolation: COMP/LAYER/EFFECT draws guides but
@@ -1198,6 +1207,7 @@ impl AdobePluginGlobal for Plugin {
                 if plane.corners.is_some() {
                     plane::render(Some(&in_layer), &mut out_layer, &p, &plane)?;
                 } else { render(&in_layer, &mut out_layer, &p)?; }
+                show_grid::State::read(params, false)?.render(&mut out_layer, &p, &grid, &plane)?;
                 #[cfg(feature="render-diagnostics")]
                 {trace.mark(render_diagnostics::Phase::Sampling);trace.complete();}
             }
@@ -1280,6 +1290,7 @@ impl AdobePluginGlobal for Plugin {
                         if snapshot.plane.corners.is_some() {
                             plane::render(input.as_ref(), &mut output, &p, &snapshot.plane)?;
                         } else { render_sparse(input.as_ref(), &mut output, &p)?; }
+                        snapshot.show_grid.render(&mut output, &p, &snapshot.grid, &snapshot.plane)?;
                         #[cfg(feature="render-diagnostics")]
                         trace.mark(render_diagnostics::Phase::Sampling);
                     }
@@ -1405,6 +1416,7 @@ mod tests {
         let snapshot = SmartRenderSnapshot {
             grid: grid.clone(),
             plane: plane::State::default(),
+            show_grid: show_grid::State::default(),
             tension_radius: 3.0,
             falloff: 2,
             elasticity_strength: 1.0,
@@ -1553,6 +1565,7 @@ mod tests {
         let snapshot = SmartRenderSnapshot {
             grid,
             plane: plane::State::default(),
+            show_grid: show_grid::State::default(),
             tension_radius: 3.0,
             falloff: 2,
             elasticity_strength: 1.0,

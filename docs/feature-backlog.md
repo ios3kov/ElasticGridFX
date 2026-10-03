@@ -16,8 +16,9 @@ hide-during-preview requirement:
   persistent display is off.
 - Provide an optional **Show Grid** switch, default off, for keeping the grid
   visible while working with other layers/effects, including preview display.
-- Never include the grid in exported frames, render output or cached image
-  pixels. Preview visibility must be a viewer-only overlay, not an image effect.
+- Superseding user decision2026-10-04: when **Show Grid** is on, the grid may
+  appear in exported/rendered/cached pixels. Implement shared pixel visualization.
+  Defaultoff leaves ordinary output unchanged.
 - A passive persistent overlay must not intercept pointer events or replace
   the selected-effect interaction.
 
@@ -220,17 +221,16 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac collapsed section inspected; Windows AE NOT RUN |
 | U5 | Live range feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Immediate saved-field response implemented after user permits changed old appearance; retained keys/wire unchanged; numeric fractional/eased/wave drag PASS; Mac Dev8 old Radius keys, native drag/Undo/Redo, scripted response/save-reopen PASS; Dev12 scripted range-boundary response, annotation/export separation, drag/Undo/Redo/save-reopen PASS in bounded Mac fixture; Dev16 first-frame hidden-default regression fixed and native reverse drag/Undo/Redo/saved-copy reopen PASS; mouse scalar scrubbing USER-REPORTED PASS; broader range lifecycle pending |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |
-| U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Retained by explicit user decision2026-10-04; feasibility open; native zoom query only PASS; additive drawing and current view/pan geometry unresolved |
+| U7 | Optional rendered Show Grid, defaultoff | Superseding pixel-output contract; selected/unselected/playback/plane/layout lifecycle; defaultoff exact output; on appears in exports;8/16/32-bit alpha/origin/cancel | Shared CPU source implemented;84Rust/272Python + strict Clippy PASS; native candidate not installed/accepted yet |
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Partially implemented helpers retained; paused until plugin behavior is complete |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
 | U10 | Integration, validation and final task reconciliation | All U1–U9 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
 
-The selected-effect PF event surface alone does not provide a confirmed drawing
-surface after deselection or during playback. U7 must not be faked by rendering
-the grid into pixels, adding project layers, retaining a DRAWBOT context outside
-its callback, or silently replacing the composition renderer. Continue independent
-blocks while researching a supported solution. Existing Grid Positions keys must
-not be silently rewritten to implement U5/U6.
+The user removed U7 export/cache exclusion on2026-10-04: optional rendered grid
+pixels are now authorized. The old additive-only research is historical for its
+original contract. No project layers, retained DRAWBOT contexts or composition
+renderer replacement are needed. Existing Grid Positions keys must not be
+silently rewritten to implement U5/U6/U7.
 
 Each block updates this table and STATUS with actual checks and limitations.
 Native source changes require fresh builds/identity; runtime, performance,

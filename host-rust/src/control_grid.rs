@@ -136,7 +136,7 @@ mod tests;
 
 // Scripted setValue does not deliver UserChangedParam. Resolve mismatched
 // densities read-only here; the first real deformation drag freezes references.
-fn apply_layout(displayed: &mut View,evaluated: &GridArb,counts: (usize,usize),
+pub(crate) fn apply_layout(displayed: &mut View,evaluated: &GridArb,counts: (usize,usize),
     layout: &control_layout::State,easing: f32,distance: f32) -> Result<(),ae::Error> {
     for column in [true,false] {
         let (lines,refs,count,retained)=if column {

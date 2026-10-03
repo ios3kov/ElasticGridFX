@@ -20,13 +20,13 @@ pixels/keys PASS in owned319x241/8-bpc Final Mac AE25.6 scope. Existing animated
 Radius stream/keys remain. Real scalar mouse scrubbing is USER-REPORTED PASS: the user confirmed both
 picture and blue boundaries change during mouse movement. U7 Show Grid and Windows build/runtime
 remain open. [Exact Dev16 record](first-default-mac-dev16-2026-10-04.json).
-The user explicitly retains Show Grid in this update (2026-10-04). A guarded
-native zoom query PASS supplies only zoom; historical deselected-log analysis
-found no Comp idle context for a safe invalidate request. Additive drawing and
-current pan/view geometry remain unresolved. [Research record](show-grid-research-2026-10-04.json).
-GridWarp reference native test confirms deselected/playback visibility, but its
-enabled grid appears in exported PNG pixels; this does not pass our output
-exclusion requirement. [Reference result](gridwarp-visualization-reference-2026-10-04.json).
+On2026-10-04 the user removed Show Grid's never-in-output requirement. U7 now
+uses an optional static pixel-visualization switch, defaultoff; whenon it will
+also appear in exports/cache/downstream effects. Shared CPU implementation
+passes84Rust/272Python tests and strict all-target probe Clippy. New0.9.4 Dev20
+is not installed or native-accepted yet.
+The prior additive overlay feasibility blocker is superseded by this product
+decision. [Current contract](persistent-viewer-grid.md#superseding-product-contract--2026-10-04).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was

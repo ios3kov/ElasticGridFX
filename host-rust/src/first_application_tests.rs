@@ -101,6 +101,7 @@ fn exact_initial_pixels<T:Pixel>(easing:f32) {
     let grid=GridArb::default();
     assert!(eligible(&grid));
     let snapshot=SmartRenderSnapshot {
+        show_grid: show_grid::State::default(),
         grid, plane:plane::State::default(), tension_radius:3.0,falloff:2,
         elasticity_strength:1.0,min_spacing:0.005,stretch_easing:easing,easing_distance:0.25,
         wave_amplitude:0.0,wave_frequency:1.0,wave_phase:0.0,wave_speed:0.0,
