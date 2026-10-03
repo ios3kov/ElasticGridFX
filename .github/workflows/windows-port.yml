@@ -75,6 +75,9 @@ jobs:
       - name: Test Rust host
         run: cargo test --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
 
+      - name: Clippy Windows host
+        run: cargo clippy --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc --all-targets -- -D warnings -A clippy::drop_non_drop -A clippy::question_mark
+
       - name: Build Windows host
         run: cargo build --release --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
 
