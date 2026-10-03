@@ -5,7 +5,6 @@ on:
   push:
     branches: [chore/github-ci-v1, fix/original-gridwarp-parity, fix/smartfx-param-snapshot, fix/final-validation, fix/first-application-516, fix/grid-density-preserve-animation, fix/fit-layer-coordinates, perf/plane-render-throughput, feat/windows-x64-aex]
     paths-ignore:
-      - "**/*.md"
       - ".gitignore"
 
 permissions:
