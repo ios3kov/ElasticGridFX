@@ -972,7 +972,7 @@ impl AdobePluginGlobal for Plugin {
         params.add_with_flags(Params::Falloff, "Follow Shape", ae::PopupDef::setup(|f| {
             // Keep saved numeric values and all four slots. Relabel to the
             // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
-            f.set_options(&["Smooth", "Soft", "Even", "Smooth (Legacy)"]);
+            f.set_options(&["Smooth", "Soft", "Even", "Old Smooth"]);
             f.set_default(2);
             f.set_value(f.default());
         }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
@@ -1011,7 +1011,7 @@ impl AdobePluginGlobal for Plugin {
                 setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
             }))?;
             params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
-                f.set_options(&["Both", "Columns Only", "Rows Only"]);
+                f.set_options(&["Both", "Columns", "Rows"]);
                 f.set_default(1);
                 f.set_value(f.default());
             }))?;
@@ -1024,7 +1024,9 @@ impl AdobePluginGlobal for Plugin {
             f.set_value(f.default());
         }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
         params.add_with_flags(Params::Quality, "Render Quality", ae::PopupDef::setup(|f| {
-            f.set_options(&["Preview (Bilinear)", "Final (Bicubic)"]);
+            // Short captions keep host-owned popups at their standard width.
+            // Algorithms/ordinals are unchanged; explain them in the guide.
+            f.set_options(&["Preview", "Final"]);
             f.set_default(2);
             f.set_value(f.default());
         }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
@@ -1115,6 +1117,8 @@ impl AdobePluginGlobal for Plugin {
                 extra.dispatch::<GridArb, Params>(Params::GridState)?;
             }
             ae::Command::Event { mut extra } => {
+                #[cfg(feature = "render-diagnostics")]
+                grid_row::observe(&mut extra);
                 match extra.event() {
                     ae::Event::Click(_) => {
                         if extra.send_drag() {

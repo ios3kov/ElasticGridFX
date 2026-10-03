@@ -299,8 +299,36 @@ not weakening guards. Contract expectations updated to the approved static
 choices, topic-only grid, group controls and appended compatibility flag.
 
 Shared checkpoint: 68 Rust tests PASS; strict Clippy PASS; Python suite265 PASS
-with scoped native-process test access; all19 standalone JavaScript test files
+with scoped native-process test access; all16 standalone JavaScript test files
 PASS after removing stale hard-coded hidden-stream indices from their models.
 The perf preparation fixture itself also retained one numeric hidden-stream
 lookup; corrected to the canonical unique name, preserving readiness refusal.
 These results are code/mock evidence, not Windows or AE runtime certification.
+
+Fresh Mac candidate3032232: loaded identity PASS, build
+EGFX-eef15a14adf9e796c0cb4542, binary SHA256
+d8566c46642a77646447f7d273a17951ec6f1553cc015a1d22d34884a20a33f2.
+New owned scene __EGFX_UPDATE_3032232 confirms current label values/static flags
+and visual Reset/Fit Layer alignment. Evidence outside repository:
+outputs/next-update-labels-reset-mac/native-labels.json and loaded-identity/.
+Native Reset/Undo, legacy project migration, new render regression and Windows
+build/runtime remain pending. No publication or release; local branch only.
+
+### Native Reset rejection / equal popup widths — 2026-10-03
+
+Owned3032232 scene: a real composition drag changes60162 pixels. The authorized
+fixed Reset input is delivered, but its frame is byte-identical to the deformed
+frame, rather than the neutral baseline. Native Reset acceptance FAIL, not PASS;
+Undo/key preservation remain pending. Isolate event dispatch/hit coordinates
+with bounded test-only geometry observations before another candidate.
+
+User additionally requires one common popup width, with every option fully
+readable, across Deformation Plane, Follow Shape, Wave Axis, Edge Behavior and
+Render Quality. SDK25.6 AE_Effect.h:2416 says ui_width/ui_height are ignored
+without PF_PUI_CONTROL (expanded custom area); it does not expose a standard
+popup-width setter. First test shorter readable options in native controls:
+Old Smooth; Preview/Final; Both/Columns/Rows, retaining numeric values/formulas.
+This should leave room for every option at the standard minimum width, but
+actual common width still needs host observation. A custom-row/menu fallback
+must retain IDs, selection, keyboard behavior and host ownership. No padding
+strings, dummy options or unsupported reserved fields added.

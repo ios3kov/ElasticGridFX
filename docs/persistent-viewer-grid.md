@@ -1,10 +1,11 @@
 # Persistent viewer grid — feasibility gate
 
-2026-09-29. Target: AE 25.6 arm64. Status: DEFERRED BY USER to a future version.
-Not a blocker for the current Stage 9/10 scope; not implemented and not PASS.
-No parameter, runtime code or installed payload changed for this request.
+Original research: 2026-09-29, target AE 25.6 arm64. Resumed 2026-10-03 under
+the next-update request, now covering macOS Apple Silicon and Windows x64.
+Status: FEASIBILITY OPEN; not implemented and not PASS. Historical deferral
+applied to Stage 9/10 only. See feature-backlog.md U7 for the active requirement.
 
-Resume only on a future user request. Preserve all requirements below. The supplied
+Preserve the current requirements below. The supplied
 GridWarp.aex (SHA-256 d26054ae75b0561a4d391a3d8866212f922239754d9cc7d658a4df4e727db91e)
 contains Visualization / Enable Visualization / stroke color, width and opacity
 strings. A sibling macOS bundle contains render symbols accepting colors and
@@ -18,8 +19,11 @@ do not copy proprietary code or licensing routines.
   existing saved parameter IDs and behavior.
 - PV-2: when on and stopped, show the same thin transformed guide grid even when
   its effect/layer is deselected. When off, retain ordinary selected-effect UI.
-- PV-3: hide during RAM Preview playback, restore on stop. Never draw into render
-  output or cached pixels (including nested comps, render queue and aerender).
+- PV-3: with Show Grid enabled, remain visible during RAM Preview playback.
+  This is the user's latest explicit answer on 2026-10-03, replacing the earlier
+  stopped-preview-only answer. Never draw into output or cached pixels
+  (including nested comps, render queue and aerender). When off, no persistent
+  playback overlay is requested.
 - PV-4: passive grid never consumes pointer events or changes the selected-tool
   cursor. Keep the existing interactive overlay only for the selected effect.
 - PV-5: handle multiple instances, comp/view changes, deletion, undo, reopen and
@@ -47,9 +51,10 @@ Burning the grid into pixels, auto-selecting the layer, adding guide layers, usi
 private AE view internals or silently changing composition renderer would change
 the agreed behavior. None is implemented or authorized by this research result.
 
-Next decision: authorize a separately isolated interactive-overlay feasibility
-prototype (no install or compositor replacement), or defer persistence and retain
-the already accepted selected-effect overlay. Do not expose a nonfunctional switch.
+Next work: isolated public-API feasibility research/prototype within the authorized
+update. Prove deselected-view callbacks and playback lifecycle before exposing
+the switch. Current headers have not established such a hook; selected-effect
+draw callbacks alone do not satisfy PV-2/PV-3. Do not expose a nonfunctional switch.
 This is not a claim that all possible implementations are impossible.
 
 ## Sources inspected

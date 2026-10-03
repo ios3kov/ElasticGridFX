@@ -72,7 +72,7 @@ proposals to refine rather than approved final wording.
 | Smoothstep | Smooth | Smoothly reduce influence toward the range boundary. |
 | Gaussian | Soft | Stronger influence near the moved line, weaker farther away. |
 | Linear | Even | Reduce influence at a constant rate with distance. |
-| Smoothstep (Legacy) | Smooth (Legacy) | Preserve the saved legacy option; not the default recommendation. |
+| Smoothstep (Legacy) | Old Smooth | Preserve the saved legacy option; not the default recommendation. |
 | Elasticity Strength | Follow Strength | How strongly neighboring lines follow the moved line. |
 | Stretch Easing | Smooth Stretch | Soften changes in image stretch at cell boundaries. |
 | Easing Distance | Smooth Width | Width of the area used to smooth those transitions. |
@@ -113,6 +113,20 @@ Grid Positions has no disclosure arrow or empty expanded area. Put a **Reset**
 button to its right on the same row, with no “Now” suffix and no separate reset
 row. Preserve the native stopwatch, animation and parameter identity. The reset
 still affects only the current time; verify the topic-row UI in both hosts.
+
+### Equal popup widths
+
+User correction on2026-10-03: all popup controls use one common width, chosen to
+fit the longest option without clipping. Includes the controls inside Wave
+Animation. Keep the native value-column alignment and preserve option values,
+parameter IDs, keyboard interaction and saved projects. SDK25.6 standard popup
+width is host-owned; ui_width is for PF_PUI_CONTROL custom areas. First retain
+native controls with short readable options: Old Smooth; Preview/Final;
+Both/Columns/Rows. Values/formulas stay unchanged and no dummy/padded options
+are added. Verify that all controls use the native130-unit minimum on the
+actual Mac and Windows panels; source captions alone do not prove equal widths.
+If a host still chooses different widths, custom-row/menu feasibility remains
+required. No fixed native-width setter or cross-platform acceptance is claimed.
 
 ### Automatic safe line spacing
 
@@ -181,8 +195,8 @@ macOS arm64 / Windows x64 until verified otherwise.
 |---|---|---|---|
 | U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
 | U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Implemented; 15 Python + 13 JSX mock cases PASS; Windows AE NOT RUN |
-| U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Implemented; core PASS; AE exact-time/Undo NOT RUN |
-| U3 | Simple English labels and single-row Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Short labels implemented locally; no-arrow inline Reset dimensions/alignment inspected on Mac; fresh labels and Windows pending |
+| U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Core PASS;3032232 native Reset FAIL (frame unchanged); event diagnosis in progress; keys/Undo pending |
+| U3 | Simple English labels, single-row Grid Positions, equal popup widths | Preserve IDs/option values; native builds; AE panel inspection/old-project load; common popup width without clipping | Short labels and Reset dimensions/alignment inspected on Mac3032232; equal popup widths open; Windows pending |
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac collapsed section inspected; Windows AE NOT RUN |
 | U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Design dependency open |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |

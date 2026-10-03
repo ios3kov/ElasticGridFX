@@ -2,6 +2,38 @@
 use super::*;
 use ae::drawbot::{ColorRgba, PointF32, RectF32, TextAlignment, TextTruncation};
 
+// Bounded test-only observations. Never enabled in the default product build;
+// records geometry/dispatch only, without project names or arbitrary payloads.
+#[cfg(feature = "render-diagnostics")]
+pub(crate) fn observe(event: &mut ae::EventExtra) {
+    use std::io::Write;
+    use std::sync::{Mutex, OnceLock};
+    if event.window_type() != ae::WindowType::Effect { return; }
+    let label = match event.event() {
+        ae::Event::Click(_) => "click", ae::Event::Drag(_) => "drag", _ => return,
+    };
+    static LOG: OnceLock<Option<Mutex<(std::fs::File, usize)>>> = OnceLock::new();
+    let log = LOG.get_or_init(|| {
+        let p = std::env::temp_dir().join(format!("egfx-grid-events-{}.txt", std::process::id()));
+        std::fs::OpenOptions::new().write(true).create_new(true).open(p).ok().map(|f| Mutex::new((f,0)))
+    });
+    if let Some(log) = log {
+        if let Ok(mut entry) = log.lock() {
+            if entry.1 >= 40 { return; }
+            entry.1 += 1;
+            let point = event.screen_point();
+            let state: [isize;4] = std::array::from_fn(|i| event.continue_refcon(i));
+            let _ = writeln!(entry.0, "{} point={:?} send={} last={} state={:?}",
+                label,point,event.send_drag(),event.last_time(),state);
+            if label == "click" {
+                let _ = writeln!(entry.0,"index={} area={:?} title={:?} current={:?}",
+                    event.param_index(),event.effect_area(),event.param_title_frame(),event.current_frame());
+            }
+            let _ = entry.0.flush();
+        }
+    }
+}
+
 fn button(frame: ae::Rect) -> Option<RectF32> {
     // ECW divides the row at its center, with the native value control inset
     // by 16 logical units. horiz_offset is not initialized for this arbitrary

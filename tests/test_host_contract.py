@@ -42,7 +42,7 @@ class HostContract(unittest.TestCase):
     def test_popup_ordinals_describe_current_core_behavior(self):
         self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
         self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
-        self.assertIn('["Smooth", "Soft", "Even", "Smooth (Legacy)"]', block('Falloff'))
+        self.assertIn('["Smooth", "Soft", "Even", "Old Smooth"]', block('Falloff'))
         self.assertIn('f.set_default(2)', block('Falloff'))
         # Ordinal 4 intentionally keeps the old Smoothstep fallback, not Cosine.
         bridge = (ROOT / 'src/bridge/elasticgrid_ffi.cpp').read_text()
