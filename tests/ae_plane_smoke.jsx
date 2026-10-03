@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Internal Stage 9 fixture. Run only after a clean candidate is installed and
 // live identity is independently checked. Never closes or edits user work.
 function elasticGridPlaneSmoke(config) {
@@ -116,7 +129,7 @@ function elasticGridPlaneSmoke(config) {
         corners(fit);
         for(var d=0;d<3;++d) {
             var depth=[8,16,32][d];owned.bitsPerChannel=depth;stage="pixels_"+depth;
-            comp.resolutionFactor=[1,1];fx.property("Wave Amplitude").setValue(0);
+            comp.resolutionFactor=[1,1];egfxWaveParam(fx, "Wave Amplitude").setValue(0);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-original");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-identity");
             corners(skew);capture("d"+depth+"-skew-identity");corners(fit);
@@ -129,12 +142,12 @@ function elasticGridPlaneSmoke(config) {
             nativePin.property(3).setValue(skew[3]);nativePin.property(4).setValue(skew[2]);
             capture("d"+depth+"-native-skew");
             nativePin.remove();fx=findEffect(layer);check(fx!==null,"Effect lost after reference capture");fx.enabled=true;
-            fx.property("Wave Amplitude").setValue(8);
+            egfxWaveParam(fx, "Wave Amplitude").setValue(8);
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-legacy-wave");
             fx.property("Deformation Plane").setValue(2);capture("d"+depth+"-plane-wave");
             corners(skew);capture("d"+depth+"-skew-wave");
             corners([[0,0],[127,95],[127,0],[0,95]]);capture("d"+depth+"-invalid");
-            corners(fit);fx.property("Wave Amplitude").setValue(0);
+            corners(fit);egfxWaveParam(fx, "Wave Amplitude").setValue(0);
             comp.resolutionFactor=[2,2];capture("d"+depth+"-half-identity");
             fx.property("Deformation Plane").setValue(1);capture("d"+depth+"-half-original");
         }
@@ -142,7 +155,7 @@ function elasticGridPlaneSmoke(config) {
         // Roundtrip a non-trivial plane state through a real AEP before camera checks.
         stage="roundtrip_save";owned.bitsPerChannel=8;comp.resolutionFactor=[1,1];
         fx.property("Deformation Plane").setValue(2);corners(skew);
-        fx.property("Wave Amplitude").setValue(8);
+        egfxWaveParam(fx, "Wave Amplitude").setValue(8);
         capture("roundtrip-before");
         var projectFile=new File(folder.fsName+"/plane-project.aep");check(!projectFile.exists,"Stale project");
         owned.save(projectFile);check(projectFile.exists && owned.file!==null,"Project not saved");
@@ -152,7 +165,7 @@ function elasticGridPlaneSmoke(config) {
         layer=comp.layer(1);check(layer!==null,"Roundtrip layer missing");
         fx=findEffect(layer);check(fx!==null,"Roundtrip effect missing");
         check(fx.property("Deformation Plane").value===2,"Plane mode did not roundtrip");
-        check(Math.abs(fx.property("Wave Amplitude").value-8)<0.001,"Wave amplitude did not roundtrip");
+        check(Math.abs(egfxWaveParam(fx, "Wave Amplitude").value-8)<0.001,"Wave amplitude did not roundtrip");
         capture("roundtrip-after");
 
         // 3D/camera acceptance: independently exercise the Default Camera

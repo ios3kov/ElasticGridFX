@@ -132,18 +132,65 @@ fn legacy_expressions()->Vec<String>{
     values
 }
 fn err(e:ae::Error)->String{format!("{e:?}")}
+// UI grouping changes stream positions. Resolve unique invariant hidden names
+// and then validate each stream's name/type again immediately before access.
+fn hidden_indices(names: &[String]) -> Result<[i32; 5], String> {
+    let mut result=[-1; 5];
+    for (index, name) in names.iter().enumerate() {
+        if let Some(slot)=NAMES.iter().position(|expected| name == expected) {
+            if result[slot] != -1 {return Err("Duplicate hidden stream".into());}
+            result[slot]=index as i32;
+        }
+    }
+    if result.iter().any(|index| *index < 0) {return Err("Missing hidden stream".into());}
+    Ok(result)
+}
+
+#[cfg(test)]
+mod schema_tests {
+    use super::*;
+    #[test]
+    fn hidden_streams_survive_ui_insertions_and_refuse_ambiguous_schema() {
+        for offset in [24, 27, 31] {
+            let mut names=vec!["UI control".to_string(); offset];
+            names.extend(NAMES.map(str::to_string));
+            assert_eq!(hidden_indices(&names).unwrap(),std::array::from_fn(|i|(offset+i) as i32));
+            names.push(NAMES[0].into());
+            assert!(hidden_indices(&names).is_err());
+            names.pop(); names.pop();
+            assert!(hidden_indices(&names).is_err());
+        }
+    }
+}
+
 struct Adapter {
     id:ae::aegp::PluginId,
     effect:ae::aegp::EffectRefHandle,
     layer:ae::aegp::LayerHandle,
     basic:*const ae::sys::SPBasicSuite,
+    indices: [i32; 5],
+    stream_count: i32,
 }
 impl Adapter {
+    fn new(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Self,String>{
+        let suite=ae::aegp::suites::Stream::new().map_err(err)?;
+        let stream_count=suite.effect_num_param_streams(effect).map_err(err)?;
+        if !(5..=128).contains(&stream_count) {return Err("Invalid effect schema size".into());}
+        let mut names=Vec::new();
+        for index in 0..stream_count {
+            let stream=suite.new_effect_stream_by_index(effect,id,index).map_err(err)?;
+            names.push(suite.stream_name(&stream,id,true).map_err(err)?);
+        }
+        let indices=hidden_indices(&names)?;
+        let mut host=Self{id,effect,layer,basic,indices,stream_count};
+        host.validate_target()?;
+        Ok(host)
+    }
     fn stream(&mut self,i:usize)->Result<ae::aegp::StreamReferenceHandle,String>{
         self.validate_target()?;
         if i>=5 {return Err("Invalid hidden stream".into());}
         let suite=ae::aegp::suites::Stream::new().map_err(err)?;
-        let stream=suite.new_effect_stream_by_index(self.effect,self.id,24+i as i32).map_err(err)?;
+        let stream=suite.new_effect_stream_by_index(self.effect,self.id,self.indices[i]).map_err(err)?;
         if suite.stream_name(&stream,self.id,true).map_err(err)?!=NAMES[i] ||
             suite.stream_type(&stream).map_err(err)?!=if i==4 {ae::aegp::StreamType::OneD} else {ae::aegp::StreamType::TwoDSpatial} {
             return Err("Hidden schema mismatch".into());
@@ -158,7 +205,7 @@ impl Host for Adapter {
         let effects=ae::aegp::suites::Effect::new().map_err(err)?;
         let key=effects.installed_key_from_layer_effect(self.effect).map_err(err)?;
         if effects.effect_match_name(key).map_err(err)?!="com.elasticgrid.fx.warp" ||
-            ae::aegp::suites::Stream::new().map_err(err)?.effect_num_param_streams(self.effect).map_err(err)?!=29 {
+            ae::aegp::suites::Stream::new().map_err(err)?.effect_num_param_streams(self.effect).map_err(err)?!=self.stream_count {
             return Err("Wrong effect schema".into());
         }
         Ok(())
@@ -183,7 +230,7 @@ impl Host for Adapter {
 // added second effect, on the main thread, with a valid scoped suite context.
 #[cfg(not(fstr_auto_binding))]
 pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<(),String>{
-    let mut host=Adapter{id,effect,layer,basic};let e=expressions();
+    let mut host=Adapter::new(id,effect,layer,basic)?;let e=expressions();
     let first=binding_transaction::install(&mut host,&e).map_err(|x|format!("{x:?}"))?;
     if first!=Outcome::Installed {return Err("Expected pristine research target".into());}
     let repeat=binding_transaction::install(&mut host,&e).map_err(|x|format!("{x:?}"))?;
@@ -193,7 +240,7 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
 
 #[cfg(fstr_auto_binding)]
 pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Outcome,String>{
-    binding_transaction::install_or_upgrade(&mut Adapter{id,effect,layer,basic},&expressions(),&legacy_expressions()).map_err(|e|format!("{e:?}"))
+    binding_transaction::install_or_upgrade(&mut Adapter::new(id,effect,layer,basic)?,&expressions(),&legacy_expressions()).map_err(|e|format!("{e:?}"))
 }
 
 // The wrapper locks even a null GetExpression result. Query explicitly and

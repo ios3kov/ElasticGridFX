@@ -1,5 +1,14 @@
 # Changelog
 
+## Next update — development, not released
+
+- Shared Mac/Windows UI: Reset Grid Positions at the current time, collapsed Grid
+  Positions, collapsed Wave Animation section, Affected Lines and Follow Strength.
+- Preserve existing parameter identities, wave values and render math; resolve
+  native-plane hidden streams independently of inserted UI controls.
+- Windows validation requires matching per-run completion after cleanup and a
+  decoded frame. AE acceptance of these changes is still pending.
+
 - 2026-10-02: reconcile published0.9.3-perf.1 README; add current end-user guide,
   performance/release retrospective and reusable AE know-how transfer. Preserve
   historical evidence and unchanged release assets; no rebuild or new speed runs.

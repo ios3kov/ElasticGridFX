@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Opens only a copied historical test-owned AEP; preserves original evidence.
 function elasticGridPlaneMigrationProbe(config) {
     var owned=null,status="FAIL",message="",clean=false;
@@ -10,7 +23,7 @@ function elasticGridPlaneMigrationProbe(config) {
         var fx=comp.layer(1).property("ADBE Effect Parade").property("com.elasticgrid.fx.warp");
         check(fx!==null,"Historical effect missing");
         check(fx.property("Deformation Plane").value===2,"Plane mode changed");
-        check(Math.abs(fx.property("Wave Amplitude").value-8)<0.001,"Wave changed");
+        check(Math.abs(egfxWaveParam(fx, "Wave Amplitude").value-8)<0.001,"Wave changed");
         var names=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
         var expected=[[10,5],[120,0],[127,85],[0,95]];
         for(var n=0;n<4;n++) {

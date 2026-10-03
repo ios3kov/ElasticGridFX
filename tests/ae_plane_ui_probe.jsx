@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Test-owned visual acceptance scene. Never opens/closes user work.
 function elasticGridPlaneUIProbe(config) {
     var owned=null;
@@ -17,7 +30,7 @@ function elasticGridPlaneUIProbe(config) {
         var values=[[0,0],[639,0],[639,479],[0,479]];
         for(var i=0;i<4;i++)fx.property(names[i]).setValue(values[i]);
         fx.property("Deformation Plane").setValue(1);
-        fx.property("Wave Amplitude").setValue(0);
+        egfxWaveParam(fx, "Wave Amplitude").setValue(0);
         layer.threeDLayer=true;
         layer.property("ADBE Transform Group").property("ADBE Rotate Y").setValue(35);
         layer.property("ADBE Transform Group").property("ADBE Scale").setValue([75,75,75]);

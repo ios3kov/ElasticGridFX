@@ -119,3 +119,32 @@ Invalid/stale/missing completion and corrupt frames fail closed. Fifteen focused
 Python tests and thirteen actual-JSX mock control-flow cases PASS; these are not
 Windows AE runtime tests. Runtime remains NOT RUN. The validation guide now records
 the audited Visual C++ x64 runtime dependency. Next: U2/U3/U4 native UI block.
+
+### U2/U3/U4 — shared native UI implementation
+
+Applies to macOS Apple Silicon and Windows x64 together. Added supervised Reset
+Grid Positions → Reset Now, writing only the current GridState value through AE's
+parameter transaction; no key enumeration/deletion, timing or other parameter
+writes. Grid Positions and the new Wave Animation group start collapsed. The
+approved labels Affected Lines and Follow Strength replace the two old labels;
+remaining label simplification is pending. Stored IDs/types, grid wire format,
+wave ranges/defaults/ordinals and render math are retained.
+
+The added UI controls exposed a fixed-index dependency in native plane binding.
+Binding now resolves unique hidden stream names and revalidates names/types before
+access, preserving fail-closed schema checks without relying on old positions.
+Test fixtures use hidden names and support both flat and grouped wave controls.
+
+Validation: 64 Rust tests PASS, including reset topology and hidden-stream schema
+regressions; 13 actual-JSX control-flow mock cases plus flat/grouped lookup PASS;
+all 16 JSX fixtures parse; 8 Windows runner tests PASS. The earlier release compile
+passed with a local rust-objcopy LLVM lookup warning; final clean-source build and
+package are pending. These results do not prove AE panel layout, current-time key
+insertion/replacement, Undo/Redo, old-project migration or Windows runtime. Those
+checks remain NOT RUN on the new candidate. No new plugin installed or released.
+
+API basis: SDK25.6 AE_Effect.h USER_CHANGED_PARAM/change flags, after-effects0.4.0
+parameter/group wrappers and [Adobe parameter supervision](https://ae-plugins.docsforadobe.dev/effect-details/parameter-supervision/).
+Next: clean candidate build and host validation, remaining labels, then the live
+influence/automatic-spacing design. Persistent/playback overlay remains a separate
+feasibility item; safe installers and Windows host closure remain required.

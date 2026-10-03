@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Owned-only queue capture; separate host turns prove native idle binding.
 // This complements the retained historical saveFrameToPng smoke evidence.
 function egfxCreateChainQueue(config) {
@@ -26,9 +39,9 @@ function egfxCaptureChainQueue(config) {
     function verified(c,n){check(c&&c.comment==='__EGFX_CHAIN_QUEUE_'+config.run_id&&c.numLayers===n&&c.width===319&&c.height===241&&c.duration===2&&c.frameRate===30&&c.resolutionFactor[0]===1&&c.resolutionFactor[1]===1,'Structure differs');}
     function effect(l){var parade=l.property('ADBE Effect Parade');check(parade&&parade.numProperties===1,'Effect count differs');var e=parade.property(1);check(e.matchName==='com.elasticgrid.fx.warp','Effect differs');
         var names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
-        for(var i=0;i<5;i++){var h=e.property(24+i);check(h&&h.name===names[i]&&h.expressionEnabled&&h.expressionError==='','Binding unready');}
-        check(e.property(28).value===1,'Plane kind differs');return e;}
-    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('Edge Behavior').setValue(1);e.property('Wave Axis').setValue(1);e.property('Wave Frequency').setValue(1.3);e.property('Wave Phase').setValue(35);e.property('Stretch Easing').setValue(0);e.property('Wave Speed').setValue(0);e.property('Wave Amplitude').setValue(0);}
+        for(var i=0;i<5;i++){var h=e.property(names[i]);check(h&&h.name===names[i]&&h.expressionEnabled&&h.expressionError==='','Binding unready');}
+        check(e.property('__FSTR Plane Kind').value===1,'Plane kind differs');return e;}
+    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('Edge Behavior').setValue(1);egfxWaveParam(e, 'Wave Axis').setValue(1);egfxWaveParam(e, 'Wave Frequency').setValue(1.3);egfxWaveParam(e, 'Wave Phase').setValue(35);e.property('Stretch Easing').setValue(0);egfxWaveParam(e, 'Wave Speed').setValue(0);egfxWaveParam(e, 'Wave Amplitude').setValue(0);}
     function frame(c,name,time){
         stage='frame_'+name;own();check(owned.renderQueue.numItems===0,'Unexpected queue');
         var folder=new Folder(config.folder+'/'+name);check(!folder.exists&&folder.create(),'Stale frame directory');
@@ -56,10 +69,10 @@ function egfxCaptureChainQueue(config) {
         check(app.project.bitsPerChannel===32&&(app.project.workingSpace===''||app.project.workingSpace==='None')&&app.project.linearizeWorkingSpace===false,'Color/depth differs');
         var fx=effect(layer),chainFx=effect(adjustment);owned=app.project;bindingReady=true;app.beginSuppressDialogs();suppressed=true;
         defaults(fx);fx.enabled=false;frame(direct,'bypass',0.25);fx.enabled=true;frame(direct,'identity',0.25);
-        fx.property('Wave Amplitude').setValue(10);frame(direct,'static_a',0.25);frame(direct,'static_b',0.75);
-        fx.property('Wave Speed').setValue(0.5);frame(direct,'animated_a',0.125);frame(direct,'animated_b',0.625);
-        fx.property('Wave Amplitude').setValue(0);frame(direct,'reset',0.25);
-        defaults(chainFx);chainFx.property('Wave Amplitude').setValue(10);frame(chain,'chain_before_corner',0.25);
+        egfxWaveParam(fx, 'Wave Amplitude').setValue(10);frame(direct,'static_a',0.25);frame(direct,'static_b',0.75);
+        egfxWaveParam(fx, 'Wave Speed').setValue(0.5);frame(direct,'animated_a',0.125);frame(direct,'animated_b',0.625);
+        egfxWaveParam(fx, 'Wave Amplitude').setValue(0);frame(direct,'reset',0.25);
+        defaults(chainFx);egfxWaveParam(chainFx, 'Wave Amplitude').setValue(10);frame(chain,'chain_before_corner',0.25);
         var corner=adjustment.property('ADBE Effect Parade').addProperty('ADBE Corner Pin');check(corner&&corner.matchName==='ADBE Corner Pin','Corner unavailable');frame(chain,'chain_corner_identity',0.25);
         corner.property(1).setValue([20,15]);corner.property(2).setValue([299,25]);corner.property(3).setValue([10,220]);corner.property(4).setValue([309,225]);frame(chain,'chain_corner_moved',0.25);
         status='CAPTURED';stage='captured';

@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Owned-only native acceptance. config.root must be a fresh output directory.
 // Creation and capture are separate host turns so the documented idle hook runs.
 function fstrCreateFinal(config) {
@@ -18,8 +31,9 @@ function fstrCaptureFinal(config) {
     var p=app.project,c=p.activeItem;
     if(!(c instanceof CompItem)||c.comment!==config.owner||c.numLayers!==1||p.renderQueue.numItems!==0)throw Error('Ownership');
     var l=c.layer(1),e=l.property('ADBE Effect Parade').property(1);
-    for(var i=24;i<=28;i++)if(!e.property(i).expressionEnabled||e.property(i).expressionError!=='')throw Error('Automatic binding');
-    if(e.property(28).value!==2||e.property('Grid Positions').numKeys!==2)throw Error('Kind/keyframes');
+    var hidden=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
+    for(var i=0;i<hidden.length;i++)if(!e.property(hidden[i]).expressionEnabled||e.property(hidden[i]).expressionError!=='')throw Error('Automatic binding');
+    if(e.property('__FSTR Plane Kind').value!==2||e.property('Grid Positions').numKeys!==2)throw Error('Kind/keyframes');
     p.workingSpace='';p.linearizeWorkingSpace=false;
     var root=new Folder(config.root);if(!root.exists)throw Error('Missing fresh output directory');
     function capture(folder,name) {
@@ -41,18 +55,18 @@ function fstrCaptureFinal(config) {
         for(var di=0;di<3;di++) {
             var depth=[8,16,32][di],folder=config.root+'/d'+depth,dir=new Folder(folder);
             if(dir.exists||!dir.create())throw Error('Stale directory');p.bitsPerChannel=depth;
-            e.property(1).setValue(1);e.property('Wave Amplitude').setValue(0);e.enabled=false;capture(folder,'original');
-            e.enabled=true;capture(folder,'neutral');e.property('Wave Amplitude').setValue(15);capture(folder,'layer-wave');
+            e.property(1).setValue(1);egfxWaveParam(e, 'Wave Amplitude').setValue(0);e.enabled=false;capture(folder,'original');
+            e.enabled=true;capture(folder,'neutral');egfxWaveParam(e, 'Wave Amplitude').setValue(15);capture(folder,'layer-wave');
             for(var j=0;j<4;j++)e.property(j+2).setValue(full[j]);e.property(1).setValue(2);capture(folder,'corners-wave');
-            for(var j=0;j<4;j++)e.property(j+2).setValue(custom[j]);e.property('Wave Amplitude').setValue(0);capture(folder,'custom-neutral');
-            e.property('Wave Amplitude').setValue(15);capture(folder,'custom-wave');
-            var points=[];for(var j=0;j<4;j++)points.push(e.property(j+24).value);
+            for(var j=0;j<4;j++)e.property(j+2).setValue(custom[j]);egfxWaveParam(e, 'Wave Amplitude').setValue(0);capture(folder,'custom-neutral');
+            egfxWaveParam(e, 'Wave Amplitude').setValue(15);capture(folder,'custom-wave');
+            var points=[];for(var j=0;j<4;j++)points.push(e.property(['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL'][j]).value);
             var r=new File(folder+'/quad.txt');if(!r.open('w'))throw Error('Report');r.write(points.toSource());r.close();
             records.push('d'+depth+' captured');
         }
-        p.bitsPerChannel=8;e.property(1).setValue(1);e.property('Wave Amplitude').setValue(0);
-        l.threeDLayer=false;if(e.property(28).value!==1)throw Error('2D transition');
-        l.threeDLayer=true;if(e.property(28).value!==2)throw Error('3D transition');
+        p.bitsPerChannel=8;e.property(1).setValue(1);egfxWaveParam(e, 'Wave Amplitude').setValue(0);
+        l.threeDLayer=false;if(e.property('__FSTR Plane Kind').value!==1)throw Error('2D transition');
+        l.threeDLayer=true;if(e.property('__FSTR Plane Kind').value!==2)throw Error('3D transition');
         if(e.property('Grid Positions').numKeys!==2)throw Error('Lost keys');
         var target=new File(config.root+'/acceptance.aep');if(target.exists)throw Error('Existing project');p.save(target);
         return records.join('; ')+'; transitions and 2 keys PASS';

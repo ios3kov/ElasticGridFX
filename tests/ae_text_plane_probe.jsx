@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Isolated text-layer baseline. Does not close or save an existing project.
 function elasticGridTextPlaneProbe(config) {
     if (!/^[a-f0-9]{32}$/.test(config.run_id)) throw new Error("Invalid run id");
@@ -20,7 +33,7 @@ function elasticGridTextPlaneProbe(config) {
     layer.property("ADBE Transform Group").property("ADBE Position").setValue([320,200]);
     var fx = layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
     fx.property("Deformation Plane").setValue(1);
-    fx.property("Wave Amplitude").setValue(0);
+    egfxWaveParam(fx, "Wave Amplitude").setValue(0);
     app.project.save(file);
     comp.openInViewer(); layer.selected = true; fx.selected = true;
 }

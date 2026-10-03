@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Fresh owned phase variants; every pair uses the same saved AEP for both builds.
 function egfxPerfVariants(config) {
     var p=app.project,owned=null,records=[],status='FAIL',stage='guard';
@@ -24,9 +37,9 @@ function egfxPerfVariants(config) {
             if(!l.source||!l.source.file||l.source.file.fsName!==(new File(config.pattern)).fsName||parade.numProperties!==1)throw Error('Owned source/effect differs');
             var e=parade.property(1);if(e.matchName!=='com.elasticgrid.fx.warp')throw Error('Effect differs');
             var names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
-            for(var h=0;h<5;h++){var stream=e.property(24+h);if(!stream||stream.name!==names[h]||!stream.expressionEnabled||stream.expressionError!=='')throw Error('Binding unready');}
-            if(e.property(28).value!==1||e.property('Deformation Plane').value!==2||e.property('Render Quality').value!==2||e.property('Wave Phase').value!==35||owned.bitsPerChannel!==32||owned.linearizeWorkingSpace!==false||(owned.workingSpace!==''&&owned.workingSpace!=='None'))throw Error('Pinned render state differs');
-            stage='phase';e.property('Wave Phase').setValue(v.phase);var actual=e.property('Wave Phase').value;
+            for(var h=0;h<5;h++){var stream=e.property(names[h]);if(!stream||stream.name!==names[h]||!stream.expressionEnabled||stream.expressionError!=='')throw Error('Binding unready');}
+            if(e.property('__FSTR Plane Kind').value!==1||e.property('Deformation Plane').value!==2||e.property('Render Quality').value!==2||egfxWaveParam(e, 'Wave Phase').value!==35||owned.bitsPerChannel!==32||owned.linearizeWorkingSpace!==false||(owned.workingSpace!==''&&owned.workingSpace!=='None'))throw Error('Pinned render state differs');
+            stage='phase';egfxWaveParam(e, 'Wave Phase').setValue(v.phase);var actual=egfxWaveParam(e, 'Wave Phase').value;
             if(Math.abs(actual-v.phase)>0.00001)throw Error('Phase not applied');
             c.comment='__EGFX_PERF_VARIANT_'+config.run_id+'_'+n;
             owned.renderQueue.item(1).outputModule(1).file=new File(v.folder+'/fixture-output/frame_[#####].png');

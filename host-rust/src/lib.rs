@@ -9,6 +9,7 @@ mod control_grid;
 mod ui_projection;
 mod plane;
 mod fit_layer;
+mod reset_grid;
 #[cfg(feature="render-diagnostics")]
 mod render_diagnostics;
 #[cfg(fstr_lifecycle_probe)]
@@ -86,6 +87,9 @@ pub(crate) enum Params {
     #[cfg(fstr_binding_probe)] ResearchPlaneBR,
     #[cfg(fstr_binding_probe)] ResearchPlaneBL,
     #[cfg(fstr_binding_probe)] ResearchPlaneKind,
+    ResetGridPositions,
+    WaveGroupStart,
+    WaveGroupEnd,
 }
 
 #[derive(Default)]
@@ -949,13 +953,18 @@ impl AdobePluginGlobal for Plugin {
         params.add_customized(Params::GridState, "Grid Positions", grid_state_def, |param| {
             // Keep the native animation row/stopwatch visible. Only the custom
             // diagnostic text is omitted by draw_effect_control.
+            param.set_flags(ae::ParamFlag::START_COLLAPSED);
             param.set_ui_flags(ae::ParamUIFlags::CONTROL);
             param.set_ui_width(300);
             param.set_ui_height(32);
             -1
         })?;
 
-        params.add(Params::TensionRadius, "Tension Radius", ae::FloatSliderDef::setup(|f| {
+        params.add_with_flags(Params::ResetGridPositions, "Reset Grid Positions", ae::ButtonDef::setup(|f| {
+            f.set_label("Reset Now");
+        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+
+        params.add(Params::TensionRadius, "Affected Lines", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 20.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
         params.add(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
@@ -965,7 +974,7 @@ impl AdobePluginGlobal for Plugin {
             f.set_default(2);
             f.set_value(f.default());
         }))?;
-        params.add(Params::ElasticityStrength, "Elasticity Strength", ae::FloatSliderDef::setup(|f| {
+        params.add(Params::ElasticityStrength, "Follow Strength", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
         }))?;
         params.add(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
@@ -985,24 +994,27 @@ impl AdobePluginGlobal for Plugin {
             f.set_default(false);
             f.set_value(f.default());
         }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
-        params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 25.0), (0.0, 10.0), 0.0, 2, true);
-        }))?;
-        params.add(Params::WaveFrequency, "Wave Frequency", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 10.0), (0.0, 10.0), 1.0, 2, false);
-        }))?;
-        params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
-            // Stored values already use degrees; do not rescale old keyframes.
-            setup_float(f, (-360.0, 360.0), (-180.0, 180.0), 0.0, 2, false);
-        }))?;
-        params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
-        }))?;
-        params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
-            f.set_options(&["Both", "Columns Only", "Rows Only"]);
-            f.set_default(1);
-            f.set_value(f.default());
-        }))?;
+        params.add_group(Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true, |params| {
+            params.add(Params::WaveAmplitude, "Wave Amplitude", ae::FloatSliderDef::setup(|f| {
+                setup_float(f, (0.0, 25.0), (0.0, 10.0), 0.0, 2, true);
+            }))?;
+            params.add(Params::WaveFrequency, "Wave Frequency", ae::FloatSliderDef::setup(|f| {
+                setup_float(f, (0.0, 10.0), (0.0, 10.0), 1.0, 2, false);
+            }))?;
+            params.add(Params::WavePhase, "Wave Phase", ae::FloatSliderDef::setup(|f| {
+                // Stored values already use degrees; do not rescale old keyframes.
+                setup_float(f, (-360.0, 360.0), (-180.0, 180.0), 0.0, 2, false);
+            }))?;
+            params.add(Params::WaveSpeed, "Wave Speed", ae::FloatSliderDef::setup(|f| {
+                setup_float(f, (-10.0, 10.0), (-2.0, 2.0), 0.0, 2, false);
+            }))?;
+            params.add(Params::WaveAxis, "Wave Axis", ae::PopupDef::setup(|f| {
+                f.set_options(&["Both", "Columns Only", "Rows Only"]);
+                f.set_default(1);
+                f.set_value(f.default());
+            }))?;
+            Ok(())
+        })?;
 
         params.add(Params::EdgeMode, "Edge Behavior", ae::PopupDef::setup(|f| {
             f.set_options(&["Clamp", "Wrap", "Mirror"]);
@@ -1060,6 +1072,11 @@ impl AdobePluginGlobal for Plugin {
                     if changed {
                         out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                     }
+                }
+                if params.index(Params::ResetGridPositions) == Some(param_index)
+                    && reset_grid::apply(params)?
+                {
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
                 }
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)

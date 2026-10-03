@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 (function () {
     var MATCH_NAME = "com.elasticgrid.fx.warp";
     var config = typeof ELASTICGRID_ROUNDTRIP_CONFIG === "undefined" ? null : ELASTICGRID_ROUNDTRIP_CONFIG;
@@ -73,10 +86,10 @@
         stage = 42;
         var cols = fx.property("Columns");
         var rows = fx.property("Rows");
-        var elasticity = fx.property("Elasticity Strength");
+        var elasticity = (fx.property("Follow Strength") || fx.property("Elasticity Strength"));
         var waveEnabled = fx.property("Wave Animation");
-        var waveAmplitude = fx.property("Wave Amplitude");
-        var waveSpeed = fx.property("Wave Speed");
+        var waveAmplitude = egfxWaveParam(fx, "Wave Amplitude");
+        var waveSpeed = egfxWaveParam(fx, "Wave Speed");
         var edge = fx.property("Edge Behavior");
         var quality = fx.property("Render Quality");
         if (cols === null || rows === null || elasticity === null || waveEnabled === null || waveAmplitude === null || waveSpeed === null || edge === null || quality === null) {
@@ -137,9 +150,9 @@
         stage = 46;
         var rc = reopenedFx.property("Columns");
         var rr = reopenedFx.property("Rows");
-        var re = reopenedFx.property("Elasticity Strength");
-        var rwa = reopenedFx.property("Wave Amplitude");
-        var rws = reopenedFx.property("Wave Speed");
+        var re = (reopenedFx.property("Follow Strength") || reopenedFx.property("Elasticity Strength"));
+        var rwa = egfxWaveParam(reopenedFx, "Wave Amplitude");
+        var rws = egfxWaveParam(reopenedFx, "Wave Speed");
         var redge = reopenedFx.property("Edge Behavior");
         var rq = reopenedFx.property("Render Quality");
         if (rc === null || rr === null || re === null || rwa === null || rws === null || redge === null || rq === null) {

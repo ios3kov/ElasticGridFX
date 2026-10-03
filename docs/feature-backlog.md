@@ -174,9 +174,9 @@ macOS arm64 / Windows x64 until verified otherwise.
 |---|---|---|---|
 | U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
 | U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Implemented; 15 Python + 13 JSX mock cases PASS; Windows AE NOT RUN |
-| U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Pending |
-| U3 | Simple English labels and collapsed Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Pending |
-| U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Pending |
+| U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Implemented; core PASS; AE exact-time/Undo NOT RUN |
+| U3 | Simple English labels and collapsed Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Approved two labels and collapse implemented; remaining labels/AE inspection pending |
+| U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac/Windows AE checks NOT RUN |
 | U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Design dependency open |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Design dependency open |
 | U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Feasibility open |

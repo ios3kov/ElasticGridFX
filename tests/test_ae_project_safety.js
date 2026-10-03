@@ -106,3 +106,20 @@ for (const options of [{}, { closeFails: true }]) {
   assert.equal(app.exitCode, 41);
 }
 console.log('PASS: 13 roundtrip ownership/refusal/cleanup cases (mock control flow; not AE verification)');
+
+// Execute the fixture's real compatibility lookup against flat and grouped AE models.
+const lookupSource = source.slice(0, source.indexOf('(function ()'));
+const lookupContext = {};
+vm.runInNewContext(lookupSource, lookupContext);
+const value = { name: 'Wave Amplitude', numKeys: 2 };
+function group(children) {
+  return { numProperties: children.length, property(key) {
+    return typeof key === 'number' ? children[key - 1] : children.find(c => c.name === key) || null;
+  } };
+}
+for (const model of [group([value]), group([{ ...group([value]), name: 'Wave Animation' }])]) {
+  assert.equal(lookupContext.egfxWaveParam(model, 'Wave Amplitude'), value);
+  assert.equal(lookupContext.egfxWaveParam(model, 'Wave Speed'), null);
+  assert.equal(value.numKeys, 2);
+}
+console.log('PASS: flat/grouped Wave parameter lookup preserves the original parameter object');

@@ -1,3 +1,16 @@
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) {
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxWaveParam(child, name);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Ordinary GUI preview setup/readback only; completion is observed through UI.
 function egfxPreviewFixture(config) {
     app.exitCode=95;
@@ -18,8 +31,8 @@ function egfxPreviewFixture(config) {
     if(!l.source||!l.source.file||l.source.file.fsName!==(new File(config.pattern)).fsName||parade.numProperties!==1)throw Error('Owned source differs');
     var e=parade.property(1);if(e.matchName!=='com.elasticgrid.fx.warp')throw Error('Effect differs');
     var names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
-    for(var h=0;h<5;h++){var stream=e.property(24+h);if(!stream||stream.name!==names[h]||!stream.expressionEnabled||stream.expressionError!=='')throw Error('Binding unready');}
-    if(e.property(28).value!==1||p.bitsPerChannel!==32||(p.workingSpace!==''&&p.workingSpace!=='None')||p.linearizeWorkingSpace!==false||e.property('Render Quality').value!==2||e.property('Deformation Plane').value!==2)throw Error('Pinned quality differs');
+    for(var h=0;h<5;h++){var stream=e.property(names[h]);if(!stream||stream.name!==names[h]||!stream.expressionEnabled||stream.expressionError!=='')throw Error('Binding unready');}
+    if(e.property('__FSTR Plane Kind').value!==1||p.bitsPerChannel!==32||(p.workingSpace!==''&&p.workingSpace!=='None')||p.linearizeWorkingSpace!==false||e.property('Render Quality').value!==2||e.property('Deformation Plane').value!==2)throw Error('Pinned quality differs');
     if(config.action!=='open'&&config.action!=='read'&&config.action!=='invalidate'&&config.action!=='cleanup')throw Error('Unsupported action');
     var v=c.openInViewer();if(!v||v.type!==ViewerType.VIEWER_COMPOSITION)throw Error('Composition viewer required');
     var options=v.views[v.activeViewIndex].options;
@@ -34,13 +47,13 @@ function egfxPreviewFixture(config) {
     if(config.action==='invalidate'){
         if(typeof config.phase!=='number'||!isFinite(config.phase)||config.phase<120||config.phase>350||c.resolutionFactor[0]!==1||c.resolutionFactor[1]!==1||options.fastPreview!==FastPreviewType.FP_OFF)throw Error('Invalidation contract');
         invalidationStart=(new Date()).getTime();
-        e.property('Wave Phase').setValue(config.phase);
-        if(Math.abs(e.property('Wave Phase').value-config.phase)>0.00001)throw Error('Phase not applied');
+        egfxWaveParam(e, 'Wave Phase').setValue(config.phase);
+        if(Math.abs(egfxWaveParam(e, 'Wave Phase').value-config.phase)>0.00001)throw Error('Phase not applied');
         c.time=0;
         invalidationEnd=(new Date()).getTime();
     }
     var ready=options.fastPreview===FastPreviewType.FP_OFF&&c.resolutionFactor[0]===1&&c.resolutionFactor[1]===1;
-    var body='{"run_id":"'+config.run_id+'","action":"'+config.action+'","binding_ready":true,"full_final":'+ready+',"previous_fast":"'+previousFast+'","bit_depth":'+p.bitsPerChannel+',"width":'+c.width+',"height":'+c.height+',"fps":'+c.frameRate+',"duration":'+c.duration+',"work_area_start":'+c.workAreaStart+',"work_area_duration":'+c.workAreaDuration+',"phase":'+e.property('Wave Phase').value+',"columns":'+e.property('Columns').value+',"rows":'+e.property('Rows').value+',"wave_speed":'+e.property('Wave Speed').value+',"memory_in_use":'+app.memoryInUse+',"scope":"setup/readback only; UI proves preview completion"}';
+    var body='{"run_id":"'+config.run_id+'","action":"'+config.action+'","binding_ready":true,"full_final":'+ready+',"previous_fast":"'+previousFast+'","bit_depth":'+p.bitsPerChannel+',"width":'+c.width+',"height":'+c.height+',"fps":'+c.frameRate+',"duration":'+c.duration+',"work_area_start":'+c.workAreaStart+',"work_area_duration":'+c.workAreaDuration+',"phase":'+egfxWaveParam(e, 'Wave Phase').value+',"columns":'+e.property('Columns').value+',"rows":'+e.property('Rows').value+',"wave_speed":'+egfxWaveParam(e, 'Wave Speed').value+',"memory_in_use":'+app.memoryInUse+',"scope":"setup/readback only; UI proves preview completion"}';
     // Wall-clock bounds bracket the parameter operation, not rendering/display.
     body=body.substr(0,body.length-1)+',"invalidation_start_utc_ms":'+invalidationStart+',"invalidation_end_utc_ms":'+invalidationEnd+'}';
     if(config.action==='cleanup'){

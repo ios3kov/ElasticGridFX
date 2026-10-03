@@ -92,7 +92,21 @@ def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
         if (comp===null || comp.numLayers<1) throw Error("owned comp unavailable");
         var layer=comp.layer(1), fx=layer.property("ADBE Effect Parade").property("com.elasticgrid.fx.warp");
         if (fx===null || fx.matchName!=="com.elasticgrid.fx.warp") throw Error("effect unavailable");
-        var amp=fx.property("Wave Amplitude");
+        // Resolve both legacy flat controls and controls inside native UI groups.
+        function egfxWaveParam(root, name) {
+            var direct = root.property(name);
+            if (direct !== null) return direct;
+            for (var i = 1; i <= root.numProperties; i++) {
+                var child = root.property(i);
+                if (child !== null && child.numProperties > 0) {
+                    var found = egfxWaveParam(child, name);
+                    if (found !== null) return found;
+                }
+            }
+            return null;
+        }
+
+        var amp=egfxWaveParam(fx, "Wave Amplitude");
         if (amp===null) throw Error("wave amplitude unavailable");
         amp.setValue(10.0);
         result.stage="render";

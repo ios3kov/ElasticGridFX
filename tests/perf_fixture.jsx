@@ -90,7 +90,7 @@ function elasticGridPerfFixture(config) {
             if(hidden===null || hidden.name!==hiddenNames[hi] || !hidden.expressionEnabled || hidden.expressionError!=="")
                 throw new Error("Deferred plane binding is not ready");
         }
-        if(fx.property(28).value!==1)throw new Error("Expected ready 2D footage plane");
+        if(fx.property('__FSTR Plane Kind').value!==1)throw new Error("Expected ready 2D footage plane");
 
         result.ae_version=app.version;
         app.beginSuppressDialogs(); suppressing=true;
