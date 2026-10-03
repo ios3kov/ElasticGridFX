@@ -155,6 +155,43 @@ native window location cannot meet pan/zoom/playback/multiple-view acceptance.
 
 This additional static assessment excludes these APIs as an established additive
 route for the agreed target; no new runtime feasibility result is claimed.
-A product scope question is pending: retain Show Grid in this update and continue
-research, or defer it. The requirement remains in force until a human decision;
-no checkbox, renderer swap or OS-specific overlay is shipped as a substitute.
+The user explicitly chose on2026-10-04 to retain Show Grid in this update and
+continue research. PV-1–PV-5 remain required; no deferral is pending. No checkbox,
+renderer swap or OS-specific overlay is shipped as a substitute.
+
+
+## Retained scope and new route evidence — 2026-10-04
+
+[Hash-bound research record](show-grid-research-2026-10-04.json) distinguishes a
+new native read-only query from reanalysis of the historical Dev3 callback log.
+The guarded Dev16 fixture returned one Composition view zoom1.26049881944922
+through `app.activeViewer.views[0].options.zoom`. This proves that query in the
+owned Mac fixture only. The documented View/Viewer/ViewOptions inventory does
+not establish image bounds or pan offset; a cached/guessed transform remains
+insufficient. Current Cua AX observation exposes window/menu only. No OS helper,
+new permission, UI selection or preference change was used for this query.
+
+Between the historical deselect and select script timestamps, the final bounded
+log has9 records:7 Layer DRAW, one Comp NEW_CONTEXT and one Comp ACTIVATE;
+zero Comp DRAW and zero Comp IDLE. The interval includes transitions. This is
+a scoped negative observation, not proof for every AE session. It supplies no
+Comp idle context for a safe redraw experiment. SDK25.6 AppSuite's
+PF_InvalidateRect requires a current effect context during a **non-draw** event.
+Calling it with a retained context or treating a Layer DRAW as a Comp context
+would violate that contract. No such experiment was built.
+
+Async Manager is also not a new drawing registration: exact SDK25.6
+AE_GeneralPlug.h5449 describes its PF_Event_DRAW-specific manager, acquired from
+the effect custom UI context. It manages frame requests for an existing UI draw.
+
+Next research gate: establish both an additive drawing registration and a
+current image-to-screen transform after deselection/during playback, before
+production implementation. A stopped selected grid or zoom query alone cannot
+pass this gate. Require pan/zoom, multi-view, lifecycle and export/cache exclusion
+proof on Mac and Windows. Show Grid remains required and unimplemented.
+
+Sources: [Redrawing and Drawbot](https://ae-plugins.docsforadobe.dev/effect-ui-events/custom-ui-and-drawbot/),
+[ViewOptions](https://ae-scripting.docsforadobe.dev/other/viewoptions/),
+[View](https://ae-scripting.docsforadobe.dev/other/view/),
+[Viewer](https://ae-scripting.docsforadobe.dev/other/viewer/); exact target headers
+and native outputs are hashed in the research record.

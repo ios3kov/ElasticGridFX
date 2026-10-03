@@ -135,3 +135,5 @@ These records support traceability; start with STATUS.md for current decisions.
 - [verification-v0.8.txt](verification-v0.8.txt)
 - [verification-v1.0.txt](verification-v1.0.txt)
 - [verification.txt](verification.txt)
+
+- [Show Grid retained scope and route evidence, 2026-10-04](show-grid-research-2026-10-04.json) — scoped native zoom query and historical callback reanalysis; feature still OPEN.

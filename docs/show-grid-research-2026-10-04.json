@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "status": "FEASIBILITY_OPEN",
+  "decision": "User explicitly retained Show Grid in 0.9.4 and requested continued research. No deferral or requirement relaxation.",
+  "production_changes": false,
+  "installed_candidate": {
+    "source_commit": "779db86",
+    "version": "0.9.4 Dev16",
+    "build_id": "EGFX-5e91589da403d19125f68235"
+  },
+  "read_only_zoom_probe": {
+    "result": "PASS_SCOPED_QUERY",
+    "zoom": 1.26049881944922,
+    "scope": "One guarded owned Composition view, ordinary Dev16. Reading zoom does not establish a drawing surface, pan offset, image rectangle, playback synchronization or multi-view support.",
+    "files": {
+      "outputs/update-094-viewer-api/read.jsx": "0c1cd644b72a648c259f63fb2c2090d53944ce88023143c2f2803fb0c2f85bea",
+      "outputs/update-094-viewer-api/read.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+      "outputs/update-094-viewer-api/viewer.json": "c446ad6aa7acb5fdb4c117fd7c927e4893e5f64d9fae3a0b3b275b817c1c56d0"
+    }
+  },
+  "historical_callback_reanalysis": {
+    "source_commit": "35a9f3c",
+    "build_id": "EGFX-7962a70953672d95f7328d1a",
+    "new_runtime_test": false,
+    "interval_utc_ms": [
+      1791043706067,
+      1791043759581
+    ],
+    "interval_semantics": "Deselect script timestamp inclusive until select script timestamp exclusive; includes transitions, not a stationary-only proof.",
+    "records": 9,
+    "counts": [
+      {
+        "event": 0,
+        "window": 0,
+        "count": 1
+      },
+      {
+        "event": 1,
+        "window": 0,
+        "count": 1
+      },
+      {
+        "event": 4,
+        "window": 1,
+        "count": 7
+      }
+    ],
+    "comp_idle_events": 0,
+    "comp_draw_events": 0,
+    "layer_draw_events": 7,
+    "conclusion": "No idle Comp callback in this recorded deselected interval from which to call PF_InvalidateRect with a current borrowed context. Layer DRAW cannot supply the missing Comp context; invalidation is valid only during non-draw effect events. No redraw probe built; no retained context or out-of-callback drawing.",
+    "files": {
+      "outputs/update-094-preview-probe-mac/events-final.csv": "cb511bd1e856bbff354fe7515f8739058c1290d7af9cb3a863b4a170370c6807",
+      "outputs/update-094-preview-probe-mac/deselected-state.json": "316fd165d2e49800b0732f50791ee4ed99927edaca4fccd3346ef817d38f646a",
+      "outputs/update-094-preview-probe-mac/selected-state.json": "0a3d28834bae12ff86a512bcbef6b7dd1c73484a6e65d66f4db4ab375066a88a"
+    }
+  },
+  "sdk_headers": {
+    "AE_EffectUI.h": "ffec9e25ac13a278f3ef0889bb33968fb338f41942ad16d13b3b53f03a235075",
+    "AE_EffectSuites.h": "718fc38aa700dc0af0372f6a54cbfcfe3cfec770bfa7463f2e24dd73b204cdba",
+    "AE_GeneralPlug.h": "30d12ec3eb5af1a902c7414053b1be1da0204b226e0b1cdc71272be1e137000c"
+  },
+  "static_findings": {
+    "async_manager": "AE_GeneralPlug.h5449: acquired via PF_GetContextAsyncManager; PF_Event_DRAW specific, not an independent overlay registration.",
+    "native_window": "PF platform MAIN_WND Windows only; artisan window functions need renderer/query context.",
+    "scripting": "Documented zoom query is available; inspected View/Viewer/ViewOptions API does not document pan origin or image viewport bounds.",
+    "accessibility": "Current Cua AX observation exposes application window/menu only, no composition canvas node; no new OS permissions or alternative UI reader used."
+  },
+  "next_gate": "Find a supported additive drawing registration and a current per-view image-to-screen transform that survives deselection and playback. Before production implementation prove a bounded isolated prototype with pan/zoom/multiple-view and export/cache exclusion on both platforms.",
+  "not_claimed": [
+    "Show Grid implemented",
+    "universal API impossibility",
+    "Windows runtime PASS",
+    "whole update ready"
+  ]
+}

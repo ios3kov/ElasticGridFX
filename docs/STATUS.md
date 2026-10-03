@@ -20,6 +20,10 @@ pixels/keys PASS in owned319x241/8-bpc Final Mac AE25.6 scope. Existing animated
 Radius stream/keys remain. Real scalar mouse scrubbing is USER-REPORTED PASS: the user confirmed both
 picture and blue boundaries change during mouse movement. U7 Show Grid and Windows build/runtime
 remain open. [Exact Dev16 record](first-default-mac-dev16-2026-10-04.json).
+The user explicitly retains Show Grid in this update (2026-10-04). A guarded
+native zoom query PASS supplies only zoom; historical deselected-log analysis
+found no Comp idle context for a safe invalidate request. Additive drawing and
+current pan/view geometry remain unresolved. [Research record](show-grid-research-2026-10-04.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was
