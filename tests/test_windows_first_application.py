@@ -1,5 +1,7 @@
 """Portable preparation checks for Windows first-application validation."""
 from pathlib import Path
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -24,6 +26,11 @@ class WindowsFirstApplicationTests(unittest.TestCase):
             self.assertTrue(follow.is_file())
             text=first.read_text(encoding='utf-8')
             self.assertIn(str(evidence).replace('\\','\\\\'),text)
+            node=shutil.which('node')
+            if node:
+                for script in (first,follow):
+                    checked=subprocess.run([node,'--check',str(script)],capture_output=True,text=True)
+                    self.assertEqual(checked.returncode,0,checked.stderr)
 
     def test_single_png_rejects_ambiguity(self):
         with tempfile.TemporaryDirectory(prefix='egfx-first-png-') as tmp:
