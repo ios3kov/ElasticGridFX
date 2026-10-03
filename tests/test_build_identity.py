@@ -199,6 +199,18 @@ class IdentityTests(unittest.TestCase):
         self.assertIn('cargo:rerun-if-env-changed=RUSTFLAGS', stdout.getvalue())
         self.assertIn(str(self.root / 'src/example.cpp'), stdout.getvalue())
 
+    def test_adobe_sdk_override_participates_in_settings_identity(self):
+        record=bi.source_record(self.root)
+        with patch.dict(os.environ,{'AESDK_ROOT':'C:/Adobe/AE-SDK'},clear=True):
+            settings=bi.build_settings()
+        self.assertEqual(settings['AESDK_ROOT'],'C:/Adobe/AE-SDK')
+        with patch.dict(os.environ,{},clear=True):
+            default=bi.build_settings()
+        self.assertEqual(default['AESDK_ROOT'],'')
+        self.assertNotEqual(
+            bi.identity(record,'x86_64-pc-windows-msvc','release',{'rustc':'r','cxx':'c'},settings)['build_id'],
+            bi.identity(record,'x86_64-pc-windows-msvc','release',{'rustc':'r','cxx':'c'},default)['build_id'])
+
     def test_same_source_diagnostic_feature_has_distinct_identity(self):
         record=bi.source_record(self.root)
         def tag(env):
