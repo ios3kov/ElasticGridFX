@@ -24,9 +24,10 @@ The Windows artifact builds with:
 - MSVC x64 and the exact toolchain recorded in each Build Identity.
 
 The external Adobe SDK is therefore **not** a compile-time dependency of the
-current normal Windows build. Supplying `AESDK_ROOT` would select regenerated
-bindings and would be a different build configuration requiring separate
-evidence.
+current normal Windows build. Supplying `AESDK_ROOT` selects regenerated
+bindings and is a different build configuration requiring separate evidence.
+`AESDK_ROOT` participates in the Build Identity settings hash so that override
+cannot silently reuse the normal built-in-bindings Build ID.
 
 ## API/version findings
 
@@ -64,7 +65,10 @@ evidence.
 - Metal/AppKit/Objective-C++ sources remain macOS-only.
 - Windows cursor handling uses AE built-in Hand/Pan cursors.
 - Windows lifecycle main-thread identity is captured at `GlobalSetup` before
-  AEGP registration/idle work; runtime ordering is still NOT RUN in AE.
+  AEGP registration/idle work. Adobe documents `PF_Cmd_GLOBAL_SETUP` and
+  `PF_Cmd_GLOBAL_SETDOWN` as main-thread-only, while sequence/render selectors
+  may be concurrent under MFR. AEGP calls remain main-thread/idle-only; only
+  `AEGP_CauseIdleRoutinesToBeCalled()` is documented thread-safe.
 - The published `pipl 0.1.1` Windows resource emitter corrupts bytes >= 0x80
   when Custom UI is present. The branch keeps the existing dependency for macOS
   and applies a local Windows-only compatibility shim equivalent to upstream
@@ -81,6 +85,7 @@ For each candidate it records:
 - release cdylib build;
 - x64 PE header;
 - `EffectMain` export;
+- PE imported-symbol and dependent-DLL inventories;
 - PiPL resource presence and byte-exact comparison;
 - Build ID, commit and artifact SHA-256.
 
@@ -105,6 +110,10 @@ Checked 2026-10-03:
   https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/
 - Adobe After Effects C++ SDK Guide, Version History:
   https://ae-plugins.docsforadobe.dev/history/
+- Adobe After Effects C++ SDK Guide, Multi-Frame Rendering:
+  https://ae-plugins.docsforadobe.dev/effect-details/multi-frame-rendering-in-ae/
+- Adobe After Effects C++ SDK Guide, AEGP implementation/threading:
+  https://ae-plugins.docsforadobe.dev/aegps/implementation/
 - Adobe After Effects C++ SDK Guide, offline/print history:
   https://ae-plugins.docsforadobe.dev/print_page/
 - Pinned Rust AE wrapper/examples:
