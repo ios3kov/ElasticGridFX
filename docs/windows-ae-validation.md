@@ -49,3 +49,31 @@ separate validation:
 Windows compile, PE/export and PiPL checks are build/static evidence. They do not
 become After Effects runtime evidence until this runner (and the remaining manual
 checks) are executed against the exact candidate.
+
+
+## Cold-start first application
+
+This is a separate test because the ordinary smoke no longer proves the first
+effect instance after host startup.
+
+Start a fresh After Effects process with an empty unsaved project, then run
+exactly one case:
+
+```powershell
+python tools/windows_first_application.py `
+  --candidate "dist\windows\FSTR Stretch.aex" `
+  --manifest "dist\windows\FSTR Stretch.windows-artifact.json" `
+  --installed-aex "C:\path\to\the\installed\FSTR Stretch.aex" `
+  --afterfx "C:\Program Files\Adobe\Adobe After Effects 2025\Support Files\AfterFX.exe" `
+  --depth 32 `
+  --kind solid
+```
+
+The runner checks the exact loaded module identity, compares the immediate first
+neutral frame to bypass, then uses a second command turn to allow ordinary host
+idle processing and requires a visibly deformed follow-up frame.
+
+For complete first-application coverage, repeat from a fresh AE launch for the
+required matrix of 8/16/32 bpc, solid/text/Checkerboard-precomp and applicable
+2D/3D cases. A completed automated case is LIMITED until transient-dialog
+observation and the remaining interactive/MFR checks are also recorded.
