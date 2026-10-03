@@ -7,6 +7,7 @@ use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 pub(crate) struct Probe {
     id: Option<ae::aegp::PluginId>,
     records: Vec<String>,
+    #[cfg(target_os = "macos")]
     journal_entries: u8,
     pending: Arc<AtomicBool>,
     wake:Option<IdleWake>,
@@ -145,8 +146,9 @@ impl Deferred {
     }
 }
 
-fn journal(index: &str, record: &str) {
+fn journal(_index: &str, _record: &str) {
     #[cfg(target_os = "macos")] {
+        let (index, record) = (_index, _record);
         use std::io::Write;
         use std::os::unix::fs::OpenOptionsExt;
         let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{index}.txt", std::process::id()));
