@@ -40,7 +40,7 @@ fn button(frame: ae::Rect) -> Option<RectF32> {
     // topic in AE 25.6 and must never be used as a coordinate.
     let width = (frame.right - frame.left) as f32;
     let left = frame.left as f32 + width * 0.5 + 16.0;
-    let available = frame.right as f32 - left - 6.0;
+    let available = frame.right as f32 - left - 5.0;
     let height = (frame.bottom - frame.top) as f32;
     // A narrow ECW still has a usable native value column. Size to that
     // column; a fixed row-width cutoff incorrectly hid Reset on resize.
@@ -162,7 +162,7 @@ mod tests {
             let rect = button(frame).expect("usable value column must retain Reset");
             assert_eq!(rect.left, 17.0 + width as f32 * 0.5 + 16.0);
             assert!(rect.width >= 60.0 && rect.width <= 130.0);
-            assert!(rect.left + rect.width <= frame.right as f32 - 6.0);
+            assert!(rect.left + rect.width <= frame.right as f32 - 5.0);
             assert_eq!(rect.height, 16.0);
             let restored = restore(capture(rect)).unwrap();
             assert!(contains(restored, ae::Point { h: (rect.left + rect.width * 0.5) as _,

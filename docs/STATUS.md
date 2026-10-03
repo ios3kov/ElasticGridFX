@@ -393,3 +393,13 @@ button width60, maximum130, height16, theme/pill and hit geometry. Regression
 covers220/240/260/299/300/400/648 rows and retained continuation bounds. Native
 resize verification for these new bytes is pending; shared Rust suite69 PASS; do not transfer fb9ae4f
 functional PASS or previous wide-panel appearance to the changed candidate.
+
+
+ac45b60 / EGFX-3aa42f290e3876afb6ca4992 installed, bundle and loaded identity
+PASS;69 Rust tests and strict Clippy PASS. Cua panel-boundary drag refuses with
+AXError.notImplemented. A native Window > Workspace > Small Screen switch
+provides an independent resize check without extending CGEvent permissions:
+Reset remains visible below the removed300-unit cutoff. Narrow comparison
+finds one logical unit less width than Fit Layer (two Retina pixels); right
+gutter corrected from6 to5, retaining maximum130. New candidate/check pending.
+No extra saved workspace or project was created; restore Default after checking.
