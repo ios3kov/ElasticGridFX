@@ -19,7 +19,7 @@ def require(pattern: str, path: Path, label: str) -> None:
 
 
 def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
-             resources: Path, expected_pipl: Path) -> dict:
+             resources: Path, expected_pipl: Path, env: dict[str, str] | None = None) -> dict:
     manifest=json.loads(manifest_path.read_text(encoding='utf-8-sig'))
     if manifest.get('schema')!=1 or manifest.get('artifact')!='FSTR Stretch.aex':
         raise ValueError('invalid Windows artifact manifest')
@@ -35,6 +35,16 @@ def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
     if pipl_verify.embedded_pipl(aex)!=expected_pipl.read_bytes():
         raise ValueError('embedded PiPL differs from generated PiPL bytes')
 
+    env=os.environ if env is None else env
+    if env.get('GITHUB_ACTIONS')!='true':
+        raise ValueError('build validation record may only be finalized in GitHub Actions')
+    if env.get('GITHUB_SHA')!=build['commit']:
+        raise ValueError('GitHub Actions SHA does not match Build Identity commit')
+    if not re.fullmatch(r'[1-9][0-9]*',env.get('GITHUB_RUN_ID','')):
+        raise ValueError('invalid GitHub Actions run id')
+    if not re.fullmatch(r'[1-9][0-9]*',env.get('GITHUB_RUN_ATTEMPT','')):
+        raise ValueError('invalid GitHub Actions run attempt')
+
     return {
         'schema':1,
         'artifact':aex.name,
@@ -44,9 +54,9 @@ def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
         'target':build['target'],
         'toolchain':build['toolchain'],
         'ci':{
-            'run_id':os.environ.get('GITHUB_RUN_ID'),
-            'run_attempt':os.environ.get('GITHUB_RUN_ATTEMPT'),
-            'sha':os.environ.get('GITHUB_SHA'),
+            'run_id':env['GITHUB_RUN_ID'],
+            'run_attempt':env['GITHUB_RUN_ATTEMPT'],
+            'sha':env['GITHUB_SHA'],
         },
         'checks':{
             'portable_core_tests':'PASS',
