@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const source = fs.readFileSync(path.join(__dirname, 'ae_project_roundtrip.jsx'), 'utf8');
 
 function run(project, options = {}) {
-  const calls = { close: 0, newProject: 0, remove: 0, create: 0, restoreDialogs: 0, paths: [] };
+  const calls = { close: 0, newProject: 0, remove: 0, create: 0, restoreDialogs: 0, paths: [], completions: [] };
   const app = {
     project,
     beginSuppressDialogs() {},
@@ -28,6 +28,11 @@ function run(project, options = {}) {
   }
   function File(name) {
     this.fsName = String(name);
+    this.name = path.basename(this.fsName);
+    this.open = () => true;
+    this.write = value => { calls.completions.push(JSON.parse(value)); return true; };
+    this.close = () => true;
+    this.rename = () => true;
     this.exists = Boolean(options.preexistingPayload);
     this.length = 10;
     this.remove = () => { calls.remove++; return true; };
@@ -39,7 +44,7 @@ function run(project, options = {}) {
     this.create = () => { calls.create++; this.exists = true; return true; };
   }
   Folder.temp = { fsName: '/mock-temp' };
-  vm.runInNewContext(source, { app, File, Folder, CloseOptions: { DO_NOT_SAVE_CHANGES: 0 } }, { timeout: 1000 });
+  vm.runInNewContext(source, { app, File, Folder, ELASTICGRID_ROUNDTRIP_CONFIG: options.config, CloseOptions: { DO_NOT_SAVE_CHANGES: 0 } }, { timeout: 1000 });
   return { calls, app };
 }
 const guardedCases = [
@@ -91,4 +96,13 @@ for (const options of [{ workspaceExists: true }, { preexistingPayload: true }])
   assert.equal(calls.close + calls.newProject + calls.remove, 0, 'context change must not touch foreign project');
   assert.equal(foreign.bitsPerChannel, 8);
 }
-console.log('PASS: 11 roundtrip ownership/refusal/cleanup cases (mock control flow; not AE verification)');
+for (const options of [{}, { closeFails: true }]) {
+  const config = { run_id: 'a'.repeat(32), build_id: 'EGFX-' + 'b'.repeat(24),
+    folder: '/mock-temp/owned/evidence', result_file: '/mock-temp/owned/completion.json' };
+  const { calls, app } = run(empty(), { ...options, config });
+  assert.equal(calls.completions.length, 1);
+  assert.deepEqual(calls.completions[0], { schema: 1, run_id: config.run_id,
+    build_id: config.build_id, status: 'FAIL', exit_code: app.exitCode });
+  assert.equal(app.exitCode, 41);
+}
+console.log('PASS: 13 roundtrip ownership/refusal/cleanup cases (mock control flow; not AE verification)');

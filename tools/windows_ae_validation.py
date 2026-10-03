@@ -21,7 +21,7 @@ import time
 import uuid
 
 import build_identity as bi
-from smoke_pixels import FRAMES, pattern, validate_frames
+from smoke_pixels import FRAMES, pattern, read_png, validate_frames
 
 ROOT = Path(__file__).resolve().parents[1]
 MATCH_NAME = b"com.elasticgrid.fx.warp"
@@ -251,23 +251,37 @@ def inspect_capture(folder: Path, run_id: str) -> dict:
     return result
 
 
-def run_roundtrip(afterfx: Path) -> dict:
-    temp = Path(tempfile.gettempdir())
-    before = {p.resolve() for p in temp.glob("ElasticGridFX-roundtrip-*") if p.is_dir()}
-    script = ROOT / "tests/ae_project_roundtrip.jsx"
-    process = subprocess.run([str(afterfx), "-r", str(script)], capture_output=True, text=True, timeout=150)
-    if process.returncode != 0:
-        raise ValueError("roundtrip script returned nonzero status")
-    candidates = [p.resolve() for p in temp.glob("ElasticGridFX-roundtrip-*") if p.is_dir() and p.resolve() not in before]
-    if len(candidates) != 1:
-        raise ValueError(f"roundtrip did not produce one new evidence folder: {len(candidates)}")
-    folder = candidates[0]
+def run_roundtrip(afterfx: Path, build: dict) -> dict:
+    # Own the per-run parent before dispatch; never guess the new folder by glob.
+    root = Path(tempfile.mkdtemp(prefix="ElasticGridFX-roundtrip-run-"))
+    run_id = uuid.uuid4().hex
+    config = dict(run_id=run_id, build_id=build["build_id"],
+                  folder=str(root / "evidence"), result_file=str(root / "completion.json"))
+    script = root / "roundtrip.jsx"
+    fixture = (ROOT / "tests/ae_project_roundtrip.jsx").read_text(encoding="utf-8")
+    script.write_text("var ELASTICGRID_ROUNDTRIP_CONFIG = " + json.dumps(config) + ";\n" + fixture,
+                      encoding="utf-8")
+    transport = run_jsx(afterfx, script, Path(config["result_file"]))
+    if transport["returncode"] != 0:
+        raise ValueError("roundtrip transport returned nonzero status")
+    record = json.loads(Path(config["result_file"]).read_text(encoding="utf-8-sig"))
+    if (record.get("schema") != 1 or record.get("run_id") != run_id or
+            record.get("build_id") != build["build_id"] or
+            record.get("status") != "PASS" or record.get("exit_code") != 0):
+        raise ValueError("roundtrip completion failed or belongs to a different run")
+    folder = Path(config["folder"])
     project = folder / "project.aep"
     frame = folder / "frame.png"
-    if not project.is_file() or project.stat().st_size <= 0 or not frame.is_file() or frame.stat().st_size <= 0:
+    if (project.is_symlink() or frame.is_symlink() or not project.is_file() or
+            project.stat().st_size <= 0):
         raise ValueError("roundtrip evidence is incomplete")
-    return dict(status="PASS", folder=str(folder), project_sha256=sha256_file(project),
-                frame_sha256=sha256_file(frame), transport_returncode=process.returncode)
+    image = read_png(frame)
+    if (image.width, image.height) != (480, 270):
+        raise ValueError("roundtrip frame dimensions do not match fixture")
+    return dict(status="PASS", scope="fixture state assertions and decoded frame; not full project migration",
+                run_id=run_id, folder=str(folder), completion=record,
+                project_sha256=sha256_file(project), frame_sha256=sha256_file(frame),
+                completion_sha256=sha256_file(Path(config["result_file"])), transport=transport)
 
 
 def execute(args) -> dict:
@@ -292,9 +306,10 @@ def execute(args) -> dict:
     if result["checks"]["pixels"].get("status") == "FAIL":
         raise ValueError("pixel validation failed")
 
-    result["checks"]["roundtrip"] = run_roundtrip(args.afterfx)
+    result["checks"]["roundtrip"] = run_roundtrip(args.afterfx, manifest["build"])
     if running_selected_ae(args.afterfx) != pid:
         raise ValueError("After Effects process changed during roundtrip validation")
+    result["loaded_module_after_roundtrip"] = verify_loaded_effect(pid, args.installed_aex, manifest)
 
     result["status"] = "BLOCKED"
     result["remaining"] = [

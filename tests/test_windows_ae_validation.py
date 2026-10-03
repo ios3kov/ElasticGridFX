@@ -1,6 +1,8 @@
 """Portable checks for the Windows AE validation packet; no AE execution."""
 from pathlib import Path
 import json
+import re
+from unittest.mock import patch
 import sys
 import tempfile
 import unittest
@@ -54,6 +56,49 @@ class WindowsAEValidationTests(unittest.TestCase):
             self.assertTrue((folder/'pattern.png').is_file())
             for name in ('arm.jsx','disarm.jsx','run.jsx','run.json'):
                 self.assertTrue((folder/name).is_file())
+
+    def roundtrip_case(self, status="PASS", code=0, stale=False, corrupt=False):
+        with tempfile.TemporaryDirectory(prefix="egfx-roundtrip-unit-") as tmp:
+            parent = Path(tmp)
+            def reserve(**kwargs):
+                root = parent / "run"
+                root.mkdir()
+                return str(root)
+            def transport(afterfx, script, result):
+                config = json.loads(re.search(r"ELASTICGRID_ROUNDTRIP_CONFIG = (.+);", script.read_text()).group(1))
+                folder = Path(config["folder"])
+                folder.mkdir()
+                (folder / "project.aep").write_bytes(b"owned fixture; state assertions reported by mocked AE")
+                if corrupt:
+                    (folder / "frame.png").write_bytes(b"not a PNG")
+                else:
+                    w.pattern(folder / "frame.png", 480, 270)
+                result.write_text(json.dumps(dict(schema=1, run_id="wrong" if stale else config["run_id"],
+                    build_id=config["build_id"], status=status, exit_code=code)))
+                return dict(returncode=0, log="mock transport")
+            with patch.object(w.tempfile, "mkdtemp", side_effect=reserve), patch.object(w, "run_jsx", side_effect=transport):
+                return w.run_roundtrip(Path("AfterFX.exe"), self.build())
+
+    def test_roundtrip_requires_decodable_frame_and_matching_completion(self):
+        self.assertEqual(self.roundtrip_case()["status"], "PASS")
+        with self.assertRaises(ValueError):
+            self.roundtrip_case(corrupt=True)
+        with self.assertRaises(ValueError):
+            self.roundtrip_case(stale=True)
+
+    def test_roundtrip_never_accepts_script_or_cleanup_failure(self):
+        with self.assertRaises(ValueError):
+            self.roundtrip_case(status="FAIL", code=48)
+        with self.assertRaises(ValueError):
+            self.roundtrip_case(status="PASS", code=48)
+
+    def test_roundtrip_requires_completion_even_with_zero_transport_exit(self):
+        with tempfile.TemporaryDirectory(prefix="egfx-roundtrip-no-result-") as tmp:
+            root = Path(tmp) / "run"
+            root.mkdir()
+            with patch.object(w.tempfile, "mkdtemp", return_value=str(root)), patch.object(w, "run_jsx", side_effect=TimeoutError("missing completion")):
+                with self.assertRaises(TimeoutError):
+                    w.run_roundtrip(Path("AfterFX.exe"), self.build())
 
     def test_non_windows_runtime_gate_fails_closed(self):
         if sys.platform.startswith('win'):

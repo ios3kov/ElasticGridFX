@@ -173,7 +173,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | ID | Requirement / block | Acceptance / check phase | Current state |
 |---|---|---|---|
 | U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
-| U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Next implementation block |
+| U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Implemented; 15 Python + 13 JSX mock cases PASS; Windows AE NOT RUN |
 | U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Pending |
 | U3 | Simple English labels and collapsed Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Pending |
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Pending |
@@ -195,3 +195,8 @@ Each block updates this table and STATUS with actual checks and limitations.
 Native source changes require fresh builds/identity; runtime, performance,
 migration and installation checks are not inferred from old release/CI results.
 No significant block is complete merely because its code compiles.
+
+Platform scope confirmed by the user on 2026-10-03: this update targets both
+macOS Apple Silicon and Windows x64 together. Shared product behavior must match;
+platform builds, installation and host evidence are tracked separately. No
+macOS-only release substitutes for completion of the agreed two-platform scope.

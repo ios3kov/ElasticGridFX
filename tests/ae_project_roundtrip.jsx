@@ -1,5 +1,6 @@
 (function () {
     var MATCH_NAME = "com.elasticgrid.fx.warp";
+    var config = typeof ELASTICGRID_ROUNDTRIP_CONFIG === "undefined" ? null : ELASTICGRID_ROUNDTRIP_CONFIG;
     var tempFile = null;
     var pngFile = null;
     var ownedProject = null;
@@ -24,7 +25,7 @@
     }
     function prepareWorkspace() {
         var runId = new Date().getTime().toString(36) + "-" + Math.floor(Math.random() * 0x7fffffff).toString(36);
-        runFolder = new Folder(Folder.temp.fsName + "/ElasticGridFX-roundtrip-" + runId);
+        runFolder = new Folder(config === null ? Folder.temp.fsName + "/ElasticGridFX-roundtrip-" + runId : config.folder);
         // Never reuse or clean a previous run's path. Retain evidence on failure.
         if (runFolder.exists || !runFolder.create()) {
             throw new Error("Could not reserve a new test workspace.");
@@ -193,5 +194,26 @@
         // The unique AEP/PNG workspace is intentionally retained as evidence.
 
         try { app.endSuppressDialogs(false); } catch (_) {}
+        // Existing-host -r transport completion is not the script's result.
+        // Emit only after all state assertions and owned-project cleanup finish.
+        if (config !== null) {
+            var result = new File(config.result_file);
+            var pending = new File(config.result_file + ".pending");
+            try {
+                if (!/^[0-9a-f]{32}$/.test(config.run_id) ||
+                    !/^EGFX-[0-9a-f]{24}$/.test(config.build_id)) throw Error("invalid run identity");
+                if (result.exists || pending.exists) throw Error("result unavailable");
+                pending.encoding = "UTF-8";
+                if (!pending.open("w")) throw Error("result unavailable");
+                if (!pending.write('{"schema":1,"run_id":"' + config.run_id +
+                    '","build_id":"' + config.build_id + '","status":"' +
+                    (app.exitCode === 0 ? "PASS" : "FAIL") +
+                    '","exit_code":' + app.exitCode + '}')) throw Error("write failed");
+                if (!pending.close()) throw Error("close failed");
+                if (!pending.rename(result.name)) throw Error("completion publish failed");
+            } catch (_) {
+                if (app.exitCode === 0) app.exitCode = 49;
+            }
+        }
     }
 })();

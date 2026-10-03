@@ -110,3 +110,12 @@ Next block: repair Windows roundtrip completion evidence, then current-time rese
 and UI organization. Live influence, automatic spacing and persistent/playback
 overlay need design/feasibility evidence before their dependent implementation.
 No new plugin has been built, installed or accepted; Windows AE runtime is NOT RUN.
+
+### U1 — Windows evidence repair
+
+Implemented per-run nonce/Build ID completion after fixture assertions and cleanup,
+atomic result publication, decoded PNG validation and loaded-module recheck.
+Invalid/stale/missing completion and corrupt frames fail closed. Fifteen focused
+Python tests and thirteen actual-JSX mock control-flow cases PASS; these are not
+Windows AE runtime tests. Runtime remains NOT RUN. The validation guide now records
+the audited Visual C++ x64 runtime dependency. Next: U2/U3/U4 native UI block.

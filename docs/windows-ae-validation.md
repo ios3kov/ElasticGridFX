@@ -13,6 +13,10 @@ moves, replaces or deletes a plug-in.
 - In **Edit > Preferences > Scripting & Expressions**, enable
   **Allow Scripts To Write Files And Access Network**. Adobe requires this for
   scripts that write evidence files.
+- Install the Microsoft Visual C++ v14 Redistributable **x64**, at least as new
+  as the candidate build tools. The audited AEX imports MSVCP140, VCRUNTIME140
+  and VCRUNTIME140_1; a successful build does not establish that the test machine
+  has these DLLs. Use the [official Microsoft download and requirements](https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Close other After Effects instances.
 - The runners use Adobe's documented Windows transport:
   `afterfx.exe -r <full-path-to-script.jsx>`, which executes in the existing
@@ -39,7 +43,13 @@ The runner fails closed unless:
   the selected installed candidate;
 - arm/disarm ownership guards confirm a disposable empty project;
 - the render smoke produces and passes the existing pixel checks;
-- save/reopen preserves the tested project state and produces a frame.
+- save/reopen preserves the tested project state and produces a decoded 480×270 PNG;
+- the fixture publishes an atomic completion record after assertions and cleanup,
+  with the exact per-run nonce, candidate Build ID, PASS and exit code zero;
+- the loaded module still matches after roundtrip.
+
+Transport exit zero or existing AEP/PNG files alone cannot pass roundtrip.
+This covers the fixture state assertions, not arbitrary old-project migration.
 
 The runner retains its unique workspace and evidence. A successful automated run
 returns **BLOCKED**, not final PASS, because the following checks still require
