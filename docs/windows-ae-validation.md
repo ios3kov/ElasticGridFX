@@ -10,7 +10,13 @@ moves, replaces or deletes a plug-in.
 - Place that candidate in the chosen After Effects installation only by an
   explicit manual/test-machine action.
 - Start the exact After Effects build to test and leave one empty, unsaved project open.
+- In **Edit > Preferences > Scripting & Expressions**, enable
+  **Allow Scripts To Write Files And Access Network**. Adobe requires this for
+  scripts that write evidence files.
 - Close other After Effects instances.
+- The runners use Adobe's documented Windows transport:
+  `afterfx.exe -r <full-path-to-script.jsx>`, which executes in the existing
+  After Effects instance rather than launching a separate test host.
 
 ## Automated validation
 
