@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "scope": "owned Mac AE fixture only; scripted radius edits are not mouse scrubbing proof",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-e9e024a3b24f5ebdd238b474",
+    "commit": "76015ca8eb2f2affb15b62666c7eb4a0c95fb293",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "a4beaa27dce414f8b8ff138dbe940efc1c57ef12f7ca1abdd6550dbac2a5aafc",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "package_sha256": "2c6afea59a893e746b78fb543c85320d15a08dfb7f40c9640b78356e825acd0c",
+  "host": {
+    "ae": "25.6x101",
+    "macos": "26.6.2",
+    "architecture": "arm64"
+  },
+  "checks": {
+    "loaded_identity": "PASS",
+    "legacy_radius_keys_and_grid_key_times": "PASS",
+    "immediate_old_animation_influence": "PASS",
+    "scripted_radius0_6_3_pixel_response": "PASS",
+    "radius3_restore_exact": "PASS",
+    "radius0_old_baked_pixels_exact": "PASS",
+    "save_reopen_keys_and_radius3_pixels": "PASS",
+    "native_guide_drag": "NOT PROVEN",
+    "native_mouse_slider_scrubbing": "NOT RUN",
+    "undo_redo_drag": "NOT RUN",
+    "affected_range_drawing": "NOT RUN",
+    "show_grid": "OPEN",
+    "windows_runtime": "NOT RUN",
+    "release": "INCOMPLETE"
+  },
+  "evidence": {
+    "outputs/update-094-live-mac/legacy-radius-animation.json": {
+      "sha256": "544dc25417fb624b80ea72ab35896ef77873bb008ca358f4a20720fcb423bf21"
+    },
+    "outputs/update-094-live-mac/open-dev4.json": {
+      "sha256": "50b2f408e4853bbda8857237cbf7f631d15af86440c5f81454a2acbe0f6826ab"
+    },
+    "outputs/update-094-live-mac/live-radius.json": {
+      "sha256": "d635bea2d7d8dbc69f63127673a9e0e50be78e7b85c0408b2fae34872605d153"
+    },
+    "outputs/update-094-live-mac/reopen-dev4.json": {
+      "sha256": "763f7aaf03baad913ae17fb1a22fdae468d5fe60685ea68207b858916e5f218f"
+    },
+    "outputs/update-094-live-mac/live-radius-pixel-check.json": {
+      "sha256": "3e59eaf091845fdfddeee84d1f63040de7271d2e4e9e33a6bab64bcea28a44c0"
+    },
+    "outputs/update-094-live-mac/legacy-radius3.png": {
+      "sha256": "296d334f30837a04ace18ca2fccc38b5815015263eb663f5ea5b0ac1a7fe249c"
+    },
+    "outputs/update-094-live-mac/dev4-radius0.png": {
+      "sha256": "296d334f30837a04ace18ca2fccc38b5815015263eb663f5ea5b0ac1a7fe249c"
+    },
+    "outputs/update-094-live-mac/dev4-radius3.png": {
+      "sha256": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b"
+    },
+    "outputs/update-094-live-mac/dev4-radius6.png": {
+      "sha256": "7f8e8185bfb0dcdffc293a425de05389b0d6696015b9d47f0d172a124bcf8872"
+    },
+    "outputs/update-094-live-mac/dev4-radius3-restored.png": {
+      "sha256": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b"
+    },
+    "outputs/update-094-live-mac/dev4-reopened.png": {
+      "sha256": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b"
+    },
+    "outputs/update-094-live-mac/dev4-radius-animation.aep": {
+      "sha256": "fc23cf753253566cd1699c25858cd22dca1379270a3bdf17a532483805142153"
+    },
+    "outputs/update-094-live-mac/installation.json": {
+      "sha256": "b17ddd6118854d2c22caeca77d327cf03d244efe99eff59d49cd6cc879598b8c"
+    }
+  },
+  "input_notes": "First helper refused nonforeground AE; subsequent deliveries completed but produced unchanged pixels. No native gesture acceptance inferred."
+}

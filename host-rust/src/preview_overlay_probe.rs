@@ -16,16 +16,18 @@ impl Log {
         let mut o=OpenOptions::new();o.write(true).create_new(true);
         #[cfg(unix)] o.mode(0o600);
         let mut file=o.open(folder.join("events.csv"))?;
-        writeln!(file,"# schema=1,build_id={},limit={LIMIT},scope=callback observation only",
+        writeln!(file,"# schema=2,build_id={},limit={LIMIT},scope=callback observation only",
             super::build_identity::BUILD_ID)?;
-        writeln!(file,"sequence,utc_ms,event,window,time_numerator,time_scale")?;
+        writeln!(file,"sequence,utc_ms,event,window,time_numerator,time_scale,mouse_h,mouse_v,hit_axis,hit_index,failed")?;
         Ok(Self{file,count:0,failed:false})
     }
-    fn append(&mut self,event:i32,window:i32,time:i32,scale:u32) {
+    fn append(&mut self,event:i32,window:i32,time:i32,scale:u32,mouse:Option<(i32,i32)>,trace:(isize,isize,i32)) {
         if self.failed||self.count>=LIMIT{return;}
         self.count+=1;
         let ms=SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis();
-        self.failed=writeln!(self.file,"{},{ms},{event},{window},{time},{scale}",self.count)
+        let (h,v)=mouse.unwrap_or((i32::MIN,i32::MIN));
+        let (axis,index,failed)=trace;
+        self.failed=writeln!(self.file,"{},{ms},{event},{window},{time},{scale},{h},{v},{},{},{failed}",self.count,axis,index)
             .and_then(|_|self.file.flush()).is_err();
     }
 }
@@ -48,10 +50,21 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra)->bool {
     });
     if let Some(log)=logger {
         if let Ok(mut log)=log.lock() {
-            log.append(raw.e_type,window,input.current_time(),input.time_scale());
+            let mouse=if recognized(window) && [ae::sys::PF_Event_DO_CLICK,ae::sys::PF_Event_DRAG,ae::sys::PF_Event_ADJUST_CURSOR].contains(&raw.e_type) {
+                let p=event.screen_point();Some((p.h,p.v))
+            } else {None};
+            log.append(raw.e_type,window,input.current_time(),input.time_scale(),mouse,(-2,-2,-1));
         }
     }
     !recognized(window)
+}
+// Called only inside owning recognized viewer callbacks. No context is retained.
+pub(crate) fn interaction(input:&ae::InData,event:&ae::EventExtra,hit:(isize,isize),failed:bool) {
+    if let Some(Some(logger))=LOG.get() {if let Ok(mut log)=logger.lock() {
+        let p=event.screen_point();
+        log.append(100+event.as_ref().e_type,-1,input.current_time(),input.time_scale(),
+            Some((p.h,p.v)),(hit.0,hit.1,i32::from(failed)));
+    }}
 }
 #[cfg(test)]
 mod tests {
@@ -68,10 +81,11 @@ mod tests {
             SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
         let mut log=Log::create(&p).unwrap();
         assert!(Log::create(&p).is_err());
-        for _ in 0..LIMIT+2 {log.append(4,3,6,30);}
+        for _ in 0..LIMIT+2 {log.append(4,3,6,30,None,(-2,-2,-1));}
         drop(log);
         let s=std::fs::read_to_string(p.join("events.csv")).unwrap();
         assert_eq!(s.lines().count(),LIMIT as usize+2);
+        assert!(s.lines().nth(2).unwrap().ends_with(",-2147483648,-2147483648,-2,-2,-1"));
         assert!(s.lines().last().unwrap().starts_with("4096,"));
         std::fs::remove_file(p.join("events.csv")).unwrap();std::fs::remove_dir(p).unwrap();
     }

@@ -419,7 +419,11 @@ pub fn click(
     let plane=ViewPlane::read(in_data,params,event)?;
     let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
-    if let Some((axis, index)) = hit_test(in_data, grid, &plane, event, event.screen_point())? {
+    let hit=hit_test(in_data, grid, &plane, event, event.screen_point())?;
+    #[cfg(feature="preview-overlay-probe")]
+    super::preview_overlay_probe::interaction(in_data,event,
+        hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
+    if let Some((axis, index)) = hit {
         event.set_continue_refcon(0, axis as _);
         event.set_continue_refcon(1, index as _);
         event.set_continue_refcon(2, grid.columns as _);
@@ -440,6 +444,9 @@ pub fn drag(
         return grid_row::drag(params, event);
     }
     let result = drag_inner(in_data, params, event);
+    #[cfg(feature="preview-overlay-probe")]
+    super::preview_overlay_probe::interaction(in_data,event,
+        (event.continue_refcon(0),event.continue_refcon(1)),result.is_err());
     if result.is_err() || event.last_time() || !event.send_drag() {
         event.set_continue_refcon(0, DRAG_NONE as _);
         event.set_send_drag(false);

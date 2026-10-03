@@ -11,11 +11,13 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Source implementation targets0.9.4 Dev4; not installed or accepted yet. Last
-verified installed candidate remains the distinct Dev1 identity below.
+Installed ordinary candidate is0.9.4 Dev4 /76015ca, Build ID
+EGFX-e9e024a3b24f5ebdd238b474. Exact AE25.6 loaded identity, immediate old Radius
+animation response, scripted0/6/3 pixel response and keys/save/reopen PASS.
+Mouse scrubbing, guide drag and affected-range drawing remain unaccepted.
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
-remains incomplete across macOS/Windows. Last verified installed test version is
+remains incomplete across macOS/Windows. Previous verified test version was
 **0.9.4 Dev 1**, source35a9f3c, Build ID EGFX-2b54838b4bf29f6a45243d07.
 Exact loaded identity and saved-gesture pixel parity PASS on Mac AE25.6.
 Hidden shape/strength/smoothing controls and visible Version row confirmed.
@@ -659,3 +661,32 @@ save-reopen checks, exact new package/load identity and Windows remain NOT RUN.
 Show Grid and affected-range visualization remain open. Full update incomplete;
 local-only boundary maintained. Next: clean-source ordinary Dev4 package and
 owned AE validation; no installer work before plugin integration.
+
+### U5 Mac Dev4: old animated field acceptance block
+
+Ordinary clean source76015ca8eb2f2affb15b62666c7eb4a0c95fb293 was assembled,
+ad-hoc signed, verified and installed with a retained backup outside Adobe.
+Build ID EGFX-e9e024a3b24f5ebdd238b474; branded ZIP SHA256
+2c6afea59a893e746b78fb543c85320d15a08dfb7f40c9640b78356e825acd0c.
+Native sample/LC_UUID, installed signature/payload and exact AE25.6 process PASS.
+The effect panel visibly identifies0.9.4 Dev4.
+
+An owned legacy fixture was authored and saved under the confirmed loaded Dev1:
+Radius keys0→1,.2→3,1→6 and Grid Positions times0,.2,.5,1. Dev4 opens those same
+streams/keys without migration or replacement. New influence changes the .2
+frame immediately, as expressly requested. Scripted Radius0/6/3 produces distinct
+frames; restoring3 matches the first Dev4 frame byte exact. Radius0 matches the
+old baked frame byte exact. Save/close/reopen retains three Radius/four Grid keys,
+exact scalar values/times and the exact radius3 frame. Scope:319×241,8-bpc Final,
+AE25.6x101/macOS26.6.2/arm64. Scripted edits do not prove mouse slider scrubbing.
+
+Native guide attempts are NOT PROVEN: the first helper refused nonforeground AE;
+later bounded deliveries reported success but readback showed unchanged pixels
+and key counts. Cua drag itself returned noWindowsAvailable. Preserve failures;
+do not infer host acceptance from numerical tests or input delivery. A bounded
+opt-in probe now records viewer click/hit/drag status and callback mouse points
+(schema2), retaining no host context. It is excluded from the ordinary build. Probe Rust76 and strict Clippy PASS;
+initial strict check rejected redundant casts, removed without suppressions.
+[Exact candidate and hashed local evidence](live-influence-mac-dev4-2026-10-03.json).
+Next: diagnose viewer gesture and finish U5 range drawing, then U7. Installer work
+remains paused; Windows integration and full-update acceptance remain incomplete.

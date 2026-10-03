@@ -1,7 +1,7 @@
 # Live influence: bounded design investigation
 
-2026-10-03. U5, rules8.0.0 / Critical / Development. This is a design proposal,
-not an implemented feature, accepted migration, or new runtime PASS. Local-only
+2026-10-03. U5, rules8.0.0 / Critical / Development. The earlier sections retain historical proposals; the superseding decision and
+implementation below are current. Acceptance is scoped by the exact candidate record. Local-only
 boundary and all other U0–U10 obligations remain. [Scope](feature-backlog.md).
 
 ## Required behavior and current cause
@@ -108,6 +108,9 @@ applying raw pointer delta to the baked axis. Bound the scalar search, store onl
 valid projected axes, and verify fractional references, saturation/reversal,
 animation input, neutral/reset and nonmutation before native acceptance.
 
-Status: IMPLEMENTATION IN PROGRESS. Previous coefficient/wire-v4 proposals are
-superseded by the explicit user decision. No completed host/runtime or Windows
-acceptance is claimed. U7 overlay feasibility remains a separate open gate.
+Status: shared evaluator and live drag solver implemented on76015ca. Mac Dev4
+loaded identity, immediate old animation response, scripted pixel changes and
+keys/save/reopen PASS in the bounded owned fixture. Native drag/mouse scrubbing
+and affected-range drawing are still unaccepted; Windows NOT RUN. Previous
+coefficient/wire-v4 proposals are superseded. U7 remains a separate open gate.
+See [native evidence](live-influence-mac-dev4-2026-10-03.json).

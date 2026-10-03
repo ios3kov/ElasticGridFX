@@ -24,6 +24,8 @@ File names are kept explicit so developers can locate the original record.
 - [architecture.md](architecture.md)
 - [performance-quality-contract.md](performance-quality-contract.md)
 - [feature-backlog.md](feature-backlog.md)
+- [live-influence-design.md](live-influence-design.md)
+- [live-influence-mac-dev4-2026-10-03.json](live-influence-mac-dev4-2026-10-03.json)
 - [persistent-viewer-grid.md](persistent-viewer-grid.md)
 - [perspective-plane-plan.md](perspective-plane-plan.md)
 
