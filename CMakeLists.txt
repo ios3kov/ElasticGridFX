@@ -45,11 +45,18 @@ if(ELASTICGRID_BUILD_TESTS)
   if(APPLE)
     add_executable(elasticgrid_installer_exchange_tests
         tests/test_installer_exchange_macos.cpp installer/macos/AtomicExchange.cpp
-        installer/macos/PreparedJournal.cpp)
+        installer/macos/PreparedJournal.cpp installer/macos/ExchangeCoordinator.cpp)
     target_include_directories(elasticgrid_installer_exchange_tests PRIVATE installer/macos)
     target_compile_options(elasticgrid_installer_exchange_tests PRIVATE -Wall -Wextra -Werror)
     elasticgrid_enable_test_assertions(elasticgrid_installer_exchange_tests)
     add_test(NAME elasticgrid_installer_exchange COMMAND elasticgrid_installer_exchange_tests)
+    add_executable(elasticgrid_installer_coordinator_tests
+        tests/test_installer_coordinator_macos.cpp installer/macos/AtomicExchange.cpp
+        installer/macos/PreparedJournal.cpp installer/macos/ExchangeCoordinator.cpp)
+    target_include_directories(elasticgrid_installer_coordinator_tests PRIVATE installer/macos)
+    target_compile_options(elasticgrid_installer_coordinator_tests PRIVATE -Wall -Wextra -Werror)
+    elasticgrid_enable_test_assertions(elasticgrid_installer_coordinator_tests)
+    add_test(NAME elasticgrid_installer_coordinator COMMAND elasticgrid_installer_coordinator_tests)
   endif()
   add_executable(elasticgrid_plane_axis_cache_tests tests/test_plane_axis_cache.cpp)
   target_link_libraries(elasticgrid_plane_axis_cache_tests PRIVATE elasticgrid_core)

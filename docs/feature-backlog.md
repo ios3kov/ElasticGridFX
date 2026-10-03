@@ -376,3 +376,15 @@ states, duplicates, symlinks/reparse paths, permissions and recovery before
 privileged installation. Hashes alone do not authenticate the publisher; package
 trust comes from the agreed distribution channel. No download/update service,
 credentials or new UI-control permissions are introduced by this contract.
+
+U8 next native block: an internal Mac replacement coordinator acquires a
+nonblocking destination-scoped lock, calls the frontend's trusted environment
+and full-payload verifier under that lock, durably prepares the journal,
+rechecks before exchange and verifies the swapped layout afterward. Recovery
+requires the original expected identities as well as a matching journal; it
+never trusts journal-supplied destinations or automatically restores unknown
+bytes. Inspect is read-only; Restore is a separate explicit operation. Every
+post-journal failure retains the record and both trees. Fault/refusal tests must
+prove no replacement after verification failure or lock contention and no
+restore over a changed current payload. This is an internal coordinator, not
+the final frontend/collector or a claim of full privileged installation safety.

@@ -537,3 +537,32 @@ completed with exit1 for the previously reviewed auth/rate-limit heuristic at
 tests/test_target_ae_acceptance.py:54, a local unit fixture, not an endpoint.
 No new installer finding; scanner does not certify readiness. Whitespace and
 repository SHA256 manifest are checked before this local checkpoint commit.
+
+### U8 replacement coordinator — local development
+
+ExchangeCoordinator connects destination-scoped nonblocking flock, immutable
+prepared journal, identity checks, replacement and explicit Inspect/Restore.
+The trusted frontend verifier must recollect fixed-root/scan/host observations
+and authenticate/compare full old/new payload snapshots under lock. It runs
+before preparing, again before exchange and after exchange. Failure before
+exchange never installs; failure afterward retains both trees/journal and reports
+NeedsRecovery. Recovery also requires the frontend's authentic original expected
+identities to match the journal; neither the journal nor an inode alone permits
+overwrite. Existing records are never silently replaced or removed.
+
+Native Release build with -Wall/-Wextra/-Werror and assertions enabled PASS.
+Two installer CTest targets PASS on fresh /private/tmp fixtures: successful
+replace/inspect/restore; idempotent restored inspection; journal reuse refusal;
+verifier failures before/after journal and after swap; changed same-inode payload
+preserved on Restore refusal; mismatched expected journal, symlink lock and
+actual lock contention rejected. Two coordinator child processes killed with
+SIGKILL at prepared/installed checkpoints release their locks; subsequent
+Inspect/Restore identifies the correct state and preserves/restores the old tree.
+Evidence: outputs/update-094-installer-coordinator-test.txt. These mock payload
+verifiers prove coordinator ordering/refusal, not authentication of real bundles.
+
+Still incomplete: native fixed-root/payload/process collector, authenticated
+durable snapshot metadata, finalization/new-install path, power-loss and syscall
+failure cases, elevation/UI, Mac package and Windows implementation/runtime.
+No installed Adobe plugin, project, system permission or remote branch changed.
+Next: implement full-payload collection before connecting any real installer UI.
