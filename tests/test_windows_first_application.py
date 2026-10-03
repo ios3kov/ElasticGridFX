@@ -29,7 +29,11 @@ class WindowsFirstApplicationTests(unittest.TestCase):
             node=shutil.which('node')
             if node:
                 for script in (first,follow):
-                    checked=subprocess.run([node,'--check',str(script)],capture_output=True,text=True)
+                    checked=subprocess.run(
+                        [node,'--check','--input-type=commonjs','-'],
+                        input=script.read_text(encoding='utf-8'),
+                        capture_output=True,text=True,
+                    )
                     self.assertEqual(checked.returncode,0,checked.stderr)
 
     def test_single_png_rejects_ambiguity(self):
