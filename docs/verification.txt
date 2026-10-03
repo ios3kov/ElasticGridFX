@@ -1,32 +1,5 @@
-ElasticGrid FX v0.6 verification snapshot
-Date: 2026-09-26
-Environment: Linux/x86-64 development container (Mac-only Metal/AE gates not runnable here)
+Historical verification report
 
-PASS — CMake Release build
-PASS — core regression tests with assertions forced on
-PASS — bridge regression tests with assertions forced on
-PASS — CPU/GPU sampling-plan parity tests with assertions forced on
-PASS — Clang Release -Wall -Wextra -Wpedantic -Werror
-PASS — Clang ASan + UBSan
-PASS — shell syntax for Mac build/preflight/parity/benchmark scripts
-
-Repeated 4K full-bridge CPU development measurements (approximate):
-8 bpc Bilinear deformed:   ~26.4 ms/frame
-16 bpc Bilinear deformed:  ~16.3 ms/frame
-32 bpc Bilinear deformed:  ~7.8 ms/frame
-8 bpc Bicubic deformed:    ~69 ms/frame
-16 bpc Bicubic deformed:   ~57 ms/frame (variance observed)
-32 bpc Bicubic deformed:   ~32 ms/frame
-
-4K identity fast path:
-8 bpc:  ~1.5-1.7 ms/frame
-16 bpc: ~2.8-3.1 ms/frame
-32 bpc: ~6.2-7.1 ms/frame
-
-NOT YET CLAIMED — macOS Metal shader compile
-NOT YET CLAIMED — real Metal CPU/GPU image parity
-NOT YET CLAIMED — real 4K Metal benchmark
-NOT YET CLAIMED — Rust AE host macOS compile
-NOT YET CLAIMED — After Effects plugin load/runtime smoke
-
-The Mac build script blocks packaging until the first four Mac-only preflight gates pass.
+The unversioned report duplicated verification-v0.6.txt.
+Read the complete, unchanged report in docs/verification-v0.6.txt.
+Current project status is in docs/STATUS.md; this old report is not a current PASS.
