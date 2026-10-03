@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "artifact": {
+    "version": "0.9.4 Dev20",
+    "build_id": "EGFX-bf6ecdde379f0831915ad144",
+    "source_commit": "3095983527e81dd2215609b15de21b0b6884da48"
+  },
+  "host": "AE25.6x101 / macOS arm64",
+  "ordinary_undo_add": "FAIL",
+  "deletion_undo_redo": "PASS",
+  "geometry": {
+    "skew_grid_changes_pixels": true,
+    "3d_grid_changes_pixels": true,
+    "restored_exact": true,
+    "history_undo_exact": true,
+    "state": {
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "threeDLayer": false,
+      "show_grid": 1
+    }
+  },
+  "initial_attempt": {
+    "status": "FAIL",
+    "checks": {
+      "undo-add": false,
+      "delete": true,
+      "redo-delete": true,
+      "redo-add": true,
+      "undo-delete": true,
+      "second_instance_changes_pixels": true,
+      "effect_counts": false,
+      "streams_preserved": true
+    },
+    "states": {
+      "baseline": {
+        "effects": 1,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "two": {
+        "effects": 2,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "undo-add": {
+        "effects": 2,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "redo-add": {
+        "effects": 2,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "delete": {
+        "effects": 1,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "undo-delete": {
+        "effects": 2,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      },
+      "redo-delete": {
+        "effects": 1,
+        "grid_keys": 4,
+        "radius_keys": 3,
+        "show_grid": 1,
+        "time": 0.2
+      }
+    }
+  },
+  "native_history_observation": "Undo FSTR research binding followed by Undo EGFX owned second grid; selecting the owned addition removes it and restores baseline exactly",
+  "cause_status": "Reinstallation observed after ordinary Undo; source deferred SequenceResetup queues install_or_upgrade for blank streams. Direct main-thread creation candidate requires native validation.",
+  "evidence_folder": "outputs/update-094-dev20-mac/lifecycle",
+  "remaining": [
+    "ordinary add Undo/Redo fix",
+    "camera/parent and legacy project coverage",
+    "expanded Wave native UI",
+    "Windows NOT RUN"
+  ],
+  "installer_gate": "WAIT_PLUGIN_VALIDATION"
+}

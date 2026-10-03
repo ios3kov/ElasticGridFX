@@ -143,3 +143,5 @@ These records support traceability; start with STATUS.md for current decisions.
 - [Show Grid pixel implementation, 2026-10-04](show-grid-pixel-implementation-2026-10-04.json) — superseding user contract, source checks and native acceptance boundary.
 
 - [Show Grid Dev20 Mac acceptance, 2026-10-04](show-grid-mac-dev20-2026-10-04.json) — exact candidate, default/switch/export/reopen/keys/depth/plane/quality/Wave/deselected/playback/other-layer checks; broader lifecycle and Windows open.
+
+- [Dev20 lifecycle regression, 2026-10-04](update-094-dev20-lifecycle-2026-10-04.json) — exact deletion/Undo/Redo and skew/3D captures; ordinary addition Undo failure and Dev24 candidate gate.

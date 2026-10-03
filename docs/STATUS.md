@@ -897,3 +897,28 @@ Repeated full Python regression271 PASS after wiring reconciliation and native
 owned-child/process sandbox access. No production plugin code changed in this
 block; installed Dev16 identity/source remains779db86. This is not a Windows AE
 or Show Grid acceptance. User feedback check is now recorded, not pending.
+
+### Dev20 lifecycle regression — 2026-10-04
+
+Exact installed Dev20 / EGFX-bf6ecdde379f0831915ad144: two enabled
+instances produce distinct pixels; deletion, Undo restoration and Redo deletion
+restore exact corresponding PNG bytes. Grid Positions (4 keys) and original
+Affected Lines (3 keys) remain intact. Skew Four Corners and a Y25 3D layer
+show enabled grid pixels, and restored state matches the initial PNG exactly.
+These scoped captures do not establish camera/parent or Windows acceptance.
+
+FAIL: ordinary Undo after adding an instance cancels the deferred hidden-plane
+binding rather than the addition. The idle route reinstalls that binding,
+creating another `FSTR research binding` action and clearing Redo. Selecting
+the owned addition in native History removes it and restores the baseline,
+but is not an acceptable replacement for ordinary Undo/Redo acceptance.
+Evidence: outputs/update-094-dev20-mac/lifecycle, including original FAIL
+results.json and geometry-results.json. Do not count the first attempted
+Undo-add as PASS. Overall lifecycle acceptance remains OPEN.
+
+Dev24 candidate under development: attempt exact-effect initialization on
+main-thread SequenceSetup inside the host's Apply Effect action; retain
+worker deferral and closed failure for incomplete schemas. No render or
+UpdateParamsUI writes are added. Native group merging is a hypothesis, not
+verified behavior. Current installed plugin remains Dev20. Installers wait
+for plugin validation; all work remains local.
