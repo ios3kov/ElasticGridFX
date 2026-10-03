@@ -963,3 +963,12 @@ Do not count it as the intended Undo fix. Dev36 will retain the bounded native
 error cause to distinguish unsupported/nonunique StreamSuite6 identities from
 other adapter failure. No identity reuse assumption is accepted from headers.
 Evidence outputs/update-094-dev32-mac/lifecycle/two.json and native journals.
+
+Dev36 81e50a3 / EGFX-33f6f8c4bacc768774c2eeec establishes the native
+cause: SDK StreamSuite6 returns [0,0,0,0,0] for these five effect streams
+on AE25.6x101. The stream-ID registry route is rejected, not degraded to
+effect index, raw handle addresses, names or selection identity. Error
+retained at outputs/update-094-dev36-mac/binding-error.txt. Dev40 restores
+safe deferred binding and preserves its bounded failure reporting.
+Undo repair requires a real instance identity/lifecycle design that preserves
+legacy sequence-data compatibility; pending source investigation.

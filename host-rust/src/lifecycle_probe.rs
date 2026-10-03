@@ -49,8 +49,6 @@ struct Deferred {
     id: ae::aegp::PluginId, pending: Arc<AtomicBool>, consumed: bool,
     basic: *const ae::sys::SPBasicSuite,
     observations:u8,
-    #[cfg(fstr_auto_binding)]
-    bindings: binding_probe::BindingRegistry,
 }
 impl Deferred {
     fn observe(&mut self) {
@@ -103,7 +101,7 @@ impl Deferred {
     // No active selection dependency and no effect handles retained across idle.
     // Only exact match-name/schema streams are writable; conflicts remain intact.
     #[cfg(fstr_auto_binding)]
-    fn inspect(&mut self) -> Result<i32,ae::Error> {
+    fn inspect(&self) -> Result<i32,ae::Error> {
         let projects=ae::aegp::suites::Project::new()?;
         let items=ae::aegp::suites::Item::new()?;
         let comps=ae::aegp::suites::Comp::new()?;
@@ -131,9 +129,9 @@ impl Deferred {
                         let result=(|| ->Result<(),ae::Error>{
                             let key=effects.installed_key_from_layer_effect(effect)?;
                             if effects.effect_match_name(key)?!="com.elasticgrid.fx.warp" {return Ok(());}
-                            match binding_probe::bind(self.id,effect,layer,self.basic,&mut self.bindings) {
-                                Ok(binding_probe::BindingOutcome::Installed)=>installed+=1,
-                                Ok(binding_probe::BindingOutcome::AlreadyInstalled | binding_probe::BindingOutcome::UndoPreserved)=>{},
+                            match binding_probe::bind(self.id,effect,layer,self.basic) {
+                                Ok(binding_transaction::Outcome::Installed)=>installed+=1,
+                                Ok(binding_transaction::Outcome::AlreadyInstalled)=>{},
                                 Err(error)=>{journal("binding-error",&error);failed=true;},
                             }
                             Ok(())
@@ -239,9 +237,7 @@ impl Probe {
             ae::aegp::suites::RegisterNonAegp::new()?.register_idle_hook(id,
                 Box::new(|state: &mut Deferred, _| { state.observe(); Ok(()) }),
                 Deferred { id, pending: self.pending.clone(), consumed: false,
-                    basic: input.pica_basic_suite_ptr(),observations:0,
-                    #[cfg(fstr_auto_binding)]
-                    bindings: binding_probe::BindingRegistry::default() })?;
+                    basic: input.pica_basic_suite_ptr(),observations:0 })?;
             return Ok(0);
         }
         let id = self.id.ok_or(ae::Error::BadCallbackParameter)?;
