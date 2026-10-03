@@ -283,3 +283,20 @@ Unsupported effect control warning appeared on initial open; cause remains
 UNKNOWN, no no-warning/complete integration PASS is claimed. The first density
 evidence script used unavailable JSON.stringify; corrected script has separate
 outputs. These harness errors do not overwrite prior evidence.
+
+
+### Hidden arbitrary registration correction
+
+SDK25.6 AE_Effect.h:400 requires arbitrary data to combine TOPIC/CONTROL or
+NO_ECW_UI; lines2313–2321 describe hidden-data edits from custom viewer UI or
+a supervised UserChangedParam. The new ControlLayout initially used INVISIBLE
+alone, producing Unsupported effect control during open/save. Add NO_ECW_UI
+alongside INVISIBLE. VersionRow already uses TOPIC. The regression source guard
+checks this prerequisite; native reopen/save acceptance remains required.
+
+During keyboard quitting the owned fixture was unexpectedly saved at17:23; its
+current hash is cc66fb173ecc37303f96864deaab70739b0559b65852a6f46b88b021a11a0ef8.
+The original fixture hash is no longer claimed immutable in this continuation.
+User projects were not involved. Historical frames/results retain their original
+identities; further work uses a new fixture path and explicit DO_NOT_SAVE_CHANGES
+for project close. No previous PASS is transferred to this new fixture.

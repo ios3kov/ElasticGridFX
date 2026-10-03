@@ -1051,7 +1051,7 @@ impl AdobePluginGlobal for Plugin {
         layout.set_default(control_layout::State::default())?;
         params.add_customized(Params::ControlLayout, "__FSTR Viewer Layout", layout, |param| {
             param.set_flags(ae::ParamFlag::CANNOT_TIME_VARY);
-            param.set_ui_flags(ae::ParamUIFlags::INVISIBLE); -1
+            param.set_ui_flags(ae::ParamUIFlags::INVISIBLE | ae::ParamUIFlags::NO_ECW_UI); -1
         })?;
         let mut version=ae::ArbitraryDef::new();
         version.set_default(version_row::Data::default())?;
