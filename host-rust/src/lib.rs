@@ -1074,7 +1074,7 @@ impl AdobePluginGlobal for Plugin {
 
         let events = ae::CustomEventFlags::COMP | ae::CustomEventFlags::LAYER |
             ae::CustomEventFlags::EFFECT;
-        #[cfg(feature="preview-overlay-probe")]
+        #[cfg(all(feature="preview-overlay-probe",not(feature="gesture-probe")))]
         let events = events | ae::CustomEventFlags::PREVIEW;
         in_data.interact().register_ui(ae::CustomUIInfo::new().events(events))?;
 

@@ -690,3 +690,22 @@ initial strict check rejected redundant casts, removed without suppressions.
 [Exact candidate and hashed local evidence](live-influence-mac-dev4-2026-10-03.json).
 Next: diagnose viewer gesture and finish U5 range drawing, then U7. Installer work
 remains paused; Windows integration and full-update acceptance remain incomplete.
+
+
+### U5 gesture investigation: ordinary and PREVIEW-probe diverge
+
+Probe9e2cea8 /0.9.4 Dev6, Build ID EGFX-e44a68598a0cbead2d664b5f,
+loaded identity PASS. Native click correctly hit column2;11 drag callbacks completed
+without a reported error. Real319×241 pixels changed; Undo restored baseline and
+Redo restored edited pixels byte exact, with three Radius/four Grid keys retained.
+Evidence outputs/update-094-live-gesture-probe/gesture-events.csv and
+undo-redo-pixels.json. Scope is this probe, not ordinary Dev4.
+
+Returning to the verified ordinary76015ca Dev4 produced unchanged pixels for the
+same delivered gesture despite exact loaded identity PASS. Earlier attribution
+to only focus/coordinates is therefore not established. Preserve the original
+failures and positive probe result separately. The next isolated gesture-probe
+build uses the same bounded logger/context guard but ordinary COMP/LAYER/EFFECT
+registration without experimental PREVIEW; versionDev7. It is test-only and does
+not implement Show Grid or change renderer sampling. Ordinary Dev4 is currently
+installed; native guide acceptance remains NOT PROVEN pending investigation.
