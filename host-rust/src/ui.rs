@@ -91,6 +91,18 @@ pub fn release_cursor() {
     // on AE 25.6; forcing Arrow here also overrides text/pen/rotation tools.
 }
 
+// PF_ContextH is valid only for this owning UI callback; never retain it.
+pub(crate) fn event_window_code(event:&ae::EventExtra)->i32 {
+    let handle=event.as_ref().contextH;
+    if handle.is_null(){return ae::sys::PF_Window_NONE;}
+    // SAFETY: the host owns the callback's handle; null is checked at both levels.
+    let context=unsafe{*handle};
+    if context.is_null(){ae::sys::PF_Window_NONE}else{unsafe{(*context).w_type}}
+}
+pub(crate) fn known_window(window:i32)->bool {
+    [ae::sys::PF_Window_COMP,ae::sys::PF_Window_LAYER,ae::sys::PF_Window_EFFECT].contains(&window)
+}
+
 fn overlay_color(value: f32) -> ae::drawbot::ColorRgba {
     ae::drawbot::ColorRgba { red: value, green: value, blue: value, alpha: 1.0 }
 }
@@ -557,6 +569,15 @@ pub fn adjust_cursor(
 
 #[cfg(test)]
 mod cursor_tests {
+    #[test]
+    fn only_known_callback_windows_enter_wrapper_conversion() {
+        for w in [ae::sys::PF_Window_COMP,ae::sys::PF_Window_LAYER,ae::sys::PF_Window_EFFECT] {
+            assert!(super::known_window(w));
+        }
+        for w in [ae::sys::PF_Window_NONE,ae::sys::PF_Window_PREVIEW,99] {
+            assert!(!super::known_window(w));
+        }
+    }
     #[test]
     fn projected_text_quad_picking_uses_comp_coordinates_once() {
         use super::*;

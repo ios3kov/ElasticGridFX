@@ -39,11 +39,7 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra)->bool {
     let raw=event.as_ref();
     // SDK25.6 AE_EffectUI.h supplies PF_ContextH. Read it only in its owning
     // callback; no pointer/context survives the callback or reaches a log.
-    let window=if raw.contextH.is_null() {ae::sys::PF_Window_NONE} else {
-        let context=unsafe{*raw.contextH};
-        if context.is_null(){ae::sys::PF_Window_NONE}
-        else {unsafe{(*context).w_type}}
-    };
+    let window=super::ui::event_window_code(event);
     let logger=LOG.get_or_init(|| {
         let folder=std::env::temp_dir().join(format!("egfx-preview-probe-{}",std::process::id()));
         Log::create(&folder).ok().map(Mutex::new)

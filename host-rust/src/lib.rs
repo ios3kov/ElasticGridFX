@@ -1074,7 +1074,10 @@ impl AdobePluginGlobal for Plugin {
 
         let events = ae::CustomEventFlags::COMP | ae::CustomEventFlags::LAYER |
             ae::CustomEventFlags::EFFECT;
-        #[cfg(all(feature="preview-overlay-probe",not(feature="gesture-probe")))]
+        // AE25.6 owned-fixture isolation: COMP/LAYER/EFFECT draws guides but
+        // does not deliver clicks/drags; adding documented PREVIEW enables them.
+        // The negative-control probe intentionally omits this flag.
+        #[cfg(not(feature="gesture-probe"))]
         let events = events | ae::CustomEventFlags::PREVIEW;
         in_data.interact().register_ui(ae::CustomUIInfo::new().events(events))?;
 
@@ -1154,9 +1157,11 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::Event { mut extra } => {
                 #[cfg(feature="preview-overlay-probe")]
-                if preview_overlay_probe::observe(&in_data, &extra) {
-                    // Wrapper WindowType omits PREVIEW/NONE. Never convert those
-                    // or use an unknown drawing context in this read-only probe.
+                let _=preview_overlay_probe::observe(&in_data, &extra);
+                // Wrapper WindowType covers only COMP/LAYER/EFFECT. In every
+                // build reject unknown/null/PREVIEW contexts before conversion.
+                if !ui::known_window(ui::event_window_code(&extra)) {
+                    ui::release_cursor();
                     return Ok(());
                 }
                 #[cfg(feature = "render-diagnostics")]

@@ -11,7 +11,7 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Installed ordinary candidate is0.9.4 Dev4 /76015ca, Build ID
+Last ordinary candidate is0.9.4 Dev4 /76015ca, Build ID
 EGFX-e9e024a3b24f5ebdd238b474. Exact AE25.6 loaded identity, immediate old Radius
 animation response, scripted0/6/3 pixel response and keys/save/reopen PASS.
 Mouse scrubbing, guide drag and affected-range drawing remain unaccepted.
@@ -709,3 +709,27 @@ build uses the same bounded logger/context guard but ordinary COMP/LAYER/EFFECT
 registration without experimental PREVIEW; versionDev7. It is test-only and does
 not implement Show Grid or change renderer sampling. Ordinary Dev4 is currently
 installed; native guide acceptance remains NOT PROVEN pending investigation.
+
+
+### U5 isolated registration finding and ordinary correction
+
+Negative-control gesture-probe source d2047c1 /Dev7, Build ID
+EGFX-910ae70a4c664a9da8006309, loaded identity PASS. The identical bounded
+owned-scene gesture produced no DO_CLICK/DRAG callbacks and no pixel change with
+COMP/LAYER/EFFECT registration; cursor/draw/idle callbacks were present. The
+preceding PREVIEW-registered Dev6 observed click and11 successful drag callbacks,
+changed pixels and exact Undo/Redo. Evidence outputs/update-094-gesture-only-mac/
+gesture-events.csv, baseline.png, drag.png and loaded-identity; this is bounded
+AE25.6 evidence, not a claim about every AE version or Windows.
+
+Ordinary source now requests the documented PREVIEW custom event flag as well;
+the negative-control feature still omits it. All builds validate borrowed context
+window codes before wrapper conversion, refusing null/unknown/PREVIEW drawing
+contexts and releasing cursor state. No context is retained and no preview pixels
+are drawn. New ordinary versionDev8; diagnosticsDev9, PREVIEW-probeDev10 and
+negative-controlDev11 prevent identity/version confusion with prior packages.
+Source and exact ordinary native acceptance are pending; Show Grid remains OPEN.
+
+Dev8 source verification: default Rust75, PREVIEW-probe strict Clippy and
+Python host-contract14 PASS. Current installed temporary negative-control Dev7;
+next install the clean-source ordinary Dev8 and validate actual gesture/Undo/Redo.
