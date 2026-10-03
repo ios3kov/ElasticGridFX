@@ -29,6 +29,8 @@ def load_identity(path: Path) -> dict:
         raise ValueError("identity missing fields: " + ", ".join(missing))
     if "windows-msvc" not in data["target"]:
         raise ValueError("identity is not a Windows MSVC build")
+    if data.get("artifact_type") != "AE native effect (.aex)":
+        raise ValueError("identity does not describe a Windows .aex artifact")
     return data
 
 
