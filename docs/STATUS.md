@@ -332,3 +332,36 @@ This should leave room for every option at the standard minimum width, but
 actual common width still needs host observation. A custom-row/menu fallback
 must retain IDs, selection, keyboard behavior and host ownership. No padding
 strings, dummy options or unsupported reserved fields added.
+
+### Reset/key/Undo proof and native popup widths — 2026-10-03
+
+Diagnostic8a2e30c loaded identity PASS, EGFX-a700873a29770d0ec94313c6.
+The earlier unchanged frame was a harness-coordinate failure: Cua captures
+window-local pixels, while CGEvent needs global logical coordinates. Measured
+AE window origin(1,34), Retina2x. Corrected Reset point(425,300) reaches native
+CLICK then DRAG/release inside the recorded rectangle. No Reset logic correction
+was needed to obtain the following native results; previous probe does not prove
+a product failure. Do not transfer this PASS to the older3032232 bytes.
+
+Owned319x241,8-bpc Final scene in AE25.6x101: static drag changes60162 pixels;
+Reset matches the neutral baseline exactly; Undo matches the deformed frame.
+Animated test starts with two distinct keys at0 and1 seconds. Reset at0.5 adds
+only that key, preserves both endpoint frames exactly and renders neutral at0.5.
+Undo restores the two original keys and all three captured frames. Redo restores
+the three-key reset state and all three frames. Eight independent comparisons
+PASS. Evidence: outputs/next-update-popup-event-mac/reset-static-result.json,
+reset-animation-result.json,12 animation PNGs and loaded-identity/.
+These are native UI/key/pixel checks, not full render/MFR/migration certification.
+
+Mac visible popups now share130 logical units, aligned with Reset/Fit Layer:
+Four Corners, Old Smooth, Mirror and Preview fully fit. Wave Axis remains inside
+the collapsed group; its short captions are implemented, but expanded visual
+width and Windows widths still need observation. A test attempt to select the
+group via JSX was rejected by AE because the group is hidden to selection; no
+product error or failed render is inferred from that probe.
+
+Source cleanup removes the incoming send_drag heuristic: SDK declares it an
+output request, and native events have separate CLICK/DRAG tags. The default
+candidate must be built and verified independently; diagnostic observations are
+compiled out without render-diagnostics. U5/U7/U8/U9 and legacy migration remain
+open; local-only boundary unchanged.

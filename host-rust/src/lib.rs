@@ -1120,13 +1120,9 @@ impl AdobePluginGlobal for Plugin {
                 #[cfg(feature = "render-diagnostics")]
                 grid_row::observe(&mut extra);
                 match extra.event() {
-                    ae::Event::Click(_) => {
-                        if extra.send_drag() {
-                            ui::drag(&in_data, params, &mut extra)?;
-                        } else {
-                            ui::click(&in_data, params, &mut extra)?;
-                        }
-                    }
+                    // send_drag is an output request, not an input event tag.
+                    // Native AE25.6 observations confirm separate CLICK/DRAG.
+                    ae::Event::Click(_) => ui::click(&in_data, params, &mut extra)?,
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
                     ae::Event::Draw(_) => {
                         plane::sync_event_ui(&in_data,params)?;
