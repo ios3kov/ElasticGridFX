@@ -99,6 +99,8 @@ jobs:
         run: |
           dumpbin /headers "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-headers.txt
           dumpbin /exports "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-exports.txt
+          dumpbin /dependents "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-dependents.txt
+          dumpbin /imports "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-imports.txt
           if (-not (Select-String -Path dist/windows/dumpbin-headers.txt -Pattern "machine \(x64\)" -Quiet)) { throw "Not an x64 PE" }
           if (-not (Select-String -Path dist/windows/dumpbin-exports.txt -Pattern "\bEffectMain\b" -Quiet)) { throw "EffectMain export missing" }
 
@@ -121,6 +123,8 @@ jobs:
             --aex "dist/windows/FSTR Stretch.aex" `
             --headers "dist/windows/dumpbin-headers.txt" `
             --exports "dist/windows/dumpbin-exports.txt" `
+            --dependents "dist/windows/dumpbin-dependents.txt" `
+            --imports "dist/windows/dumpbin-imports.txt" `
             --resources "dist/windows/coff-resources.txt" `
             --expected-pipl $pipl[0].FullName `
             --out "dist/windows/FSTR Stretch.windows-build-validation.json"
@@ -148,6 +152,8 @@ jobs:
             dist/windows/FSTR Stretch.windows-build-validation.json
             dist/windows/dumpbin-headers.txt
             dist/windows/dumpbin-exports.txt
+            dist/windows/dumpbin-dependents.txt
+            dist/windows/dumpbin-imports.txt
             dist/windows/coff-resources.txt
             dist/windows/VALIDATION_SCOPE.txt
             tools/finalize_windows_validation.py
