@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "scope": "ordinary Dev12; owned 319x241 8-bpc Final AE25.6 Mac fixture; bounded acceptance only",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-fedbc0cbe18a3a28d105a305",
+    "commit": "aa6c2034235a2c5fae80b551ccf8393e3728dbec",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "24704050bca1f51d21e5fae30961333c709aab69ab6b2b80cc4a5af36b05f2ef",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "host": {
+    "architecture": "arm64",
+    "os": "Darwin",
+    "os_version": "26.6.2"
+  },
+  "checks": {
+    "loaded_identity": "PASS",
+    "visible_dev12_version": "PASS",
+    "scripted_range_boundary_response": "PASS",
+    "annotation_not_in_export": "PASS",
+    "native_column_drag_changes_pixels": "PASS",
+    "undo_exact": "PASS",
+    "redo_exact": "PASS",
+    "save_reopen_keys_and_pixels": "PASS",
+    "native_scalar_mouse_scrubbing": "NOT RUN",
+    "range_multiple_instances_and_planes": "NOT RUN",
+    "show_grid": "OPEN",
+    "windows_runtime": "NOT RUN",
+    "full_update": "INCOMPLETE"
+  },
+  "evidence": {
+    "outputs/update-094-range-mac/undo-read.jsx": {
+      "sha256": "8167c6e911abc4f2283703ce0a3e42f5faeee9e0fdf4057e9824d6306096bc62"
+    },
+    "outputs/update-094-range-mac/drag2-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-range-mac/installation.json": {
+      "sha256": "37ecd9ef7bb0ba013153074e3c6d2614373b7e766833754f3d86230577d09b2c"
+    },
+    "outputs/update-094-range-mac/roundtrip.jsx": {
+      "sha256": "4784cb9357eede5a35fe315954b033525e24e94d8dda05f1a614bb9631408817"
+    },
+    "outputs/update-094-range-mac/undo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-range-mac/redo-read.jsx": {
+      "sha256": "156db5cea204e9dfc2c3048bddab90ed229e4dd7e95ab1a5db78ebbfd7be9f28"
+    },
+    "outputs/update-094-range-mac/drag-delivery.json": {
+      "sha256": "0572c7f5d1eecf36cd427a08b358552ed8adddf642ecd04c4baf3663e8ecfde4"
+    },
+    "outputs/update-094-range-mac/open.json": {
+      "sha256": "11c355fd43559130b2d39f6e04f8a3cd8c8fe180b85fd786dea01617d1fb4faf"
+    },
+    "outputs/update-094-range-mac/range-response-export-pixels.json": {
+      "sha256": "95f3c3a9881e6889f657d87597e663047b6da42862a66dec0257164cfceeb323"
+    },
+    "outputs/update-094-range-mac/range-reopened.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-range-mac/range-reopened.json": {
+      "sha256": "763f7aaf03baad913ae17fb1a22fdae468d5fe60685ea68207b858916e5f218f"
+    },
+    "outputs/update-094-range-mac/redo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-range-mac/close-owned.jsx": {
+      "sha256": "c8082f8d40a3d50a97b938a060e80d8f0a52d047e5264a3c50efc3b091b0fe2b"
+    },
+    "outputs/update-094-range-mac/baseline.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-range-mac/range1.png": {
+      "sha256": "1d31a075b63abcb91531692b1e168de3a60f6cb4d317c92a912e35f0500b17b8"
+    },
+    "outputs/update-094-range-mac/drag.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-range-mac/open.jsx": {
+      "sha256": "7974b9c0e06a45443d9f2f72c0c63cb14442f8bbe1b84070c97ced3b0c8e8db6"
+    },
+    "outputs/update-094-range-mac/restored3.jsx": {
+      "sha256": "0fd117cb9c0f9e734ee16b5292b8bdecfe40a282d425956d90cf65bc15108807"
+    },
+    "outputs/update-094-range-mac/range1.json": {
+      "sha256": "1ace7c67debeb928044b1c1b1f061f96c5bfa4a21224c2b4c6e16ec007b00221"
+    },
+    "outputs/update-094-range-mac/drag2-delivery.json": {
+      "sha256": "0569e5a05c23ecd6c090f9fe3eb819a34de31bb2512f4dfd9bbd657ce4c6f90b"
+    },
+    "outputs/update-094-range-mac/overlay-export-pixels.json": {
+      "sha256": "e42ff35173434cedfc88965b88a379bd2624a127bda4b1255ba121ba89c59657"
+    },
+    "outputs/update-094-range-mac/restored3.json": {
+      "sha256": "e641beaa18ab9b57febab148fbd09d3a4535c83d8c644e52ba8530882c79fabf"
+    },
+    "outputs/update-094-range-mac/drag3-delivery.json": {
+      "sha256": "7e72a5203d26cc84a57cee5c4257827e843794fe0177dcb9444bc98c8ad55046"
+    },
+    "outputs/update-094-range-mac/undo.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-range-mac/drag3-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-range-mac/range1.jsx": {
+      "sha256": "545ea2e0707b3401fdf05898266f22e4e5c9b757ae4c0aff70c42f026e20ff96"
+    },
+    "outputs/update-094-range-mac/drag3-read.jsx": {
+      "sha256": "39b562880d748a0ec572bec8f3d3e89ea96e35eaeff08e5ac7d8d353c386f9d0"
+    },
+    "outputs/update-094-range-mac/drag2-read.jsx": {
+      "sha256": "46358be3df426aacac0854ee920c0b18c953d406179f38d6e570fc4259cd9e99"
+    },
+    "outputs/update-094-range-mac/range-gesture.aep": {
+      "sha256": "911a3bbc0d30fffe39fd00e76dc03b20974883b96fd07767a115caade0df50e0"
+    },
+    "outputs/update-094-range-mac/redo.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-range-mac/drag-read.jsx": {
+      "sha256": "ac5c09b2414c66022a61e7684af0c99230293821891eca92d9ad65d0e93c1d33"
+    },
+    "outputs/update-094-range-mac/drag3.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-range-mac/drag2.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-range-mac/range-gesture-pixels.json": {
+      "sha256": "a17416c0bb98774a6afee67d545c04e5d84f4914753b05a1894b6674ad921327"
+    },
+    "outputs/update-094-range-mac/drag-guard.jsx": {
+      "sha256": "0efd2f517119e83e0c76075bc3b080d1c85231030cb88d150f2c836eeb046454"
+    },
+    "outputs/update-094-range-mac/drag-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-range-mac/restored3.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-range-mac/drag-guard.json": {
+      "sha256": "e697a0c803245af888fdc2c7353261cf8eb2cedaeb71b37cdc1975a42751759c"
+    }
+  },
+  "observations": [
+    "Cua observed blue source-reference cap and kernel boundaries at radius3 and changed boundaries at radius1; restored3 export equals baseline exactly.",
+    "First two delivered gestures did not change pixels; retained as unsuccessful attempts. Third gesture on a different visible internal guide changed actual pixels.",
+    "Cua drag refused noWindowsAvailable; existing authorized composition-bounded CGEvent helper used without expanded scope.",
+    "Initial sandbox DoScript transport syntax failure; authorized transport rerun succeeded.",
+    "Four Grid key times and three Radius keys [0,1],[0.2,3],[1,6] survive save/reopen. Original fixture not overwritten."
+  ]
+}

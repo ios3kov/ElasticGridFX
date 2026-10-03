@@ -11,11 +11,14 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Installed ordinary candidate is**0.9.4 Dev8** /cd33b02, Build ID
-EGFX-160e38dd8fe6ee59bcd259e5. Exact AE25.6 loaded identity, native guide drag,
-Undo/Redo, radius response after dragging and keys/save/reopen PASS in the owned
-fixture. Old Radius animation applies immediately; its original stream/keys remain.
-Mouse scalar scrubbing and affected-range drawing remain unaccepted.
+Installed ordinary candidate is **0.9.4 Dev12** /aa6c203, Build ID
+EGFX-fedbc0cbe18a3a28d105a305. Exact loaded identity and visible Version PASS.
+Current-time scripted range changes move the blue boundaries; annotation does
+not enter exported pixels. Native guide drag, exact Undo/Redo and save/reopen
+pixels/keys PASS in the owned 319x241/8-bpc Final Mac AE25.6 fixture. Existing
+Radius animation applies immediately and its original stream/keys remain.
+Real scalar mouse scrubbing and broader range lifecycle/plane coverage remain
+unaccepted. [Exact Dev12 record](live-influence-mac-dev12-2026-10-03.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was
@@ -784,3 +787,18 @@ final strict checks are pending; installed accepted ordinary remains Dev8.
 
 Final versioned range-source checks: PREVIEW-probe Rust80 and strict Clippy PASS.
 Initial default Rust78 PASS; exact native range/export verification remains next.
+
+### U5 ordinary Dev12 native range checkpoint
+
+Source aa6c203 / EGFX-fedbc0cbe18a3a28d105a305 installed and loaded exactly.
+Visible radius1/3 boundaries respond to scripted changes. Export baseline equals
+Dev8 saved frame byte exact; restoring3 returns exact baseline. A successful
+internal-guide gesture changes real pixels; Undo/Redo and a new saved-copy
+roundtrip are exact. Four Grid keys and three original Radius keys remain.
+Two earlier delivered gestures produced unchanged frames and are not accepted;
+Cua direct drag refused noWindowsAvailable. Existing bounded authorized helper
+was used for the successful gesture. Original owned fixture was not overwritten.
+The new copy is outputs/update-094-range-mac/range-gesture.aep.
+
+Native scalar mouse scrubbing, range multiple-instance/plane lifecycle, U7,
+Windows host validation and installers remain incomplete. No remote action.
