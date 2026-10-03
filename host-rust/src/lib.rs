@@ -10,6 +10,7 @@ mod ui_projection;
 mod plane;
 mod fit_layer;
 mod reset_grid;
+mod grid_row;
 #[cfg(feature="render-diagnostics")]
 mod render_diagnostics;
 #[cfg(fstr_lifecycle_probe)]
@@ -914,7 +915,7 @@ impl AdobePluginGlobal for Plugin {
         params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
             f.set_options(&["Layer Plane", "Four Corners"]);
             f.set_default(1); f.set_value(1);
-        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
         for (id, name, point) in [
             (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
             (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
@@ -951,29 +952,28 @@ impl AdobePluginGlobal for Plugin {
         grid_state_def.set_default(GridArb::default())?;
         grid_state_def.set_refcon(GRID_REFCON as *mut c_void);
         params.add_customized(Params::GridState, "Grid Positions", grid_state_def, |param| {
-            // Keep the native animation row/stopwatch visible. Only the custom
-            // diagnostic text is omitted by draw_effect_control.
-            param.set_flags(ae::ParamFlag::START_COLLAPSED);
-            param.set_ui_flags(ae::ParamUIFlags::CONTROL);
-            param.set_ui_width(300);
-            param.set_ui_height(32);
+            // Keep the native animation row/stopwatch visible. The custom
+            // topic provides inline Reset without an empty child area.
+            // Topic only: no expanded custom-control area. AE retains the
+            // animation stream/stopwatch; Reset is drawn on the title row.
+            param.set_ui_flags(ae::ParamUIFlags::TOPIC);
             -1
         })?;
 
         params.add_with_flags(Params::ResetGridPositions, "Reset Grid Positions", ae::ButtonDef::setup(|f| {
-            f.set_label("Reset Now");
-        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
+            f.set_label("Reset");
+        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::INVISIBLE)?;
 
         params.add(Params::TensionRadius, "Affected Lines", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 20.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
-        params.add(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
+        params.add_with_flags(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
             // Keep saved numeric values and all four slots. Relabel to the
             // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
             f.set_options(&["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]);
             f.set_default(2);
             f.set_value(f.default());
-        }))?;
+        }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
         params.add(Params::ElasticityStrength, "Follow Strength", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
         }))?;
@@ -1016,16 +1016,16 @@ impl AdobePluginGlobal for Plugin {
             Ok(())
         })?;
 
-        params.add(Params::EdgeMode, "Edge Behavior", ae::PopupDef::setup(|f| {
+        params.add_with_flags(Params::EdgeMode, "Edge Behavior", ae::PopupDef::setup(|f| {
             f.set_options(&["Clamp", "Wrap", "Mirror"]);
             f.set_default(1);
             f.set_value(f.default());
-        }))?;
-        params.add(Params::Quality, "Render Quality", ae::PopupDef::setup(|f| {
+        }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
+        params.add_with_flags(Params::Quality, "Render Quality", ae::PopupDef::setup(|f| {
             f.set_options(&["Preview (Bilinear)", "Final (Bicubic)"]);
             f.set_default(2);
             f.set_value(f.default());
-        }))?;
+        }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
 
         #[cfg(fstr_binding_probe)]
         binding_probe::add_params(params)?;

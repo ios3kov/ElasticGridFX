@@ -383,15 +383,9 @@ fn draw_effect_control(
     params: &ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
-    if event.effect_area() != ae::EffectArea::Control
-        || params.index(Params::GridState) != Some(event.param_index())
-    {
-        return Ok(());
+    if params.index(Params::GridState) == Some(event.param_index()) {
+        grid_row::draw(event)?;
     }
-
-    // AE owns the parameter name, stopwatch and keyframes. Leave its custom
-    // value area blank instead of hiding the entire animation control.
-    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
 }
 
@@ -411,6 +405,12 @@ pub fn click(
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
+    if event.window_type() == ae::WindowType::Effect {
+        if params.index(Params::GridState) == Some(event.param_index()) {
+            grid_row::click(params, event)?;
+        }
+        return Ok(());
+    }
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }

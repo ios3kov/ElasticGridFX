@@ -106,11 +106,13 @@ and verify the editable deformation representation and its compatibility path
 so range/neighbor changes can respond live without silently rewriting existing
 Grid Positions keys, deleting animation or changing historical projects.
 
-### Grid Positions starts collapsed
+### Grid Positions has no disclosure arrow
 
-Grid Positions must be collapsed by default in Effect Controls. The user can
-expand it for editing/animation. Preserve its stopwatch, existing animation and
-parameter identity; verify supported host UI behavior before implementation.
+Latest user correction on 2026-10-03 supersedes the collapsed-by-default design:
+Grid Positions has no disclosure arrow or empty expanded area. Put a **Reset**
+button to its right on the same row, with no “Now” suffix and no separate reset
+row. Preserve the native stopwatch, animation and parameter identity. The reset
+still affects only the current time; verify the topic-row UI in both hosts.
 
 ### Automatic safe line spacing
 
@@ -175,7 +177,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
 | U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Implemented; 15 Python + 13 JSX mock cases PASS; Windows AE NOT RUN |
 | U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Implemented; core PASS; AE exact-time/Undo NOT RUN |
-| U3 | Simple English labels and collapsed Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Approved two labels and collapse implemented; remaining labels/AE inspection pending |
+| U3 | Simple English labels and single-row Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Approved two labels implemented; no-arrow inline Reset replaces prior collapse; AE inspection pending |
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac/Windows AE checks NOT RUN |
 | U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Design dependency open |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Design dependency open |
@@ -200,3 +202,13 @@ Platform scope confirmed by the user on 2026-10-03: this update targets both
 macOS Apple Silicon and Windows x64 together. Shared product behavior must match;
 platform builds, installation and host evidence are tracked separately. No
 macOS-only release substitutes for completion of the agreed two-platform scope.
+
+### Static choice controls — latest user correction, 2026-10-03
+
+Deformation Plane (mode), Falloff (profile type), Edge Behavior and Render Quality
+must not expose a
+stopwatch or allow new animation. Apply to both Mac and Windows. Retain parameter
+IDs/types and numeric option mappings; do not delete keys in code. Opening old
+projects that already animate these choices is an explicit compatibility check:
+AE handling of the new CANNOT_TIME_VARY flags is not assumed to preserve old
+output until verified. U3/U10 include this check before acceptance/release.

@@ -173,3 +173,26 @@ The Mac and Windows native source workflows now include feat/next-update, ensuri
 both systems validate this shared branch when pushed. Windows runtime remains
 NOT RUN. Evidence is retained in local outputs/next-update-45b33ba-mac; older
 release/runtime PASS records are not transferred to this candidate.
+
+### Shared UI corrections — 2026-10-03, in progress
+
+The user replaced collapsed Grid Positions with a single title row without a
+disclosure arrow, with Reset on the right. A topic-only arbitrary UI and inline
+Drawbot button are being implemented; native layout/hit testing is not yet
+accepted. The current-time reset scope and preserved animation requirement remain.
+Deformation Plane, Falloff, Edge Behavior and Render Quality now declare
+CANNOT_TIME_VARY in shared parameter setup. IDs, types, option mappings and
+defaults are unchanged. New-host stopwatch/animation refusal and compatibility
+with previously animated project values require fresh Mac/Windows checks.
+
+Clean candidate4f653fd / EGFX-3f04fc41b9b8054153c0cb7d loaded identity PASS on
+AE25.6x101. Seven direct-effect frames and five independent pixel comparisons
+PASS, including identity, deformation changes and wave time changes. Full smoke
+remains FAIL at frame_chain_before_corner; adjustment-layer chain and UI reset
+are not accepted. Evidence: outputs/next-update-4f653fd-mac (local, not published).
+These results do not cover the subsequent UI/static-choice edits.
+
+Shared UI/static-choice source checkpoint: 65 Rust tests PASS, strict Clippy PASS
+(with the existing documented drop-non-drop/question-mark allowances), diff
+whitespace check PASS. These are local Mac source checks, not Windows compilation
+or AE panel/migration acceptance.

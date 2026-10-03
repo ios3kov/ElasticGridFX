@@ -2,8 +2,11 @@
 
 ## Next update — development, not released
 
-- Shared Mac/Windows UI: Reset Grid Positions at the current time, collapsed Grid
-  Positions, collapsed Wave Animation section, Affected Lines and Follow Strength.
+- Shared Mac/Windows UI: Grid Positions has no empty disclosure area, with inline
+  Reset at the current time; collapsed Wave Animation section, Affected Lines and
+  Follow Strength. Native panel layout verification is pending.
+- Deformation Plane, Falloff, Edge Behavior and Render Quality disallow new
+  animation. Existing animated-project compatibility remains pending.
 - Preserve existing parameter identities, wave values and render math; resolve
   native-plane hidden streams independently of inserted UI controls.
 - Windows validation requires matching per-run completion after cleanup and a
