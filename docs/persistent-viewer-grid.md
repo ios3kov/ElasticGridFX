@@ -133,3 +133,28 @@ Sources rechecked: [Effect UI & Events](https://ae-plugins.docsforadobe.dev/effe
 and [Item Views](https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/#item-views).
 No new unsupported host route, OS overlay, auto-selection or renderer change
 was implemented. No package/installer work resumed while this feature is open.
+
+## Additional route boundary — 2026-10-04
+
+The user-confirmed live selected slider feedback does not satisfy PV-2/3.
+SDK25.6 AE_GeneralPlug.h3773 exposes GetPlatformWindowRef, viewport scale and
+translation only with PR_RenderContextH under interactive artisan information.
+QueryDrawProcs/PrepareForLineDrawing at4061+ require PR_QueryContextH and are
+artisan-provided camera/light handle drawing functions; they are not a general
+PF-effect registration for an existing viewer. PR_Public.h explicitly defines
+artisans as plugin renderers and requires render_func. GeneralPlugPanels.h
+provides a native view for an owned custom panel, not the existing Composition
+view/transform. Merely acquiring these suites supplies none of those contexts.
+
+[Adobe UI Callbacks](https://ae-plugins.docsforadobe.dev/effect-ui-events/ui-callbacks/)
+requires current PF_ContextH for source/frame transforms, including zoom. Those
+borrowed callbacks are not a transform query after the host stops delivering the
+effect's draws. [Artisan documentation](https://ae-plugins.docsforadobe.dev/artisans/artisan-data-types/)
+describes the renderer-owned draw context. A cached prior transform or guessed
+native window location cannot meet pan/zoom/playback/multiple-view acceptance.
+
+This additional static assessment excludes these APIs as an established additive
+route for the agreed target; no new runtime feasibility result is claimed.
+A product scope question is pending: retain Show Grid in this update and continue
+research, or defer it. The requirement remains in force until a human decision;
+no checkbox, renderer swap or OS-specific overlay is shipped as a substitute.

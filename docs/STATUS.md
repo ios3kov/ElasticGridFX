@@ -17,8 +17,8 @@ New neutral instance's first pending frame (Kind0/smoothing100) renders exactly,
 fixing a reproduced BadCallbackParameter regression in Dev12. Existing fixture
 initial picture, native reverse drag, exact Undo/Redo and saved-copy reopen
 pixels/keys PASS in owned319x241/8-bpc Final Mac AE25.6 scope. Existing animated
-Radius stream/keys remain. Real scalar mouse scrubbing is blocked by Cua panel
-drag refusal; a manual question is pending. U7 Show Grid and Windows build/runtime
+Radius stream/keys remain. Real scalar mouse scrubbing is USER-REPORTED PASS: the user confirmed both
+picture and blue boundaries change during mouse movement. U7 Show Grid and Windows build/runtime
 remain open. [Exact Dev16 record](first-default-mac-dev16-2026-10-04.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
@@ -855,3 +855,34 @@ existing helper cannot address this ECW field under its fixed coordinates.
 User was asked to perform this small check; no helper/TCC widening performed.
 Show Grid, Windows and the complete update remain unaccepted. Installers stay
 paused after the user corrected dependency order. No remote operations.
+
+### 2026-10-04 live slider user acceptance
+
+Human confirmed image and blue boundaries change during mouse movement for the
+Affected Lines question about the last installed Dev16 test scene. Record as
+USER-REPORTED PASS, distinct from earlier agent-scripted range changes. No more
+question or helper scope expansion is needed for this same check. Native broader
+plane/lifecycle coverage and U7 Show Grid are separate open checks.
+
+### 2026-10-04 U7 route review and source-contract reconciliation
+
+Reviewed SDK25.6 PF UI callbacks, Panels, Canvas/QueryXForm and PR_Public
+against current Adobe SDK guide. Renderer-owned PR contexts expose window,
+scale and translation, but are not a generic additive effect-viewer hook.
+Owned panel views do not expose existing Composition viewer transforms.
+Record and sources: persistent-viewer-grid.md. No new runtime route is proved;
+Show Grid remains blocked on a supported implementation, with a scope question
+pending. Requirements remain unchanged until the human answers.
+
+Whole Python regression initial271: one obsolete source-wiring expectation
+still called pre-live drag(), and three native observation/process tests were
+blocked by sandbox ps and /Users/Shared restrictions. Updated the wiring test
+to require current evaluated render + absolute-target drag_live(), retaining
+layout sharing, density guards and changed-state-only publication checks.
+The existing numerical/native evidence remains separate; this source scanner
+is not pixel proof. Repeat with needed sandbox access pending; keep first log.
+
+Repeated full Python regression271 PASS after wiring reconciliation and native
+owned-child/process sandbox access. No production plugin code changed in this
+block; installed Dev16 identity/source remains779db86. This is not a Windows AE
+or Show Grid acceptance. User feedback check is now recorded, not pending.

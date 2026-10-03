@@ -37,11 +37,12 @@
     "native_reverse_drag_changes_pixels": "PASS",
     "undo_redo_exact": "PASS",
     "saved_copy_reopen_pixels_and_keys": "PASS",
-    "real_scalar_mouse_scrubbing": "BLOCKED (Cua noWindowsAvailable; manual question pending)",
+    "real_scalar_mouse_scrubbing": "USER-REPORTED PASS",
     "show_grid": "OPEN",
     "windows_build_and_runtime": "NOT RUN",
     "full_update": "INCOMPLETE",
-    "first_application_and_windows_validation_tool_contracts": "PASS (tool/source contracts; not Windows host)"
+    "first_application_and_windows_validation_tool_contracts": "PASS (tool/source contracts; not Windows host)",
+    "python_all_after_wiring_contract_update": "PASS (271 tests; source/tools/owned-child only)"
   },
   "observations": [
     "Earlier Dev12 missing second-neutral PNG and subsequently observed BadCallbackParameter modal are no longer treated as a completed first-application check. Controlled Kind0/smoothing100/Wave0/spacing0.5 reproduction yielded status42/no PNG.",
@@ -167,6 +168,18 @@
     },
     "outputs/update-094-dev16-first-contract.txt": {
       "sha256": "7272d8a9f35252edde036ff9ad1fff8900d3811e85874d2143cb0c5053c7a283"
+    },
+    "outputs/update-094-dev16-python-all.txt": {
+      "sha256": "5bdc1fa9aa4b876d8d86ad7e65ef7ddf2751501e7d8df7b30c6bd8d4b9fd5ed2"
+    },
+    "outputs/update-094-dev16-python-all-fixed.txt": {
+      "sha256": "e02f5a8e380466ec27b91651328309c3865542bf283ba17b8372aa809c22810b"
     }
+  },
+  "user_report": {
+    "source": "human response in this conversation on2026-10-04",
+    "reported": "Affected Lines changes both image and blue boundaries during mouse movement",
+    "candidate_context": "last installed/observed0.9.4 Dev16 / EGFX-5e91589da403d19125f68235; not a fresh agent observation of the gesture",
+    "scope": "timing of mouse-drag feedback only; no broader platform/runtime acceptance"
   }
 }
