@@ -24,8 +24,18 @@ def _write_wrapper(script_dir: Path, evidence_dir: Path, run_id: str, depth: int
     wrapper = r'''
 (function () {
     var result = {run_id: CONFIG.run_id, status:"FAIL", value:"", error:""};
-    function q(s){return '"' + String(s).replace(/\/g,"\\").replace(/"/g,'\"').replace(//g,"\r").replace(/
-/g,"\n") + '"';}
+    function q(s) {
+        var input=String(s), out='"', bs=String.fromCharCode(92);
+        for (var i=0; i<input.length; i++) {
+            var code=input.charCodeAt(i);
+            if (code===92) out+=bs+bs;
+            else if (code===34) out+=bs+'"';
+            else if (code===13) out+=bs+'r';
+            else if (code===10) out+=bs+'n';
+            else out+=input.charAt(i);
+        }
+        return out+'"';
+    }
     try {
         result.value = elasticGridFirstApplicationFixture(CONFIG);
         result.status = result.value === "CAPTURED_NOT_FULL_ACCEPTANCE" ? "CAPTURED" : "FAIL";
@@ -53,7 +63,16 @@ def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
     source = r'''
 (function(){
     var config=CONFIG, result={run_id:config.run_id,status:"FAIL",stage:"guard"};
-    function q(s){return '"' + String(s).replace(/\/g,"\\").replace(/"/g,'\"') + '"';}
+    function q(s) {
+        var input=String(s), out='"', bs=String.fromCharCode(92);
+        for (var i=0; i<input.length; i++) {
+            var code=input.charCodeAt(i);
+            if (code===92) out+=bs+bs;
+            else if (code===34) out+=bs+'"';
+            else out+=input.charAt(i);
+        }
+        return out+'"';
+    }
     try {
         var projectFile=new File(config.folder+"/first-application.aep");
         if (app.project===null || app.project.file===null ||
@@ -112,7 +131,6 @@ def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
     path=script_dir/"followup.jsx"
     path.write_text(source,encoding="utf-8")
     return path
-
 
 def _single_png(folder: Path, prefix: str) -> Path:
     files=sorted(folder.glob(prefix+"-*.png"))
