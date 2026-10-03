@@ -148,3 +148,28 @@ parameter/group wrappers and [Adobe parameter supervision](https://ae-plugins.do
 Next: clean candidate build and host validation, remaining labels, then the live
 influence/automatic-spacing design. Persistent/playback overlay remains a separate
 feasibility item; safe installers and Windows host closure remain required.
+
+### New-candidate host checkpoint — investigation in progress
+
+Built clean source45b33ba on macOS; candidate EGFX-f16f0eb6f275980990b1f645.
+Bundle entrypoints/PiPL/signature and package/source hashes PASS; local Clippy PASS.
+The permission-preserving installer helper requires the canonical internal archive
+root ElasticGrid.plugin, whereas host verification binds the archive to the actual
+installed name FSTR Stretch.plugin. Separate verified wrappers contain identical
+native payloads; the first archive-name refusal occurred before replacement and
+is retained. The canonical payload was installed atomically with the old plugin
+retained outside Adobe active directories. No rollback requested.
+
+AE25.6x101 smoke on this candidate FAIL at frame_identity; pixels NOT RUN, acceptance
+not claimed. A disposable owned scene reproduced a black viewer. Investigation
+exposed input parameter0 being included in the new hidden-stream discovery scan;
+that scan now starts with effect parameter1. SDK25.6 headers allow input index0,
+so this change is a conservative exclusion of an irrelevant input, not a claim
+that the public SDK universally forbids0. The revised candidate still needs a
+build and host retry before this failure can be marked fixed. The temporary scene
+was closed without saving, under the user's explicit AE permission.
+
+The Mac and Windows native source workflows now include feat/next-update, ensuring
+both systems validate this shared branch when pushed. Windows runtime remains
+NOT RUN. Evidence is retained in local outputs/next-update-45b33ba-mac; older
+release/runtime PASS records are not transferred to this candidate.

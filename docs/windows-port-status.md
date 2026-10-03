@@ -1,5 +1,10 @@
 # Windows x64 port status
 
+This is the original port checkpoint. The active two-platform update now follows
+rules8.0.0 on `feat/next-update`; see [current status](STATUS.md) and
+[task mapping](feature-backlog.md#active-update-task-and-check-mapping--rules800).
+The scope and authorization statements below describe the original port phase.
+
 Updated: 2026-10-03
 
 ## Identity and scope

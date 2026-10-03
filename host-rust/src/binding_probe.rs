@@ -176,8 +176,9 @@ impl Adapter {
         let suite=ae::aegp::suites::Stream::new().map_err(err)?;
         let stream_count=suite.effect_num_param_streams(effect).map_err(err)?;
         if !(5..=128).contains(&stream_count) {return Err("Invalid effect schema size".into());}
-        let mut names=Vec::new();
-        for index in 0..stream_count {
+        let mut names=vec![String::new()];
+        // AE effect parameter streams start at 1; index 0 is the input layer.
+        for index in 1..stream_count {
             let stream=suite.new_effect_stream_by_index(effect,id,index).map_err(err)?;
             names.push(suite.stream_name(&stream,id,true).map_err(err)?);
         }

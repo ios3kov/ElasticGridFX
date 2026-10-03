@@ -2,7 +2,7 @@ name: Windows Port
 
 on:
   push:
-    branches: [feat/windows-x64-aex]
+    branches: [feat/windows-x64-aex, feat/next-update]
   workflow_dispatch:
 
 permissions:
