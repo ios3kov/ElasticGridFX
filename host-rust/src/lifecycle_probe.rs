@@ -130,8 +130,8 @@ impl Deferred {
                             let key=effects.installed_key_from_layer_effect(effect)?;
                             if effects.effect_match_name(key)?!="com.elasticgrid.fx.warp" {return Ok(());}
                             match binding_probe::bind(self.id,effect,layer,self.basic) {
-                                Ok(binding_transaction::Outcome::Installed)=>installed+=1,
-                                Ok(binding_transaction::Outcome::AlreadyInstalled)=>{},
+                                Ok(binding_probe::BindingOutcome::Installed)=>installed+=1,
+                                Ok(binding_probe::BindingOutcome::AlreadyInstalled | binding_probe::BindingOutcome::UndoPreserved)=>{},
                                 Err(error)=>{journal("binding-error",&error);failed=true;},
                             }
                             Ok(())
@@ -159,7 +159,7 @@ fn journal(_index: &str, _record: &str) {
 }
 
 #[cfg(target_os = "macos")]
-fn main_thread() -> bool {
+pub(crate) fn main_thread() -> bool {
     unsafe extern "C" { fn pthread_main_np() -> i32; }
     unsafe { pthread_main_np() != 0 }
 }
@@ -172,12 +172,12 @@ fn capture_main_thread() {
 }
 
 #[cfg(target_os = "windows")]
-fn main_thread() -> bool {
+pub(crate) fn main_thread() -> bool {
     MAIN_THREAD_ID.get().is_some_and(|id| *id == std::thread::current().id())
 }
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn main_thread() -> bool { false }
+pub(crate) fn main_thread() -> bool { false }
 
 impl Probe {
     pub fn observe(&mut self, cmd: &ae::Command, input: &ae::InData) {

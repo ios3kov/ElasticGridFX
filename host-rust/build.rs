@@ -45,9 +45,9 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {43}
-        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {42}
-        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {41} else {40};
+    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {47}
+        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {46}
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {45} else {44};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
@@ -201,6 +201,7 @@ fn main() {
         },
         Property::AE_Effect_Info_Flags(0),
         Property::AE_Effect_Global_OutFlags(
+            OutFlags::SequenceDataNeedsFlattening |
             OutFlags::UseOutputExtent |
             OutFlags::NonParamVary |
             OutFlags::DeepColorAware |

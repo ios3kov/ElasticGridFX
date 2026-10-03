@@ -5,6 +5,7 @@ use std::fmt;
 use std::ffi::c_void;
 
 mod ui;
+mod binding_receipt;
 mod control_grid;
 mod show_grid;
 mod range_feedback;
@@ -925,7 +926,20 @@ fn render_metal(
 #[allow(clippy::drop_non_drop, clippy::question_mark)]
 mod effect_entry {
 use super::*;
-ae::define_effect!(Plugin, (), Params);
+#[derive(Default)]
+struct Instance { receipt: binding_receipt::State }
+ae::define_effect!(Plugin, Instance, Params);
+impl AdobePluginInstance for Instance {
+    fn flatten(&self) -> Result<(u16, Vec<u8>), ae::Error> { Ok(self.receipt.flatten()) }
+    fn unflatten(version: u16, bytes: &[u8]) -> Result<Self, ae::Error> {
+        Ok(Self { receipt: binding_receipt::State::unflatten(version, bytes)? })
+    }
+    fn render(&self, _: &mut PluginState, _: &ae::Layer, _: &mut ae::Layer) -> Result<(), ae::Error> { Ok(()) }
+    fn handle_command(&mut self, _: &mut PluginState, cmd: ae::Command) -> Result<(), ae::Error> {
+        if matches!(cmd, ae::Command::CompletelyGeneral) { self.receipt.service()?; }
+        Ok(())
+    }
+}
 
 impl AdobePluginGlobal for Plugin {
     fn params_setup(

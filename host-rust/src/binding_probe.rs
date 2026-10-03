@@ -243,8 +243,44 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
 }
 
 #[cfg(fstr_auto_binding)]
-pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Outcome,String>{
-    binding_transaction::install_or_upgrade(&mut Adapter::new(id,effect,layer,basic)?,&expressions(),&legacy_expressions()).map_err(|e|format!("{e:?}"))
+#[derive(Debug)]
+pub(crate) enum BindingOutcome { Installed, AlreadyInstalled, UndoPreserved }
+#[cfg(fstr_auto_binding)]
+fn cancelled_or_previous(states: &[Snapshot], previous: &[String]) -> bool {
+    states.len() == 5 && (states.iter().all(|s| s.keys == 0 && !s.enabled && s.expression.is_empty())
+        || (previous.len() == 5 && states.iter().zip(previous)
+            .all(|(s,e)| s.keys == 0 && s.enabled && s.expression == *e)))
+}
+#[cfg(fstr_auto_binding)]
+pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<BindingOutcome,String>{
+    let mut host = Adapter::new(id,effect,layer,basic)?;
+    let initialized = binding_receipt::query(id,effect,None).map_err(err)?;
+    let states = (0..5).map(|i|host.read(i)).collect::<Result<Vec<_>,_>>()?;
+    let previous = legacy_expressions();
+    if initialized && cancelled_or_previous(&states, &previous) {
+        host.validate_target()?;
+        return Ok(BindingOutcome::UndoPreserved);
+    }
+    let expected = expressions();
+    let exact = states.len() == expected.len() && states.iter().zip(&expected)
+        .all(|(s,e)| s.keys == 0 && s.enabled && s.expression == *e);
+    // Mark before entering the binding undo group. Its prior sequence snapshot
+    // must already carry the receipt, so Undo cannot restore an uninitialized
+    // marker and cause the idle callback to recreate the cancelled action.
+    let marked = !initialized && (exact || cancelled_or_previous(&states, &previous));
+    if marked { binding_receipt::query(id,effect,Some(true)).map_err(err)?; }
+    let outcome = match binding_transaction::install_or_upgrade(&mut host,&expected,&previous) {
+        Ok(outcome) => outcome,
+        Err(failure) => {
+            if marked && host.validate_target().is_ok() {
+                binding_receipt::query(id,effect,Some(false))
+                    .map_err(|error|format!("{failure:?}; receipt rollback failed: {error:?}"))?;
+            }
+            return Err(format!("{failure:?}"));
+        }
+    };
+    Ok(match outcome { Outcome::Installed => BindingOutcome::Installed,
+        Outcome::AlreadyInstalled => BindingOutcome::AlreadyInstalled })
 }
 
 // The wrapper locks even a null GetExpression result. Query explicitly and

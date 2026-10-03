@@ -972,3 +972,28 @@ retained at outputs/update-094-dev36-mac/binding-error.txt. Dev40 restores
 safe deferred binding and preserves its bounded failure reporting.
 Undo repair requires a real instance identity/lifecycle design that preserves
 legacy sequence-data compatibility; pending source investigation.
+
+### Dev44 per-instance receipt candidate
+
+The rejected stream-ID cache is replaced by a compact versioned sequence
+receipt, queried synchronously for the exact effect with EffectCallGeneric
+on the captured main thread. No effect/stream handles survive a callback.
+A scoped TLS request carries only read/mark and its scalar reply; no generic
+extra pointer is dereferenced. Outside that scope callbacks are no-ops.
+Legacy null/empty sequence state initializes generation0; version1 receipts
+flatten with a magic/size/version check. Public parameters, GridArb wire3,
+original animation streams and rendering ABI remain unchanged. PiPL enables
+SequenceDataNeedsFlattening with existing MFR/GetFlattenedSequenceData support.
+
+An owned eligible receipt is marked before the expression Undo group so the
+group's prior sequence snapshot can retain it. If binding fails, the receipt
+is cleared only while the exact target still validates, and clear failure is
+explicit. Initialized blank or exact previous owned binding is respected as
+Undo; foreign, partial and keyed streams keep the transaction conflict policy.
+No current-time mutation, expression edits from render/UpdateParamsUI, cached
+geometry or renderer fallback is introduced. The renderer ignores receipts.
+
+Acceptance is NOT RUN until native new/legacy creation, ordinary Undo/Redo,
+deletion/restore, save/reopen, first-frame and MFR evidence is recorded.
+Native sequence snapshot behavior remains a hypothesis. Mac installed Dev40
+safe deferred route; Dev44 source checks in progress. Windows remains NOT RUN.
