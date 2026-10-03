@@ -254,6 +254,8 @@ def run_roundtrip(afterfx: Path) -> dict:
     before = {p.resolve() for p in temp.glob("ElasticGridFX-roundtrip-*") if p.is_dir()}
     script = ROOT / "tests/ae_project_roundtrip.jsx"
     process = subprocess.run([str(afterfx), "-r", str(script)], capture_output=True, text=True, timeout=150)
+    if process.returncode != 0:
+        raise ValueError("roundtrip script returned nonzero status")
     candidates = [p.resolve() for p in temp.glob("ElasticGridFX-roundtrip-*") if p.is_dir() and p.resolve() not in before]
     if len(candidates) != 1:
         raise ValueError(f"roundtrip did not produce one new evidence folder: {len(candidates)}")
