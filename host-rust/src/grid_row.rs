@@ -4,10 +4,10 @@ use ae::drawbot::{ColorRgba, PointF32, RectF32, TextAlignment, TextTruncation};
 
 fn button(frame: ae::Rect) -> Option<RectF32> {
     // ECW divides the row at its center, with the native value control inset
-    // by 18 logical units. horiz_offset is not initialized for this arbitrary
+    // by 16 logical units. horiz_offset is not initialized for this arbitrary
     // topic in AE 25.6 and must never be used as a coordinate.
     let width = (frame.right - frame.left) as f32;
-    let left = frame.left as f32 + width * 0.5 + 18.0;
+    let left = frame.left as f32 + width * 0.5 + 16.0;
     let available = frame.right as f32 - left - 6.0;
     let height = (frame.bottom - frame.top) as f32;
     if width < 300.0 || available < 60.0 || height < 12.0 { return None; }
@@ -95,7 +95,7 @@ mod tests {
     fn reset_hit_area_preserves_title_and_refuses_outside_points() {
         let frame = ae::Rect { left: 40, top: 50, right: 340, bottom: 72 };
         let rect = button(frame).unwrap();
-        assert!(rect.left >= frame.left as f32 + 168.0);
+        assert!(rect.left >= frame.left as f32 + 166.0);
         assert!(contains(rect, ae::Point { h: 300, v: 60 }));
         for point in [ae::Point { h: 50, v: 60 }, ae::Point { h: 300, v: 40 },
             ae::Point { h: 340, v: 60 }, ae::Point { h: 300, v: 71 }] {

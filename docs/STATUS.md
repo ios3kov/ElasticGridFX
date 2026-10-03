@@ -249,3 +249,10 @@ for this AE25.6 arbitrary topic. Reset now follows the row center plus the
 observed native 18-unit value inset, uses 130x16 logical units and pill corners.
 This is a measured layout policy, not a claimed SDK value-column API. Native
 comparison and panel-width coverage are still pending.
+
+Native ordinary candidate31e1ada shows Reset with matching 130x16 logical
+size, pill corners and theme colors next to enabled Fit Layer. Visual comparison
+found a 2-logical-unit horizontal discrepancy; inset corrected from18 to16.
+Grid Positions retains its native stopwatch and no disclosure. Min Line Spacing
+is hidden; Wave Animation remains collapsed. This is Mac AE25.6 visual coverage;
+Windows UI and additional panel widths remain NOT RUN.
