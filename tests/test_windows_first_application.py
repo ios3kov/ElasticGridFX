@@ -13,7 +13,7 @@ class WindowsFirstApplicationTests(unittest.TestCase):
     def test_control_scripts_do_not_pollute_fresh_evidence_folder(self):
         with tempfile.TemporaryDirectory(prefix='egfx-first-prep-') as tmp:
             root=Path(tmp)
-            evidence=root/'EGFX-first-'+'a'*32
+            evidence=root/('EGFX-first-'+'a'*32)
             control=root/'control'
             evidence.mkdir()
             control.mkdir()
