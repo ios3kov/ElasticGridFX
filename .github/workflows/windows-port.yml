@@ -108,3 +108,17 @@ jobs:
           After Effects load: NOT RUN
           After Effects runtime/UI/render/MFR/Undo: NOT RUN
           "@ | Set-Content -Encoding utf8 dist/windows/VALIDATION_SCOPE.txt
+
+      - name: Upload Windows validation artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
+        with:
+          name: FSTR-Stretch-Windows-x64-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            dist/windows/FSTR Stretch.aex
+            dist/windows/FSTR Stretch.windows-artifact.json
+            dist/windows/dumpbin-headers.txt
+            dist/windows/dumpbin-exports.txt
+            dist/windows/coff-resources.txt
+            dist/windows/VALIDATION_SCOPE.txt
+            host-rust/Cargo.lock
