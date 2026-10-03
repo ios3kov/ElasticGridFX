@@ -421,3 +421,23 @@ resize still NOT RUN; finite available width is required for any readable
 button. No new Reset pixel/keys/MFR claim for this geometry-only candidate.
 U3 narrow-panel disappearance is resolved on the verified Mac layouts. U5/U7/
 U8/U9 plus legacy migration/integration remain open; update is not complete.
+
+
+### Live influence investigation — 2026-10-03
+
+U5 requires editable move intent, not additional UPDATE_NOW calls over baked
+positions. [Design investigation](live-influence-design.md) records the existing
+source route, a bounded candidate state and numerical/serialization gates before
+integration. Real C++ FFI regression proves every density1..50 at each retained
+topology1..50 uses the same maximum50 internal reference catalog, comparing float
+bits and unchanged serialized state across2500 cases. Shared suite70 PASS.
+This is a design prerequisite, not an implemented live-influence feature.
+
+Human legacy decision pending: preserve exact old appearance and apply live
+influence to new moves, or require old baked deformations to respond too. Missing
+gesture history must not be fabricated by inverse fitting or rewriting old keys.
+No v4 data is encoded, no render model changed, no platform runtime PASS claimed.
+Installed6314811 remains the Reset-resize candidate; subsequent edits in this
+checkpoint are documentation plus test-only design coverage. Local-only scope
+continues. Show Grid public overlay feasibility, installers, Windows and legacy
+integration are still open, so the full requested update remains incomplete.

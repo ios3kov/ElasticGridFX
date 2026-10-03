@@ -74,3 +74,26 @@ fn malformed_lattice_and_invalid_counts_are_not_silently_repaired() {
     assert!(retained_grid(&invalid).is_err());
     assert!(view(&invalid,(4,4),0.0,0.25).is_err());
 }
+
+#[test]
+fn every_density_uses_a_bounded_catalog_of_fifty_exact_references() {
+    // U5 design prerequisite: retaining editable moves must not require an
+    // unbounded gesture log or change reference identity after a density edit.
+    // Exercise the real C++ control reader for every supported base topology.
+    for guides in 1..=MAX_GUIDES {
+        let initial = GridArb::uniform(guides, guides);
+        let before = bytes(&initial);
+        let catalog = view(&initial, (MAX_GUIDES, MAX_GUIDES), 0.0, 0.25).unwrap();
+        let exact: std::collections::HashSet<_> = catalog.column_refs.iter()
+            .map(|reference| reference.to_bits()).collect();
+        assert_eq!(exact.len(), MAX_GUIDES + 2);
+        for count in 1..=MAX_GUIDES {
+            let controls = view(&initial, (count, count), 0.0, 0.25).unwrap();
+            for reference in controls.column_refs.iter().chain(&controls.row_refs) {
+                assert!(exact.contains(&reference.to_bits()),
+                    "base={guides}, density={count}, ref={reference}");
+            }
+            assert_eq!(bytes(&initial), before);
+        }
+    }
+}
