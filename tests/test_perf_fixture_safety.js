@@ -5,7 +5,7 @@ const source=fs.readFileSync(path.join(__dirname,'perf_fixture.jsx'),'utf8');
 function run(options={}){
  const folder='/owned';const files={[folder+'/pattern.png']:'png'};const calls={save:0,close:0,newProject:0,dialogs:0,import:0,comp:0};
  const hiddenNames=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
- const params={};const fx={matchName:'com.elasticgrid.fx.warp',property(n){if(typeof n==='number' && n>=24 && n<=28)return {name:hiddenNames[n-24],value:options.wrongKind?0:1,expressionEnabled:!options.unready,expressionError:options.expressionError?'error':''};return params[n]||=( {value:0,setValue(v){this.value=options.wrongPlane && n==='Deformation Plane'?1:options.wrongCorners && n==='Plane Top Right'?[100,0]:v;}} );}};
+ const params={};const fx={matchName:'com.elasticgrid.fx.warp',property(n){if(hiddenNames.includes(n))return {name:n,value:options.wrongKind?0:1,expressionEnabled:!options.unready,expressionError:options.expressionError?'error':''};return params[n]||=( {value:0,setValue(v){this.value=options.wrongPlane && n==='Deformation Plane'?1:options.wrongCorners && n==='Plane Top Right'?[100,0]:v;}} );}};
  const parade={numProperties:1,property(){return fx;},addProperty(){return options.noEffect?null:fx;}};
  const layer={source:null,selected:true,property(){return parade;}};
  const comp={name:'EGFX_PERF',width:1920,height:1080,frameRate:30,duration:2,numLayers:1,resolutionFactor:[1,1],openInViewer(){},layer(){return layer;},layers:{add(footage){layer.source=footage;return layer;}}};

@@ -1,16 +1,23 @@
-// Resolve both legacy flat controls and controls inside native UI groups.
-function egfxWaveParam(root, name) {
+// Standalone fixtures accept legacy/new labels and flat/grouped host controls.
+function egfxFixtureParam(root, name, depth) {
+    depth = depth || 0;
+    if (depth > 8) throw Error("Parameter nesting exceeds fixture limit");
+    var aliases = {"Falloff":"Follow Shape", "Stretch Easing":"Smooth Stretch", "Easing Distance":"Smooth Width"};
     var direct = root.property(name);
     if (direct !== null) return direct;
+    if (aliases[name]) { direct = root.property(aliases[name]); if (direct !== null) return direct; }
+    if (root.numProperties > 128) throw Error("Parameter count exceeds fixture limit");
     for (var i = 1; i <= root.numProperties; i++) {
         var child = root.property(i);
         if (child !== null && child.numProperties > 0) {
-            var found = egfxWaveParam(child, name);
+            var found = egfxFixtureParam(child, name, depth + 1);
             if (found !== null) return found;
         }
     }
     return null;
 }
+// Resolve both legacy flat controls and controls inside native UI groups.
+function egfxWaveParam(root, name) { return egfxFixtureParam(root, name); }
 // Owned-only queue capture; separate host turns prove native idle binding.
 // This complements the retained historical saveFrameToPng smoke evidence.
 function egfxCreateChainQueue(config) {
@@ -41,7 +48,7 @@ function egfxCaptureChainQueue(config) {
         var names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
         for(var i=0;i<5;i++){var h=e.property(names[i]);check(h&&h.name===names[i]&&h.expressionEnabled&&h.expressionError==='','Binding unready');}
         check(e.property('__FSTR Plane Kind').value===1,'Plane kind differs');return e;}
-    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('Edge Behavior').setValue(1);egfxWaveParam(e, 'Wave Axis').setValue(1);egfxWaveParam(e, 'Wave Frequency').setValue(1.3);egfxWaveParam(e, 'Wave Phase').setValue(35);e.property('Stretch Easing').setValue(0);egfxWaveParam(e, 'Wave Speed').setValue(0);egfxWaveParam(e, 'Wave Amplitude').setValue(0);}
+    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('Edge Behavior').setValue(1);egfxWaveParam(e, 'Wave Axis').setValue(1);egfxWaveParam(e, 'Wave Frequency').setValue(1.3);egfxWaveParam(e, 'Wave Phase').setValue(35);egfxFixtureParam(e, 'Stretch Easing').setValue(0);egfxWaveParam(e, 'Wave Speed').setValue(0);egfxWaveParam(e, 'Wave Amplitude').setValue(0);}
     function frame(c,name,time){
         stage='frame_'+name;own();check(owned.renderQueue.numItems===0,'Unexpected queue');
         var folder=new Folder(config.folder+'/'+name);check(!folder.exists&&folder.create(),'Stale frame directory');

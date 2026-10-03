@@ -1,3 +1,21 @@
+// Standalone fixtures accept legacy/new labels and flat/grouped host controls.
+function egfxFixtureParam(root, name, depth) {
+    depth = depth || 0;
+    if (depth > 8) throw Error("Parameter nesting exceeds fixture limit");
+    var aliases = {"Falloff":"Follow Shape", "Stretch Easing":"Smooth Stretch", "Easing Distance":"Smooth Width"};
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    if (aliases[name]) { direct = root.property(aliases[name]); if (direct !== null) return direct; }
+    if (root.numProperties > 128) throw Error("Parameter count exceeds fixture limit");
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxFixtureParam(child, name, depth + 1);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Creation returns to the host so its existing idle binding can finish.
 // Finalization never installs expressions or accepts an unready plane.
 function elasticGridPerfFixtureCreate(config) {
@@ -49,7 +67,7 @@ function elasticGridPerfFixture(config) {
     var result = {run_id:config.run_id,status:"FAIL",stage:"guard",ae_version:""};
     function q(s) { return '"' + String(s).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/\r/g,"\\r").replace(/\n/g,"\\n") + '"'; }
     function own() { if (owned === null || app.project !== owned) throw new Error("Project ownership changed"); }
-    function param(fx,name) { var p=fx.property(name); if (p===null) throw new Error("Missing parameter"); return p; }
+    function param(fx,name) { var p=egfxFixtureParam(fx,name); if (p===null) throw new Error("Missing parameter"); return p; }
     function hasTemplate(list,name) { for (var i=0;i<list.length;i++) if (list[i]===name) return true; return false; }
     app.exitCode = 92;
     try {
@@ -86,7 +104,7 @@ function elasticGridPerfFixture(config) {
         // A UUID comment alone is insufficient: check the exact structure/source above.
         var hiddenNames=["__FSTR Probe TL","__FSTR Probe TR","__FSTR Probe BR","__FSTR Probe BL","__FSTR Plane Kind"];
         for(var hi=0;hi<5;hi++){
-            var hidden=fx.property(24+hi);
+            var hidden=fx.property(hiddenNames[hi]);
             if(hidden===null || hidden.name!==hiddenNames[hi] || !hidden.expressionEnabled || hidden.expressionError!=="")
                 throw new Error("Deferred plane binding is not ready");
         }

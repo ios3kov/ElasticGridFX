@@ -12,7 +12,7 @@ fn button(frame: ae::Rect) -> Option<RectF32> {
     let height = (frame.bottom - frame.top) as f32;
     if width < 300.0 || available < 60.0 || height < 12.0 { return None; }
     Some(RectF32 { left, top: frame.top as f32,
-        width: available.min(130.0), height: (height - 1.0).min(16.0) })
+        width: available.floor().min(130.0), height: (height - 1.0).min(16.0) })
 }
 fn contains(rect: RectF32, point: ae::Point) -> bool {
     let (x, y) = (point.h as f32, point.v as f32);
@@ -60,13 +60,31 @@ pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
     Ok(())
 }
 
+// A drag continuation has its own event data. Capture the hit rectangle at
+// DO_CLICK instead of reading effect_win fields which the SDK only guarantees
+// for DO_CLICK/DRAW/ADJUST_CURSOR. Four integers, no retained host pointers.
+const RESET_GESTURE: isize = 0x45474658;
+fn capture(rect: RectF32) -> [isize; 4] {
+    [RESET_GESTURE, rect.left.to_bits() as isize, rect.top.to_bits() as isize,
+        ((rect.width as u32) << 16 | rect.height as u32) as isize]
+}
+fn restore(state: [isize; 4]) -> Option<RectF32> {
+    if state[0] != RESET_GESTURE || state[1] < 0 || state[1] as u64 > u32::MAX as u64 ||
+        state[2] < 0 || state[2] as u64 > u32::MAX as u64 ||
+        state[3] <= 0 || state[3] as u64 > u32::MAX as u64 { return None; }
+    let rect = RectF32 { left: f32::from_bits(state[1] as u32),
+        top: f32::from_bits(state[2] as u32), width: ((state[3] as u32) >> 16) as f32,
+        height: ((state[3] as u32) & 0xffff) as f32 };
+    if !rect.left.is_finite() || !rect.top.is_finite() ||
+        !(1.0..=130.0).contains(&rect.width) || !(1.0..=16.0).contains(&rect.height) { return None; }
+    Some(rect)
+}
 pub(crate) fn click(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
     if event.effect_area() != ae::EffectArea::Title { return Ok(()); }
-    if button(event.param_title_frame())
-        .is_some_and(|rect| contains(rect, event.screen_point())) {
+    if let Some(rect) = button(event.param_title_frame()).filter(|r| contains(*r, event.screen_point())) {
         // PF_CHANGE_VALUE is valid in DRAG, not DO_CLICK. Arm the button and
         // commit on release inside its bounds, allowing drag-out cancellation.
-        event.set_continue_refcon(0, 1);
+        for (index, value) in capture(rect).into_iter().enumerate() { event.set_continue_refcon(index, value); }
         event.set_send_drag(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     }
@@ -74,13 +92,12 @@ pub(crate) fn click(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
 }
 
 pub(crate) fn drag(params: &mut ae::Parameters<Params>, event: &mut ae::EventExtra) -> Result<(), ae::Error> {
-    if event.continue_refcon(0) != 1 { return Ok(()); }
+    let Some(rect) = restore(std::array::from_fn(|i| event.continue_refcon(i))) else { return Ok(()); };
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     if event.last_time() {
         event.set_continue_refcon(0, 0);
         event.set_send_drag(false);
-        if button(event.param_title_frame())
-            .is_some_and(|rect| contains(rect, event.screen_point())) && reset_grid::apply(params)? {
+        if contains(rect, event.screen_point()) && reset_grid::apply(params)? {
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT |
                 ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
         }
@@ -102,5 +119,21 @@ mod tests {
             assert!(!contains(rect, point));
         }
         assert!(button(ae::Rect { right: 180, ..frame }).is_none());
+    }
+
+    #[test]
+    fn reset_continuation_keeps_original_bounds_and_rejects_foreign_state() {
+        let rect = RectF32 { left: -20.5, top: 300.0, width: 130.0, height: 16.0 };
+        let state = capture(rect);
+        let retained = restore(state).unwrap();
+        assert_eq!(retained.left, rect.left); assert_eq!(retained.top, rect.top);
+        assert!(contains(retained, ae::Point { h: 0, v: 310 }));
+        assert!(!contains(retained, ae::Point { h: 110, v: 310 }));
+        assert!(!contains(retained, ae::Point { h: 0, v: 316 }));
+        for bad in [[0;4], [1, state[1], state[2], state[3]],
+            [RESET_GESTURE, f32::NAN.to_bits() as isize, state[2], state[3]],
+            [RESET_GESTURE, state[1], state[2], (131 << 16) | 16]] {
+            assert!(restore(bad).is_none());
+        }
     }
 }

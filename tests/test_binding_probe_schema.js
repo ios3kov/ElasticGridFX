@@ -8,7 +8,11 @@ function fixture(){
  const points=names.map(name=>({name,numKeys:0,expressionEnabled:true,expression:'// FSTR research plane v1\n[1,2]',expressionError:'',value:[1,2]}));
  const builtin={matchName:'ADBE Effect Built In Params'};
  const kind={name:'__FSTR Plane Kind',numKeys:0,expressionEnabled:true,expressionError:'',value:1};
- const fx={matchName:'com.elasticgrid.fx.warp',numProperties:29,property(i){return i===29?builtin:i===28?kind:points[i-24];}};
+ const streams=[...points,kind];
+ const fx={matchName:'com.elasticgrid.fx.warp',numProperties:33,property(key){
+   if(typeof key==='string')return streams.find(p=>p.name===key)||null;
+   return key===33?builtin:key===32?kind:points[key-28]||null;
+ }};
  const effects={numProperties:2,property(i){return i===2?fx:{property(){return {expression:''};}};}};
  const layer={name:'__EGFX_TEST_TEXT',property(n){return n==='ADBE Text Properties'?{}:effects;}};
  const comp=Object.assign(new CompItem(),{name:'__EGFX_TEXT_'+config.runId,comment:'EGFX_TEXT_PROBE_V1:'+config.runId,numLayers:1,width:640,height:480,layer(){return layer;}});
@@ -17,7 +21,7 @@ function fixture(){
  return {ctx,fx,builtin,points,kind};
 }
 const f=fixture();assert.match(f.ctx.EGFXBindingProbe(config,true),/^PASS/);
-for(const alter of [f=>f.fx.numProperties=28,f=>f.builtin.matchName='foreign',f=>f.points[0].expressionError='bad',f=>f.points[1].numKeys=1,f=>f.kind.value=2]){
+for(const alter of [f=>f.fx.matchName='foreign',f=>f.kind.name='foreign',f=>f.points[0].name='foreign',f=>f.points[0].expressionError='bad',f=>f.points[1].numKeys=1,f=>f.kind.value=2]){
  const f=fixture();alter(f);assert.throws(()=>f.ctx.EGFXBindingProbe(config,true));
 }
-console.log('binding schema includes native Compositing Options; negative controls PASS');
+console.log('binding resolves hidden names independently of appended controls/Compositing Options; missing/foreign streams and binding corruption rejected');

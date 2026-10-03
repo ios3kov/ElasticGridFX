@@ -273,3 +273,34 @@ colors; final9b5c26b horizontal correction is not yet visually accepted.
 No claim of Windows UI verification, old-project spacing migration, Reset
 keyframe/Undo runtime proof or complete update readiness. User local-only scope
 continues; no push, PR, release or changes to main.
+
+### Reset final layout and event review — 2026-10-03
+
+Mac unlocked; installed9b5c26b visually matches Fit Layer horizontal bounds,
+130x16 dimensions, rounded shape and theme colors. Grid Positions remains a
+single row with its native stopwatch. New visual comparison observed in Cua.
+Coordinate click via Cua still returns AXError.notImplemented. A current source
+review against SDK25.6 AE_EffectUI.h:545 avoids effect_win reads during DRAG;
+DO_CLICK saves the hit rectangle in the four continuation integers. DRAG uses
+that rectangle and the gesture marker, clears it on release and commits only
+inside bounds. New regression verifies foreign/nonfinite state rejection and
+inside/outside release geometry. Native button/keys/Undo proof still pending.
+
+U3 remaining labels use short wording: Follow Shape (Smooth/Soft/Even/
+Smooth Legacy), Smooth Stretch, Smooth Width. Enum IDs, four ordinal slots,
+values and formula mapping are unchanged. Standalone host fixtures resolve
+legacy/new label aliases and flat/grouped parameters, with bounded nesting.
+Compatibility of existing name-based user expressions remains a native check,
+not inferred from unchanged IDs.
+
+Full Python suite baseline265: three stale approved-UI contract failures and
+three sandbox process/path permission errors; latter require scoped execution,
+not weakening guards. Contract expectations updated to the approved static
+choices, topic-only grid, group controls and appended compatibility flag.
+
+Shared checkpoint: 68 Rust tests PASS; strict Clippy PASS; Python suite265 PASS
+with scoped native-process test access; all19 standalone JavaScript test files
+PASS after removing stale hard-coded hidden-stream indices from their models.
+The perf preparation fixture itself also retained one numeric hidden-stream
+lookup; corrected to the canonical unique name, preserving readiness refusal.
+These results are code/mock evidence, not Windows or AE runtime certification.

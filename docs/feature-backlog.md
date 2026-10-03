@@ -56,8 +56,8 @@ Status: REQUESTED / NOT IMPLEMENTED. No host tests or acceptance PASS recorded.
 User decisions recorded on 2026-10-03: all user-facing parameter, button,
 section and option names must remain **English** and explain their purpose in
 ordinary language. Russian explanations in the conversation are not UI labels.
-Implementation has not started; the following are proposed English labels for
-that approved interface direction, not shipped controls.
+Implementation is in the local update branch; labels and checks below are
+development state, not a released interface.
 
 ### Clear parameter names
 
@@ -68,14 +68,14 @@ proposals to refine rather than approved final wording.
 | Existing label | Proposed English label | User-facing meaning |
 |---|---|---|
 | Tension Radius | Affected Lines | How far neighboring grid lines are affected; the value remains a range in grid steps, not an exact integer count. |
-| Falloff | Influence Shape | How movement fades across the affected area. |
-| Smoothstep | Smooth Fade | Smoothly reduce influence toward the range boundary. |
-| Gaussian | Soft Center | Stronger influence near the moved line, weaker farther away. |
-| Linear | Even Fade | Reduce influence at a constant rate with distance. |
-| Smoothstep (Legacy) | Smooth Fade (Legacy) | Preserve the saved legacy option; not the default recommendation. |
+| Falloff | Follow Shape | How movement fades across the affected area. |
+| Smoothstep | Smooth | Smoothly reduce influence toward the range boundary. |
+| Gaussian | Soft | Stronger influence near the moved line, weaker farther away. |
+| Linear | Even | Reduce influence at a constant rate with distance. |
+| Smoothstep (Legacy) | Smooth (Legacy) | Preserve the saved legacy option; not the default recommendation. |
 | Elasticity Strength | Follow Strength | How strongly neighboring lines follow the moved line. |
-| Stretch Easing | Stretch Smoothing | Soften changes in image stretch at cell boundaries. |
-| Easing Distance | Smoothing Width | Width of the area used to smooth those transitions. |
+| Stretch Easing | Smooth Stretch | Soften changes in image stretch at cell boundaries. |
+| Easing Distance | Smooth Width | Width of the area used to smooth those transitions. |
 
 Label changes must preserve parameter IDs, saved numeric option mappings and
 existing animation/state formats. Do not remove a legacy numeric option or
@@ -90,7 +90,7 @@ reorder its meaning just to simplify its visible name.
 - Affected Lines and Follow Strength must provide immediate, meaningful
   viewport feedback, rather than only altering a later drag. Visualize the
   affected range while adjusting it and interacting with the grid.
-- Stretch Smoothing and Smoothing Width must immediately update the visible
+- Smooth Stretch and Smooth Width must immediately update the visible
   deformation where those controls have an effect.
 - Preserve legitimate dependencies: width at zero smoothing, and wave settings
   at zero wave amount, need not manufacture a visible deformation. Explain or
@@ -128,7 +128,7 @@ new instances and uses USE_VALUE_FOR_OLD_PROJECTS=false for older projects.
 Automatic requests zero spacing, invoking the existing core numerical floor
 (1e-6 normalized units) and density cap. The retained hidden Min Line Spacing
 stream supplies unchanged saved values/keys for legacy projects. No key rewrite.
-Host migration/default behavior remains to be verified.
+New-instance default and static flag verified in AE25.6; old-project migration remains to be verified.
 
 ### Collapsible Wave Animation section
 
@@ -182,10 +182,10 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
 | U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Implemented; 15 Python + 13 JSX mock cases PASS; Windows AE NOT RUN |
 | U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Implemented; core PASS; AE exact-time/Undo NOT RUN |
-| U3 | Simple English labels and single-row Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Approved two labels implemented; no-arrow inline Reset replaces prior collapse; AE inspection pending |
-| U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac/Windows AE checks NOT RUN |
+| U3 | Simple English labels and single-row Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Short labels implemented locally; no-arrow inline Reset dimensions/alignment inspected on Mac; fresh labels and Windows pending |
+| U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac collapsed section inspected; Windows AE NOT RUN |
 | U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Design dependency open |
-| U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Design dependency open |
+| U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |
 | U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Feasibility open |
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Pending design and helpers |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |

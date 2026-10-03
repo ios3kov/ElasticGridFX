@@ -969,10 +969,10 @@ impl AdobePluginGlobal for Plugin {
         params.add(Params::TensionRadius, "Affected Lines", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 20.0), (0.0, 8.0), 3.0, 1, false);
         }))?;
-        params.add_with_flags(Params::Falloff, "Falloff", ae::PopupDef::setup(|f| {
+        params.add_with_flags(Params::Falloff, "Follow Shape", ae::PopupDef::setup(|f| {
             // Keep saved numeric values and all four slots. Relabel to the
             // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
-            f.set_options(&["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]);
+            f.set_options(&["Smooth", "Soft", "Even", "Smooth (Legacy)"]);
             f.set_default(2);
             f.set_value(f.default());
         }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
@@ -982,10 +982,10 @@ impl AdobePluginGlobal for Plugin {
         params.add_with_flags(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 25.0), (0.0, 5.0), 0.5, 2, true);
         }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
-        params.add(Params::StretchEasing, "Stretch Easing", ae::FloatSliderDef::setup(|f| {
+        params.add(Params::StretchEasing, "Smooth Stretch", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
         }))?;
-        params.add(Params::EasingDistance, "Easing Distance", ae::FloatSliderDef::setup(|f| {
+        params.add(Params::EasingDistance, "Smooth Width", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (1.0, 50.0), (1.0, 50.0), 25.0, 1, true);
         }))?;
 

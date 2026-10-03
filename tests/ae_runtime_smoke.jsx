@@ -1,3 +1,21 @@
+// Standalone fixtures accept legacy/new labels and flat/grouped host controls.
+function egfxFixtureParam(root, name, depth) {
+    depth = depth || 0;
+    if (depth > 8) throw Error("Parameter nesting exceeds fixture limit");
+    var aliases = {"Falloff":"Follow Shape", "Stretch Easing":"Smooth Stretch", "Easing Distance":"Smooth Width"};
+    var direct = root.property(name);
+    if (direct !== null) return direct;
+    if (aliases[name]) { direct = root.property(aliases[name]); if (direct !== null) return direct; }
+    if (root.numProperties > 128) throw Error("Parameter count exceeds fixture limit");
+    for (var i = 1; i <= root.numProperties; i++) {
+        var child = root.property(i);
+        if (child !== null && child.numProperties > 0) {
+            var found = egfxFixtureParam(child, name, depth + 1);
+            if (found !== null) return found;
+        }
+    }
+    return null;
+}
 // Phase 1: instantiate ElasticGrid in a strictly empty test project so the native
 // image is resident before Python performs live-image identity sampling.
 //
@@ -156,7 +174,7 @@ function elasticGridSmoke(config) {
         if (owned === null || app.project !== owned) throw new Error("Project ownership changed");
     }
     function property(fx, name) {
-        var value = fx.property(name);
+        var value = egfxFixtureParam(fx, name);
         if (value === null) throw new Error("Required parameter is missing");
         return value;
     }

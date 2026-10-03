@@ -26,19 +26,23 @@ class HostContract(unittest.TestCase):
     def test_parameter_ids_keep_legacy_prefix_and_approved_append(self):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
-                         LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND)
+                         LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND +
+                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing'])
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
-        self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY)
-        self.assertEqual(direct[-1], 'Quality')
+        self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY[:3] +
+                         ['ResetGridPositions'] + LEGACY[3:10] + ['WaveGroupStart'] +
+                         LEGACY[10:] + ['AutomaticSpacing'])
+        self.assertIn('Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true', SETUP)
+        self.assertEqual(direct[-1], 'AutomaticSpacing')
         for name in STAGE9_APPEND[1:-1]:
             self.assertIn(f'(Params::{name},', SETUP)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
         self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
         self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
-        self.assertIn('["Smoothstep", "Gaussian", "Linear", "Smoothstep (Legacy)"]', block('Falloff'))
+        self.assertIn('["Smooth", "Soft", "Even", "Smooth (Legacy)"]', block('Falloff'))
         self.assertIn('f.set_default(2)', block('Falloff'))
         # Ordinal 4 intentionally keeps the old Smoothstep fallback, not Cosine.
         bridge = (ROOT / 'src/bridge/elasticgrid_ffi.cpp').read_text()
@@ -69,16 +73,18 @@ class HostContract(unittest.TestCase):
                 self.assertNotIn('CANNOT_INTERP', definition)
                 self.assertNotIn('CONTROL_ONLY', definition)
 
-    def test_only_grid_counts_lose_time_variation(self):
-        # Grid Positions, waves, plane controls and hidden dependencies keep
-        # their existing saved streams and animation policy.
-        self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), 2)
-        self.assertNotIn('CANNOT_TIME_VARY', block('GridState'))
-        self.assertNotIn('CANNOT_INTERP', block('GridState'))
-        self.assertIn('ae::ParamUIFlags::CONTROL', block('GridState'))
-        for name in ('WaveAmplitude', 'WaveFrequency', 'WavePhase', 'WaveSpeed',
-                     'PlaneMode', 'Quality'):
+    def test_static_choices_and_animated_grid_waves_keep_approved_policy(self):
+        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing')
+        for name in static:
+            self.assertIn('CANNOT_TIME_VARY', block(name))
+        self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), len(static))
+        self.assertIn('USE_VALUE_FOR_OLD_PROJECTS', block('AutomaticSpacing'))
+        self.assertIn('f.set_default(true); f.set_value(false)', block('AutomaticSpacing'))
+        for name in ('GridState', 'WaveAmplitude', 'WaveFrequency', 'WavePhase', 'WaveSpeed'):
             self.assertNotIn('CANNOT_TIME_VARY', block(name))
+        self.assertNotIn('CANNOT_INTERP', block('GridState'))
+        self.assertIn('ae::ParamUIFlags::TOPIC', block('GridState'))
+        self.assertNotIn('ae::ParamUIFlags::CONTROL', block('GridState'))
 
     def test_manual_density_change_requests_redraw_without_grid_sync(self):
         handler = SOURCE.split('ae::Command::UserChangedParam { param_index } => {', 1)[1].split(
@@ -132,12 +138,13 @@ class HostContract(unittest.TestCase):
         ui = (ROOT / 'host-rust/src/ui.rs').read_text()
         self.assertNotIn('EGFX-{}', ui)
         grid = SETUP.split('params.add_customized(Params::GridState,',1)[1].split('})?;',1)[0]
-        self.assertIn('ae::ParamUIFlags::CONTROL',grid)
+        self.assertIn('ae::ParamUIFlags::TOPIC',grid)
+        self.assertNotIn('ae::ParamUIFlags::CONTROL',grid)
         self.assertNotIn('ae::ParamUIFlags::NO_ECW_UI',grid)
         self.assertNotIn('ae::ParamUIFlags::INVISIBLE',grid)
         control = ui.split('fn draw_effect_control(',1)[1].split('pub fn draw(',1)[0]
         self.assertNotIn('draw_string(',control)
-        self.assertIn('HANDLED_EVENT',control)
+        self.assertIn('grid_row::draw(event)', control)
         identity=(ROOT/'tools/build_identity.py').read_text()
         self.assertIn('ElasticGridBuildID=',identity)
 
