@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-10-03. This is the concise entry point for the current product and
+Updated: 2026-10-04. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
@@ -11,14 +11,15 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Installed ordinary candidate is **0.9.4 Dev12** /aa6c203, Build ID
-EGFX-fedbc0cbe18a3a28d105a305. Exact loaded identity and visible Version PASS.
-Current-time scripted range changes move the blue boundaries; annotation does
-not enter exported pixels. Native guide drag, exact Undo/Redo and save/reopen
-pixels/keys PASS in the owned 319x241/8-bpc Final Mac AE25.6 fixture. Existing
-Radius animation applies immediately and its original stream/keys remain.
-Real scalar mouse scrubbing and broader range lifecycle/plane coverage remain
-unaccepted. [Exact Dev12 record](live-influence-mac-dev12-2026-10-03.json).
+Installed ordinary candidate is **0.9.4 Dev16** /779db86, Build ID
+EGFX-5e91589da403d19125f68235. Exact loaded identity and visible Version PASS.
+New neutral instance's first pending frame (Kind0/smoothing100) renders exactly,
+fixing a reproduced BadCallbackParameter regression in Dev12. Existing fixture
+initial picture, native reverse drag, exact Undo/Redo and saved-copy reopen
+pixels/keys PASS in owned319x241/8-bpc Final Mac AE25.6 scope. Existing animated
+Radius stream/keys remain. Real scalar mouse scrubbing is blocked by Cua panel
+drag refusal; a manual question is pending. U7 Show Grid and Windows build/runtime
+remain open. [Exact Dev16 record](first-default-mac-dev16-2026-10-04.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was
@@ -835,3 +836,22 @@ bpc dense/sparse. Probe strict Clippy and Python host/version contracts PASS.
 The accepted exception is only exact smoothing0/100, with existing malformed,
 deformed, Wave, topology and Four Corners rejection unchanged. Ordinary Dev16;
 diagnostic17/preview-probe18/negative-control19. Native acceptance pending.
+
+### 2026-10-04 ordinary Dev16 native regression closure
+
+Source779db86 / EGFX-5e91589da403d19125f68235 ad-hoc verified, installed and
+loaded exactly. Cua Version0.9.4 Dev16 observed. Before-render native record
+Kind0/easing100/Wave0/spacing0.5 now yields an actual PNG exactly equal to the
+first effect's frame; no error modal when returning to ECW. Removing the newly
+added second effect preserves first pixels and4Grid/3Radius keys. Legacy starting
+frame equals Dev12 saved-copy image. A delivered forward gesture left pixels
+unchanged (cause unproven); reverse native drag changes pixels and exact Undo,
+Redo and another owned saved-copy roundtrip pass. Original fixture untouched.
+SourceRust79/Python18/strictClippy PASS. Native scope is8-bpc319x241 Final,
+AE25.6x101/macOS26.6.2 arm64; source exact neutral tests also cover16/32-bpc.
+
+Real scalar mouse scrubbing remains unaccepted: Cua drag noWindowsAvailable;
+existing helper cannot address this ECW field under its fixed coordinates.
+User was asked to perform this small check; no helper/TCC widening performed.
+Show Grid, Windows and the complete update remain unaccepted. Installers stay
+paused after the user corrected dependency order. No remote operations.

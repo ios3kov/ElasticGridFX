@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "scope": "ordinary Dev16 / owned319x241 8-bpc Final Mac AE25.6 native acceptance; source FFI8/16/32-bpc neutral checks",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-5e91589da403d19125f68235",
+    "commit": "779db8674c9234c3ca4b9047190465d6cc8c2282",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "14a4f18d848559c6c2d75b205a07827f492085adff4133545ba30073a7bd42ea",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "host": {
+    "architecture": "arm64",
+    "os": "Darwin",
+    "os_version": "26.6.2"
+  },
+  "checks": {
+    "before_regression_reproduced": "FAIL (expected)",
+    "rust79": "PASS",
+    "python18": "PASS",
+    "probe_strict_clippy": "PASS",
+    "loaded_identity": "PASS",
+    "visible_dev16": "PASS",
+    "pending_new_effect_kind0_smoothing100_actual_frame": "PASS",
+    "second_neutral_pixels_match_first_exact": "PASS",
+    "remove_second_retains_first_pixels_keys": "PASS",
+    "legacy_fixture_initial_picture_exact": "PASS",
+    "native_reverse_drag_changes_pixels": "PASS",
+    "undo_redo_exact": "PASS",
+    "saved_copy_reopen_pixels_and_keys": "PASS",
+    "real_scalar_mouse_scrubbing": "BLOCKED (Cua noWindowsAvailable; manual question pending)",
+    "show_grid": "OPEN",
+    "windows_build_and_runtime": "NOT RUN",
+    "full_update": "INCOMPLETE"
+  },
+  "observations": [
+    "Earlier Dev12 missing second-neutral PNG and subsequently observed BadCallbackParameter modal are no longer treated as a completed first-application check. Controlled Kind0/smoothing100/Wave0/spacing0.5 reproduction yielded status42/no PNG.",
+    "Strict pending identity previously admitted only legacy smoothing0; new hidden default100 rejected. Fix admits exactly0/100 with original grid/mode/wave/spacing guards; unknown deformed planes still reject.",
+    "Production FFI dense/sparse8/16/32-bpc neutral pixels proven exact for normalized smoothing0/1 before widening guard.",
+    "A first forward delivered gesture left pixels unchanged; it is not accepted as actual movement and no cause is asserted. Reverse gesture changed pixels; exact Undo/Redo verified.",
+    "Only separately owned saved copies modified; original fixtures retained. No push, remote CI, publication or installer changes."
+  ],
+  "evidence": {
+    "outputs/update-094-dev16-mac/undo-read.jsx": {
+      "sha256": "9ca476a1acfab3ccf75f61ca12d590d98f2015e71cb65e4b106827975fbf8c71"
+    },
+    "outputs/update-094-dev16-mac/reverse-read.jsx": {
+      "sha256": "6a22f7de8fdb12cdbf0149d616346ea8f94e0431e3322416026480047d45e39b"
+    },
+    "outputs/update-094-dev16-mac/bundle-check.txt": {
+      "sha256": "66c24565b17da53f6375ad69a32096c6400359fbb95cd19d91f9ca6272c52cb7"
+    },
+    "outputs/update-094-dev16-mac/reverse-error.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs/update-094-dev16-mac/installation.json": {
+      "sha256": "fff474d665bfd1416f2ab0302383a5fed373d67120c41c9c2f237773975c1f09"
+    },
+    "outputs/update-094-dev16-mac/native-pixels.json": {
+      "sha256": "18b35d6c0cd9e325e1ff033ab831988c84cfd74e0f0eb89e70cc9c8e121d9810"
+    },
+    "outputs/update-094-dev16-mac/roundtrip.jsx": {
+      "sha256": "9a4e7ea3eef7d4e01d727a6c6854810d7a0661b95693828781f897474bcc3909"
+    },
+    "outputs/update-094-dev16-mac/undo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev16-mac/redo-read.jsx": {
+      "sha256": "8044ccfe53c56a271698eafaa60fab7b92d020d44b462b525776aa7f36f08638"
+    },
+    "outputs/update-094-dev16-mac/drag-delivery.json": {
+      "sha256": "10f4942f2375d6d031d2ee57d3fce554ef6a5568638d34fde4ef093cf4901754"
+    },
+    "outputs/update-094-dev16-mac/open.json": {
+      "sha256": "11c355fd43559130b2d39f6e04f8a3cd8c8fe180b85fd786dea01617d1fb4faf"
+    },
+    "outputs/update-094-dev16-mac/range-reopened.png": {
+      "sha256": "2112626f814a3b042085fcbcb2fd86b6d86d988ac2e35e5369641c58d306e4d5"
+    },
+    "outputs/update-094-dev16-mac/range-reopened.json": {
+      "sha256": "763f7aaf03baad913ae17fb1a22fdae468d5fe60685ea68207b858916e5f218f"
+    },
+    "outputs/update-094-dev16-mac/redo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev16-mac/baseline.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-dev16-mac/drag.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-dev16-mac/reverse-delivery.json": {
+      "sha256": "b558d7b51f77640f880a429e88bec6295bb23ece2b1344d1d5d0356ea2f391d7"
+    },
+    "outputs/update-094-dev16-mac/open.jsx": {
+      "sha256": "230d817ce26448a2a5c40b704d7f2f4e09e93dfd36932d53838c7f6bcaef0f8b"
+    },
+    "outputs/update-094-dev16-mac/pending.jsx": {
+      "sha256": "0861f87f0f5e57f5716d75c9d5f8e9828395493d6684fe863b8cba3d862da4aa"
+    },
+    "outputs/update-094-dev16-mac/second-removed.jsx": {
+      "sha256": "7bc4ddafc31b454a14c73fdb851b7177d91f3ce6432d6f55227aee8e841a9b76"
+    },
+    "outputs/update-094-dev16-mac/pending-values.json": {
+      "sha256": "c22d662cd9fd3919dae76e6c2e92571b536b40c1dca6c0f0da92c0d1f725ad5c"
+    },
+    "outputs/update-094-dev16-mac/second-removed.json": {
+      "sha256": "ad13df0eaf824e1bb52324c9e681a82b2a3082d0e16e886f011c278b4c54511d"
+    },
+    "outputs/update-094-dev16-mac/undo.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-dev16-mac/reverse.png": {
+      "sha256": "2112626f814a3b042085fcbcb2fd86b6d86d988ac2e35e5369641c58d306e4d5"
+    },
+    "outputs/update-094-dev16-mac/drag-error.txt": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "outputs/update-094-dev16-mac/reverse-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev16-mac/range-gesture.aep": {
+      "sha256": "785fdfbd14761c05f8617cfc69a7d00f93e9b2950fe321f27a369ca82c48b568"
+    },
+    "outputs/update-094-dev16-mac/second-removed.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-dev16-mac/redo.png": {
+      "sha256": "2112626f814a3b042085fcbcb2fd86b6d86d988ac2e35e5369641c58d306e4d5"
+    },
+    "outputs/update-094-dev16-mac/drag-read.jsx": {
+      "sha256": "c024e6eca50d2fc3b4767fc1a9e540596ecf01fb1fd15a19ae03268dc435c3d1"
+    },
+    "outputs/update-094-dev16-mac/drag-guard.jsx": {
+      "sha256": "50092575aa331874ad6577ecc2f87617e125e7a40456dad5eee2815dfd8e828d"
+    },
+    "outputs/update-094-dev16-mac/drag-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev16-mac/drag-guard.json": {
+      "sha256": "e697a0c803245af888fdc2c7353261cf8eb2cedaeb71b37cdc1975a42751759c"
+    },
+    "outputs/update-094-dev16-mac/pending.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
+    },
+    "outputs/update-094-first-default-before.txt": {
+      "sha256": "f1b560a81f440ea315cf0728ab290d4a2c5c01a0cb6d711aeff30587afa2473c"
+    },
+    "outputs/update-094-first-default-after.txt": {
+      "sha256": "d80d5b2f9b764932b043b677fb40064184a8c56305434a0de590bee3a7651229"
+    },
+    "outputs/update-094-first-default-clippy.txt": {
+      "sha256": "536b3759c4478a67b0420781d1f7d9360cfcdd38df87813b66031d3009832488"
+    },
+    "outputs/update-094-first-default-python.txt": {
+      "sha256": "b0a8dbec0a2e82a419cb3e67cef0daf42dc9f1ebf357bb99df1b36a8a620a67d"
+    }
+  }
+}
