@@ -23,6 +23,7 @@ File names are kept explicit so developers can locate the original record.
 - [USER_GUIDE.md](USER_GUIDE.md)
 - [architecture.md](architecture.md)
 - [performance-quality-contract.md](performance-quality-contract.md)
+- [feature-backlog.md](feature-backlog.md)
 - [persistent-viewer-grid.md](persistent-viewer-grid.md)
 - [perspective-plane-plan.md](perspective-plane-plan.md)
 
