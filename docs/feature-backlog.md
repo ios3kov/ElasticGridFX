@@ -8,11 +8,25 @@ contract changes are authorized by recording this list.
 
 ### Grid visible without selection
 
-Show the transformed guide grid when the effect/layer is deselected, with an
-opt-in switch. Hide it during RAM Preview playback; never include it in rendered
-or cached pixels or intercept pointer events. Preserve the existing interactive
-selected-effect overlay. Feasibility and detailed acceptance remain in
-[persistent viewer grid](persistent-viewer-grid.md).
+Latest user clarification on 2026-10-03 supersedes the older blanket
+hide-during-preview requirement:
+
+- During ordinary editing of the selected effect, show the interactive grid
+  by default; hide it during ordinary preview playback when the optional
+  persistent display is off.
+- Provide an optional **Show Grid** switch, default off, for keeping the grid
+  visible while working with other layers/effects, including preview display.
+- Never include the grid in exported frames, render output or cached image
+  pixels. Preview visibility must be a viewer-only overlay, not an image effect.
+- A passive persistent overlay must not intercept pointer events or replace
+  the selected-effect interaction.
+
+Whether "preview" specifically requires the overlay during RAM Preview playback
+was asked in the conversation and is still unconfirmed; preserve the user's
+preview-visibility intent and resolve that playback detail before design.
+The earlier feasibility research is in
+[persistent viewer grid](persistent-viewer-grid.md); its original PV-3 statement
+is historical where it conflicts with this later user clarification.
 
 ### Reset Grid Positions only
 
@@ -47,15 +61,19 @@ that approved interface direction, not shipped controls.
 
 ### Clear parameter names
 
+User approved **Affected Lines** and **Follow Strength**. All visible names must
+use simple English at approximately B1 level; the other labels below remain
+proposals to refine rather than approved final wording.
+
 | Existing label | Proposed English label | User-facing meaning |
 |---|---|---|
-| Tension Radius | Influence Range | How far neighboring grid lines are affected. |
+| Tension Radius | Affected Lines | How far neighboring grid lines are affected; the value remains a range in grid steps, not an exact integer count. |
 | Falloff | Influence Shape | How movement fades across the affected area. |
 | Smoothstep | Smooth Fade | Smoothly reduce influence toward the range boundary. |
 | Gaussian | Soft Center | Stronger influence near the moved line, weaker farther away. |
 | Linear | Even Fade | Reduce influence at a constant rate with distance. |
 | Smoothstep (Legacy) | Smooth Fade (Legacy) | Preserve the saved legacy option; not the default recommendation. |
-| Elasticity Strength | Neighbor Movement | How strongly neighboring lines follow the moved line. |
+| Elasticity Strength | Follow Strength | How strongly neighboring lines follow the moved line. |
 | Stretch Easing | Stretch Smoothing | Soften changes in image stretch at cell boundaries. |
 | Easing Distance | Smoothing Width | Width of the area used to smooth those transitions. |
 
@@ -69,7 +87,7 @@ reorder its meaning just to simplify its visible name.
   the user changes a value, drags a slider, selects an option or moves a handle.
   Do not require releasing the slider, clicking Apply, moving another line or
   changing time to see the result.
-- Influence Range and Neighbor Movement must provide immediate, meaningful
+- Affected Lines and Follow Strength must provide immediate, meaningful
   viewport feedback, rather than only altering a later drag. Visualize the
   affected range while adjusting it and interacting with the grid.
 - Stretch Smoothing and Smoothing Width must immediately update the visible
@@ -87,6 +105,12 @@ cannot retroactively reevaluate that deformation. Before implementation, define
 and verify the editable deformation representation and its compatibility path
 so range/neighbor changes can respond live without silently rewriting existing
 Grid Positions keys, deleting animation or changing historical projects.
+
+### Grid Positions starts collapsed
+
+Grid Positions must be collapsed by default in Effect Controls. The user can
+expand it for editing/animation. Preserve its stopwatch, existing animation and
+parameter identity; verify supported host UI behavior before implementation.
 
 ### Automatic safe line spacing
 
@@ -126,7 +150,13 @@ technical-design work, not runtime feasibility, completed code or test PASS.
 - Windows x64 CPU port: build/static checks passed at the checkpoint linked in
   [current status](STATUS.md#windows-continuation); Windows AE runtime remains
   NOT RUN. Separate portability work, not a new deformation feature.
-- macOS pkg installer and broader AE-version support: discussed candidates,
-  not implementation commitments.
+- Simple installation/update on both macOS and Windows is now required by the
+  user. Evaluate a pkg/installer versus an executable command or guided helper;
+  format is not predetermined. Plan clear instructions, detection of an existing
+  plugin, preservation of the previous version outside active Adobe plugin
+  folders, a discoverable backup location and a simple rollback. Avoid duplicate
+  active copies and unexplained destructive replacement. No installer code or
+  installation action is authorized merely by recording this requirement.
+- Broader AE-version support remains a discussed candidate, not a commitment.
 - GPU/Metal acceleration: historical plans exist; no new cycle is approved.
 - The accepted macOS CPU performance cycle is complete; do not label it unfinished.
