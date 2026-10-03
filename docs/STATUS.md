@@ -96,3 +96,17 @@ already-reviewed false positive in the mocked local artifact-manifest unit test
 at tests/test_target_ae_acceptance.py:54; this is not an auth/network endpoint.
 CI on this documentation commit is reported separately from the existing
 release's tests. See [documentation index](README.md).
+
+## Next update development — 2026-10-03
+
+The user authorized implementing the feature plan under frozen rules8.0.0 /
+132b7cd32873ba7328e3128ffbb33e1929b74d45. Branch feat/next-update preserves the
+backlog and locally integrates the existing Windows port; main and the original
+Windows branch remain unchanged. The latest explicit Show Grid decision is to
+keep the viewer-only overlay visible during RAM Preview playback when enabled.
+Read the [active task/check mapping](feature-backlog.md#active-update-task-and-check-mapping--rules800).
+
+Next block: repair Windows roundtrip completion evidence, then current-time reset
+and UI organization. Live influence, automatic spacing and persistent/playback
+overlay need design/feasibility evidence before their dependent implementation.
+No new plugin has been built, installed or accepted; Windows AE runtime is NOT RUN.

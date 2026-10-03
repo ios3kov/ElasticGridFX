@@ -21,9 +21,9 @@ hide-during-preview requirement:
 - A passive persistent overlay must not intercept pointer events or replace
   the selected-effect interaction.
 
-Whether "preview" specifically requires the overlay during RAM Preview playback
-was asked in the conversation and is still unconfirmed; preserve the user's
-preview-visibility intent and resolve that playback detail before design.
+Latest explicit answer (2026-10-03, repeated question): **Show Grid remains
+visible during RAM Preview playback**, including when another layer/effect is
+selected. This replaces the earlier answer to hide during playback.
 The earlier feasibility research is in
 [persistent viewer grid](persistent-viewer-grid.md); its original PV-3 statement
 is historical where it conflicts with this later user clarification.
@@ -142,7 +142,7 @@ The section organizes controls; collapsing it must not disable the animation.
 6. Undo/Redo, existing keyframes/projects, parameter IDs and Final-quality output
    retain their contracts; verify on both platform scopes when available.
 
-Status: PLANNED / NOT IMPLEMENTED. This records product requirements and pending
+Status: DEVELOPMENT STARTED under rules8.0.0. This records product requirements and pending
 technical-design work, not runtime feasibility, completed code or test PASS.
 
 ## Other continuation and candidates
@@ -160,3 +160,38 @@ technical-design work, not runtime feasibility, completed code or test PASS.
 - Broader AE-version support remains a discussed candidate, not a commitment.
 - GPU/Metal acceleration: historical plans exist; no new cycle is approved.
 - The accepted macOS CPU performance cycle is complete; do not label it unfinished.
+
+## Active update task and check mapping — rules8.0.0
+
+Branch: feat/next-update. Parent work is retained: backlog decisions plus the
+Windows port checkpoint003607d have been combined locally without altering main
+or the original Windows branch. The accepted macOS source f611312 and installed
+release remain the historical comparison baseline, not a PASS for new bytes.
+New update version is not yet assigned; packaging/host target scope is AE25.x
+macOS arm64 / Windows x64 until verified otherwise.
+
+| ID | Requirement / block | Acceptance / check phase | Current state |
+|---|---|---|---|
+| U0 | Adopt frozen rules8.0.0 and preserve prior work | Verified release ZIP/tag identity; explicit migration; retained decision ledger | Adoption recorded |
+| U1 | Repair Windows roundtrip validation evidence | Regression rejects invalid files and missing/failed per-run completion; no AE transport false PASS | Next implementation block |
+| U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Pending |
+| U3 | Simple English labels and collapsed Grid Positions | Preserve IDs/option values; native builds; AE panel inspection/old-project load | Pending |
+| U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Pending |
+| U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Design dependency open |
+| U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Design dependency open |
+| U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Feasibility open |
+| U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Pending design and helpers |
+| U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
+| U10 | Integration, validation and final task reconciliation | All U1–U9 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
+
+The selected-effect PF event surface alone does not provide a confirmed drawing
+surface after deselection or during playback. U7 must not be faked by rendering
+the grid into pixels, adding project layers, retaining a DRAWBOT context outside
+its callback, or silently replacing the composition renderer. Continue independent
+blocks while researching a supported solution. Existing Grid Positions keys must
+not be silently rewritten to implement U5/U6.
+
+Each block updates this table and STATUS with actual checks and limitations.
+Native source changes require fresh builds/identity; runtime, performance,
+migration and installation checks are not inferred from old release/CI results.
+No significant block is complete merely because its code compiles.

@@ -79,3 +79,26 @@ retrospective reconciliation. Reusable findings are contributed to the central
 AE knowledge base separately; this does not change this project's baseline.
 No new discovery/reference audit, API, build, installation or host timing gate.
 The earlier performance/release decisions above retain their historical scope.
+
+## Next update baseline — 2026-10-03
+
+The human explicitly requested this update under **AE-Development-Rules8.0.0**,
+immutable tag v8.0.0 / `132b7cd32873ba7328e3128ffbb33e1929b74d45`.
+The official ZIP SHA256 was verified, AI_ENTRYPOINT read first, and migration
+from the project6.0.0 and Windows6.2.0 baselines reviewed in CHANGELOG/§34.
+Historical release/Windows results retain their original standards and identity.
+New mandatory overlays: FEATURE-SET-001, TASK-CLOSE-001 and CLEANUP-001.
+The project does not invoke starter-kit distribution wrappers; no wrapper caller
+migration is needed. Update the existing plan/status rather than copying rules.
+
+Scope: native effect/UI/animation/state plus guarded installation helpers,
+macOS Apple Silicon and Windows x64 CPU; Critical / Development. Read Process
+§§1–13/27, Engineering §§14–21/24/25/31–34/36–39/41, Native§23, Workflow and
+applicable source/parameter supervision before affected API changes; apply
+Validation/Release/platform gates only for that actual delivery phase.
+No GPU, broader-version certification, main merge, public release or destructive
+installation is authorized merely by the Development scope. Existing permissions
+and direct user decisions remain separately scoped.
+
+See [feature/update plan](docs/feature-backlog.md) for the requirement/task/check
+mapping and [current checkpoint](docs/STATUS.md).
