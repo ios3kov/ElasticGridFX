@@ -195,3 +195,31 @@ Sources: [Redrawing and Drawbot](https://ae-plugins.docsforadobe.dev/effect-ui-e
 [View](https://ae-scripting.docsforadobe.dev/other/view/),
 [Viewer](https://ae-scripting.docsforadobe.dev/other/viewer/); exact target headers
 and native outputs are hashed in the research record.
+
+
+## GridWarp1.0.0 feature reference — 2026-10-04
+
+The newly supplied Archive.zip contains the same Windows binary as the earlier
+reference and a universal Mac bundle1.0.0. The already-installed Mac executable
+matches the supplied archive SHA-256; no install/replacement was needed. Exact
+loaded-memory UUID verification is NOT_RUN, so no stronger loaded-artifact
+identity claim is made. [Reference record](gridwarp-visualization-reference-2026-10-04.json).
+
+A separate owned319x241 solid in AE25.6x101 confirms Enable Visualization and
+color/width/opacity controls. With it enabled, blue grid lines remain after
+deselecting the layer/effect and during actual Preview playback (Cua red
+playhead/Playing indicator). Trial diagonal watermark remains; no activation or
+licensing bypass was performed.
+
+The grid also appears in an actual PNG produced by saveFrameToPng. Comparing the
+same.2second frame with only Enable Visualization0→1 gives6516changed RGBA
+pixels; blue-threshold pixels rise10→4025. The enabled exported PNG visibly
+contains the blue vertical/horizontal grid. This directly fails PV-3's
+never-in-output-pixels condition for this tested export path. Render Queue,
+aerender and Windows behavior are NOT_RUN, not inferred from this test.
+
+Internal visibility implementation is UNKNOWN. Render symbols accepting colors
+and floats are only a lead; no recovered proprietary routines are copied. The
+reference demonstrates persistent visibility, but has not established the
+additive export-free drawing route needed by our contract. Retain Show Grid in
+this update; no automatic scope relaxation follows from this finding.

@@ -24,6 +24,9 @@ The user explicitly retains Show Grid in this update (2026-10-04). A guarded
 native zoom query PASS supplies only zoom; historical deselected-log analysis
 found no Comp idle context for a safe invalidate request. Additive drawing and
 current pan/view geometry remain unresolved. [Research record](show-grid-research-2026-10-04.json).
+GridWarp reference native test confirms deselected/playback visibility, but its
+enabled grid appears in exported PNG pixels; this does not pass our output
+exclusion requirement. [Reference result](gridwarp-visualization-reference-2026-10-04.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was

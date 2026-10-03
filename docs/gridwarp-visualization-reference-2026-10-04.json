@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "scope": "Feature reference: persistent grid visualization only; metadata inspection and black-box tests, no recovered code copied.",
+  "reference": {
+    "name": "GridWarp",
+    "version": "1.0.0",
+    "archive": "/Users/os3kov/Downloads/GridWarp_v1/Archive.zip",
+    "archive_sha256": "d5b727e6d6a6fa549aa02d944b1a68815425aab57fdc8446b8399d4550b0047b",
+    "mac_binary_sha256": "cc08255b11f7dd9294b823b8a64755ad05d1e604ca1b75e16930ded35f2bfd7d",
+    "windows_binary_sha256": "d26054ae75b0561a4d391a3d8866212f922239754d9cc7d658a4df4e727db91e",
+    "architectures": [
+      "macOS arm64",
+      "macOS x86_64",
+      "Windows x64"
+    ],
+    "windows_runtime": "NOT_RUN",
+    "match_name": "NMFX GridWarp",
+    "installed_mac_binary_matches_archive": true,
+    "loaded_memory_uuid_identity": "NOT_RUN; no exact loaded-module UUID result asserted",
+    "installation_changes": false
+  },
+  "host": {
+    "ae": "25.6x101",
+    "platform": "macOS arm64",
+    "fixture": "Owned separate319x241 gray solid,2seconds24fps; original FSTR composition untouched",
+    "licensing": "Trial diagonal watermark observed; no activation, license bypass or licensing code changes."
+  },
+  "claims": [
+    {
+      "id": "GW1",
+      "claim": "Enable Visualization with column/row color, thickness and opacity controls exists",
+      "status": "OBSERVED",
+      "evidence": "Native param inventory, indices22..26; default disabled, width2, opacity100."
+    },
+    {
+      "id": "GW2",
+      "claim": "Grid remains visible after effect/layer deselection when visualization enabled",
+      "status": "OBSERVED",
+      "evidence": "frames.json confirms both selectionsfalse; Cua screenshot shows blue grid without layer handles."
+    },
+    {
+      "id": "GW3",
+      "claim": "Grid remains visible during playback",
+      "status": "OBSERVED",
+      "evidence": "Cua screenshot shows blue grid, red playback playhead and Playing:48of indication after Space; Preview stopped afterwards."
+    },
+    {
+      "id": "GW4",
+      "claim": "Visualization changes actual exported PNG pixels and includes blue grid lines",
+      "status": "OBSERVED",
+      "evidence": "Same comp/time.2, only Enable Visualization changed0\u21921; saveFrameToPng exports compared as RGBA.6516pixels changed, blue threshold pixels10\u21924025; exported enabled image visually inspected."
+    },
+    {
+      "id": "GW5",
+      "claim": "Internal mechanism of persistent visibility",
+      "status": "UNKNOWN",
+      "evidence": "Render function symbol accepts colors/floats and visualization controls affect output, consistent with a pixel drawing path; no implementation recovery asserted."
+    },
+    {
+      "id": "GW6",
+      "claim": "Render Queue/aerender/Windows/cache exclusion behavior",
+      "status": "UNKNOWN",
+      "evidence": "NOT_RUN; saveFrameToPng already violates required never-in-output scope, but not relabeled as Render Queue execution."
+    }
+  ],
+  "pixel_comparison": {
+    "size": [
+      319,
+      241
+    ],
+    "changed_pixels": 6516,
+    "blue_pixels_off": 10,
+    "blue_pixels_on": 4025,
+    "png_sha256": {
+      "visualization-0.png": "980bff010e9f5507c056d7254d72950200374f547e7be69b931bc78be17ca515",
+      "visualization-1.png": "cbb2061e427d10e465596662ed82edeee7b20e07be03d6a6c70cb4456cdb41bd"
+    }
+  },
+  "result": "Reference confirms persistent visibility but fails our never-in-exported-pixels acceptance for tested PNG path. It does not establish a public additive overlay route. Show Grid remains required and feasibility OPEN.",
+  "files": {
+    "outputs/gridwarp-reference-2026-10-04/effects.json": "a50bc1c863b30fe54d4e0e3794174b1f8762ba360b6160e94ec00b253c93110f",
+    "outputs/gridwarp-reference-2026-10-04/fixture.jsx": "ba082d61c6049f3dc8a5175ef1be5200ff316479975dcfbadbb95c513181e743",
+    "outputs/gridwarp-reference-2026-10-04/fixture.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+    "outputs/gridwarp-reference-2026-10-04/frames.json": "bfb75abb68210bd19d67f16ef1393519813700df987becb7170888ed4f24f75e",
+    "outputs/gridwarp-reference-2026-10-04/frames.jsx": "f63ee7121fcbea2b3edc36adc63b4ce3fdcbd930e4ea11463f0ce778afad98a1",
+    "outputs/gridwarp-reference-2026-10-04/frames.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+    "outputs/gridwarp-reference-2026-10-04/inventory.jsx": "32814fd9200e96f880901a43a639f0a078880b7799b3cae699f090a5670ee0e4",
+    "outputs/gridwarp-reference-2026-10-04/inventory.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+    "outputs/gridwarp-reference-2026-10-04/params.txt": "15ab9b0d036e6b55b76ffc86dcd4f84d0950bab46dec3d5740ace927a52b7631",
+    "outputs/gridwarp-reference-2026-10-04/pixel-comparison.json": "13f66a26f13409a812749116452c1283dda605d48447b78a770e69d8d58b403d",
+    "outputs/gridwarp-reference-2026-10-04/visualization-0.png": "980bff010e9f5507c056d7254d72950200374f547e7be69b931bc78be17ca515",
+    "outputs/gridwarp-reference-2026-10-04/visualization-1.png": "cbb2061e427d10e465596662ed82edeee7b20e07be03d6a6c70cb4456cdb41bd"
+  }
+}

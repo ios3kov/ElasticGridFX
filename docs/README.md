@@ -137,3 +137,5 @@ These records support traceability; start with STATUS.md for current decisions.
 - [verification.txt](verification.txt)
 
 - [Show Grid retained scope and route evidence, 2026-10-04](show-grid-research-2026-10-04.json) — scoped native zoom query and historical callback reanalysis; feature still OPEN.
+
+- [GridWarp visualization reference, 2026-10-04](gridwarp-visualization-reference-2026-10-04.json) — native deselected/playback visibility and PNG pixel inclusion; internal mechanism UNKNOWN.
