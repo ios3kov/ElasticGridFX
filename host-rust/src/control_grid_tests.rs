@@ -132,7 +132,7 @@ fn redistributed_handles_move_and_keep_their_source_identity_after_drag() {
 
 #[test]
 fn scripted_density_without_callback_uses_uniform_read_only_fallback() {
-    let mut saved=GridArb::default();saved.column_lines=vec![0.0,0.03,0.18,0.71,0.95,1.0];
+    let saved=GridArb {column_lines:vec![0.0,0.03,0.18,0.71,0.95,1.0],..GridArb::default()};
     let before=bincode::serde::encode_to_vec(&saved,bincode::config::legacy()).unwrap();
     let mut displayed=view(&saved,(7,6),1.0,0.25).unwrap();
     apply_layout(&mut displayed,&saved,(7,6),&control_layout::State::default(),1.0,0.25).unwrap();
