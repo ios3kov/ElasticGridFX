@@ -19,7 +19,8 @@ def require(pattern: str, path: Path, label: str) -> None:
 
 
 def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
-             resources: Path, expected_pipl: Path, env: dict[str, str] | None = None) -> dict:
+             dependents: Path, imports: Path, resources: Path, expected_pipl: Path,
+             env: dict[str, str] | None = None) -> dict:
     manifest=json.loads(manifest_path.read_text(encoding='utf-8-sig'))
     if manifest.get('schema')!=1 or manifest.get('artifact')!='FSTR Stretch.aex':
         raise ValueError('invalid Windows artifact manifest')
@@ -31,6 +32,10 @@ def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
 
     require(r'machine \(x64\)',headers,'x64 PE')
     require(r'\bEffectMain\b',exports,'EffectMain export')
+    if dependents.stat().st_size <= 0:
+        raise ValueError('PE dependency inventory is empty')
+    if imports.stat().st_size <= 0:
+        raise ValueError('PE import inventory is empty')
     require(r'PiPL',resources,'PiPL resource')
     if pipl_verify.embedded_pipl(aex)!=expected_pipl.read_bytes():
         raise ValueError('embedded PiPL differs from generated PiPL bytes')
@@ -66,10 +71,16 @@ def validate(manifest_path: Path, aex: Path, headers: Path, exports: Path,
             'release_cdylib_build':'PASS',
             'pe_x64':'PASS',
             'effectmain_export':'PASS',
+            'pe_dependencies_recorded':'PASS',
+            'pe_imports_recorded':'PASS',
             'pipl_resource_present':'PASS',
             'pipl_resource_byte_exact':'PASS',
             'after_effects_load':'NOT RUN',
             'after_effects_runtime_ui_render_mfr_undo':'NOT RUN',
+        },
+        'inventories':{
+            'dependents_sha256':bi.digest(dependents.read_bytes()),
+            'imports_sha256':bi.digest(imports.read_bytes()),
         },
         'scope':'build/static validation only; not After Effects runtime evidence',
     }
@@ -81,12 +92,15 @@ def main() -> int:
     parser.add_argument('--aex',required=True,type=Path)
     parser.add_argument('--headers',required=True,type=Path)
     parser.add_argument('--exports',required=True,type=Path)
+    parser.add_argument('--dependents',required=True,type=Path)
+    parser.add_argument('--imports',required=True,type=Path)
     parser.add_argument('--resources',required=True,type=Path)
     parser.add_argument('--expected-pipl',required=True,type=Path)
     parser.add_argument('--out',required=True,type=Path)
     args=parser.parse_args()
     record=validate(*(p.resolve(strict=True) for p in (
-        args.manifest,args.aex,args.headers,args.exports,args.resources,args.expected_pipl)))
+        args.manifest,args.aex,args.headers,args.exports,args.dependents,args.imports,
+        args.resources,args.expected_pipl)))
     args.out.parent.mkdir(parents=True,exist_ok=True)
     if args.out.exists():
         raise FileExistsError(args.out)
