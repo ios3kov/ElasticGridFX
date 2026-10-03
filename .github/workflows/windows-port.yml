@@ -8,7 +8,13 @@ on:
       - "host-rust/**"
       - "tools/package_windows.py"
       - "tools/verify_windows_pipl.py"
+      - "tools/windows_ae_validation.py"
+      - "tools/smoke_pixels.py"
+      - "tools/build_identity.py"
       - "tests/test_package_windows.py"
+      - "tests/test_windows_ae_validation.py"
+      - "tests/ae_runtime_smoke.jsx"
+      - "tests/ae_project_roundtrip.jsx"
       - ".github/workflows/windows-port.yml"
   workflow_dispatch:
 
@@ -60,8 +66,8 @@ jobs:
           EG_SOAK_CYCLES: "5000"
         run: ctest --test-dir build-win -C Release --output-on-failure
 
-      - name: Test Windows packager
-        run: python -m unittest tests.test_package_windows
+      - name: Test Windows packager and AE validation packet
+        run: python -m unittest tests.test_package_windows tests.test_windows_ae_validation
 
       - name: Check locked Rust graph
         run: cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml > NUL
@@ -121,4 +127,9 @@ jobs:
             dist/windows/dumpbin-exports.txt
             dist/windows/coff-resources.txt
             dist/windows/VALIDATION_SCOPE.txt
+            tools/windows_ae_validation.py
+            tools/smoke_pixels.py
+            tools/build_identity.py
+            tests/ae_runtime_smoke.jsx
+            tests/ae_project_roundtrip.jsx
             host-rust/Cargo.lock
