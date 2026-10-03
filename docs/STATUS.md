@@ -11,10 +11,11 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Last ordinary candidate is0.9.4 Dev4 /76015ca, Build ID
-EGFX-e9e024a3b24f5ebdd238b474. Exact AE25.6 loaded identity, immediate old Radius
-animation response, scripted0/6/3 pixel response and keys/save/reopen PASS.
-Mouse scrubbing, guide drag and affected-range drawing remain unaccepted.
+Installed ordinary candidate is**0.9.4 Dev8** /cd33b02, Build ID
+EGFX-160e38dd8fe6ee59bcd259e5. Exact AE25.6 loaded identity, native guide drag,
+Undo/Redo, radius response after dragging and keys/save/reopen PASS in the owned
+fixture. Old Radius animation applies immediately; its original stream/keys remain.
+Mouse scalar scrubbing and affected-range drawing remain unaccepted.
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was
@@ -733,3 +734,27 @@ Source and exact ordinary native acceptance are pending; Show Grid remains OPEN.
 Dev8 source verification: default Rust75, PREVIEW-probe strict Clippy and
 Python host-contract14 PASS. Current installed temporary negative-control Dev7;
 next install the clean-source ordinary Dev8 and validate actual gesture/Undo/Redo.
+
+
+### U5 ordinary Dev8 native closure of gesture defect
+
+Clean source cd33b0286a53b83837a7ecbbdef0f28708b00f95 was assembled, ad-hoc
+signed/verified and installed instead of the negative-control probe. Build ID
+EGFX-160e38dd8fe6ee59bcd259e5; exact loaded identity PASS. Ordinary build has
+PREVIEW registration/context guards, without the diagnostic writer. Native
+column2 drag changed actual pixels; Undo matches initial frame byte exact and
+Redo matches edited frame byte exact. The original three Radius keys and four
+Grid key times remain. Scripted Radius0/6/3 after this real gesture changes pixels
+and restores the edited frame exactly. Saving/reopening retains scalar values,
+key counts/times and exact edited frame. Baseline matches the preceding Dev4
+old-animation frame. Scope319×241/8-bpc Final/AE25.6x101/macOS26.6.2/arm64.
+
+The owned acceptance script initially refused a wrong copy path, then a cached
+File.exists object caused a missing-frame verdict despite eventual PNG creation.
+Only the corrected fresh-path/fresh-File run and actual PNG/JSON checks are accepted;
+retain original scripts/logs. This was validation harness behavior, not a bypass
+of a failed plugin check. [Exact record](live-influence-mac-dev8-2026-10-03.json).
+
+U5 affected-range drawing and real scalar mouse scrubbing remain open. U7 Show
+Grid, Windows integration and installers remain incomplete; current priority is
+remaining plugin behavior, not installer work. No remote operation was performed.

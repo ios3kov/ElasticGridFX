@@ -26,6 +26,7 @@ File names are kept explicit so developers can locate the original record.
 - [feature-backlog.md](feature-backlog.md)
 - [live-influence-design.md](live-influence-design.md)
 - [live-influence-mac-dev4-2026-10-03.json](live-influence-mac-dev4-2026-10-03.json)
+- [live-influence-mac-dev8-2026-10-03.json](live-influence-mac-dev8-2026-10-03.json)
 - [persistent-viewer-grid.md](persistent-viewer-grid.md)
 - [perspective-plane-plan.md](perspective-plane-plan.md)
 

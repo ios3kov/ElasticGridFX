@@ -110,7 +110,10 @@ animation input, neutral/reset and nonmutation before native acceptance.
 
 Status: shared evaluator and live drag solver implemented on76015ca. Mac Dev4
 loaded identity, immediate old animation response, scripted pixel changes and
-keys/save/reopen PASS in the bounded owned fixture. Native drag/mouse scrubbing
-and affected-range drawing are still unaccepted; Windows NOT RUN. Previous
+keys/save/reopen PASS in the bounded owned fixture. Ordinary Dev8 native drag/Undo/Redo and save/reopen also PASS in the owned
+fixture after correcting registration. Mouse scalar scrubbing and affected-range
+drawing remain unaccepted; Windows NOT RUN. Previous
 coefficient/wire-v4 proposals are superseded. U7 remains a separate open gate.
 See [native evidence](live-influence-mac-dev4-2026-10-03.json).
+
+[Ordinary Dev8 native evidence](live-influence-mac-dev8-2026-10-03.json).

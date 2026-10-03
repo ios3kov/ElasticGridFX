@@ -78,7 +78,8 @@ but WindowType omits PREVIEW/NONE; its conversion would panic for these contexts
 An opt-in preview-overlay-probe build registers the public flag and records raw
 callback/window/time observations only. It guards null contexts, avoids wrapper
 conversion for unknown windows, and never retains/draws into a preview context.
-Ordinary builds do not register PREVIEW or compile this writer. Logs use an
+At this historical checkpoint ordinary builds did not register PREVIEW or compile this writer.
+The later Dev8 gesture correction below supersedes registration only. Logs use an
 exclusive private per-process folder, bounded4096 records and Build ID. Full log
 or missing log cannot prove absence of callbacks. Probe version0.9.4 Dev3.
 No Show Grid checkbox or production drawing hook is claimed. Selected, deselected
@@ -101,3 +102,16 @@ After the experiment the ordinary new0.9.4 Dev1 build
 EGFX-2b54838b4bf29f6a45243d07 was installed from35a9f3c; loaded identity and exact
 current .2-frame parity PASS. No old released plugin was restored. Show Grid
 remains feasibility OPEN, no fake checkbox/baked guide pixels are shipped.
+
+
+## Later ordinary gesture registration correction — Dev8
+
+An isolated comparison found that AE25.6 delivered selected-effect Comp clicks
+and drags when PREVIEW registration was added; the same bounded logger without
+that flag saw cursor/draw/idle, but no click/drag and unchanged pixels. Ordinary
+Dev8 now registers PREVIEW and rejects unsupported/null/PREVIEW contexts before
+wrapper conversion. Its actual native guide drag/Undo/Redo/save-reopen passed
+without a diagnostic writer. [Exact candidate](live-influence-mac-dev8-2026-10-03.json).
+This does not establish an unselected or playback drawing surface: no guide pixels
+are rendered, and Show Grid remains OPEN. The earlier negative overlay observation
+retains its original source scope; do not reinterpret input delivery as overlay proof.

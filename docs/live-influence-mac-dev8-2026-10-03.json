@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "scope": "owned AE25.6 Mac fixture; ordinary Dev8; no diagnostic writer",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-160e38dd8fe6ee59bcd259e5",
+    "commit": "cd33b0286a53b83837a7ecbbdef0f28708b00f95",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "50b117b268d6ef81b228cd13aaecb0b8c069c2f73a8ab397a4b5c783a05baa84",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "package_sha256": "68821afeec5b023b1fd7acdd683e58b435e8c5daf4dc7a7a9a52b1dca7e6f71b",
+  "host": {
+    "ae": "25.6x101",
+    "macos": "26.6.2",
+    "architecture": "arm64"
+  },
+  "checks": {
+    "loaded_identity": "PASS",
+    "visible_dev8_version": "PASS",
+    "native_column_drag_changes_pixels": "PASS",
+    "undo_exact": "PASS",
+    "redo_exact": "PASS",
+    "radius0_6_3_response_after_drag": "PASS",
+    "restore3_exact": "PASS",
+    "three_radius_keys_and_four_grid_key_times_retained": "PASS",
+    "save_reopen_keys_and_pixels": "PASS",
+    "old_animated_fixture_initial_pixels_match_dev4": "PASS",
+    "native_slider_mouse_scrubbing": "NOT RUN",
+    "affected_range_drawing": "OPEN",
+    "show_grid": "OPEN",
+    "windows_runtime": "NOT RUN",
+    "full_update": "INCOMPLETE"
+  },
+  "evidence": {
+    "outputs/update-094-dev8-mac/baseline.png": {
+      "sha256": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b"
+    },
+    "outputs/update-094-dev8-mac/drag.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-dev8-mac/undo.png": {
+      "sha256": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b"
+    },
+    "outputs/update-094-dev8-mac/redo.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-dev8-mac/undo-redo-pixels.json": {
+      "sha256": "a17416c0bb98774a6afee67d545c04e5d84f4914753b05a1894b6674ad921327"
+    },
+    "outputs/update-094-dev8-mac/drag-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev8-mac/undo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev8-mac/redo-state.json": {
+      "sha256": "2cf1a6e6ab996ff2cdb038e02277af64ae56ed53766d28e5174e53c2ec5b994a"
+    },
+    "outputs/update-094-dev8-mac/radius0-v3.png": {
+      "sha256": "1d31a075b63abcb91531692b1e168de3a60f6cb4d317c92a912e35f0500b17b8"
+    },
+    "outputs/update-094-dev8-mac/radius6-v3.png": {
+      "sha256": "bb0ebda852b365fd4ec8096ae9ec63560562bde7b306d4e2c6fc7405526f4d3a"
+    },
+    "outputs/update-094-dev8-mac/radius3-restored-v3.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-dev8-mac/dev4-reopened.png": {
+      "sha256": "ffaed56c36d8724b3b78c44789da46b7811c5219629178951cb8d3ea35e5bae7"
+    },
+    "outputs/update-094-dev8-mac/live-radius.json": {
+      "sha256": "d635bea2d7d8dbc69f63127673a9e0e50be78e7b85c0408b2fae34872605d153"
+    },
+    "outputs/update-094-dev8-mac/reopen-dev4.json": {
+      "sha256": "763f7aaf03baad913ae17fb1a22fdae468d5fe60685ea68207b858916e5f218f"
+    },
+    "outputs/update-094-dev8-mac/radius-save-reopen-pixels.json": {
+      "sha256": "569a9a65783a41d6f29ecbc756fa59b9340b96f0dc540fafd492158dc292a26e"
+    },
+    "outputs/update-094-dev8-mac/dev4-radius-animation.aep": {
+      "sha256": "12e2b798c454f2672d693e8f575bd1c88d9d24fde549c48aa8588371c8cc8c3b"
+    },
+    "outputs/update-094-dev8-mac/installation.json": {
+      "sha256": "a2f7acfeb8a9b849f22db14487af3329884635d3e6b1ee662e20ae31baebcefd"
+    }
+  },
+  "limitations": [
+    "319x241 8-bpc Final owned single-effect fixture; broader native matrix not inferred",
+    "Native radius changes used official DoScript, not mouse scrubbing",
+    "Saved copy filenames inherited prior harness names; candidate identity above determines version"
+  ],
+  "harness_failures": "Initial radius/roundtrip scripts refused a wrong owned-copy path, then refreshed File.exists polling was corrected; original scripts/logs retained. Accepted run is radius-check-v3/roundtrip-v2 with actual JSON and PNG verification."
+}
