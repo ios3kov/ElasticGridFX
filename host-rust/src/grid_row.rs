@@ -42,7 +42,9 @@ fn button(frame: ae::Rect) -> Option<RectF32> {
     let left = frame.left as f32 + width * 0.5 + 16.0;
     let available = frame.right as f32 - left - 6.0;
     let height = (frame.bottom - frame.top) as f32;
-    if width < 300.0 || available < 60.0 || height < 12.0 { return None; }
+    // A narrow ECW still has a usable native value column. Size to that
+    // column; a fixed row-width cutoff incorrectly hid Reset on resize.
+    if available < 60.0 || height < 12.0 { return None; }
     Some(RectF32 { left, top: frame.top as f32,
         width: available.floor().min(130.0), height: (height - 1.0).min(16.0) })
 }
@@ -151,6 +153,21 @@ mod tests {
             assert!(!contains(rect, point));
         }
         assert!(button(ae::Rect { right: 180, ..frame }).is_none());
+    }
+
+    #[test]
+    fn reset_remains_visible_when_panel_shrinks_below_old_cutoff() {
+        for width in [220, 240, 260, 299, 300, 400, 648] {
+            let frame = ae::Rect { left: 17, top: 153, right: 17 + width, bottom: 170 };
+            let rect = button(frame).expect("usable value column must retain Reset");
+            assert_eq!(rect.left, 17.0 + width as f32 * 0.5 + 16.0);
+            assert!(rect.width >= 60.0 && rect.width <= 130.0);
+            assert!(rect.left + rect.width <= frame.right as f32 - 6.0);
+            assert_eq!(rect.height, 16.0);
+            let restored = restore(capture(rect)).unwrap();
+            assert!(contains(restored, ae::Point { h: (rect.left + rect.width * 0.5) as _,
+                v: 160 }));
+        }
     }
 
     #[test]

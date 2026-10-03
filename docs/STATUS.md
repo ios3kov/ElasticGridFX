@@ -4,6 +4,13 @@ Updated: 2026-10-03. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
+## Active local update — rules8.0.0
+
+Branch feat/next-update; no push, PR or publication authorized. Current update
+remains incomplete across macOS/Windows. See the U0–U10 table in
+[feature backlog](feature-backlog.md). Installed candidates and checks below
+are development evidence, separate from the published release.
+
 ## Published macOS release
 
 [FSTR Stretch v0.9.3-perf.1](https://github.com/ios3kov/ElasticGridFX/releases/tag/v0.9.3-perf.1)
@@ -365,3 +372,24 @@ output request, and native events have separate CLICK/DRAG tags. The default
 candidate must be built and verified independently; diagnostic observations are
 compiled out without render-diagnostics. U5/U7/U8/U9 and legacy migration remain
 open; local-only boundary unchanged.
+
+
+### Default Reset proof and narrow-panel defect — 2026-10-03
+
+Ordinary fb9ae4f / EGFX-332d09780aa8f63db066d439 loaded identity PASS.
+AE25.6x101, 319x241, 8-bpc Final: saved three-key fixture reopened with exact
+matching pixels. Reset at0.2 adds only that key, preserves0/0.5/1 frames, renders
+neutral at0.2; Undo restores original keys and all four before frames. All eight
+checks PASS; saved fixture SHA unchanged. Evidence outside repo:
+outputs/next-update-ui-default-mac/reset-default-result.json and loaded-identity/.
+Diagnostic observations are compiled out in this ordinary native-plane build.
+Four visible popups align and fit on Mac; expanded Wave Axis/Windows pending.
+
+User screenshots15:16:49/15:16:59 reproduce Reset disappearing when the ECW
+shrinks, while native Fit Layer remains visible. Root cause is the arbitrary
+300-logical-unit row-width rejection in grid_row::button. Remove that rejection
+and size to the actual available value column, retaining minimum readable
+button width60, maximum130, height16, theme/pill and hit geometry. Regression
+covers220/240/260/299/300/400/648 rows and retained continuation bounds. Native
+resize verification for these new bytes is pending; shared Rust suite69 PASS; do not transfer fb9ae4f
+functional PASS or previous wide-panel appearance to the changed candidate.
