@@ -11,22 +11,26 @@ then finish installers. User explicitly corrected this order; U8 work is paused.
 On2026-10-03 the user chose immediate new influence of existing Tension Radius
 animation. Old appearance may change at opening; preserve the original streams
 and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Installed ordinary candidate is **0.9.4 Dev16** /779db86, Build ID
-EGFX-5e91589da403d19125f68235. Exact loaded identity and visible Version PASS.
-New neutral instance's first pending frame (Kind0/smoothing100) renders exactly,
-fixing a reproduced BadCallbackParameter regression in Dev12. Existing fixture
-initial picture, native reverse drag, exact Undo/Redo and saved-copy reopen
-pixels/keys PASS in owned319x241/8-bpc Final Mac AE25.6 scope. Existing animated
-Radius stream/keys remain. Real scalar mouse scrubbing is USER-REPORTED PASS: the user confirmed both
-picture and blue boundaries change during mouse movement. U7 Show Grid and Windows build/runtime
-remain open. [Exact Dev16 record](first-default-mac-dev16-2026-10-04.json).
-On2026-10-04 the user removed Show Grid's never-in-output requirement. U7 now
-uses an optional static pixel-visualization switch, defaultoff; whenon it will
-also appear in exports/cache/downstream effects. Shared CPU implementation
-passes84Rust/272Python tests and strict all-target probe Clippy. New0.9.4 Dev20
-is not installed or native-accepted yet.
-The prior additive overlay feasibility blocker is superseded by this product
-decision. [Current contract](persistent-viewer-grid.md#superseding-product-contract--2026-10-04).
+Installed ordinary candidate is **0.9.4 Dev20** /3095983, Build ID
+EGFX-bf6ecdde379f0831915ad144. Exact loaded UUID/path/hash and visible Version
+PASS. User removed Show Grid's never-in-output requirement on2026-10-04.
+Show Grid is a static checkbox, defaultoff for new/legacy instances. Whenon,
+grid pixels appear in playback/export/downstream effects. Shared CPU code for
+Mac/Windows passes84Rust/272Python and strict all-target probe Clippy.
+
+Mac AE25.6 scoped acceptance PASS: defaultoff exact saved Dev16 picture;
+on/off reversible output; enabled save/reopen exact output; original4Grid keys
+(times0,.2,.5,1) and3Radius keys(0:1,.2:3,1:6) retained; new neutral second
+instance defaultoff exact output;24PNG exports at8/16/32bpc, fitted Four Corners
+and Layer Plane, both qualities; wave on/off; deselected and playback visibility;
+other selected layer does not hide the grid. Own dummy layer/source removed.
+[Exact Dev20 record](show-grid-mac-dev20-2026-10-04.json).
+
+This closes the old additive-overlay feasibility blocker under the revised
+contract; broad3D/skewed-plane/multiple-instance/Undo lifecycle and Windows
+runtime remain open. Previous Dev16 first-default/reverse-drag checks retain
+their exact original scope; live scalar scrubbing is USER-REPORTED PASS.
+[Dev16 record](first-default-mac-dev16-2026-10-04.json).
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Previous verified test version was

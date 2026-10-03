@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "status": "SCOPED_MAC_PASS",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-bf6ecdde379f0831915ad144",
+    "commit": "3095983527e81dd2215609b15de21b0b6884da48",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "e7636cbdcd2738915f09c2474a82212b40ce31e4c65c1ba87b0c39e4b7de2679",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "version_ui": "0.9.4 Dev20, inspected Cua; Show Grid visible, static checkbox On, defaultoff",
+  "host": {
+    "ae": "25.6x101",
+    "platform": "macOS arm64",
+    "fixture": "319x241 pattern, saved animated deformation; retained4x4 topology, visible7x6 controls; fitted Four Corners and Layer Plane",
+    "scope_limit": "8-bit source pattern converted to8/16/32 host worlds; PNG comparisons are8-bit exports, not broad HDR/OCIO certification."
+  },
+  "checks": {
+    "source": "84Rust/272Python and all-target preview-probe Clippy PASS",
+    "release_package": "build/sign/bundle version/extracted package checks PASS",
+    "installed_loaded_identity": "PASS, UUID/path/hash",
+    "legacy_default_off_pixels": "PASS, exact saved Dev16 reverse.png baseline; pre-reverse baseline is intentionally different",
+    "switch_off_again": "PASS exact off.png bytes after on\u2192off",
+    "on_save_reopen": "PASS exact enabled output and saved Show Grid1;4Grid keys and3Radius keys retained",
+    "new_instance_default": "PASS defaultoff,0Show Grid keys, exact frame through neutral second instance; removed after check",
+    "native_world_matrix": "24PNG exports, on/off at8/16/32-bpc, modes1/2 fitted, qualities1/2; all12pairs have actual changed pixels",
+    "wave": "PASS on/off PNG with amplitude8/frequency2/speed1 at.2sec; restored original zero-wave fixture",
+    "key_metadata": "Grid times0,.2,.5,1; Radius0:1,.2:3,1:6 retained",
+    "deselected": "Cua-observed PASS, no selected effect/layer, rendered guides visible",
+    "playback": "Cua-observed PASS: red playback playhead, Playing60of indicator, visible changing rendered grid; stopped afterwards",
+    "other_layer": "Script state confirms other selected/effectfalse; exact original enabled PNG, Cua-observed visibility; owned dummy layer/source removed with Undo group",
+    "windows": "NOT_RUN: no Windows host/toolchain; public CI not authorized",
+    "broader_lifecycle": "NOT_RUN: arbitrary skewed3D/camera, many enabled instances, undo/deletion/reopen matrix and native process abort; no broad acceptance claim"
+  },
+  "files": {
+    "outputs/update-094-dev20-mac/rust-tests.txt": "45eafb23260c98982873ed3e469eebff1d66a9866431388d0809c69b944a21d8",
+    "outputs/update-094-dev20-mac/clippy.txt": "bee99ba3e94ca412395a2410ec049b34471b8ffcb15f5b8cf4c272d7f2549c89",
+    "outputs/update-094-dev20-mac/python-initial.txt": "d0f0b5f6815922c0ef944be097ab9f12de9bae7ba53f2e8d38e01a7b9f30eede",
+    "outputs/update-094-dev20-mac/python-final.txt": "3cdbdeedb2633c0e89d38956e1efe058f35d41be0a5ea51677570fcfd777b5e3",
+    "outputs/update-094-dev20-mac/audit.json": "625f5a7e57f9d0ce58bb04b3d44cb107f831338b4d732f805c950abed8d4b7fd",
+    "outputs/update-094-dev20-mac/open.jsx": "6d46e022c81860c5105bfc477024caa4e1adf540814e0ae2cd991a4ebecb8d51",
+    "outputs/update-094-dev20-mac/open.json": "11c355fd43559130b2d39f6e04f8a3cd8c8fe180b85fd786dea01617d1fb4faf",
+    "outputs/update-094-dev20-mac/switch.jsx": "57472e4f50ef64e05efb78d585b4e0fadd614697a41fdf94dd3823d190f381d3",
+    "outputs/update-094-dev20-mac/switch-reopen.json": "b0bf8a5bfff30896ca1a5ab13c0631692fb3134837f65e7058f99f9b1003bff6",
+    "outputs/update-094-dev20-mac/matrix.jsx": "7ec3c17f24ad4901a93ec36851dbff9b7c3963cdad39650cf1e9821f7d786085",
+    "outputs/update-094-dev20-mac/native-matrix.json": "ea856891132d9ebb65235fce110e054b2e64d8ceb55581e92b889a1e5f43f085",
+    "outputs/update-094-dev20-mac/pixel-results.json": "4c9d21f0784e2b31b21772942212e6e75b622335801b7d18ba1dafb15c2c1443",
+    "outputs/update-094-dev20-mac/cleanup-other.jsx": "f3e27b836b091f21841592d3a531cd453102ab68f5a26e6caf9c5f14103a4b9d",
+    "outputs/update-094-dev20-mac/installation.json": "71d774adbf3a096156124579b2f63d663f76ed6a1a0e6ef06eb0b268d46783f0",
+    "outputs/update-094-dev20-mac/bundle-check.txt": "5832d5b7284e6f83b1a51400bbbaf1afbdac6e194609d5bfccae0a0d318f24ab",
+    "outputs/update-094-dev20-mac/show-grid-gesture.aep": "5b3e5ec599764de6183a529162828c51f65846037f5660ce4dab5bf6c76457b3",
+    "outputs/update-094-dev20-mac/off.png": "2112626f814a3b042085fcbcb2fd86b6d86d988ac2e35e5369641c58d306e4d5",
+    "outputs/update-094-dev20-mac/on.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "outputs/update-094-dev20-mac/on-reopen.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "outputs/update-094-dev20-mac/off-again.png": "2112626f814a3b042085fcbcb2fd86b6d86d988ac2e35e5369641c58d306e4d5",
+    "outputs/update-094-dev20-mac/loaded-identity/EGFX-check-53434d26e6c84e3c867fd35047809ada/report.json": "9bbf09a1b38db6a75a9652e8ca54058ac20742414ea19a0fb6ffcbcb432b5731",
+    "outputs/update-094-dev20-mac/validation-payload/FSTR Stretch.artifact.json": "2023cacb98409887eabe6cd6c468f38a9d59cd38d2e37a857a14800a23c1f3b0"
+  },
+  "remaining": "Full-update U5/U7 broader lifecycle, Windows validation, then installers/integration/release. Local-only boundary remains."
+}

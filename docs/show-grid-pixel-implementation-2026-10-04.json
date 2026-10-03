@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "date": "2026-10-04",
-  "status": "IMPLEMENTED_SOURCE_NOT_NATIVE_ACCEPTED",
+  "status": "IMPLEMENTED_SCOPED_MAC_PASS",
   "product_decision": "User removes never-in-output requirement; Show Grid defaultsfalse, renders optional grid pixels on both platforms.",
   "implementation": "New appended static ShowGrid stream; owned SmartPreRender snapshot of switch/counts/layout; existing evaluated axes and plane geometry; bounded major-axis stroke raster after ordinary/sparse/plane CPU renders. No existing stream ID/wire/FFI changes.",
   "checks": {
@@ -9,7 +9,7 @@
     "clippy_all_targets_preview_probe": "PASS",
     "python_initial": "269PASS,2FAIL from old approved parameter lists; no production failure. Tests updated to include appended ShowGrid and preserve exact legacy prefixes/static policy.",
     "python_final": "272PASS",
-    "native_dev20": "NOT_RUN",
+    "native_dev20": "SCOPED_PASS; see show-grid-mac-dev20-2026-10-04.json",
     "windows_build_runtime": "NOT_RUN; no Windows environment, remote CI unauthorized",
     "static_audit": "review_required,1existing false-positive auth heuristic at tests/test_target_ae_acceptance.py54: local test fixture, not auth route; no code findings in new module; not readiness certification."
   },
@@ -21,5 +21,5 @@
     "outputs/update-094-dev20-mac/clippy.txt": "bee99ba3e94ca412395a2410ec049b34471b8ffcb15f5b8cf4c272d7f2549c89",
     "outputs/update-094-dev20-mac/rust-tests.txt": "45eafb23260c98982873ed3e469eebff1d66a9866431388d0809c69b944a21d8"
   },
-  "remaining": "Fresh release build/package/installed loaded identity, native checkbox/defaultoff pixel parity/on PNG/deselected/playback, saved-key lifecycle and Windows validation. Installer work remains after plugin closure."
+  "remaining": "Full-update U5/U7 broader lifecycle, Windows validation, then installers/integration/release. Local-only boundary remains."
 }

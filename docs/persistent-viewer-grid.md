@@ -253,3 +253,17 @@ Acceptance: source tests for off pixel parity, stroke depth/alpha and tile origi
 current-time layout/Wave/plane matching; native new checkbox/default/switching,
 deselected/playback and actual PNG inclusion; reopen/key preservation; exact
 candidate identity. Windows native execution remains a separate required gate.
+
+
+### Implementation and scoped Mac acceptance
+
+Shared source3095983 implements the revised pixel-visualization contract;
+ordinary0.9.4 Dev20 is installed/loaded and inspected.
+[Exact native record](show-grid-mac-dev20-2026-10-04.json) binds actual PNGs,
+saved project, scripts, package and loaded identity. Defaultoff retains the
+existing saved picture exactly; on/off is reversible. Enabled grid remains
+visible without selection, with another layer selected and during playback.
+Reopen preserves switch/pixels and original Grid/Radius keys.24native PNG
+exports cover8/16/32bpc, fitted Four Corners/Layer Plane and both qualities;
+Wave is also exercised. Source84Rust/272Python/strict Clippy PASS.
+These are scoped Mac checks, not full lifecycle/3D/HDR/Windows acceptance.

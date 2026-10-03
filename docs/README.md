@@ -141,3 +141,5 @@ These records support traceability; start with STATUS.md for current decisions.
 - [GridWarp visualization reference, 2026-10-04](gridwarp-visualization-reference-2026-10-04.json) — native deselected/playback visibility and PNG pixel inclusion; internal mechanism UNKNOWN.
 
 - [Show Grid pixel implementation, 2026-10-04](show-grid-pixel-implementation-2026-10-04.json) — superseding user contract, source checks and native acceptance boundary.
+
+- [Show Grid Dev20 Mac acceptance, 2026-10-04](show-grid-mac-dev20-2026-10-04.json) — exact candidate, default/switch/export/reopen/keys/depth/plane/quality/Wave/deselected/playback/other-layer checks; broader lifecycle and Windows open.
