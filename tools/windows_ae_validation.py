@@ -66,6 +66,8 @@ def _windows_path(path: Path | str) -> str:
 def _require_windows() -> None:
     if os.name != "nt":
         raise RuntimeError("Windows AE validation must run on Windows")
+    if ctypes.sizeof(ctypes.c_void_p) != 8:
+        raise RuntimeError("Windows AE validation requires 64-bit Python")
 
 
 def _snapshot(flags: int, pid: int = 0):
