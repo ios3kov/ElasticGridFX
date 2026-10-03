@@ -17,10 +17,10 @@ from smoke_pixels import difference, read_png
 import windows_ae_validation as common
 
 
-def _write_wrapper(folder: Path, run_id: str, depth: int, kind: str, three_d: bool) -> Path:
+def _write_wrapper(script_dir: Path, evidence_dir: Path, run_id: str, depth: int, kind: str, three_d: bool) -> Path:
     guard = (common.ROOT / "tests/ae_runtime_smoke.jsx").read_text(encoding="utf-8")
     fixture = (common.ROOT / "tests/ae_first_application.jsx").read_text(encoding="utf-8")
-    config = dict(run_id=run_id, folder=str(folder), depth=depth, kind=kind, three_d=three_d)
+    config = dict(run_id=run_id, folder=str(evidence_dir), depth=depth, kind=kind, three_d=three_d)
     wrapper = r'''
 (function () {
     var result = {run_id: CONFIG.run_id, status:"FAIL", value:"", error:""};
@@ -43,13 +43,13 @@ def _write_wrapper(folder: Path, run_id: str, depth: int, kind: str, three_d: bo
     }
 })();
 '''.replace("CONFIG", json.dumps(config))
-    path = folder / "first.jsx"
+    path = script_dir / "first.jsx"
     path.write_text(guard + "\n" + fixture + "\n" + wrapper, encoding="utf-8")
     return path
 
 
-def _write_followup(folder: Path, run_id: str) -> Path:
-    config = dict(run_id=run_id, folder=str(folder))
+def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
+    config = dict(run_id=run_id, folder=str(evidence_dir))
     source = r'''
 (function(){
     var config=CONFIG, result={run_id:config.run_id,status:"FAIL",stage:"guard"};
@@ -105,7 +105,7 @@ def _write_followup(folder: Path, run_id: str) -> Path:
     }
 })();
 '''.replace("CONFIG", json.dumps(config))
-    path=folder/"followup.jsx"
+    path=script_dir/"followup.jsx"
     path.write_text(source,encoding="utf-8")
     return path
 
@@ -128,8 +128,10 @@ def execute(args) -> dict:
     root.mkdir(parents=True,exist_ok=True)
     folder=root/("EGFX-first-"+run_id)
     folder.mkdir()
-    first=_write_wrapper(folder,run_id,args.depth,args.kind,args.three_d)
-    followup=_write_followup(folder,run_id)
+    control=root/("EGFX-first-control-"+run_id)
+    control.mkdir()
+    first=_write_wrapper(control,folder,run_id,args.depth,args.kind,args.three_d)
+    followup=_write_followup(control,folder,run_id)
 
     result=dict(schema=1,status="FAIL",artifact=identity,pid=pid,workspace=str(folder),
                 case=dict(depth=args.depth,kind=args.kind,three_d=args.three_d),checks={})
