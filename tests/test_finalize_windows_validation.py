@@ -30,8 +30,9 @@ class FinalizeWindowsValidationTests(unittest.TestCase):
     def test_record_keeps_runtime_not_run(self):
         with tempfile.TemporaryDirectory(prefix='egfx-win-final-') as tmp:
             args=self.fixture(Path(tmp))
+            env={'GITHUB_ACTIONS':'true','GITHUB_SHA':'b'*40,'GITHUB_RUN_ID':'123','GITHUB_RUN_ATTEMPT':'1'}
             with patch.object(f.pipl_verify,'embedded_pipl',return_value=b'PiPL fixture'):
-                record=f.validate(*(p.resolve() for p in args))
+                record=f.validate(*(p.resolve() for p in args),env=env)
             self.assertEqual(record['checks']['pe_x64'],'PASS')
             self.assertEqual(record['checks']['pipl_resource_byte_exact'],'PASS')
             self.assertEqual(record['checks']['after_effects_load'],'NOT RUN')
@@ -41,10 +42,21 @@ class FinalizeWindowsValidationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='egfx-win-final-bad-') as tmp:
             args=list(self.fixture(Path(tmp)))
             args[3].write_text('no export here\n',encoding='utf-8')
+            env={'GITHUB_ACTIONS':'true','GITHUB_SHA':'b'*40,'GITHUB_RUN_ID':'123','GITHUB_RUN_ATTEMPT':'1'}
             with patch.object(f.pipl_verify,'embedded_pipl',return_value=b'PiPL fixture'):
                 with self.assertRaises(ValueError):
-                    f.validate(*(p.resolve() for p in args))
+                    f.validate(*(p.resolve() for p in args),env=env)
 
+
+    def test_non_ci_or_wrong_sha_cannot_emit_pass_record(self):
+        with tempfile.TemporaryDirectory(prefix='egfx-win-final-env-') as tmp:
+            args=self.fixture(Path(tmp))
+            with patch.object(f.pipl_verify,'embedded_pipl',return_value=b'PiPL fixture'):
+                with self.assertRaises(ValueError):
+                    f.validate(*(p.resolve() for p in args),env={})
+                bad={'GITHUB_ACTIONS':'true','GITHUB_SHA':'a'*40,'GITHUB_RUN_ID':'123','GITHUB_RUN_ATTEMPT':'1'}
+                with self.assertRaises(ValueError):
+                    f.validate(*(p.resolve() for p in args),env=bad)
 
 if __name__=='__main__':
     unittest.main()
