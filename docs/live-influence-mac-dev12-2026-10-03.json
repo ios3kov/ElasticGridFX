@@ -35,7 +35,10 @@
     "range_multiple_instances_and_planes": "NOT RUN",
     "show_grid": "OPEN",
     "windows_runtime": "NOT RUN",
-    "full_update": "INCOMPLETE"
+    "full_update": "INCOMPLETE",
+    "selected_second_instance_neutral_range": "OBSERVED",
+    "second_instance_export_parity": "NOT RUN",
+    "remove_second_restores_first_pixels_and_keys": "PASS"
   },
   "evidence": {
     "outputs/update-094-range-mac/undo-read.jsx": {
@@ -151,6 +154,27 @@
     },
     "outputs/update-094-range-mac/drag-guard.json": {
       "sha256": "e697a0c803245af888fdc2c7353261cf8eb2cedaeb71b37cdc1975a42751759c"
+    },
+    "outputs/update-094-range-mac/second-removed.jsx": {
+      "sha256": "2b68f67f13202c4c0967963e7fdc42686e460e23129f22ca836f4403351b2ba3"
+    },
+    "outputs/update-094-range-mac/second-neutral.jsx.transport.log": {
+      "sha256": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4"
+    },
+    "outputs/update-094-range-mac/second-removed.json": {
+      "sha256": "ad13df0eaf824e1bb52324c9e681a82b2a3082d0e16e886f011c278b4c54511d"
+    },
+    "outputs/update-094-range-mac/second-removed.jsx.transport.log": {
+      "sha256": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4"
+    },
+    "outputs/update-094-range-mac/second-neutral.json": {
+      "sha256": "66d7abf257b0829d5f54fa8422a975389368b5fc636590f6419a8f706e1d9c01"
+    },
+    "outputs/update-094-range-mac/second-neutral.jsx": {
+      "sha256": "aff6ad88ab2fbb758d52947864714e0f6b3992fbe6c5afa23cdaf957d584dc83"
+    },
+    "outputs/update-094-range-mac/second-removed.png": {
+      "sha256": "d4f8da458391ac6be6abab6676a49ecba0a108fc80e11c3d4c64f567ea7ce3a6"
     }
   },
   "observations": [
@@ -158,6 +182,8 @@
     "First two delivered gestures did not change pixels; retained as unsuccessful attempts. Third gesture on a different visible internal guide changed actual pixels.",
     "Cua drag refused noWindowsAvailable; existing authorized composition-bounded CGEvent helper used without expanded scope.",
     "Initial sandbox DoScript transport syntax failure; authorized transport rerun succeeded.",
-    "Four Grid key times and three Radius keys [0,1],[0.2,3],[1,6] survive save/reopen. Original fixture not overwritten."
+    "Four Grid key times and three Radius keys [0,1],[0.2,3],[1,6] survive save/reopen. Original fixture not overwritten.",
+    "A newly added neutral second effect at radius1 showed center-referenced blue boundaries through Cua; removal restored the first effect exact exported pixels and original key counts.",
+    "Second-neutral saveFrameToPng produced no actual file despite successful DoScript/state JSON. Do not accept neutral second-effect pixel parity; missing export retained explicitly."
   ]
 }

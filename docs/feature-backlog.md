@@ -208,7 +208,7 @@ Branch: feat/next-update. Parent work is retained: backlog decisions plus the
 Windows port checkpoint003607d have been combined locally without altering main
 or the original Windows branch. The accepted macOS source f611312 and installed
 release remain the historical comparison baseline, not a PASS for new bytes.
-New update version is not yet assigned; packaging/host target scope is AE25.x
+Update version is 0.9.4 (current ordinary candidate Dev12); packaging/host target scope is AE25.x
 macOS arm64 / Windows x64 until verified otherwise.
 
 | ID | Requirement / block | Acceptance / check phase | Current state |
@@ -221,7 +221,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U5 | Live range feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Immediate saved-field response implemented after user permits changed old appearance; retained keys/wire unchanged; numeric fractional/eased/wave drag PASS; Mac Dev8 old Radius keys, native drag/Undo/Redo, scripted response/save-reopen PASS; Dev12 scripted range-boundary response, annotation/export separation, drag/Undo/Redo/save-reopen PASS in bounded Mac fixture; mouse scalar scrubbing and broader range lifecycle pending |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |
 | U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Feasibility open |
-| U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Pending design and helpers |
+| U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Partially implemented helpers retained; paused until plugin behavior is complete |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
 | U10 | Integration, validation and final task reconciliation | All U1–U9 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
 

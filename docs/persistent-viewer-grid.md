@@ -115,3 +115,21 @@ without a diagnostic writer. [Exact candidate](live-influence-mac-dev8-2026-10-0
 This does not establish an unselected or playback drawing surface: no guide pixels
 are rendered, and Show Grid remains OPEN. The earlier negative overlay observation
 retains its original source scope; do not reinterpret input delivery as overlay proof.
+
+## SDK route recheck after Dev12 native range acceptance
+
+2026-10-03: rechecked the Adobe SDK guide Effect UI & Events and AEGP Suites
+against local SDK25.6 AE_EffectUI.h and AE_GeneralPlug.h. Custom Comp UI remains
+specified for a selected effect. ItemViewSuite1 exposes playback time, but no
+additive drawing surface or current view transform. Current online ItemViewSuite2
+adds only guide visible/snap/locked controls, documented for AE26.0+; this does
+not supply the missing custom drawing route or expand the target25.6 headers.
+The previously tested public PREVIEW flag route remains insufficient for PV-2/3.
+This is a bounded route assessment, not a proof that every implementation is
+impossible. The complete Show Grid behavior is still a functional blocker; do
+not convert successful selected Dev12 range feedback into Show Grid acceptance.
+
+Sources rechecked: [Effect UI & Events](https://ae-plugins.docsforadobe.dev/effect-ui-events/effect-ui-events/)
+and [Item Views](https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/#item-views).
+No new unsupported host route, OS overlay, auto-selection or renderer change
+was implemented. No package/installer work resumed while this feature is open.

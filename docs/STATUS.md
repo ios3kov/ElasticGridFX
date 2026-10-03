@@ -802,3 +802,15 @@ The new copy is outputs/update-094-range-mac/range-gesture.aep.
 
 Native scalar mouse scrubbing, range multiple-instance/plane lifecycle, U7,
 Windows host validation and installers remain incomplete. No remote action.
+
+Dev12 second-instance bounded check: Cua observed a neutral new instance's
+center range at radius1. Removing only that new instance restored exact first
+pixels/keys. Its own requested export did not produce a PNG; second-neutral
+pixel parity remains NOT RUN despite successful state JSON. Broader multi-view,
+plane, deletion-Undo and playback lifecycle acceptance remains open.
+
+U7 SDK route recheck: online ItemViewSuite2 adds guide toggles only for26.0+,
+not an additive custom drawing surface. SDK25.6 ItemViewSuite1 and the selected
+PF event route still do not establish PV-2/3. Full Show Grid remains a functional
+blocker. Windows target std/toolchain and Windows AE are absent locally; existing
+Mac/shared checks do not become a Windows build or runtime PASS.
