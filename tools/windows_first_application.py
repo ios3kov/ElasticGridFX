@@ -33,6 +33,7 @@ def _write_wrapper(script_dir: Path, evidence_dir: Path, run_id: str, depth: int
             else if (code===34) out+=bs+'"';
             else if (code===13) out+=bs+'r';
             else if (code===10) out+=bs+'n';
+            else if (code===9) out+=bs+'t';
             else out+=input.charAt(i);
         }
         return out+'"';
@@ -70,6 +71,9 @@ def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
             var code=input.charCodeAt(i);
             if (code===92) out+=bs+bs;
             else if (code===34) out+=bs+'"';
+            else if (code===13) out+=bs+'r';
+            else if (code===10) out+=bs+'n';
+            else if (code===9) out+=bs+'t';
             else out+=input.charAt(i);
         }
         return out+'"';
