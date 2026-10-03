@@ -87,19 +87,23 @@ def _write_followup(script_dir: Path, evidence_dir: Path, run_id: str) -> Path:
     } catch(e) {
         result.error=String(e);
     } finally {
+        try {
+            if (app.project!==null && app.project.file!==null &&
+                app.project.file.fsName===new File(config.folder+"/first-application.aep").fsName) {
+                app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
+                var fresh=app.newProject();
+                if (fresh===null || fresh!==app.project || fresh.file!==null || fresh.numItems!==0)
+                    throw Error("fresh project unavailable");
+            }
+        } catch(cleanupError) {
+            result.status="FAIL"; result.stage="cleanup"; result.error=String(cleanupError);
+        }
         var file=new File(config.folder+"/followup.json");
         try {
             file.encoding="UTF-8";
             if (file.exists || !file.open("w")) throw Error("result unavailable");
             file.write('{"run_id":'+q(result.run_id)+',"status":'+q(result.status)+',"stage":'+q(result.stage)+',"error":'+q(result.error||"")+'}');
             file.close();
-        } catch(_) {}
-        try {
-            if (app.project!==null && app.project.file!==null &&
-                app.project.file.fsName===new File(config.folder+"/first-application.aep").fsName) {
-                app.project.close(CloseOptions.DO_NOT_SAVE_CHANGES);
-                app.newProject();
-            }
         } catch(_) { result.status="FAIL"; }
         app.exitCode=result.status==="CAPTURED"?0:95;
     }
