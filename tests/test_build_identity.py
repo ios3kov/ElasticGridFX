@@ -94,6 +94,13 @@ class IdentityTests(unittest.TestCase):
                 ('aarch64-apple-darwin', 'release', {'rustc': 'a'}, {'RUSTFLAGS': '-Copt-level=2'})]
         self.assertEqual(len({bi.identity(src, *a)['build_id'] for a in args}), len(args))
 
+    def test_artifact_type_matches_target_platform(self):
+        src = bi.source_record(self.root)
+        mac = bi.identity(src, 'aarch64-apple-darwin', 'release', {'rustc':'a'}, {})
+        win = bi.identity(src, 'x86_64-pc-windows-msvc', 'release', {'rustc':'a'}, {})
+        self.assertEqual(mac['artifact_type'], 'AE native effect (.plugin)')
+        self.assertEqual(win['artifact_type'], 'AE native effect (.aex)')
+
     def test_ignored_build_files_do_not_make_source_dirty(self):
         before = self.meta()
         self.write('dist/log.txt', 'generated')
