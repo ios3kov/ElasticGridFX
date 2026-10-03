@@ -42,6 +42,10 @@ outside the verified scope. Persistent grid display when unselected is a
 The [future update backlog](feature-backlog.md) also records the requested
 Grid Positions-only reset button: reset at the current time while preserving
 keys at other times; do not clear the animation.
+The next-update plan also requires clear English UI labels, live viewport
+feedback, automatic safe spacing and a collapsible Wave Animation section.
+The editable influence model and legacy-spacing compatibility need design
+before implementation; no new controls or runtime behavior are shipped.
 
 Read the [performance/release retrospective](retrospective-0.9.3-perf.1.md),
 [quality contract](performance-quality-contract.md) and
