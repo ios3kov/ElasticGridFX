@@ -84,3 +84,20 @@ or missing log cannot prove absence of callbacks. Probe version0.9.4 Dev3.
 No Show Grid checkbox or production drawing hook is claimed. Selected, deselected
 and playback phases need actual host observations; compilation is not feasibility
 PASS. Negative observations cover only this public flag in the tested host.
+
+
+### Runtime result — tested public flag only
+
+35a9f3c / EGFX-7962a70953672d95f7328d1a, 0.9.4 Dev3 probe, AE25.6x101 arm64:
+loaded UUID/path identity PASS. Actual stopped selected/unselected and RAM
+Preview selected/unselected phases observed through Cua.1711 bounded records,
+no PREVIEW window callbacks; after deselection zero comp DRAW events, seven
+Layer DRAW events from the separate Layer view. Layer callbacks are not an
+additive Composition overlay. The raw log is retained/hash-bound in
+outputs/update-094-preview-probe-mac/feasibility-result.json. This rejects this
+flag as a demonstrated PV-2/PV-3 route in this host; it does not prove universal
+impossibility or transfer a Windows result. UI/output drawing was unchanged.
+After the experiment the ordinary new0.9.4 Dev1 build
+EGFX-2b54838b4bf29f6a45243d07 was installed from35a9f3c; loaded identity and exact
+current .2-frame parity PASS. No old released plugin was restored. Show Grid
+remains feasibility OPEN, no fake checkbox/baked guide pixels are shipped.

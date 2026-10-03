@@ -477,3 +477,22 @@ Default Rust74 and full Python267 PASS. Source checks/build/host observation
 are separate gates. Probe version0.9.4 Dev3, no Show Grid feasibility PASS yet.
 The user confirms old baked deformation must respond to Affected Lines too;
 new-edits-only was rejected. U5 numerical/compatibility design remains open.
+
+
+### PREVIEW experiment closure / ordinary candidate
+
+Actual AE25.6 selected/unselected stopped/playback experiment logs1711 records
+and zero PF_Window_PREVIEW callbacks. After deselection no comp DRAW, seven
+Layer DRAW from the separate Layer view. Tested flag is not a demonstrated Show
+Grid route; universal impossibility is not claimed. Evidence:
+outputs/update-094-preview-probe-mac/feasibility-result.json. Show Grid still OPEN.
+Ordinary0.9.4 Dev1 from35a9f3c installed afterward (EGFX-2b54838b4bf29f6a45243d07):
+loaded identity PASS and exact current-time saved-gesture pixels PASS. Old released
+plugin was not restored; original test copies remain in external backups.
+
+U8: shared read-only installer decision contract implemented with both-platform
+positive/negative checks. Native pkg/exe frontends, atomic executor/recovery and
+actual installation acceptance remain NOT RUN. U5 old-project live response
+needs a compatibility decision about the old Tension Radius animation; original
+picture and Grid Positions keys must remain unchanged before edits. Local-only
+boundary continues; full requested update remains incomplete.

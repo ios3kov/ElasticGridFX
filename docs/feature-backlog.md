@@ -49,7 +49,8 @@ neutral geometry for the current topology.
 - Resetting Grid Positions does not imply disabling independently configured
   wave animation, elasticity or plane/corner transforms.
 
-Status: REQUESTED / NOT IMPLEMENTED. No host tests or acceptance PASS recorded.
+Status: IMPLEMENTED locally in U2; see native Reset checkpoints in STATUS.md.
+Final integrated Mac/Windows candidate acceptance remains open.
 
 ## Next update interface plan
 
@@ -194,8 +195,9 @@ technical-design work, not runtime feasibility, completed code or test PASS.
   format is not predetermined. Plan clear instructions, detection of an existing
   plugin, preservation of the previous version outside active Adobe plugin
   folders, a discoverable backup location and a simple rollback. Avoid duplicate
-  active copies and unexplained destructive replacement. No installer code or
-  installation action is authorized merely by recording this requirement.
+  active copies and unexplained destructive replacement. The later explicit
+  instruction to implement the whole update authorizes local installer development;
+  this does not authorize publication or broaden system access.
 - Broader AE-version support remains a discussed candidate, not a commitment.
 - GPU/Metal acceleration: historical plans exist; no new cycle is approved.
 - The accepted macOS CPU performance cycle is complete; do not label it unfinished.
@@ -342,3 +344,32 @@ saved deformation; preserving exact initial appearance/keys remains required.
 The stored baked axes cannot reconstruct gesture history. Investigate geometric
 field response and validate its observable behavior before saved-format changes.
 See live-influence-design.md. The old pending legacy question is superseded.
+
+
+### U8 shared installation decision contract
+
+User-facing direction: Mac native installer and Windows native installer with
+Install/Restore actions, clear running-host/conflict messages, previous-version
+backup outside Adobe scan directories and no Developer ID requirement. Format
+integration/native frontends are pending; no final pkg/exe is available yet.
+Read-only tools/installer_contract.py shares the policy for both targets:
+verified clean ordinary candidate matching expected version/Build ID/architecture;
+fresh complete scan and stopped Adobe hosts; guarded destination/backup paths;
+refuse unknown/multiple/changed copies and pending recovery; distinguish exclusive
+fresh install, identical already-installed bytes, and backup-before-replacement.
+Four unit scenarios include both platforms and negative/tamper/uncertain cases.
+This is a decision contract, not a secure executor, installer or OS runtime PASS.
+
+Native integration MUST collect observations itself, bind a full payload snapshot
+(bytes/modes/layout) and process/scan provenance, then recheck under a transaction
+lock immediately before publication. Package paths never select destinations.
+On Mac resolve target under system root / and backups under /Library; on Windows
+resolve target under native CommonProgramFiles and backups under ProgramData.
+Require same-volume atomic publication/replacement; no copy/delete fallback for
+unsupported atomic operations. Journal before mutation and retain recoverable
+payload/previous tree after interruption. Restore verifies current/previous
+identities and never overwrites a newer changed installation. Test interrupted
+states, duplicates, symlinks/reparse paths, permissions and recovery before
+privileged installation. Hashes alone do not authenticate the publisher; package
+trust comes from the agreed distribution channel. No download/update service,
+credentials or new UI-control permissions are introduced by this contract.
