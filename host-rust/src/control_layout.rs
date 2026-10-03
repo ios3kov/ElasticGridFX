@@ -55,6 +55,17 @@ pub(crate) fn reflow(in_data: &ae::InData, params: &mut ae::Parameters<Params>, 
     Ok(())
 }
 
+pub(crate) fn freeze_for_drag(in_data: &ae::InData,params: &mut ae::Parameters<Params>,column: bool)
+    -> Result<(),ae::Error> {
+    let saved=grid_snapshot(params)?;
+    let count=params.get(if column {Params::Columns} else {Params::Rows})?.as_slider()?.value() as usize;
+    let layout=params.get(Params::ControlLayout)?.as_arbitrary()?.value::<State>()?.clone();
+    let refs=if column {&layout.columns} else {&layout.rows};
+    let retained=if column {saved.columns} else {saved.rows} as usize;
+    if refs.len()!=count+2 && count!=retained {reflow(in_data,params,column)?;}
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

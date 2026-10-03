@@ -264,3 +264,22 @@ A read-only Version row displays 0.9.4 Dev 1 (Dev 2 for diagnostics). Package,
 PiPL and About version derive from the same Cargo version.
 
 | U11 | Uniform density without deformation change | Real FFI tests for all counts, immutable grid/key bytes, saved layout roundtrip; native AE count-change, Undo and reopen | Source implemented; 73 Rust tests PASS; AE and Windows pending |
+
+
+### Scripted density checkpoint — 2026-10-03
+
+AE scripted count setters do not send UserChangedParam in the owned Mac fixture.
+A pure read-only fallback redistributes guides when visible count differs from
+retained topology; the first actual deformation drag freezes the references.
+No Grid Positions setter is invoked merely by drawing or changing counts.
+74 Rust tests PASS, including callback-free redistribution with immutable saved
+bytes. Fresh candidate native acceptance follows separately.
+
+Initial 0.9.4 candidate 6d67c27 / EGFX-981a1e675022a0a6abb7d6d4 loaded identity
+PASS on Mac AE25.6. New hidden defaults are 1/100/100/25; legacy fixture remains
+2/100/0/25 with its three keys. Four legacy PNG frames match prior candidate
+exactly. Version row and hidden controls visually confirmed. One native
+Unsupported effect control warning appeared on initial open; cause remains
+UNKNOWN, no no-warning/complete integration PASS is claimed. The first density
+evidence script used unavailable JSON.stringify; corrected script has separate
+outputs. These harness errors do not overwrite prior evidence.

@@ -129,3 +129,15 @@ fn redistributed_handles_move_and_keep_their_source_identity_after_drag() {
     let (reopened,_)=bincode::serde::decode_from_slice::<control_layout::State,_>(&wire,bincode::config::legacy()).unwrap();
     assert_eq!(sample_layout(&saved.column_lines,&reopened.columns,0.0,0.25).unwrap().0,after);
 }
+
+#[test]
+fn scripted_density_without_callback_uses_uniform_read_only_fallback() {
+    let mut saved=GridArb::default();saved.column_lines=vec![0.0,0.03,0.18,0.71,0.95,1.0];
+    let before=bincode::serde::encode_to_vec(&saved,bincode::config::legacy()).unwrap();
+    let mut displayed=view(&saved,(7,6),1.0,0.25).unwrap();
+    apply_layout(&mut displayed,&saved,(7,6),&control_layout::State::default(),1.0,0.25).unwrap();
+    for (lines,n) in [(&displayed.grid.column_lines,8),(&displayed.grid.row_lines,7)] {
+        for (i,v) in lines.iter().enumerate() {assert!((v-i as f32/n as f32).abs()<1e-5);}
+    }
+    assert_eq!(bincode::serde::encode_to_vec(&saved,bincode::config::legacy()).unwrap(),before);
+}

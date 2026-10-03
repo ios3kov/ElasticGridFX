@@ -81,14 +81,7 @@ pub(crate) fn read(in_data: &ae::InData, params: &mut ae::Parameters<Params>)
     let layout=params.get(Params::ControlLayout)?.as_arbitrary()?.value::<control_layout::State>()?;
     if !layout.valid() {return Err(ae::Error::BadCallbackParameter);}
     let mut displayed=view(&evaluated,counts,p.stretch_easing,p.easing_distance)?;
-    if layout.columns.len()==counts.0+2 {
-        (displayed.grid.column_lines,displayed.column_refs)=
-            sample_layout(&evaluated.column_lines,&layout.columns,p.stretch_easing,p.easing_distance)?;
-    }
-    if layout.rows.len()==counts.1+2 {
-        (displayed.grid.row_lines,displayed.row_refs)=
-            sample_layout(&evaluated.row_lines,&layout.rows,p.stretch_easing,p.easing_distance)?;
-    }
+    apply_layout(&mut displayed,&evaluated,counts,&layout,p.stretch_easing,p.easing_distance)?;
     Ok(displayed)
 }
 
@@ -106,3 +99,22 @@ pub(crate) fn drag(lines: &mut [f32], pins: &[u8], reference: f32, delta: f32,
 #[cfg(test)]
 #[path = "control_grid_tests.rs"]
 mod tests;
+
+// Scripted setValue does not deliver UserChangedParam. Resolve mismatched
+// densities read-only here; the first real deformation drag freezes references.
+fn apply_layout(displayed: &mut View,evaluated: &GridArb,counts: (usize,usize),
+    layout: &control_layout::State,easing: f32,distance: f32) -> Result<(),ae::Error> {
+    for column in [true,false] {
+        let (lines,refs,count,retained)=if column {
+            (&evaluated.column_lines,&layout.columns,counts.0,evaluated.columns as usize)
+        } else {(&evaluated.row_lines,&layout.rows,counts.1,evaluated.rows as usize)};
+        let fallback;
+        let selected=if refs.len()==count+2 {refs.as_slice()}
+        else if count!=retained {fallback=reflow_axis(lines,count,easing,distance)?;&fallback}
+        else {continue;};
+        let sampled=sample_layout(lines,selected,easing,distance)?;
+        if column {(displayed.grid.column_lines,displayed.column_refs)=sampled;}
+        else {(displayed.grid.row_lines,displayed.row_refs)=sampled;}
+    }
+    Ok(())
+}

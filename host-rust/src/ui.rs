@@ -504,6 +504,7 @@ fn drag_inner(
     control_grid::drag(lines,pins,refs[index],target-positions[index],&elastic)?;
     // Only a real deformation edit may write the animated arbitrary parameter.
     if grid != before {
+        control_layout::freeze_for_drag(in_data,params,axis==DRAG_COLUMNS)?;
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(grid)?;
         event.set_event_out_flags(
             ae::EventOutFlags::HANDLED_EVENT
