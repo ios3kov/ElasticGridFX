@@ -6,6 +6,14 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active local update — rules8.0.0
 
+Current priority: complete plugin behavior (U5 then U7), validate both platforms,
+then finish installers. User explicitly corrected this order; U8 work is paused.
+On2026-10-03 the user chose immediate new influence of existing Tension Radius
+animation. Old appearance may change at opening; preserve the original streams
+and keys. This supersedes the earlier preserve-initial-picture migration hold.
+Source implementation targets0.9.4 Dev4; not installed or accepted yet. Last
+verified installed candidate remains the distinct Dev1 identity below.
+
 Branch feat/next-update; no push, PR or publication authorized. Current update
 remains incomplete across macOS/Windows. Last verified installed test version is
 **0.9.4 Dev 1**, source35a9f3c, Build ID EGFX-2b54838b4bf29f6a45243d07.
@@ -607,3 +615,47 @@ or Build ID; it is not a new AE-loaded identity or installation acceptance.
 No plugin bytes, permissions or project were changed. Fixed-root/process scan,
 package trust/signature/identity collector, durable authenticated recovery metadata,
 new-install/finalization, native frontend and Windows remain incomplete.
+
+### U5 immediate live field — source block
+
+Pure compact Smoothstep displacement evaluation is connected to the shared
+viewer/normal-render/SmartRender grid preparation. It immediately reads the
+existing TensionRadius stream, including old animated values, without touching
+saved Grid Positions, scalar keys or wire3. Increasing radius distributes local
+deformation and may soften its magnitude; radius<=1 retains the baked axis,
+neutral/reset retains exact uniform bits. Visible guide density is independent.
+The explicit new internal live_influence field is host/core coordinated,168 bytes
+on64-bit with offset160. Frozen core parity callers leave it0; updated host sets1
+for normal and SmartRender paths. Older binaries are never mixed with this ABI.
+
+Interactive editing now uses a bounded scalar search against exactly the same
+evaluated field, Wave and easing at the fractional source reference. Every trial
+starts from the original stored projected axis; only the final validated result
+is published, so saturation retains no hidden movement history. Affected Lines
+supervision requests rerender without rewriting any grid/animation value. Dev4
+cache identity and visible version derive from one build-script number; optional
+diagnostic/probe builds becomeDev5/Dev6, not the earlier2/3 candidates.
+
+Core25/25 CTest PASS on initial source; focused final live-field numeric/pixel
+test PASS after adding full8/16/32-bpc sampling comparison. Neutral/monotonicity
+at every topology1..50; explicit kernel weights; radius response and immutable
+axes; fractional handles with Wave/easing; zero-drag stability, saturation/reverse
+and invalid-target refusal tested. Both qualities/all edge modes match byte exact
+rendering of the same pre-evaluated axes through the existing sampler, including
+extended-range float inputs. This proves sampling consistency, not preservation
+of old appearance (the user expressly superseded that requirement).
+Rust74 PASS; strict Clippy PASS before final build-number consolidation; final
+consolidated Rust74/strict Clippy PASS, identity/host-contract37 PASS (two subtests).
+Scanner exit1 remains the reviewed mocked-local-fixture auth heuristic; no new
+finding. Source checks recorded separately before package. Earlier compile failed on the
+old160-byte ABI assertion; updated both Rust/C++ size and new-offset guards.
+Unused legacy drag wrapper is now test-only; no warning suppression added.
+
+Evidence: outputs/update-094-live-core-tests.txt,
+update-094-live-numeric-pixel-tests.txt, update-094-live-rust-versioned.txt and
+update-094-live-clippy-versioned.txt, update-094-live-rust-consolidated.txt and
+update-094-live-host-checks.txt. Native AE slider/old-radius-key/drag/Undo/
+save-reopen checks, exact new package/load identity and Windows remain NOT RUN.
+Show Grid and affected-range visualization remain open. Full update incomplete;
+local-only boundary maintained. Next: clean-source ordinary Dev4 package and
+owned AE validation; no installer work before plugin integration.

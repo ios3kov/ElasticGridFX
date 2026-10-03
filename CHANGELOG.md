@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.4 Dev 4 — development, not released
+
+- Affected Lines now evaluates the saved deformation itself. Existing animated
+  Tension Radius values remain in their original stream and immediately influence
+  old projects; their appearance may change, by explicit user decision. Grid keys,
+  scalar keys and grid serialization remain unchanged. Native acceptance pending.
+- Shared compact Smoothstep displacement field feeds viewer and render paths;
+  dragging solves against the evaluated field, including fractional controls,
+  smoothing and waves. Sampling quality modes remain unchanged.
+- Cache version and visible Dev label now share the build script's development
+  number. Previous Dev1/2/3 evidence is not transferred to this candidate.
+
 ## 0.9.4 Dev 1 — development, not released
 
 - Simplify deformation UI: hide Follow Shape, Follow Strength, Smooth Stretch

@@ -181,3 +181,52 @@ extern "C" int eg_control_axis_drag(float* lines, const std::uint8_t* pins, std:
         return 0;
     } catch (...) { return 4; }
 }
+
+extern "C" int eg_control_axis_drag_live(float* lines,const std::uint8_t* pins,std::int32_t size,
+                                         float ref,float target,const EgElasticParams* e,
+                                         const EgRenderParams* render,std::int32_t columns) noexcept {
+    try{
+        if(!valid(lines,size) || !pins || !e || !render || render->live_influence!=1 ||
+           (columns!=0 && columns!=1) || !std::isfinite(target) || !std::isfinite(ref) ||
+           ref<=0 || ref>=size-1 || !std::isfinite(e->elasticity_strength)) return 1;
+        if((columns ? render->column_line_count : render->row_line_count)!=size) return 1;
+        // Every trial starts from the stored, projected axis. No hidden overshoot
+        // accumulates and no animated state is published before all checks pass.
+        const std::vector<float> base(lines,lines+size);
+        auto sample=[&](const std::vector<float>& axis,float& result){
+            auto p=*render;
+            if(columns){p.column_lines=axis.data();p.column_pins=pins;}
+            else {p.row_lines=axis.data();p.row_pins=pins;}
+            std::vector<float> x(52),y(52);
+            int rc=eg_evaluate_grid(&p,x.data(),52,y.data(),52);
+            if(rc) return rc;
+            auto& evaluated=columns ? x : y;
+            evaluated.resize(static_cast<std::size_t>(size));
+            result=position(evaluated,ref,p.stretch_easing,p.easing_distance);
+            return std::isfinite(result) ? 0 : 4;
+        };
+        float current=0;
+        if(int rc=sample(base,current)) return rc;
+        if(e->elasticity_strength<=0) return 0;
+        target=std::clamp(target,0.0f,1.0f);
+        if(std::abs(target-current)<2e-7f) return 0;
+        const float sign=target>current ? 1.0f : -1.0f;
+        auto best=base;
+        float bestError=std::abs(target-current), low=0, high=1;
+        for(int step=0;step<29;++step){
+            const float amount=step==0 ? high : (low+high)*0.5f;
+            auto trial=base;
+            if(int rc=eg_control_axis_drag(trial.data(),pins,size,ref,sign*amount,e)) return rc;
+            float value=0;
+            if(int rc=sample(trial,value)) return rc;
+            const float error=std::abs(target-value);
+            if(error<bestError){bestError=error;best=std::move(trial);}
+            if(bestError<2e-7f) break;
+            if(sign*(value-target)<0) low=amount; else high=amount;
+            if(step==0 && low==high) break; // Unreachable target: closest projected state.
+        }
+        if(!valid(best.data(),size)) return 4;
+        std::copy(best.begin(),best.end(),lines);
+        return 0;
+    }catch(...){return 4;}
+}

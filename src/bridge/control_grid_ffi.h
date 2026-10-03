@@ -9,6 +9,9 @@ int eg_control_axis_read(const float* lines, std::int32_t size,
                          float* positions, float* references, std::int32_t capacity) noexcept;
 int eg_control_axis_drag(float* lines, const std::uint8_t* pins, std::int32_t size,
                          float reference, float delta, const EgElasticParams* elastic) noexcept;
+int eg_control_axis_drag_live(float* lines,const std::uint8_t* pins,std::int32_t size,
+                              float reference,float target,const EgElasticParams* elastic,
+                              const EgRenderParams* render,std::int32_t columns) noexcept;
 // Retained viewer layout: normalized source references, independent of render
 // axes/keys. Reflow chooses references whose current destination is uniform.
 int eg_control_axis_reflow(const float* lines, std::int32_t size,

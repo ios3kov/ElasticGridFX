@@ -446,6 +446,7 @@ struct EgRenderParams {
     output_origin_y: i32,
     abort_fn: Option<unsafe extern "C" fn(*mut c_void) -> i32>,
     abort_refcon: *mut c_void,
+    live_influence: i32,
 }
 
 #[derive(Clone, Debug)]
@@ -506,6 +507,7 @@ impl SmartRenderSnapshot {
             output_origin_y: 0,
             abort_fn: Some(ae_abort_trampoline),
             abort_refcon,
+            live_influence: 1,
         }
     }
 }
@@ -752,6 +754,7 @@ fn evaluated_params(
         output_origin_y: 0,
         abort_fn: Some(ae_abort_trampoline),
         abort_refcon: in_data.as_ptr() as *mut c_void,
+        live_influence: 1,
     })
 }
 
@@ -979,9 +982,9 @@ impl AdobePluginGlobal for Plugin {
             f.set_label("Reset");
         }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::INVISIBLE)?;
 
-        params.add(Params::TensionRadius, "Affected Lines", ae::FloatSliderDef::setup(|f| {
+        params.add_with_flags(Params::TensionRadius, "Affected Lines", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 20.0), (0.0, 8.0), 3.0, 1, false);
-        }))?;
+        }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::empty())?;
         params.add_with_flags(Params::Falloff, "Follow Shape", ae::PopupDef::setup(|f| {
             // Keep saved numeric values and all four slots. Relabel to the
             // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
@@ -1100,6 +1103,11 @@ impl AdobePluginGlobal for Plugin {
                     build_identity::DIAGNOSTIC, self.lifecycle_probe.report()));
             }
             ae::Command::UserChangedParam { param_index } => {
+                if params.index(Params::TensionRadius)==Some(param_index) {
+                    // Radius is now a render dependency of existing deformation.
+                    // Never rewrite Grid Positions or any scalar animation keys.
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
+                }
                 if params.index(Params::PlaneMode)==Some(param_index) {
                     plane::update_ui(&in_data,params)?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
@@ -1575,9 +1583,10 @@ mod tests {
     #[test]
     fn ffi_layout_is_frozen_on_64_bit_hosts() {
         assert_eq!(std::mem::size_of::<usize>(), 8);
-        assert_eq!(std::mem::size_of::<EgRenderParams>(), 160);
+        assert_eq!(std::mem::size_of::<EgRenderParams>(), 168);
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_fn), 144);
         assert_eq!(std::mem::offset_of!(EgRenderParams, abort_refcon), 152);
+        assert_eq!(std::mem::offset_of!(EgRenderParams, live_influence), 160);
         assert_eq!(std::mem::size_of::<EgElasticParams>(), 16);
     }
 }

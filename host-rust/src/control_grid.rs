@@ -4,8 +4,12 @@ use super::*;
 unsafe extern "C" {
     fn eg_control_axis_read(lines: *const f32, size: i32, count: i32,
         easing: f32, distance: f32, positions: *mut f32, references: *mut f32, capacity: i32) -> i32;
+    #[cfg(test)]
     fn eg_control_axis_drag(lines: *mut f32, pins: *const u8, size: i32,
         reference: f32, delta: f32, elastic: *const EgElasticParams) -> i32;
+    fn eg_control_axis_drag_live(lines: *mut f32,pins: *const u8,size: i32,
+        reference: f32,target: f32,elastic: *const EgElasticParams,
+        render: *const EgRenderParams,columns: i32) -> i32;
     fn eg_control_axis_reflow(lines: *const f32,size: i32,count: i32,easing: f32,
         distance: f32,refs: *mut f32,capacity: i32) -> i32;
     fn eg_control_axis_read_layout(lines: *const f32,size: i32,normalized: *const f32,
@@ -41,6 +45,19 @@ pub(crate) struct View {
     pub grid: GridArb,
     pub column_refs: Vec<f32>,
     pub row_refs: Vec<f32>,
+}
+
+pub(crate) fn drag_live(lines: &mut [f32],pins: &[u8],reference: f32,target: f32,
+                       elastic: &EgElasticParams,render: &EgRenderParams,columns: bool)
+    -> Result<(),ae::Error> {
+    if !(3..=MAX_GUIDES+2).contains(&lines.len()) || pins.len()!=lines.len() {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    // SAFETY: bounded slices and complete render inputs live throughout this
+    // synchronous call. The core publishes only the final validated edited axis.
+    let rc=unsafe {eg_control_axis_drag_live(lines.as_mut_ptr(),pins.as_ptr(),lines.len() as i32,
+        reference,target,elastic,render,i32::from(columns))};
+    if rc==0 {Ok(())} else {Err(ae::Error::BadCallbackParameter)}
 }
 
 fn sample(lines: &[f32], count: usize, easing: f32, distance: f32)
@@ -85,6 +102,7 @@ pub(crate) fn read(in_data: &ae::InData, params: &mut ae::Parameters<Params>)
     Ok(displayed)
 }
 
+#[cfg(test)]
 pub(crate) fn drag(lines: &mut [f32], pins: &[u8], reference: f32, delta: f32,
                   elastic: &EgElasticParams) -> Result<(), ae::Error> {
     if lines.len()!=pins.len() || !(3..=MAX_GUIDES+2).contains(&lines.len()) {

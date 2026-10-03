@@ -45,6 +45,9 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
+    let development_build=if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {6}
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {5} else {4};
+    println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_auto_binding)");
@@ -193,8 +196,7 @@ fn main() {
             bugversion: std::env::var("CARGO_PKG_VERSION_PATCH").unwrap().parse().unwrap(),
             stage: Stage::Develop,
             // Distinguish ordinary/diagnostic development candidates in AE caches.
-            build: if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() { 3 }
-                else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 2 } else { 1 },
+            build: development_build,
         },
         Property::AE_Effect_Info_Flags(0),
         Property::AE_Effect_Global_OutFlags(

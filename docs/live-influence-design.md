@@ -82,6 +82,32 @@ coefficients, animation keys, or rendering quality.
 6. Draw affected-range feedback only inside valid host callbacks. U7's unselected
    and playback overlay feasibility remains a separate dependency.
 
-Status: DESIGN OPEN. Catalog-bound regression is independent of the pending
-migration decision. No product parameter IDs, defaults, saved bytes, render
-route, installation permissions or release status changed by this document.
+## Superseding migration decision and first implementation block
+
+The user explicitly chose immediate application of existing Tension Radius
+animation on2026-10-03. Exact old appearance on opening is no longer required;
+saved Grid Positions and scalar keys must remain intact. No baseline clone,
+new parameter stream, gesture reconstruction or new wire format is needed.
+
+Implement a bounded geometric field: subtract the uniform source position from
+each retained knot, smooth those displacements with a normalized compact
+Smoothstep kernel whose radius is the current Affected Lines value, add them back
+to uniform positions, pin endpoints and project to safe spacing. Radius<=1 keeps
+the baked shape exactly; neutral axes remain bit exact. Increasing radius spreads
+local changes and can soften their magnitude. This is a new geometric behavior,
+not a recovery of the old gesture history or a quality reduction in sampling.
+Use retained topology units; changing visible Columns/Rows never changes this
+field. Apply before Wave and existing interpolation/sampling on the shared core.
+
+An explicit internal render-ABI flag selects the new evaluator for the updated
+host; legacy core parity callers remain on their frozen old route. The AE stream
+ID/default/range and saved-grid six-field encoding stay unchanged. Both normal
+UI evaluation and immutable SmartRender snapshots enable the same flag. Dragging
+must solve against the same evaluated field (including Wave/easing), rather than
+applying raw pointer delta to the baked axis. Bound the scalar search, store only
+valid projected axes, and verify fractional references, saturation/reversal,
+animation input, neutral/reset and nonmutation before native acceptance.
+
+Status: IMPLEMENTATION IN PROGRESS. Previous coefficient/wire-v4 proposals are
+superseded by the explicit user decision. No completed host/runtime or Windows
+acceptance is claimed. U7 overlay feasibility remains a separate open gate.

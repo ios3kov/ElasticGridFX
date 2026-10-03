@@ -43,6 +43,8 @@ typedef struct EgRenderParams {
     std::int32_t output_origin_y;
     EgAbortFn abort_fn;
     void* abort_refcon;
+    // Internal coordinated host/core ABI: new live field, frozen parity off=0.
+    std::int32_t live_influence;
 } EgRenderParams;
 
 typedef struct EgElasticParams {

@@ -57,6 +57,8 @@ public:
     static void enforceMonotonic(std::vector<float>& values,
                                  float min_spacing,
                                  const std::vector<std::uint8_t>* pins = nullptr);
+    // Pure geometric response of retained deformation; no gesture history/state.
+    bool influencedInto(std::vector<float>& out, float radius_lines, float min_spacing) const;
 
 private:
     std::vector<float> lines_;

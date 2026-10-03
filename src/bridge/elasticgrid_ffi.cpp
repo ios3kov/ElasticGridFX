@@ -17,7 +17,8 @@
 namespace eg = elasticgrid;
 
 static_assert(sizeof(void*) == 8, "ElasticGrid AE host ABI requires 64-bit pointers");
-static_assert(sizeof(EgRenderParams) == 160, "EgRenderParams ABI drift");
+static_assert(sizeof(EgRenderParams) == 168, "EgRenderParams ABI drift");
+static_assert(offsetof(EgRenderParams, live_influence) == 160, "live field ABI drift");
 static_assert(offsetof(EgRenderParams, abort_fn) == 144, "EgRenderParams::abort_fn ABI drift");
 static_assert(offsetof(EgRenderParams, abort_refcon) == 152, "EgRenderParams::abort_refcon ABI drift");
 static_assert(sizeof(EgElasticParams) == 16, "EgElasticParams ABI drift");
@@ -197,6 +198,14 @@ int prepare_grid(const EgRenderParams* p, PreparedBridge& out) {
     if (p->row_lines &&
         !load_axis(out.gy, p->row_lines, p->row_pins, p->row_line_count, elastic.min_spacing)) {
         return 4;
+    }
+    if(p->live_influence!=0 && p->live_influence!=1) return 4;
+    if(p->live_influence){
+        if(!out.gx.influencedInto(out.x_lines,p->tension_radius,elastic.min_spacing) ||
+           !out.gy.influencedInto(out.y_lines,p->tension_radius,elastic.min_spacing)) return 4;
+        const auto xp=out.gx.pins(), yp=out.gy.pins();
+        if(!out.gx.setState(out.x_lines,xp,elastic.min_spacing) ||
+           !out.gy.setState(out.y_lines,yp,elastic.min_spacing)) return 4;
     }
 
     eg::WaveSettings wave;

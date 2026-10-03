@@ -486,6 +486,7 @@ fn drag_inner(
     let before = grid.clone();
     let elastic = elastic_params(params)?;
     let displayed = control_grid::read(in_data,params)?;
+    let render = evaluated_params(params,*in_data,&grid)?;
     // A reentrant density change must not redirect an in-flight drag to another handle.
     if event.continue_refcon(2) != displayed.grid.columns as ae::sys::A_intptr_t ||
         event.continue_refcon(3) != displayed.grid.rows as ae::sys::A_intptr_t {
@@ -501,7 +502,7 @@ fn drag_inner(
     if index == 0 || index+1 >= positions.len() {
         event.set_send_drag(false); return Ok(());
     }
-    control_grid::drag(lines,pins,refs[index],target-positions[index],&elastic)?;
+    control_grid::drag_live(lines,pins,refs[index],target,&elastic,&render,axis==DRAG_COLUMNS)?;
     // Only a real deformation edit may write the animated arbitrary parameter.
     if grid != before {
         control_layout::freeze_for_drag(in_data,params,axis==DRAG_COLUMNS)?;

@@ -1,5 +1,6 @@
 #include "core/GridModel.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 
@@ -171,6 +172,34 @@ bool AxisGrid::dragElastic(std::size_t line, float target, const ElasticSettings
 
     enforceMonotonic(candidate, settings.min_spacing, &pins_);
     lines_.swap(candidate);
+    return true;
+}
+
+bool AxisGrid::influencedInto(std::vector<float>& out,float radius,float spacing) const {
+    if(!std::isfinite(radius) || !std::isfinite(spacing)) return false;
+    radius=std::clamp(radius,0.0f,20.0f);
+    out=lines_;
+    if(radius<=1.0f) return true;
+    std::array<double,129> displacement{};
+    bool neutral=true;
+    for(std::size_t i=1;i+1<lines_.size();++i){
+        const float uniform=static_cast<float>(i)/static_cast<float>(lines_.size()-1);
+        displacement[i]=static_cast<double>(lines_[i])-uniform;
+        neutral=neutral && displacement[i]==0.0;
+    }
+    if(neutral) return true;
+    for(std::size_t i=1;i+1<lines_.size();++i){
+        if(pins_[i]) continue;
+        double sum=0.0,total=0.0;
+        for(std::size_t j=0;j<lines_.size();++j){
+            const float w=falloffWeight(std::abs(static_cast<float>(i)-static_cast<float>(j)),
+                                        radius,FalloffProfile::Smoothstep);
+            sum+=w*displacement[j]; total+=w;
+        }
+        const float uniform=static_cast<float>(i)/static_cast<float>(lines_.size()-1);
+        out[i]=static_cast<float>(uniform+sum/total);
+    }
+    enforceMonotonic(out,spacing,&pins_);
     return true;
 }
 
