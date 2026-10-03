@@ -14,6 +14,7 @@ class WindowsPackageTests(unittest.TestCase):
     def identity(self, build_id='EGFX-'+'a'*24):
         return {
             'build_id':build_id,
+            'artifact_type':'AE native effect (.aex)',
             'target':'x86_64-pc-windows-msvc',
             'commit':'b'*40,
             'source_state':'clean',
