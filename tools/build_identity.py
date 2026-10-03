@@ -119,7 +119,8 @@ def identity(record, target, profile, toolchain, settings):
     if not re.fullmatch('[A-Za-z0-9_.-]{1,80}', target) or profile not in ('debug', 'release'):
         raise ValueError('invalid target/profile')
     result = {k: record[k] for k in ('version', 'commit', 'source_state', 'source_sha256')}
-    result.update(schema=1, artifact_type='AE native effect (.plugin)', target=target, profile=profile, toolchain=toolchain,
+    artifact_type = 'AE native effect (.aex)' if 'windows' in target else 'AE native effect (.plugin)'
+    result.update(schema=1, artifact_type=artifact_type, target=target, profile=profile, toolchain=toolchain,
                   settings_sha256=digest(encoded(settings)))
     result['build_id'] = 'EGFX-' + digest(encoded(result))[:24]
     return result
