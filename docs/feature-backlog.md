@@ -25,9 +25,13 @@ neutral geometry for the current topology.
   edge behavior and render quality.
 - This is a targeted Grid Positions reset, not the effect's global Reset.
 - Support ordinary Undo/Redo; preserve parameter IDs and saved-state compatibility.
-- The request does not yet define reset behavior for animated Grid Positions
-  (current time versus all keys). Resolve that product detail before implementation;
-  recording the feature does not authorize deleting animation keys.
+- For animated Grid Positions, reset only at the current composition time:
+  replace an existing key at that time or add a neutral key if none exists.
+  Preserve all keys at other times and their interpolation settings. Do not
+  clear the animation or reset the entire timeline. The new/current key may
+  affect interpolation in adjacent intervals under ordinary AE semantics.
+- For unanimated Grid Positions, reset its static value without automatically
+  enabling animation. All other parameters remain unchanged.
 - Resetting Grid Positions does not imply disabling independently configured
   wave animation, elasticity or plane/corner transforms.
 

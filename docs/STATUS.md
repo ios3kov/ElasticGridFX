@@ -40,7 +40,8 @@ Broad HDR/OCIO, per-character 3D and untested host/platform compatibility remain
 outside the verified scope. Persistent grid display when unselected is a
 [future feature](persistent-viewer-grid.md), not an unfinished release gate.
 The [future update backlog](feature-backlog.md) also records the requested
-Grid Positions-only reset button; animation-key behavior is not yet decided.
+Grid Positions-only reset button: reset at the current time while preserving
+keys at other times; do not clear the animation.
 
 Read the [performance/release retrospective](retrospective-0.9.3-perf.1.md),
 [quality contract](performance-quality-contract.md) and
