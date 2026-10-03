@@ -407,7 +407,7 @@ pub fn click(
 ) -> Result<(), ae::Error> {
     if event.window_type() == ae::WindowType::Effect {
         if params.index(Params::GridState) == Some(event.param_index()) {
-            grid_row::click(params, event)?;
+            grid_row::click(event)?;
         }
         return Ok(());
     }
@@ -434,6 +434,12 @@ pub fn drag(
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
 ) -> Result<(), ae::Error> {
+    if event.window_type() == ae::WindowType::Effect {
+        if params.index(Params::GridState) == Some(event.param_index()) {
+            return grid_row::drag(params, event);
+        }
+        return Ok(());
+    }
     let result = drag_inner(in_data, params, event);
     if result.is_err() || event.last_time() || !event.send_drag() {
         event.set_continue_refcon(0, DRAG_NONE as _);

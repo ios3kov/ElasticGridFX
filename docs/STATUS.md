@@ -210,3 +210,18 @@ custom caption drawing. This subsequent source fix requires a new panel check.
 Old animated-choice project compatibility, actual Reset key/Undo semantics
 and Windows host behavior remain NOT RUN. Local evidence retained in
 outputs/next-update-ui-mac; no release claim.
+
+### Inline Reset alignment — user correction, 2026-10-03
+
+Installed candidate3877a6c / EGFX-05609e48d846d45beb491845 visually confirms
+removal of duplicated Grid Positions caption and retention of its stopwatch.
+User requires Reset to align with the native value column and match Fit Layer
+size/shape. The next source uses PF_EffectWindowInfo title offset, a 130-unit
+pill button matching the observed native 260-pixel button at Retina scale,
+and host ButtonFill/ButtonText colors rather than fixed grays. Fresh host layout
+check pending. Also corrected mutation routing: DO_CLICK only arms; DRAG release
+inside the button writes Grid Positions, as required by SDK change-flag validity.
+
+User explicitly chose local-only work: no push or draft PR for feat/next-update.
+Windows MSVC build/CI is NOT RUN here; no MSVC/Windows host is available locally.
+Independent shared code and local verification continue.

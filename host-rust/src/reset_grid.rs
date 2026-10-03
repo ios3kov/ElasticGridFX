@@ -9,7 +9,7 @@ fn target(columns: i32, rows: i32) -> Result<GridArb, ae::Error> {
     Ok(GridArb::uniform(columns as usize, rows as usize))
 }
 
-// USER_CHANGED_PARAM only. Change only the current GridState value. AE owns
+// USER_CHANGED_PARAM or native UI DRAG release only. Change only the current GridState value. AE owns
 // current-time key insertion/replacement and Undo; never enumerate/delete keys
 // or switch time-varying state. A neutral repeated reset is a no-op.
 pub(crate) fn apply(params: &mut ae::Parameters<Params>) -> Result<bool, ae::Error> {
