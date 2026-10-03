@@ -256,3 +256,20 @@ found a 2-logical-unit horizontal discrepancy; inset corrected from18 to16.
 Grid Positions retains its native stopwatch and no disclosure. Min Line Spacing
 is hidden; Wave Animation remains collapsed. This is Mac AE25.6 visual coverage;
 Windows UI and additional panel widths remain NOT RUN.
+
+### Installed Reset correction / new spacing host check — 2026-10-03
+
+Candidate9b5c26b is installed. Independent loaded-identity verification PASS:
+outputs/next-update-reset-aligned-mac/loaded-identity/
+EGFX-check-ab108c38e46b43ee83e4e1de938ce378.zip.
+Fresh owned-scene API evidence native-new-spacing.json on AE25.6x101:
+AutomaticSpacing=1; canVaryOverTime=false; legacy MinSpacing=0.5 retained;
+Grid Positions canVaryOverTime=true. Shared suite67 PASS; strict Clippy PASS
+at31e1ada; focused final layout test1 PASS after the inset-only correction.
+
+Final visual inspection interrupted because macOS locked before the panel was
+shown. Previous31e1ada visual comparison confirms dimensions, pill shape and
+colors; final9b5c26b horizontal correction is not yet visually accepted.
+No claim of Windows UI verification, old-project spacing migration, Reset
+keyframe/Undo runtime proof or complete update readiness. User local-only scope
+continues; no push, PR, release or changes to main.

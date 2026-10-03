@@ -4,7 +4,11 @@
 
 - Shared Mac/Windows UI: Grid Positions has no empty disclosure area, with inline
   Reset at the current time; collapsed Wave Animation section, Affected Lines and
-  Follow Strength. Native panel layout verification is pending.
+  Follow Strength. Reset matches Fit Layer dimensions, pill shape and theme
+  colors on Mac AE25.6; final inset/panel-width and Windows checks remain pending.
+- Hide Min Line Spacing and enable automatic safety spacing for new effects.
+  A new appended compatibility flag preserves existing project spacing values
+  and keys. New-instance defaults verified on Mac; old-project migration pending.
 - Deformation Plane, Falloff, Edge Behavior and Render Quality disallow new
   animation. Existing animated-project compatibility remains pending.
 - Preserve existing parameter identities, wave values and render math; resolve
