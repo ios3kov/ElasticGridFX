@@ -134,7 +134,7 @@ impl Deferred {
                             match binding_probe::bind(self.id,effect,layer,self.basic,&mut self.bindings) {
                                 Ok(binding_probe::BindingOutcome::Installed)=>installed+=1,
                                 Ok(binding_probe::BindingOutcome::AlreadyInstalled | binding_probe::BindingOutcome::UndoPreserved)=>{},
-                                Err(_)=>failed=true,
+                                Err(error)=>{journal("binding-error",&error);failed=true;},
                             }
                             Ok(())
                         })();

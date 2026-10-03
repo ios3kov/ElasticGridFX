@@ -273,7 +273,7 @@ pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aeg
         states.push(host.read(i)?);
     }
     if identity.iter().enumerate().any(|(i,v)| identity[..i].contains(v)) {
-        return Err("Nonunique dependency streams".into());
+        return Err(format!("Nonunique dependency stream IDs: {identity:?}"));
     }
     if registry.initialized.contains(&identity) && blank_binding(&states) {
         host.validate_target()?;

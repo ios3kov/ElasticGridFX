@@ -954,3 +954,12 @@ restoration, new-instance identity and close/reopen must pass before acceptance.
 Any project/stream identity reuse or loss of Redo is a candidate failure.
 The automatic initialization remains a distinct native action; do not claim
 one Undo removes a newly added effect. Native Dev32 remains NOT RUN.
+
+Dev32 dd8cf3b / EGFX-aa13d6dae9bd907a1ea0bfcf native FAIL: second effect
+creation succeeds but its five hidden expressions remain disabled/blank.
+Bounded idle journals report BadCallbackParameter. Undo removes the second
+effect and restores baseline, but that is not valid initialized-render proof.
+Do not count it as the intended Undo fix. Dev36 will retain the bounded native
+error cause to distinguish unsupported/nonunique StreamSuite6 identities from
+other adapter failure. No identity reuse assumption is accepted from headers.
+Evidence outputs/update-094-dev32-mac/lifecycle/two.json and native journals.
