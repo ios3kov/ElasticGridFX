@@ -8,11 +8,13 @@ on:
       - "host-rust/**"
       - "tools/package_windows.py"
       - "tools/verify_windows_pipl.py"
+      - "tools/finalize_windows_validation.py"
       - "tools/windows_ae_validation.py"
       - "tools/windows_first_application.py"
       - "tools/smoke_pixels.py"
       - "tools/build_identity.py"
       - "tests/test_package_windows.py"
+      - "tests/test_finalize_windows_validation.py"
       - "tests/test_windows_ae_validation.py"
       - "tests/test_windows_first_application.py"
       - "tests/ae_runtime_smoke.jsx"
@@ -70,7 +72,7 @@ jobs:
         run: ctest --test-dir build-win -C Release --output-on-failure
 
       - name: Test Windows packager and AE validation packet
-        run: python -m unittest tests.test_package_windows tests.test_windows_ae_validation tests.test_windows_first_application
+        run: python -m unittest tests.test_package_windows tests.test_finalize_windows_validation tests.test_windows_ae_validation tests.test_windows_first_application
 
       - name: Check locked Rust graph
         run: cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml > NUL
@@ -109,6 +111,20 @@ jobs:
           if ($pipl.Count -ne 1) { throw "Expected one release pipl.bin, found $($pipl.Count)" }
           python tools/verify_windows_pipl.py --aex "dist/windows/FSTR Stretch.aex" --expected $pipl[0].FullName
 
+      - name: Finalize Windows build validation record
+        shell: pwsh
+        run: |
+          $pipl = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/pipl.bin")
+          if ($pipl.Count -ne 1) { throw "Expected one release pipl.bin, found $($pipl.Count)" }
+          python tools/finalize_windows_validation.py `
+            --manifest "dist/windows/FSTR Stretch.windows-artifact.json" `
+            --aex "dist/windows/FSTR Stretch.aex" `
+            --headers "dist/windows/dumpbin-headers.txt" `
+            --exports "dist/windows/dumpbin-exports.txt" `
+            --resources "dist/windows/coff-resources.txt" `
+            --expected-pipl $pipl[0].FullName `
+            --out "dist/windows/FSTR Stretch.windows-build-validation.json"
+
       - name: Record scope
         shell: pwsh
         run: |
@@ -129,10 +145,12 @@ jobs:
           path: |
             dist/windows/FSTR Stretch.aex
             dist/windows/FSTR Stretch.windows-artifact.json
+            dist/windows/FSTR Stretch.windows-build-validation.json
             dist/windows/dumpbin-headers.txt
             dist/windows/dumpbin-exports.txt
             dist/windows/coff-resources.txt
             dist/windows/VALIDATION_SCOPE.txt
+            tools/finalize_windows_validation.py
             tools/windows_ae_validation.py
             tools/windows_first_application.py
             tools/smoke_pixels.py
