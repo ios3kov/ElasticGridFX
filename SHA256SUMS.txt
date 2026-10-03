@@ -51,7 +51,7 @@ a02c98ede54f8f95b25a0207763a256282553c0618ec7a45e2a6e8d675cfc1aa  docs/feature-b
 d1313fb1b3347f2e9a2f877f05a5af7a885d96250145fb9bdb2f2221fdda884e  docs/final-regression-v1.0.md
 da6bba97c9991b0da22811f60b62c7af17bc9f2107d7a56da40832e7d72b7256  docs/final-validation-v1.0.md
 05a565a52c19ac41d7438f13e1298cc67501403f7f3dcafa6eb929f5ea0778df  docs/first-application-516-2026-09-30.md
-1f25953115d88353d00f325d4b803c5f1287fb1e97a90a7b96e686a267db9b2b  docs/first-default-mac-dev16-2026-10-04.json
+a8a6db2b6246e74e2c586922f8d634c8f21d2039fce1eb5579349470f5811bbb  docs/first-default-mac-dev16-2026-10-04.json
 d55fb12adfbef26c64c4d09e42793ed298c382812e2c40dded49dd5f98b0be76  docs/fit-layer-coordinate-fix-2026-09-30.md
 9901417b525fdc83881c821d5fad71e9df11c26e969e120050a7ebfc9afd2e03  docs/github-ci-v1.md
 c4e22e1379d05abf11bfc8b69e43780ddde156f04e5790bcdb4f6a2ecacaa0ed  docs/gpu-plan.md

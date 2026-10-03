@@ -40,7 +40,8 @@
     "real_scalar_mouse_scrubbing": "BLOCKED (Cua noWindowsAvailable; manual question pending)",
     "show_grid": "OPEN",
     "windows_build_and_runtime": "NOT RUN",
-    "full_update": "INCOMPLETE"
+    "full_update": "INCOMPLETE",
+    "first_application_and_windows_validation_tool_contracts": "PASS (tool/source contracts; not Windows host)"
   },
   "observations": [
     "Earlier Dev12 missing second-neutral PNG and subsequently observed BadCallbackParameter modal are no longer treated as a completed first-application check. Controlled Kind0/smoothing100/Wave0/spacing0.5 reproduction yielded status42/no PNG.",
@@ -163,6 +164,9 @@
     },
     "outputs/update-094-first-default-python.txt": {
       "sha256": "b0a8dbec0a2e82a419cb3e67cef0daf42dc9f1ebf357bb99df1b36a8a620a67d"
+    },
+    "outputs/update-094-dev16-first-contract.txt": {
+      "sha256": "7272d8a9f35252edde036ff9ad1fff8900d3811e85874d2143cb0c5053c7a283"
     }
   }
 }
