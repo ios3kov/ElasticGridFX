@@ -814,3 +814,24 @@ not an additive custom drawing surface. SDK25.6 ItemViewSuite1 and the selected
 PF event route still do not establish PV-2/3. Full Show Grid remains a functional
 blocker. Windows target std/toolchain and Windows AE are absent locally; existing
 Mac/shared checks do not become a Windows build or runtime PASS.
+
+### 2026-10-04 first-application default regression
+
+Ordinary installed Dev12 showed EffectMain BadCallbackParameter(516), observed
+when returning to ECW after the prior second-instance attempt; do not attribute
+the modal timing to the ECW draw selector without a trace. Controlled immediate
+add/render on the owned range-gesture copy recorded pending Kind0, hidden smoothing
+100, Wave0 and spacing0.5; actual PNG absent and script status42. The initial
+identity eligibility guard still requires legacy smoothing0. New-instance default
+is now100. Source regression reproduces this rejection; actual production FFI
+8/16/32-bit dense/sparse tests preserve exact neutral pixels at both normalized
+smoothing0 and1. Planned fix accepts only these two exact defaults with all other
+strict default-grid/mode/wave/spacing guards unchanged. Deformed/pending geometry
+must still fail closed. Native exact new-candidate reproduction is required.
+
+Fix source checks: default Rust79 PASS, including reproduced new-default
+eligibility and exact production neutral pixels with smoothing0/1 across8/16/32
+bpc dense/sparse. Probe strict Clippy and Python host/version contracts PASS.
+The accepted exception is only exact smoothing0/100, with existing malformed,
+deformed, Wave, topology and Four Corners rejection unchanged. Ordinary Dev16;
+diagnostic17/preview-probe18/negative-control19. Native acceptance pending.

@@ -94,7 +94,7 @@ impl Pixel for f32 {
     fn same(self,other:Self)->bool {self.to_bits()==other.to_bits()}
 }
 
-fn exact_initial_pixels<T:Pixel>() {
+fn exact_initial_pixels<T:Pixel>(easing:f32) {
     const W:usize=31; const H:usize=23;
     const IW:usize=19; const IH:usize=11;
     const IX:usize=3; const IY:usize=2;
@@ -102,7 +102,7 @@ fn exact_initial_pixels<T:Pixel>() {
     assert!(eligible(&grid));
     let snapshot=SmartRenderSnapshot {
         grid, plane:plane::State::default(), tension_radius:3.0,falloff:2,
-        elasticity_strength:1.0,min_spacing:0.005,stretch_easing:0.0,easing_distance:0.25,
+        elasticity_strength:1.0,min_spacing:0.005,stretch_easing:easing,easing_distance:0.25,
         wave_amplitude:0.0,wave_frequency:1.0,wave_phase:0.0,wave_speed:0.0,
         wave_axis:1,edge_mode:1,quality:2,time_seconds:0.0,
         canvas_width:W as i32,canvas_height:H as i32,
@@ -140,6 +140,15 @@ fn exact_initial_pixels<T:Pixel>() {
         }
     }
 }
-#[test] fn initial_identity_8bpc_dense_and_sparse() {exact_initial_pixels::<u8>();}
-#[test] fn initial_identity_16bpc_dense_and_sparse() {exact_initial_pixels::<u16>();}
-#[test] fn initial_identity_32bpc_extended_range_dense_and_sparse() {exact_initial_pixels::<f32>();}
+#[test] fn initial_identity_8bpc_dense_and_sparse() {for easing in [0.0,1.0] {exact_initial_pixels::<u8>(easing);}}
+#[test] fn initial_identity_16bpc_dense_and_sparse() {for easing in [0.0,1.0] {exact_initial_pixels::<u16>(easing);}}
+#[test] fn initial_identity_32bpc_extended_range_dense_and_sparse() {for easing in [0.0,1.0] {exact_initial_pixels::<f32>(easing);}}
+
+#[test]
+fn current_hidden_smoothing_default_is_a_proven_neutral_first_frame() {
+    let grid=GridArb::default();
+    assert!(initial_identity_values(&grid,(4,4),1,0.0,100.0,0.5));
+    let mut edited=grid.clone();
+    edited.column_lines[2]=f32::from_bits(edited.column_lines[2].to_bits()+1);
+    assert!(!initial_identity_values(&edited,(4,4),1,0.0,100.0,0.5));
+}

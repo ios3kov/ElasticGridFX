@@ -68,8 +68,11 @@ fn initial_identity_values(grid:&GridArb,topology:(i32,i32),mode:i32,
                            wave:f64,easing:f64,min_spacing:f64)->bool {
     // Deliberately narrower than every possible identity grid. No approximate
     // equality, resizes, sanitization, or fallback from malformed saved state.
+    // Both legacy0 and new hidden100 smoothing defaults have byte-exact
+    // neutral dense/sparse production FFI proof at8/16/32bpc. No other value
+    // expands eligibility for a pending unknown layer plane.
     if topology != (4,4) || mode != 1 || wave.to_bits() != 0.0f64.to_bits()
-        || easing.to_bits() != 0.0f64.to_bits()
+        || ![0.0f64.to_bits(),100.0f64.to_bits()].contains(&easing.to_bits())
         || min_spacing.to_bits() != 0.5f64.to_bits() {
         return false;
     }
