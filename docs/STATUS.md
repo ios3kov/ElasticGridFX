@@ -7,15 +7,18 @@ their older holds and release-policy statements do not override the state below.
 ## Active local update — rules8.0.0
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
-remains incomplete across macOS/Windows. Installed test version is **0.9.4 Dev 1**, source db97762,
-Build ID EGFX-883ae0b0eae4536bb555bc3d. Exact loaded identity PASS on Mac AE25.6.
+remains incomplete across macOS/Windows. Last verified installed test version is
+**0.9.4 Dev 1**, source35a9f3c, Build ID EGFX-2b54838b4bf29f6a45243d07.
+Exact loaded identity and saved-gesture pixel parity PASS on Mac AE25.6.
 Hidden shape/strength/smoothing controls and visible Version row confirmed.
 Owned-fixture density7/6, immutable pixels/three keys and save/reopen PASS.
-Interactive drag/Undo remains pending: automated input did not change the scene,
-and subsequent native Cua gesture reported noWindowsAvailable. No integration
-or Windows runtime acceptance is claimed.
-Local source checks: 73 Rust tests, 266 Python tests, 16 JavaScript safety files
-and strict Clippy PASS. These are not After Effects or Windows runtime acceptance.
+Native density drag/Undo/Redo/save-reopen passed on the preceding db97762
+candidate; evidence below retains that exact source scope. Show Grid's tested
+public PREVIEW flag produced no preview callbacks; the feature remains OPEN.
+Local source35a9f3c checks: default Rust74, probe Rust76, Python267 and strict
+Clippy PASS. Earlier JSX16-file results retain their original scope. U5 live
+old-deformation response, U7 Show Grid, U8 installers and Windows integration
+remain incomplete. No whole-update or Windows runtime acceptance is claimed.
 See the U0–U11 table in
 [feature backlog](feature-backlog.md). Installed candidates and checks below
 are development evidence, separate from the published release.
@@ -496,3 +499,41 @@ actual installation acceptance remain NOT RUN. U5 old-project live response
 needs a compatibility decision about the old Tension Radius animation; original
 picture and Grid Positions keys must remain unchanged before edits. Local-only
 boundary continues; full requested update remains incomplete.
+
+### U8 native Mac exchange primitive — resumed 2026-10-03
+
+Internal installer/macos/AtomicExchange performs same-volume directory exchange
+using public renameatx_np with RENAME_SWAP and RENAME_NOFOLLOW_ANY. Owned parent
+FDs, single-component names and expected device/inode checks reject stale,
+linked, unsafe or unsupported entries. An exchange followed by verification or
+sync failure is explicitly ExchangedNeedsRecovery, never reported unchanged.
+The caller still must provide fixed-root validation, payload authentication,
+transaction lock, durable journal and recovery. This primitive is not a finished
+installer or a privileged helper; no actual Adobe installation was changed.
+
+PreparedJournal writes an exclusive immutable, versioned record of both tree
+identities before exchange, syncs file/parent and requests Darwin F_FULLFSYNC.
+Failure after record creation retains evidence and refuses publication. Its
+bounded reader rejects partial/extra/invalid records, unsafe permissions and
+links; recovery classifies unchanged/swapped identities or refuses unknown.
+Neither inode classification nor this journal authenticates payload contents.
+
+Native Release CMake test on disposable /private/tmp fixtures PASS: exchange,
+restore, file inode/mode/owner/xattr preservation and negative guards for stale
+identity, traversal, aliases, missing/non-directory entries, links and unsafe
+parents; exclusive journal creation/readback, unchanged/swapped/unknown identity
+classification and partial-record rejection. Two fresh child processes receive
+SIGKILL after durable prepare and after exchange; readback identifies both states
+and the swapped fixture restores successfully. This is process-death evidence,
+not power-loss or full privileged-installer recovery acceptance.
+Evidence: outputs/update-094-installer-cmake and
+outputs/update-094-installer-resume-test.txt. Cross-volume, sync-failure injection,
+full coordinator crash recovery, privilege boundaries and Windows runtime remain NOT RUN.
+Next U8 step: coordinator combining journal, locks, verified payload snapshots
+and identity-safe recovery; process interruption/fault injection before any
+end-user installer frontend or real installation test. Everything remains local.
+Shared installer contract tests:4 PASS, including26 subtests. Static scanner
+completed with exit1 for the previously reviewed auth/rate-limit heuristic at
+tests/test_target_ae_acceptance.py:54, a local unit fixture, not an endpoint.
+No new installer finding; scanner does not certify readiness. Whitespace and
+repository SHA256 manifest are checked before this local checkpoint commit.

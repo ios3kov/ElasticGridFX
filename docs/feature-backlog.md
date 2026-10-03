@@ -359,6 +359,9 @@ refuse unknown/multiple/changed copies and pending recovery; distinguish exclusi
 fresh install, identical already-installed bytes, and backup-before-replacement.
 Four unit scenarios include both platforms and negative/tamper/uncertain cases.
 This is a decision contract, not a secure executor, installer or OS runtime PASS.
+Native Mac exchange and immutable prepared-journal primitives now have disposable
+filesystem tests (see STATUS.md); coordinator/recovery, frontend and Windows
+implementation remain incomplete. No ready pkg/exe or installation PASS is claimed.
 
 Native integration MUST collect observations itself, bind a full payload snapshot
 (bytes/modes/layout) and process/scan provenance, then recheck under a transaction
