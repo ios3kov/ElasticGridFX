@@ -23,9 +23,11 @@ class FinalizeWindowsValidationTests(unittest.TestCase):
         mp=root/'manifest.json'; mp.write_text(json.dumps(manifest),encoding='utf-8')
         headers=root/'headers.txt'; headers.write_text('8664 machine (x64)\n',encoding='utf-8')
         exports=root/'exports.txt'; exports.write_text('ordinal hint RVA name\n1 0 0000 EffectMain\n',encoding='utf-8')
+        dependents=root/'dependents.txt'; dependents.write_text('KERNEL32.dll\n',encoding='utf-8')
+        imports=root/'imports.txt'; imports.write_text('KERNEL32.dll import table\n',encoding='utf-8')
         resources=root/'resources.txt'; resources.write_text('Resource type: PiPL\n',encoding='utf-8')
         pipl=root/'pipl.bin'; pipl.write_bytes(b'PiPL fixture')
-        return mp,aex,headers,exports,resources,pipl
+        return mp,aex,headers,exports,dependents,imports,resources,pipl
 
     def test_record_keeps_runtime_not_run(self):
         with tempfile.TemporaryDirectory(prefix='egfx-win-final-') as tmp:
@@ -47,6 +49,15 @@ class FinalizeWindowsValidationTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     f.validate(*(p.resolve() for p in args),env=env)
 
+
+    def test_empty_dependency_inventory_fails_closed(self):
+        with tempfile.TemporaryDirectory(prefix='egfx-win-final-deps-') as tmp:
+            args=list(self.fixture(Path(tmp)))
+            args[4].write_text('',encoding='utf-8')
+            env={'GITHUB_ACTIONS':'true','GITHUB_SHA':'b'*40,'GITHUB_RUN_ID':'123','GITHUB_RUN_ATTEMPT':'1'}
+            with patch.object(f.pipl_verify,'embedded_pipl',return_value=b'PiPL fixture'):
+                with self.assertRaises(ValueError):
+                    f.validate(*(p.resolve() for p in args),env=env)
 
     def test_non_ci_or_wrong_sha_cannot_emit_pass_record(self):
         with tempfile.TemporaryDirectory(prefix='egfx-win-final-env-') as tmp:
