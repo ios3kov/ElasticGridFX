@@ -14,7 +14,7 @@ import sys
 import zipfile
 
 SETTINGS = ('RUSTFLAGS', 'CARGO_ENCODED_RUSTFLAGS', 'CFLAGS', 'CXXFLAGS',
-            'CPPFLAGS', 'CC', 'CXX', 'MACOSX_DEPLOYMENT_TARGET')
+            'CPPFLAGS', 'CC', 'CXX', 'MACOSX_DEPLOYMENT_TARGET', 'AESDK_ROOT')
 GENERATED = {'.git', 'dist', 'build', '.preflight-macos', '.pytest_cache'}
 
 
