@@ -23,5 +23,8 @@ serde = { version = "=1.0.229", features = ["derive"] }
 pipl = "=0.1.1"
 cc = "=1.5.1"
 
+[target.'cfg(windows)'.build-dependencies]
+pipl-fixed = { path = "pipl-fixed" }
+
 [dev-dependencies]
 bincode = { version = "=2.0.1", features = ["serde"] }

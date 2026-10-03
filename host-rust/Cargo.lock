@@ -216,6 +216,7 @@ dependencies = [
  "bincode",
  "cc",
  "pipl",
+ "pipl-fixed",
  "serde",
 ]
 
@@ -424,6 +425,14 @@ dependencies = [
  "bitflags",
  "byteorder",
  "pretty-hex",
+ "winres",
+]
+
+[[package]]
+name = "pipl-fixed"
+version = "0.1.0"
+dependencies = [
+ "pipl",
  "winres",
 ]
 

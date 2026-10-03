@@ -94,6 +94,13 @@ class IdentityTests(unittest.TestCase):
                 ('aarch64-apple-darwin', 'release', {'rustc': 'a'}, {'RUSTFLAGS': '-Copt-level=2'})]
         self.assertEqual(len({bi.identity(src, *a)['build_id'] for a in args}), len(args))
 
+    def test_artifact_type_matches_target_platform(self):
+        src = bi.source_record(self.root)
+        mac = bi.identity(src, 'aarch64-apple-darwin', 'release', {'rustc':'a'}, {})
+        win = bi.identity(src, 'x86_64-pc-windows-msvc', 'release', {'rustc':'a'}, {})
+        self.assertEqual(mac['artifact_type'], 'AE native effect (.plugin)')
+        self.assertEqual(win['artifact_type'], 'AE native effect (.aex)')
+
     def test_ignored_build_files_do_not_make_source_dirty(self):
         before = self.meta()
         self.write('dist/log.txt', 'generated')
@@ -191,6 +198,18 @@ class IdentityTests(unittest.TestCase):
         self.assertIn('Source:', diagnostic_line)
         self.assertIn('cargo:rerun-if-env-changed=RUSTFLAGS', stdout.getvalue())
         self.assertIn(str(self.root / 'src/example.cpp'), stdout.getvalue())
+
+    def test_adobe_sdk_override_participates_in_settings_identity(self):
+        record=bi.source_record(self.root)
+        with patch.dict(os.environ,{'AESDK_ROOT':'C:/Adobe/AE-SDK'},clear=True):
+            settings=bi.build_settings()
+        self.assertEqual(settings['AESDK_ROOT'],'C:/Adobe/AE-SDK')
+        with patch.dict(os.environ,{},clear=True):
+            default=bi.build_settings()
+        self.assertEqual(default['AESDK_ROOT'],'')
+        self.assertNotEqual(
+            bi.identity(record,'x86_64-pc-windows-msvc','release',{'rustc':'r','cxx':'c'},settings)['build_id'],
+            bi.identity(record,'x86_64-pc-windows-msvc','release',{'rustc':'r','cxx':'c'},default)['build_id'])
 
     def test_same_source_diagnostic_feature_has_distinct_identity(self):
         record=bi.source_record(self.root)

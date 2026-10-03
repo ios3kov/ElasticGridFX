@@ -1,4 +1,7 @@
+#[cfg(not(target_os = "windows"))]
 use pipl::*;
+#[cfg(target_os = "windows")]
+use pipl_fixed::*;
 use std::path::PathBuf;
 
 const PF_PLUG_IN_VERSION: u16 = 13;
@@ -70,7 +73,8 @@ fn main() {
 
     // Identity is generated only in OUT_DIR. The Python tool validates Git or a
     // hash-checked source snapshot and emits Cargo change-tracking directives.
-    let identity = std::process::Command::new("python3")
+    let python_command = if target_os == "windows" { "python" } else { "python3" };
+    let identity = std::process::Command::new(python_command)
         .arg(root.join("tools/build_identity.py"))
         .arg("generate").arg("--root").arg(&root)
         .arg("--out").arg(&out_dir)
@@ -166,7 +170,7 @@ fn main() {
         out_flags2 |= OutFlags2::SupportsGpuRenderF32;
     }
 
-    pipl::plugin_build(vec![
+    plugin_build(vec![
         Property::Kind(PIPLType::AEEffect),
         Property::Name("FSTR Stretch"),
         Property::Category("FSTR Effects"),

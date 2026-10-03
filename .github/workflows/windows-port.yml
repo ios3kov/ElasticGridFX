@@ -1,0 +1,150 @@
+name: Windows Port
+
+on:
+  push:
+    branches: [feat/windows-x64-aex]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-port-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-x64:
+    name: Windows x64 compile and artifact gate
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5, verified 2026-10-02
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12"
+
+      - name: Set up MSVC x64
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        with:
+          arch: x64
+
+      - name: Environment
+        shell: pwsh
+        run: |
+          python --version
+          python3 --version
+          rustc --version
+          cargo --version
+          cl 2>&1 | Select-Object -First 2
+          cmake --version
+
+      - name: Configure portable core
+        run: cmake -S . -B build-win -A x64 -DCMAKE_BUILD_TYPE=Release -DELASTICGRID_BUILD_BENCH=OFF
+
+      - name: Build portable core
+        run: cmake --build build-win --config Release --parallel 2
+
+      - name: Test portable core
+        env:
+          EG_FUZZ_SCALE: "0.1"
+          EG_SOAK_CYCLES: "5000"
+        run: ctest --test-dir build-win -C Release --output-on-failure
+
+      - name: Test Windows packager and AE validation packet
+        run: python -m unittest tests.test_package_windows tests.test_finalize_windows_validation tests.test_windows_ae_validation tests.test_windows_first_application
+
+      - name: Check locked Rust graph
+        run: cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml > NUL
+
+      - name: Test Rust host
+        run: cargo test --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
+
+      - name: Clippy Windows host
+        run: cargo clippy --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc --all-targets -- -D warnings -A clippy::drop_non_drop -A clippy::question_mark
+
+      - name: Build Windows host
+        run: cargo build --release --locked --manifest-path host-rust/Cargo.toml --target x86_64-pc-windows-msvc
+
+      - name: Package AEX
+        shell: pwsh
+        run: |
+          $dll = Resolve-Path "host-rust/target/x86_64-pc-windows-msvc/release/elasticgrid_ae.dll"
+          $identities = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/BuildIdentity.json")
+          if ($identities.Count -ne 1) { throw "Expected one release BuildIdentity.json, found $($identities.Count)" }
+          python tools/package_windows.py --dll $dll --identity $identities[0].FullName --out dist/windows
+
+      - name: Inspect PE and EffectMain export
+        shell: pwsh
+        run: |
+          dumpbin /headers "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-headers.txt
+          dumpbin /exports "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-exports.txt
+          dumpbin /dependents "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-dependents.txt
+          dumpbin /imports "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/dumpbin-imports.txt
+          if (-not (Select-String -Path dist/windows/dumpbin-headers.txt -Pattern "machine \(x64\)" -Quiet)) { throw "Not an x64 PE" }
+          if (-not (Select-String -Path dist/windows/dumpbin-exports.txt -Pattern "\bEffectMain\b" -Quiet)) { throw "EffectMain export missing" }
+
+      - name: Verify PiPL resource byte-for-byte
+        shell: pwsh
+        run: |
+          llvm-readobj --coff-resources "dist/windows/FSTR Stretch.aex" | Tee-Object -FilePath dist/windows/coff-resources.txt
+          if (-not (Select-String -Path dist/windows/coff-resources.txt -Pattern "PiPL" -Quiet)) { throw "PiPL resource missing" }
+          $pipl = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/pipl.bin")
+          if ($pipl.Count -ne 1) { throw "Expected one release pipl.bin, found $($pipl.Count)" }
+          python tools/verify_windows_pipl.py --aex "dist/windows/FSTR Stretch.aex" --expected $pipl[0].FullName
+
+      - name: Finalize Windows build validation record
+        shell: pwsh
+        run: |
+          $pipl = @(Get-ChildItem "host-rust/target/x86_64-pc-windows-msvc/release/build/elasticgrid_ae-*/out/pipl.bin")
+          if ($pipl.Count -ne 1) { throw "Expected one release pipl.bin, found $($pipl.Count)" }
+          python tools/finalize_windows_validation.py `
+            --manifest "dist/windows/FSTR Stretch.windows-artifact.json" `
+            --aex "dist/windows/FSTR Stretch.aex" `
+            --headers "dist/windows/dumpbin-headers.txt" `
+            --exports "dist/windows/dumpbin-exports.txt" `
+            --dependents "dist/windows/dumpbin-dependents.txt" `
+            --imports "dist/windows/dumpbin-imports.txt" `
+            --resources "dist/windows/coff-resources.txt" `
+            --expected-pipl $pipl[0].FullName `
+            --out "dist/windows/FSTR Stretch.windows-build-validation.json"
+
+      - name: Record scope
+        shell: pwsh
+        run: |
+          @"
+          Windows PE compile: CHECKED BY THIS JOB
+          Portable core tests: CHECKED BY THIS JOB
+          Rust host tests: CHECKED BY THIS JOB
+          PiPL resource structure: CHECKED BY THIS JOB
+          After Effects load: NOT RUN
+          After Effects runtime/UI/render/MFR/Undo: NOT RUN
+          "@ | Set-Content -Encoding utf8 dist/windows/VALIDATION_SCOPE.txt
+
+      - name: Upload Windows validation artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified 2026-10-02
+        with:
+          name: FSTR-Stretch-Windows-x64-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            dist/windows/FSTR Stretch.aex
+            dist/windows/FSTR Stretch.windows-artifact.json
+            dist/windows/FSTR Stretch.windows-build-validation.json
+            dist/windows/dumpbin-headers.txt
+            dist/windows/dumpbin-exports.txt
+            dist/windows/dumpbin-dependents.txt
+            dist/windows/dumpbin-imports.txt
+            dist/windows/coff-resources.txt
+            dist/windows/VALIDATION_SCOPE.txt
+            tools/finalize_windows_validation.py
+            tools/windows_ae_validation.py
+            tools/windows_first_application.py
+            tools/smoke_pixels.py
+            tools/build_identity.py
+            tests/ae_runtime_smoke.jsx
+            tests/ae_project_roundtrip.jsx
+            tests/ae_first_application.jsx
+            docs/windows-ae-validation.md
+            host-rust/Cargo.lock

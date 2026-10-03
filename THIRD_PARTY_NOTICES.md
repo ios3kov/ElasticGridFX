@@ -5,6 +5,9 @@ ElasticGrid FX is an independent clean-room implementation. No GridWarp source c
 Direct Rust dependencies are exact-pinned for the v1.0 freeze candidate:
 - `after-effects = 0.4.0` — Apache-2.0 OR BSD-3-Clause OR MIT OR Zlib
 - `pipl = 0.1.1` — MIT OR Apache-2.0
+- `host-rust/pipl-fixed` — local Windows-only compatibility shim around `pipl 0.1.1`;
+  derived from the same MIT OR Apache-2.0 project and the upstream Windows
+  resource fix commit `83dcc93734fd5db1335b6ec83cba7a6505a39dcc`.
 - `serde = 1.0.229` — MIT OR Apache-2.0
 - `cc = 1.5.1` — MIT OR Apache-2.0
 - `bincode = 2.0.1` — MIT

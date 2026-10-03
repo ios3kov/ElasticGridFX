@@ -3,10 +3,10 @@ use super::*;
 const HIT_SLOP: f32 = 9.0;
 const GRIP_LENGTH: f32 = 48.0;
 const GUIDE_GAP: f32 = 12.0;
-const DRAG_NONE: isize = 0;
-const DRAG_COLUMNS: isize = 1;
-const DRAG_ROWS: isize = 2;
-const DRAG_CORNER: isize = 3;
+const DRAG_NONE: ae::sys::A_intptr_t = 0;
+const DRAG_COLUMNS: ae::sys::A_intptr_t = 1;
+const DRAG_ROWS: ae::sys::A_intptr_t = 2;
+const DRAG_CORNER: ae::sys::A_intptr_t = 3;
 
 struct ViewPlane {
     state: plane::State,
@@ -221,13 +221,13 @@ fn hit_test(
     plane: &ViewPlane,
     event: &ae::EventExtra,
     mouse: ae::Point,
-) -> Result<Option<(isize, usize)>, ae::Error> {
+) -> Result<Option<(ae::sys::A_intptr_t, usize)>, ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(None);
     }
     let width = in_data.width().max(1) as f32;
     let height = in_data.height().max(1) as f32;
-    let mut best: Option<(f32, isize, usize)> = None;
+    let mut best: Option<(f32, ae::sys::A_intptr_t, usize)> = None;
 
     if let Some(corners) = plane.state.corner_controls() {
         for i in 0..4 {
@@ -482,8 +482,8 @@ fn drag_inner(
     let elastic = elastic_params(params)?;
     let displayed = control_grid::read(in_data,params)?;
     // A reentrant density change must not redirect an in-flight drag to another handle.
-    if event.continue_refcon(2) != displayed.grid.columns as isize ||
-        event.continue_refcon(3) != displayed.grid.rows as isize {
+    if event.continue_refcon(2) != displayed.grid.columns as ae::sys::A_intptr_t ||
+        event.continue_refcon(3) != displayed.grid.rows as ae::sys::A_intptr_t {
         event.set_send_drag(false); return Ok(());
     }
     let (positions,refs,lines,pins,target) = if axis == DRAG_COLUMNS {

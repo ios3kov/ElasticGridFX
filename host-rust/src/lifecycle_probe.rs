@@ -7,6 +7,7 @@ use std::sync::{Arc, atomic::{AtomicBool, Ordering}};
 pub(crate) struct Probe {
     id: Option<ae::aegp::PluginId>,
     records: Vec<String>,
+    #[cfg(target_os = "macos")]
     journal_entries: u8,
     pending: Arc<AtomicBool>,
     wake:Option<IdleWake>,
@@ -145,8 +146,9 @@ impl Deferred {
     }
 }
 
-fn journal(index: &str, record: &str) {
+fn journal(_index: &str, _record: &str) {
     #[cfg(target_os = "macos")] {
+        let (index, record) = (_index, _record);
         use std::io::Write;
         use std::os::unix::fs::OpenOptionsExt;
         let path = std::env::temp_dir().join(format!("fstr-lifecycle-{}-{index}.txt", std::process::id()));
@@ -161,11 +163,31 @@ fn main_thread() -> bool {
     unsafe extern "C" { fn pthread_main_np() -> i32; }
     unsafe { pthread_main_np() != 0 }
 }
-#[cfg(not(target_os = "macos"))]
+#[cfg(target_os = "windows")]
+static MAIN_THREAD_ID: std::sync::OnceLock<std::thread::ThreadId> = std::sync::OnceLock::new();
+
+#[cfg(target_os = "windows")]
+fn capture_main_thread() {
+    let _ = MAIN_THREAD_ID.set(std::thread::current().id());
+}
+
+#[cfg(target_os = "windows")]
+fn main_thread() -> bool {
+    MAIN_THREAD_ID.get().is_some_and(|id| *id == std::thread::current().id())
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn main_thread() -> bool { false }
 
 impl Probe {
     pub fn observe(&mut self, cmd: &ae::Command, input: &ae::InData) {
+        #[cfg(target_os = "windows")]
+        if matches!(cmd, ae::Command::GlobalSetup) {
+            // PF_Cmd_GLOBAL_SETUP is the process-lifetime registration point.
+            // Capture its thread identity before any AEGP suite acquisition so
+            // later sequence callbacks can never accidentally promote a worker.
+            capture_main_thread();
+        }
         let label = match cmd {
             ae::Command::GlobalSetup => "global",
             ae::Command::SequenceSetup => "setup",

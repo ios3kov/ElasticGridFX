@@ -5,6 +5,48 @@ below preserve earlier evidence and decisions; later decisions may supersede
 their original PASS, BLOCKED and release-policy statements. No historical verdict
 has been changed. See the [documentation index](README.md) for navigation.
 
+
+## Windows x64 port — Development checkpoint — 2026-10-03
+
+Branch `feat/windows-x64-aex` remains isolated from
+`main@9d0162de64d01ceb41f6a1374a73544729ed0ec2`. The Windows scope consciously
+adopts AE-Development-Rules 6.2.0 /
+`d966078a9e45fee7ec9ad14f211a9da753d64b8a`; historical evidence retains the
+baseline under which it was produced. Risk profile is Critical native,
+Delivery Gate is Development. No merge, release, publication or installation
+is authorized.
+
+The Windows CPU port implementation is complete for build/static scope:
+MSVC x64 core, Rust host, Win64 `EffectMain`, byte-exact PiPL, pointer-width
+Custom UI refcons, Windows lifecycle/main-thread handling, non-installing AEX
+packaging, Build Identity, PE import/dependency inventory, warning-free Clippy,
+and tested runtime-validation tooling are present. The original macOS build path
+is preserved.
+
+The first Windows CI run exposed a real `A_intptr_t`/ `isize` UI mismatch and
+later packaging validation exposed a Build-ID parser bug; both were fixed and
+subsequent Windows gates reached full build/static PASS. Code review then found
+and fixed generated first-application JSX escaping, missing runner error-path
+import, x64-Python enforcement, CI evidence binding, Adobe SDK override identity,
+and explicit PE dependency/import evidence. Earlier failing/cancelled runs remain
+historical and are not relabeled.
+
+Windows After Effects execution is still **NOT RUN/BLOCKED**. Prepared validation
+covers exact loaded-module identity, pixel smoke, save/reopen and cold-start
+first-application/auto-binding; interactive guide drag/cursor, Undo/Redo,
+Render Queue/MFR/`aerender`, the full first-application matrix and Windows
+performance still require a real Windows+AE environment.
+
+Static compatibility is recorded separately in
+[Windows API compatibility audit](windows-api-compatibility.md). AE 23.4 remains
+a STATIC-COMPATIBLE candidate floor, not VERIFIED; the working runtime target is
+AE 2025+/25.x. The final handoff artifact must come from the final tracked HEAD,
+because tracked documentation participates in Build Identity.
+
+See [Windows port status](windows-port-status.md) and
+[Windows AE validation](windows-ae-validation.md).
+
+
 ## Documentation closeout — 2026-10-02
 
 Scope: Light documentation / Development under adopted rules6.0.0,
