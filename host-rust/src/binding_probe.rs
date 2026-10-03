@@ -242,9 +242,53 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
     Ok(())
 }
 
+// StreamSuite6 provides unique stream identifiers. Retain only these scalar
+// identities, never host references, to distinguish a previously initialized
+// live dependency set from a new effect. A fully blank set after initialization
+// is the user's Undo, not permission to recreate an action and destroy Redo.
 #[cfg(fstr_auto_binding)]
-pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<Outcome,String>{
-    binding_transaction::install_or_upgrade(&mut Adapter::new(id,effect,layer,basic)?,&expressions(),&legacy_expressions()).map_err(|e|format!("{e:?}"))
+#[derive(Default)]
+pub(crate) struct BindingRegistry {
+    initialized: std::collections::BTreeSet<[i32; 5]>,
+}
+#[cfg(fstr_auto_binding)]
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) enum BindingOutcome { Installed, AlreadyInstalled, UndoPreserved }
+
+#[cfg(fstr_auto_binding)]
+fn blank_binding(states: &[Snapshot]) -> bool {
+    states.len() == 5 && states.iter().all(|s| s.keys == 0 && !s.enabled && s.expression.is_empty())
+}
+
+#[cfg(fstr_auto_binding)]
+pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite,
+    registry: &mut BindingRegistry)->Result<BindingOutcome,String>{
+    let mut host = Adapter::new(id,effect,layer,basic)?;
+    let suite = ae::aegp::suites::Stream::new().map_err(err)?;
+    let mut identity = [0; 5];
+    let mut states = Vec::with_capacity(5);
+    for (i, value) in identity.iter_mut().enumerate() {
+        let stream = host.stream(i)?;
+        *value = suite.unique_stream_id(&stream).map_err(err)?;
+        states.push(host.read(i)?);
+    }
+    if identity.iter().enumerate().any(|(i,v)| identity[..i].contains(v)) {
+        return Err("Nonunique dependency streams".into());
+    }
+    if registry.initialized.contains(&identity) && blank_binding(&states) {
+        host.validate_target()?;
+        return Ok(BindingOutcome::UndoPreserved);
+    }
+    // Bound process-lifetime memory. Never evict a cancellation identity and
+    // thereby turn a later Undo into an implicit new initialization.
+    if registry.initialized.len() >= 16384 && !registry.initialized.contains(&identity) {
+        return Err("Binding registry limit; no changes made".into());
+    }
+    let outcome = binding_transaction::install_or_upgrade(&mut host,&expressions(),&legacy_expressions())
+        .map_err(|e|format!("{e:?}"))?;
+    registry.initialized.insert(identity);
+    Ok(match outcome { Outcome::Installed => BindingOutcome::Installed,
+        Outcome::AlreadyInstalled => BindingOutcome::AlreadyInstalled })
 }
 
 // The wrapper locks even a null GetExpression result. Query explicitly and
@@ -335,3 +379,27 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
 #[cfg(test)]
 #[path = "first_application_tests.rs"]
 mod first_application_tests;
+
+#[cfg(all(test, fstr_auto_binding))]
+mod undo_registry_tests {
+    use super::*;
+    #[test]
+    fn cancelled_binding_refuses_partial_foreign_or_keyed_streams() {
+        let blank = Snapshot { expression: String::new(), enabled: false, keys: 0 };
+        let pristine = vec![blank; 5];
+        assert!(blank_binding(&pristine));
+        for i in 0..5 {
+            let mut keyed = pristine.clone(); keyed[i].keys = 1;
+            assert!(!blank_binding(&keyed));
+            let mut foreign = pristine.clone(); foreign[i].expression = "user expression".into();
+            assert!(!blank_binding(&foreign));
+            let mut enabled = pristine.clone(); enabled[i].enabled = true;
+            assert!(!blank_binding(&enabled));
+        }
+        assert!(!blank_binding(&pristine[..4]));
+        let mut registry = BindingRegistry::default();
+        registry.initialized.insert([1,2,3,4,5]);
+        assert!(registry.initialized.contains(&[1,2,3,4,5]));
+        assert!(!registry.initialized.contains(&[6,7,8,9,10]));
+    }
+}

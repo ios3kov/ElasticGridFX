@@ -931,3 +931,26 @@ creation route, not ordinary Undo acceptance. Dev24 is not a deliverable.
 Native failure retained at outputs/update-094-dev24-mac/lifecycle/two-failure.txt.
 Source tests: Rust84 PASS, strict Clippy PASS, Python272 PASS after repeating
 three environment-blocked native-process probes with authorized access.
+
+### Dev32 Undo-respecting deferred initialization candidate
+
+Dev28 b0544c3 / EGFX-732d6d6314a298290dbb44ac restores the safe route:
+loaded image identity PASS; owned saved-copy reopen, two-instance addition and
+deletion PASS, baseline/deletion PNGs exact Dev20 parity. Dev24 is superseded.
+Evidence: outputs/update-094-dev28-mac/{lifecycle,loaded-identity}.
+
+Dev32 candidate retains deferred-only writes. A bounded process-lifetime
+registry records the five unique dependency stream IDs only after validated
+success or exact existing binding. A subsequently fully blank, disabled,
+unkeyed set with the same identity is treated as user Undo, without a setter
+or a new Undo action. Foreign/partial/keyed states retain existing conflict
+policy. No handles, parameter values or project contents are cached. No
+eviction can unexpectedly recreate a cancelled action; registry overflow
+fails before writes. StreamSuite6 (SDK25.6, introduced AE22.5) is authoritative.
+
+This fixes a hypothesis for the observed automatic reinstallation, not the
+separate initialization action itself. Native ordinary Undo/Redo, deletion
+restoration, new-instance identity and close/reopen must pass before acceptance.
+Any project/stream identity reuse or loss of Redo is a candidate failure.
+The automatic initialization remains a distinct native action; do not claim
+one Undo removes a newly added effect. Native Dev32 remains NOT RUN.
