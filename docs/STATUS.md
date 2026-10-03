@@ -225,3 +225,20 @@ inside the button writes Grid Positions, as required by SDK change-flag validity
 User explicitly chose local-only work: no push or draft PR for feat/next-update.
 Windows MSVC build/CI is NOT RUN here; no MSVC/Windows host is available locally.
 Independent shared code and local verification continue.
+
+### Native alignment rejection and automatic spacing checkpoint — 2026-10-03
+
+Candidate fc81a6d does not display Reset in the Effect Controls title row.
+The assumption that PF_EffectWindowInfo.horiz_offset describes the native value
+column is not accepted as proven; next diagnostic build records the public
+event rectangles once under the existing test-only render-diagnostics feature.
+No diagnostic observation is included in default builds. Scene creation switched
+to Four Corners before idle and displayed BadCallbackParameter once; after
+dismissal the image rendered. Cause is not isolated and remains a separate FAIL.
+
+U6 source adds a hidden AutomaticSpacing flag after all existing parameter IDs:
+new effects default to automatic spacing; old projects missing this new stream
+use false via USE_VALUE_FOR_OLD_PROJECTS and preserve legacy spacing values/keys.
+Automatic mode requests zero, leaving the existing monotonic safety floor and
+density limit in core. Local shared Rust tests: 67 PASS. Native new/old project
+parameter defaults and Windows runtime remain NOT RUN.

@@ -123,7 +123,12 @@ without crossing neighboring lines or creating degenerate cells.
 The automatic policy and behavior at different densities, image sizes and depths
 must be designed and tested. Preserve the stored parameter ID and existing values
 for project compatibility; do not silently change old project output while hiding
-this control. The final legacy/new-instance policy is a technical-design item.
+this control. Implementation policy: an appended hidden static flag defaults to automatic for
+new instances and uses USE_VALUE_FOR_OLD_PROJECTS=false for older projects.
+Automatic requests zero spacing, invoking the existing core numerical floor
+(1e-6 normalized units) and density cap. The retained hidden Min Line Spacing
+stream supplies unchanged saved values/keys for legacy projects. No key rewrite.
+Host migration/default behavior remains to be verified.
 
 ### Collapsible Wave Animation section
 

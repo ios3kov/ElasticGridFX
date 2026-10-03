@@ -10,6 +10,7 @@ mod ui_projection;
 mod plane;
 mod fit_layer;
 mod reset_grid;
+mod spacing;
 mod grid_row;
 #[cfg(feature="render-diagnostics")]
 mod render_diagnostics;
@@ -91,6 +92,7 @@ pub(crate) enum Params {
     ResetGridPositions,
     WaveGroupStart,
     WaveGroupEnd,
+    AutomaticSpacing,
 }
 
 #[derive(Default)]
@@ -539,7 +541,7 @@ fn smart_render_snapshot(
         tension_radius: checked_float(params, Params::TensionRadius)? as f32,
         falloff: checked_popup(params, Params::Falloff)?,
         elasticity_strength: checked_float(params, Params::ElasticityStrength)? as f32 / 100.0,
-        min_spacing: checked_float(params, Params::MinSpacing)? as f32 / 100.0,
+        min_spacing: spacing::read(params, true)?,
         stretch_easing: checked_float(params, Params::StretchEasing)? as f32 / 100.0,
         easing_distance: checked_float(params, Params::EasingDistance)? as f32 / 100.0,
         wave_amplitude: checked_float(params, Params::WaveAmplitude)? as f32 / 100.0,
@@ -696,7 +698,7 @@ pub(crate) fn elastic_params(params: &ae::Parameters<Params>) -> Result<EgElasti
         tension_radius: params.get(Params::TensionRadius)?.as_float_slider()?.value() as f32,
         falloff: params.get(Params::Falloff)?.as_popup()?.value(),
         elasticity_strength: params.get(Params::ElasticityStrength)?.as_float_slider()?.value() as f32 / 100.0,
-        min_spacing: params.get(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0,
+        min_spacing: spacing::read(params, false)?,
     })
 }
 
@@ -723,7 +725,7 @@ fn evaluated_params(
         tension_radius: params.get(Params::TensionRadius)?.as_float_slider()?.value() as f32,
         falloff: params.get(Params::Falloff)?.as_popup()?.value(),
         elasticity_strength: params.get(Params::ElasticityStrength)?.as_float_slider()?.value() as f32 / 100.0,
-        min_spacing: params.get(Params::MinSpacing)?.as_float_slider()?.value() as f32 / 100.0,
+        min_spacing: spacing::read(params, false)?,
         stretch_easing: params.get(Params::StretchEasing)?.as_float_slider()?.value() as f32 / 100.0,
         easing_distance: params.get(Params::EasingDistance)?.as_float_slider()?.value() as f32 / 100.0,
         // Original GridWarp has no Wave Enable switch; amplitude=0 disables it.
@@ -977,9 +979,9 @@ impl AdobePluginGlobal for Plugin {
         params.add(Params::ElasticityStrength, "Follow Strength", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
         }))?;
-        params.add(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
+        params.add_with_flags(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 25.0), (0.0, 5.0), 0.5, 2, true);
-        }))?;
+        }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
         params.add(Params::StretchEasing, "Stretch Easing", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
         }))?;
@@ -1029,6 +1031,14 @@ impl AdobePluginGlobal for Plugin {
 
         #[cfg(fstr_binding_probe)]
         binding_probe::add_params(params)?;
+
+        // Existing projects lack this appended stream: initialize them false
+        // from value, while new instances use default=true. Retain old spacing
+        // stream/keys untouched; both UI and render resolve the same policy.
+        params.add_with_flags(Params::AutomaticSpacing, "__FSTR Automatic Spacing", ae::CheckBoxDef::setup(|f| {
+            f.set_label("Automatic"); f.set_default(true); f.set_value(false);
+        }), ae::ParamFlag::CANNOT_TIME_VARY | ae::ParamFlag::USE_VALUE_FOR_OLD_PROJECTS,
+            ae::ParamUIFlags::INVISIBLE)?;
 
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(

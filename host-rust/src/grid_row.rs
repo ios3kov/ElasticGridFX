@@ -21,6 +21,17 @@ fn contains(rect: RectF32, point: ae::Point) -> bool {
 pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
     if event.effect_area() != ae::EffectArea::Title { return Ok(()); }
     let frame = event.param_title_frame();
+    #[cfg(feature = "render-diagnostics")]
+    {
+        static LOG: std::sync::Once = std::sync::Once::new();
+        LOG.call_once(|| {
+            use std::io::Write;
+            let p = std::env::temp_dir().join(format!("egfx-grid-layout-{}.txt", std::process::id()));
+            if let Ok(mut file) = std::fs::OpenOptions::new().write(true).create_new(true).open(p) {
+                let _ = write!(file, "title={:?} current={:?} offset={}", frame, event.current_frame(), event.horiz_offset());
+            }
+        });
+    }
     let Some(rect) = button(frame, event.horiz_offset()) else { return Ok(()); };
     let drawbot = event.context_handle().drawing_reference()?;
     let supplier = drawbot.supplier()?;
