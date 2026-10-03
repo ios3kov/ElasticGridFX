@@ -242,3 +242,10 @@ use false via USE_VALUE_FOR_OLD_PROJECTS and preserve legacy spacing values/keys
 Automatic mode requests zero, leaving the existing monotonic safety floor and
 density limit in core. Local shared Rust tests: 67 PASS. Native new/old project
 parameter defaults and Windows runtime remain NOT RUN.
+
+Diagnostic candidate58737cb records title/current frame (17,153)-(665,170)
+and horiz_offset=94617420, outside the title rectangle. The latter is unusable
+for this AE25.6 arbitrary topic. Reset now follows the row center plus the
+observed native 18-unit value inset, uses 130x16 logical units and pill corners.
+This is a measured layout policy, not a claimed SDK value-column API. Native
+comparison and panel-width coverage are still pending.

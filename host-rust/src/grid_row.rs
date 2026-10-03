@@ -2,15 +2,17 @@
 use super::*;
 use ae::drawbot::{ColorRgba, PointF32, RectF32, TextAlignment, TextTruncation};
 
-fn button(frame: ae::Rect, offset: i32) -> Option<RectF32> {
-    // AE supplies the value-column offset; follow its divider when the panel
-    // is resized rather than anchoring Reset to the panel's right edge.
-    let left = frame.left as f32 + offset as f32;
+fn button(frame: ae::Rect) -> Option<RectF32> {
+    // ECW divides the row at its center, with the native value control inset
+    // by 18 logical units. horiz_offset is not initialized for this arbitrary
+    // topic in AE 25.6 and must never be used as a coordinate.
+    let width = (frame.right - frame.left) as f32;
+    let left = frame.left as f32 + width * 0.5 + 18.0;
     let available = frame.right as f32 - left - 6.0;
     let height = (frame.bottom - frame.top) as f32;
-    if offset < 120 || available < 60.0 || height < 12.0 { return None; }
-    Some(RectF32 { left, top: frame.top as f32 + 1.0,
-        width: available.min(130.0), height: (height - 2.0).min(24.0) })
+    if width < 300.0 || available < 60.0 || height < 12.0 { return None; }
+    Some(RectF32 { left, top: frame.top as f32,
+        width: available.min(130.0), height: (height - 1.0).min(16.0) })
 }
 fn contains(rect: RectF32, point: ae::Point) -> bool {
     let (x, y) = (point.h as f32, point.v as f32);
@@ -32,7 +34,7 @@ pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
             }
         });
     }
-    let Some(rect) = button(frame, event.horiz_offset()) else { return Ok(()); };
+    let Some(rect) = button(frame) else { return Ok(()); };
     let drawbot = event.context_handle().drawing_reference()?;
     let supplier = drawbot.supplier()?;
     let surface = drawbot.surface()?;
@@ -60,7 +62,7 @@ pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
 
 pub(crate) fn click(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
     if event.effect_area() != ae::EffectArea::Title { return Ok(()); }
-    if button(event.param_title_frame(), event.horiz_offset())
+    if button(event.param_title_frame())
         .is_some_and(|rect| contains(rect, event.screen_point())) {
         // PF_CHANGE_VALUE is valid in DRAG, not DO_CLICK. Arm the button and
         // commit on release inside its bounds, allowing drag-out cancellation.
@@ -77,7 +79,7 @@ pub(crate) fn drag(params: &mut ae::Parameters<Params>, event: &mut ae::EventExt
     if event.last_time() {
         event.set_continue_refcon(0, 0);
         event.set_send_drag(false);
-        if button(event.param_title_frame(), event.horiz_offset())
+        if button(event.param_title_frame())
             .is_some_and(|rect| contains(rect, event.screen_point())) && reset_grid::apply(params)? {
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT |
                 ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
@@ -92,13 +94,13 @@ mod tests {
     #[test]
     fn reset_hit_area_preserves_title_and_refuses_outside_points() {
         let frame = ae::Rect { left: 40, top: 50, right: 340, bottom: 72 };
-        let rect = button(frame, 180).unwrap();
-        assert!(rect.left >= frame.left as f32 + 180.0);
+        let rect = button(frame).unwrap();
+        assert!(rect.left >= frame.left as f32 + 168.0);
         assert!(contains(rect, ae::Point { h: 300, v: 60 }));
         for point in [ae::Point { h: 50, v: 60 }, ae::Point { h: 300, v: 40 },
-            ae::Point { h: 334, v: 60 }, ae::Point { h: 300, v: 71 }] {
+            ae::Point { h: 340, v: 60 }, ae::Point { h: 300, v: 71 }] {
             assert!(!contains(rect, point));
         }
-        assert!(button(ae::Rect { right: 180, ..frame }, 180).is_none());
+        assert!(button(ae::Rect { right: 180, ..frame }).is_none());
     }
 }
