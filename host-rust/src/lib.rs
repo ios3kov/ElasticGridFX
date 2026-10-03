@@ -6,6 +6,8 @@ use std::ffi::c_void;
 
 mod ui;
 mod control_grid;
+mod control_layout;
+mod version_row;
 mod ui_projection;
 mod plane;
 mod fit_layer;
@@ -93,6 +95,8 @@ pub(crate) enum Params {
     WaveGroupStart,
     WaveGroupEnd,
     AutomaticSpacing,
+    ControlLayout,
+    VersionRow,
 }
 
 #[derive(Default)]
@@ -973,21 +977,22 @@ impl AdobePluginGlobal for Plugin {
             // Keep saved numeric values and all four slots. Relabel to the
             // existing FFI behavior; ordinal 4 is the legacy Smoothstep alias.
             f.set_options(&["Smooth", "Soft", "Even", "Old Smooth"]);
-            f.set_default(2);
-            f.set_value(f.default());
-        }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
-        params.add(Params::ElasticityStrength, "Follow Strength", ae::FloatSliderDef::setup(|f| {
+            f.set_default(1);
+            f.set_value(2); // Fallback for old projects missing this stream.
+        }), ae::ParamFlag::CANNOT_TIME_VARY | ae::ParamFlag::USE_VALUE_FOR_OLD_PROJECTS, ae::ParamUIFlags::INVISIBLE)?;
+        params.add_with_flags(Params::ElasticityStrength, "Follow Strength", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 200.0), (0.0, 200.0), 100.0, 1, true);
-        }))?;
+        }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
         params.add_with_flags(Params::MinSpacing, "Min Line Spacing", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (0.0, 25.0), (0.0, 5.0), 0.5, 2, true);
         }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
-        params.add(Params::StretchEasing, "Smooth Stretch", ae::FloatSliderDef::setup(|f| {
-            setup_float(f, (0.0, 100.0), (0.0, 100.0), 0.0, 1, true);
-        }))?;
-        params.add(Params::EasingDistance, "Smooth Width", ae::FloatSliderDef::setup(|f| {
+        params.add_with_flags(Params::StretchEasing, "Smooth Stretch", ae::FloatSliderDef::setup(|f| {
+            setup_float(f, (0.0, 100.0), (0.0, 100.0), 100.0, 1, true);
+            f.set_value(0.0); // Preserve the old missing-stream fallback.
+        }), ae::ParamFlag::USE_VALUE_FOR_OLD_PROJECTS, ae::ParamUIFlags::INVISIBLE)?;
+        params.add_with_flags(Params::EasingDistance, "Smooth Width", ae::FloatSliderDef::setup(|f| {
             setup_float(f, (1.0, 50.0), (1.0, 50.0), 25.0, 1, true);
-        }))?;
+        }), ae::ParamFlag::empty(), ae::ParamUIFlags::INVISIBLE)?;
 
         // The parity implementation uses amplitude=0 to disable waves. Keep
         // this old checkbox slot/ID/type for projects, but do not expose a no-op.
@@ -1042,6 +1047,19 @@ impl AdobePluginGlobal for Plugin {
         }), ae::ParamFlag::CANNOT_TIME_VARY | ae::ParamFlag::USE_VALUE_FOR_OLD_PROJECTS,
             ae::ParamUIFlags::INVISIBLE)?;
 
+        let mut layout=ae::ArbitraryDef::new();
+        layout.set_default(control_layout::State::default())?;
+        params.add_customized(Params::ControlLayout, "__FSTR Viewer Layout", layout, |param| {
+            param.set_flags(ae::ParamFlag::CANNOT_TIME_VARY);
+            param.set_ui_flags(ae::ParamUIFlags::INVISIBLE); -1
+        })?;
+        let mut version=ae::ArbitraryDef::new();
+        version.set_default(version_row::Data::default())?;
+        params.add_customized(Params::VersionRow, "Version", version, |param| {
+            param.set_flags(ae::ParamFlag::CANNOT_TIME_VARY);
+            param.set_ui_flags(ae::ParamUIFlags::TOPIC); -1
+        })?;
+
         in_data.interact().register_ui(
             ae::CustomUIInfo::new().events(
                 ae::CustomEventFlags::COMP |
@@ -1093,7 +1111,8 @@ impl AdobePluginGlobal for Plugin {
                 if params.index(Params::Columns) == Some(param_index)
                     || params.index(Params::Rows) == Some(param_index)
                 {
-                    // Only request the viewer update. Never touch Grid Positions:
+                    control_layout::reflow(&in_data,params,params.index(Params::Columns)==Some(param_index))?;
+                    // Reflow viewer references only. Never touch Grid Positions:
                     // a setter here would create/overwrite a key at the playhead.
                     out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
 
@@ -1115,6 +1134,8 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::ArbitraryCallback { mut extra } => {
                 extra.dispatch::<GridArb, Params>(Params::GridState)?;
+                extra.dispatch::<control_layout::State, Params>(Params::ControlLayout)?;
+                extra.dispatch::<version_row::Data, Params>(Params::VersionRow)?;
             }
             ae::Command::Event { mut extra } => {
                 #[cfg(feature = "render-diagnostics")]

@@ -7,7 +7,10 @@ their older holds and release-policy statements do not override the state below.
 ## Active local update — rules8.0.0
 
 Branch feat/next-update; no push, PR or publication authorized. Current update
-remains incomplete across macOS/Windows. See the U0–U10 table in
+remains incomplete across macOS/Windows. Source version is 0.9.4 Dev 1; installation of these latest changes is pending.
+Local source checks: 73 Rust tests, 266 Python tests, 16 JavaScript safety files
+and strict Clippy PASS. These are not After Effects or Windows runtime acceptance.
+See the U0–U11 table in
 [feature backlog](feature-backlog.md). Installed candidates and checks below
 are development evidence, separate from the published release.
 

@@ -1,8 +1,8 @@
 # Future update feature backlog
 
-Updated: 2026-10-03. These are future product requests, not implemented features
-or blockers for the published 0.9.3-perf.1 release. No native code or parameter
-contract changes are authorized by recording this list.
+Updated: 2026-10-03. The user authorized implementing this update locally for
+Mac and Windows. Individual items remain incomplete until their evidence below
+is closed. This work does not reopen the published 0.9.3-perf.1 release.
 
 ## Confirmed user requests
 
@@ -59,7 +59,25 @@ ordinary language. Russian explanations in the conversation are not UI labels.
 Implementation is in the local update branch; labels and checks below are
 development state, not a released interface.
 
-### Clear parameter names
+### Simplified deformation controls — superseding decision, 2026-10-03
+
+The user removed Follow Shape, Follow Strength, Smooth Stretch and Smooth Width
+from the visible interface. For new effects use one Smoothstep influence profile,
+100% follow strength, 100% boundary smoothing and 25% smoothing width. These are
+engineering starting defaults, not a visually certified universal optimum.
+Keep their existing IDs, types, ordinal mappings, values and animation streams
+hidden for old-project compatibility. Never overwrite existing project settings.
+Affected Lines remains editable. The older naming table and live-feedback requests
+below are historical for the four hidden controls; they no longer require exposed
+sliders or a profile menu. Both platform builds share this policy.
+
+Source implementation and local checks are separate from AE acceptance. Verify
+new-instance defaults, old-project pixel/key parity and panel absence in AE before
+calling this complete. Local checks: 73 Rust tests and 13 host source-contract
+tests PASS; whitespace check PASS. These do not certify host visuals or Windows
+runtime. No current installation claim follows from source changes.
+
+### Clear parameter names (historical proposals)
 
 User approved **Affected Lines** and **Follow Strength**. All visible names must
 use simple English at approximately B1 level; the other labels below remain
@@ -198,7 +216,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Core PASS; Mac diagnostic8a2e30c native current-time key preservation + static/animated Undo/Redo PASS; ordinary fb9ae4f reopen/current-time Reset/Undo8 checks PASS; Windows pending |
 | U3 | Simple English labels, single-row Grid Positions, equal popup widths | Preserve IDs/option values; native builds; AE panel inspection/old-project load; common popup width without clipping | Mac8a2e30c visible popups equal130 units, longest captions fully fit; inline Reset matches Fit Layer; ordinary fb9ae4f four visible popups PASS; 6314811 native wide/narrow Reset visibility and matching Fit Layer dimensions PASS; expanded Wave Axis and Windows pending |
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac collapsed section inspected; Windows AE NOT RUN |
-| U5 | Live range/strength feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | [Bounded design investigation](live-influence-design.md); real FFI catalog bound PASS across2500 cases; legacy product decision and numeric/wire integration open |
+| U5 | Live range feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | [Bounded design investigation](live-influence-design.md); legacy FFI catalog bound PASS across2500 cases; density reflow adds arbitrary references, so the new model bound must be redesigned; numeric/wire integration open |
 | U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |
 | U7 | Viewer-only grid with Show Grid off by default | Public API/overlay feasibility before implementation; selected/unselected/playback/camera/multiple-instance lifecycle; export/cache never includes guides | Feasibility open |
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Pending design and helpers |
@@ -231,3 +249,18 @@ IDs/types and numeric option mappings; do not delete keys in code. Opening old
 projects that already animate these choices is an explicit compatibility check:
 AE handling of the new CANNOT_TIME_VARY flags is not assumed to preserve old
 output until verified. U3/U10 include this check before acceptance/release.
+
+
+### Density redistribution and version display — 0.9.4 Dev 1
+
+Changing Columns/Rows redistributes visible guides uniformly across the current
+deformed plane, preserving the image deformation and all Grid Positions keys.
+An appended hidden, static ControlLayout stream stores bounded source references;
+the render lattice is unchanged. Later dragging uses the saved source references.
+Legacy layouts remain readable; source-reference reflow is triggered only by an
+explicit count change. AE callback/Undo/save/reopen acceptance remains pending.
+
+A read-only Version row displays 0.9.4 Dev 1 (Dev 2 for diagnostics). Package,
+PiPL and About version derive from the same Cargo version.
+
+| U11 | Uniform density without deformation change | Real FFI tests for all counts, immutable grid/key bytes, saved layout roundtrip; native AE count-change, Undo and reopen | Source implemented; 73 Rust tests PASS; AE and Windows pending |

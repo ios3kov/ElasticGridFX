@@ -1,11 +1,15 @@
 # Changelog
 
-## Next update — development, not released
+## 0.9.4 Dev 1 — development, not released
+
+- Simplify deformation UI: hide Follow Shape, Follow Strength, Smooth Stretch
+  and Smooth Width. New effects use Smoothstep, full follow strength, full
+  boundary smoothing and 25% smoothing width; retain saved legacy values/keys.
+  Host visual/default/legacy acceptance is pending.
 
 - Shared Mac/Windows UI: Grid Positions has no empty disclosure area, with inline
-  Reset at the current time; collapsed Wave Animation section, Affected Lines and
-  Follow Strength, Follow Shape (Smooth/Soft/Even), Smooth Stretch and Smooth
-  Width. Reset matches Fit Layer dimensions, pill shape and theme
+  Reset at the current time; collapsed Wave Animation section and Affected Lines.
+  Reset matches Fit Layer dimensions, pill shape and theme
   colors on Mac AE25.6; final inset/panel-width and Windows checks remain pending.
 - Hide Min Line Spacing and enable automatic safety spacing for new effects.
   A new appended compatibility flag preserves existing project spacing values

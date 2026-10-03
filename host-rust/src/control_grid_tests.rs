@@ -97,3 +97,35 @@ fn every_density_uses_a_bounded_catalog_of_fifty_exact_references() {
         }
     }
 }
+
+#[test]
+fn density_reflow_is_visually_uniform_without_changing_deformation_or_keys() {
+    let mut saved=GridArb::uniform(4,4);
+    saved.column_lines[1]=0.03;saved.column_lines[2]=0.18;
+    saved.column_lines[3]=0.71;saved.column_lines[4]=0.95;
+    let original=bytes(&saved);
+    for easing in [0.0,0.5,1.0] {for count in 1..=MAX_GUIDES {
+        let layout=reflow_axis(&saved.column_lines,count,easing,0.25).unwrap();
+        let (positions,refs)=sample_layout(&saved.column_lines,&layout,easing,0.25).unwrap();
+        for (i,p) in positions.iter().enumerate() {
+            assert!((*p-i as f32/(count+1) as f32).abs()<0.00001,
+                "density={count}, easing={easing}, index={i}, position={p}");
+        }
+        assert!(refs.windows(2).all(|p|p[1]>p[0]));
+        assert_eq!(bytes(&saved),original);
+    }}
+}
+
+#[test]
+fn redistributed_handles_move_and_keep_their_source_identity_after_drag() {
+    let mut saved=GridArb::default();saved.column_lines[2]=0.47;
+    let layout=reflow_axis(&saved.column_lines,7,0.0,0.25).unwrap();
+    let (before,refs)=sample_layout(&saved.column_lines,&layout,0.0,0.25).unwrap();
+    let elastic=EgElasticParams {tension_radius:0.0,falloff:2,elasticity_strength:1.0,min_spacing:0.0};
+    drag(&mut saved.column_lines,&saved.column_pins,refs[3],0.01,&elastic).unwrap();
+    let (after,after_refs)=sample_layout(&saved.column_lines,&layout,0.0,0.25).unwrap();
+    assert_eq!(refs,after_refs);assert!(after[3]>before[3]);assert!(saved.is_valid());
+    let wire=bincode::serde::encode_to_vec(control_layout::State {columns:layout,rows:Vec::new()},bincode::config::legacy()).unwrap();
+    let (reopened,_)=bincode::serde::decode_from_slice::<control_layout::State,_>(&wire,bincode::config::legacy()).unwrap();
+    assert_eq!(sample_layout(&saved.column_lines,&reopened.columns,0.0,0.25).unwrap().0,after);
+}

@@ -99,6 +99,50 @@ extern "C" int eg_control_axis_read(const float* lines, std::int32_t size,
     } catch (...) { return 4; }
 }
 
+extern "C" int eg_control_axis_reflow(const float* lines, std::int32_t size,
+                                      std::int32_t count, float easing, float distance,
+                                      float* refs, std::int32_t capacity) noexcept {
+    try {
+        if (!valid(lines,size) || count < 1 || count > 50 || capacity < count+2 ||
+            !refs || !std::isfinite(easing) || !std::isfinite(distance)) return 1;
+        const std::vector<float> saved(lines,lines+size);
+        std::vector<float> result; result.reserve(count+2);
+        for (int i=0;i<count+2;++i) {
+            const float destination = static_cast<float>(i)/static_cast<float>(count+1);
+            result.push_back(i==0 ? 0.0f : i==count+1 ? 1.0f :
+                elasticgrid::inverseMapNormalized(destination,saved,easing,distance));
+        }
+        for (std::size_t i=0;i<result.size();++i)
+            if (!std::isfinite(result[i]) || (i>0 && result[i]<=result[i-1])) return 4;
+        std::copy(result.begin(),result.end(),refs);
+        return 0;
+    } catch (...) { return 4; }
+}
+
+extern "C" int eg_control_axis_read_layout(const float* lines, std::int32_t size,
+                                           const float* normalized, std::int32_t count,
+                                           float easing, float distance, float* positions,
+                                           float* refs, std::int32_t capacity) noexcept {
+    try {
+        if (!valid(lines,size) || !normalized || count<3 || count>52 || capacity<count ||
+            !positions || !refs || !std::isfinite(easing) || !std::isfinite(distance) ||
+            normalized[0]!=0.0f || normalized[count-1]!=1.0f) return 1;
+        const std::vector<float> saved(lines,lines+size);
+        std::vector<float> result, references; result.reserve(count); references.reserve(count);
+        for (int i=0;i<count;++i) {
+            if (!std::isfinite(normalized[i]) || normalized[i]<0.0f || normalized[i]>1.0f ||
+                (i>0 && normalized[i]<=normalized[i-1])) return 1;
+            const float ref = normalized[i]*static_cast<float>(size-1);
+            references.push_back(ref); result.push_back(position(saved,ref,easing,distance));
+        }
+        for (std::size_t i=0;i<result.size();++i)
+            if (!std::isfinite(result[i]) || (i>0 && result[i]<result[i-1])) return 4;
+        std::copy(result.begin(),result.end(),positions);
+        std::copy(references.begin(),references.end(),refs);
+        return 0;
+    } catch (...) { return 4; }
+}
+
 extern "C" int eg_control_axis_drag(float* lines, const std::uint8_t* pins, std::int32_t size,
                                      float ref, float delta, const EgElasticParams* e) noexcept {
     try {

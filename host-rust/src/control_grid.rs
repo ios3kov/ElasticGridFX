@@ -6,6 +6,35 @@ unsafe extern "C" {
         easing: f32, distance: f32, positions: *mut f32, references: *mut f32, capacity: i32) -> i32;
     fn eg_control_axis_drag(lines: *mut f32, pins: *const u8, size: i32,
         reference: f32, delta: f32, elastic: *const EgElasticParams) -> i32;
+    fn eg_control_axis_reflow(lines: *const f32,size: i32,count: i32,easing: f32,
+        distance: f32,refs: *mut f32,capacity: i32) -> i32;
+    fn eg_control_axis_read_layout(lines: *const f32,size: i32,normalized: *const f32,
+        count: i32,easing: f32,distance: f32,positions: *mut f32,refs: *mut f32,capacity: i32) -> i32;
+}
+
+pub(crate) fn reflow_axis(lines: &[f32],count: usize,easing: f32,distance: f32)
+    -> Result<Vec<f32>,ae::Error> {
+    if !(1..=MAX_GUIDES).contains(&count) || !(3..=MAX_GUIDES+2).contains(&lines.len()) {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    let mut refs=vec![0.0;count+2];
+    // SAFETY: checked slice dimensions, bounded owned output and immutable input.
+    let rc=unsafe {eg_control_axis_reflow(lines.as_ptr(),lines.len() as i32,count as i32,
+        easing,distance,refs.as_mut_ptr(),refs.len() as i32)};
+    if rc==0 {Ok(refs)} else {Err(ae::Error::BadCallbackParameter)}
+}
+
+fn sample_layout(lines: &[f32],normalized: &[f32],easing: f32,distance: f32)
+    -> Result<(Vec<f32>,Vec<f32>),ae::Error> {
+    if normalized.is_empty() || !control_layout::State::valid_axis(normalized) ||
+        !(3..=MAX_GUIDES+2).contains(&lines.len()) {return Err(ae::Error::BadCallbackParameter);}
+    let mut positions=vec![0.0;normalized.len()];let mut refs=positions.clone();
+    // SAFETY: all arrays are bounded to52 elements and remain valid; outputs do
+    // not alias input or each other. C++ validates before publishing either.
+    let rc=unsafe {eg_control_axis_read_layout(lines.as_ptr(),lines.len() as i32,
+        normalized.as_ptr(),normalized.len() as i32,easing,distance,positions.as_mut_ptr(),
+        refs.as_mut_ptr(),positions.len() as i32)};
+    if rc==0 {Ok((positions,refs))} else {Err(ae::Error::BadCallbackParameter)}
 }
 
 pub(crate) struct View {
@@ -49,7 +78,18 @@ pub(crate) fn read(in_data: &ae::InData, params: &mut ae::Parameters<Params>)
     let counts = (
         params.get(Params::Columns)?.as_slider()?.value().clamp(1,MAX_GUIDES as i32) as usize,
         params.get(Params::Rows)?.as_slider()?.value().clamp(1,MAX_GUIDES as i32) as usize);
-    view(&evaluated,counts,p.stretch_easing,p.easing_distance)
+    let layout=params.get(Params::ControlLayout)?.as_arbitrary()?.value::<control_layout::State>()?;
+    if !layout.valid() {return Err(ae::Error::BadCallbackParameter);}
+    let mut displayed=view(&evaluated,counts,p.stretch_easing,p.easing_distance)?;
+    if layout.columns.len()==counts.0+2 {
+        (displayed.grid.column_lines,displayed.column_refs)=
+            sample_layout(&evaluated.column_lines,&layout.columns,p.stretch_easing,p.easing_distance)?;
+    }
+    if layout.rows.len()==counts.1+2 {
+        (displayed.grid.row_lines,displayed.row_refs)=
+            sample_layout(&evaluated.row_lines,&layout.rows,p.stretch_easing,p.easing_distance)?;
+    }
+    Ok(displayed)
 }
 
 pub(crate) fn drag(lines: &mut [f32], pins: &[u8], reference: f32, delta: f32,

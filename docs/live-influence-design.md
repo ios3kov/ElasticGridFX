@@ -6,9 +6,10 @@ boundary and all other U0–U10 obligations remain. [Scope](feature-backlog.md).
 
 ## Required behavior and current cause
 
-Affected Lines and Follow Strength must change the current deformation while
-the user edits their controls. Follow Shape, Smooth Stretch and Smooth Width
-retain their approved values/formulas; Wave Animation remains a separate group.
+Affected Lines must change the current deformation while the user edits it.
+The later user decision hides Follow Shape, Follow Strength, Smooth Stretch and
+Smooth Width and sets unified new-instance defaults; saved legacy values remain.
+Wave Animation remains a separate group.
 Changing scalar controls must not rewrite Grid Positions keys. Reset changes
 only current-time Grid Positions; AE owns key insertion and Undo/Redo.
 
@@ -29,16 +30,20 @@ silently convert old animation keys. The human has been asked whether old
 appearance should remain exact with live influence for new edits only; that
 legacy behavior remains a pending product decision.
 
-The existing virtual references are nested source-knot selections/subdivisions,
+The legacy virtual references are nested source-knot selections/subdivisions,
 not arbitrary pointer coordinates. For each retained topology, all permitted
 visible densities1..50 use a subset of the same maximum-density catalog. This
 limits editable reference coefficients to50 per axis rather than an unbounded
 list of gestures. A real Rust/C++ FFI regression checks all2500 combinations of
 base topology and density, exact float reference bits, and immutable saved bytes.
-This proves only the catalog bound, not the proposed deformation algorithm.
+This proves only the legacy catalog bound, not the proposed deformation algorithm.
+The newly requested visible-space density reflow produces arbitrary source
+references depending on the current deformation. It invalidates the assumption
+that every editable handle belongs to this catalog. A bounded driver-knot or
+other validated representation is required before live influence integration.
 
 Candidate representation: immutable base positions, canonical endpoint pins,
-50 bounded finite coefficients per axis, and an explicit wire-version tag.
+a bounded finite coefficient representation per axis (bound/design still open), and an explicit wire-version tag.
 Grid Positions remains the single animated arbitrary stream. No extra animated
 parameter or platform-specific state. Do not append fields to bincode's existing
 six-field struct without a version-specific reader/writer. Encoding within

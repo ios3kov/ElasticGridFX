@@ -188,13 +188,12 @@ fn main() {
             minor: PF_PLUG_IN_SUBVERS,
         },
         Property::AE_Effect_Version {
-            version: 0,
-            subversion: 9,
-            bugversion: 3,
+            version: std::env::var("CARGO_PKG_VERSION_MAJOR").unwrap().parse().unwrap(),
+            subversion: std::env::var("CARGO_PKG_VERSION_MINOR").unwrap().parse().unwrap(),
+            bugversion: std::env::var("CARGO_PKG_VERSION_PATCH").unwrap().parse().unwrap(),
             stage: Stage::Develop,
-            // Isolate fresh performance/observer frames from accepted build 1
-            // and from each other through AE's documented effect-version key.
-            build: if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 3 } else { 2 },
+            // Distinguish ordinary/diagnostic development candidates in AE caches.
+            build: if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() { 2 } else { 1 },
         },
         Property::AE_Effect_Info_Flags(0),
         Property::AE_Effect_Global_OutFlags(

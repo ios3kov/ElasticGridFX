@@ -385,6 +385,8 @@ fn draw_effect_control(
 ) -> Result<(), ae::Error> {
     if params.index(Params::GridState) == Some(event.param_index()) {
         grid_row::draw(event)?;
+    } else if params.index(Params::VersionRow)==Some(event.param_index()) {
+        version_row::draw(event)?;
     }
     Ok(())
 }

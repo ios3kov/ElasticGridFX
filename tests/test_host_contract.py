@@ -27,15 +27,15 @@ class HostContract(unittest.TestCase):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
                          LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND +
-                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing'])
+                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow'])
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
         self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY[:3] +
                          ['ResetGridPositions'] + LEGACY[3:10] + ['WaveGroupStart'] +
-                         LEGACY[10:] + ['AutomaticSpacing'])
+                         LEGACY[10:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow'])
         self.assertIn('Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true', SETUP)
-        self.assertEqual(direct[-1], 'AutomaticSpacing')
+        self.assertEqual(direct[-1], 'VersionRow')
         for name in STAGE9_APPEND[1:-1]:
             self.assertIn(f'(Params::{name},', SETUP)
 
@@ -43,7 +43,7 @@ class HostContract(unittest.TestCase):
         self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
         self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
         self.assertIn('["Smooth", "Soft", "Even", "Old Smooth"]', block('Falloff'))
-        self.assertIn('f.set_default(2)', block('Falloff'))
+        self.assertIn('f.set_default(1)', block('Falloff'))
         # Ordinal 4 intentionally keeps the old Smoothstep fallback, not Cosine.
         bridge = (ROOT / 'src/bridge/elasticgrid_ffi.cpp').read_text()
         mapping = bridge.split('falloff_from_i32', 1)[1].split('wave_axis_from_i32', 1)[0]
@@ -51,6 +51,17 @@ class HostContract(unittest.TestCase):
                      'case 3: return eg::FalloffProfile::Linear',
                      'default: return eg::FalloffProfile::Smoothstep'):
             self.assertIn(text, mapping)
+
+    def test_hidden_shape_controls_preserve_saved_streams_and_old_fallbacks(self):
+        for name in ('Falloff', 'ElasticityStrength', 'StretchEasing', 'EasingDistance'):
+            self.assertIn('ae::ParamUIFlags::INVISIBLE', block(name))
+        self.assertIn('USE_VALUE_FOR_OLD_PROJECTS', block('Falloff'))
+        self.assertIn('f.set_value(2)', block('Falloff'))
+        self.assertIn('USE_VALUE_FOR_OLD_PROJECTS', block('StretchEasing'))
+        self.assertIn('f.set_value(0.0)', block('StretchEasing'))
+        self.assertIn('(0.0, 100.0), (0.0, 100.0), 100.0', block('StretchEasing'))
+        for name in ('ElasticityStrength', 'StretchEasing', 'EasingDistance'):
+            self.assertNotIn('CANNOT_TIME_VARY', block(name))
 
     def test_ui_limits_match_renderer(self):
         for name in ('Columns', 'Rows'):
@@ -74,7 +85,7 @@ class HostContract(unittest.TestCase):
                 self.assertNotIn('CONTROL_ONLY', definition)
 
     def test_static_choices_and_animated_grid_waves_keep_approved_policy(self):
-        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing')
+        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow')
         for name in static:
             self.assertIn('CANNOT_TIME_VARY', block(name))
         self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), len(static))
