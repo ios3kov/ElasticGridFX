@@ -31,7 +31,7 @@ int fixtureMain(){
     }
     {
         auto e=make(L"backup-acl");previous(e.active/L"FSTR Stretch.aex");assert(runNative(e,false).starts_with(L"Installed."));auto installed=bytes(e.active/L"FSTR Stretch.aex");auto tx=fs::directory_iterator(e.backups)->path();
-        PSECURITY_DESCRIPTOR descriptor=nullptr;assert(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"D:P(A;FA;;;SY)(A;FA;;;BA)",SDDL_REVISION_1,&descriptor,nullptr));PACL acl=nullptr;BOOL present=FALSE,defaulted=FALSE;assert(GetSecurityDescriptorDacl(descriptor,&present,&acl,&defaulted) && present);
+        PSECURITY_DESCRIPTOR descriptor=nullptr;assert(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"D:P(A;;FA;;;SY)(A;;FA;;;BA)",SDDL_REVISION_1,&descriptor,nullptr));PACL acl=nullptr;BOOL present=FALSE,defaulted=FALSE;assert(GetSecurityDescriptorDacl(descriptor,&present,&acl,&defaulted) && present);
         auto file=tx/L"previous.aex";assert(SetNamedSecurityInfoW(const_cast<wchar_t*>(file.c_str()),SE_FILE_OBJECT,DACL_SECURITY_INFORMATION|PROTECTED_DACL_SECURITY_INFORMATION,nullptr,nullptr,acl,nullptr)==ERROR_SUCCESS);LocalFree(descriptor);
         refuses([&]{runNative(e,true);});assert(bytes(e.active/L"FSTR Stretch.aex")==installed);
     }
