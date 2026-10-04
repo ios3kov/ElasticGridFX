@@ -42,7 +42,7 @@ int fixtureMain(){
         auto e=make(L"host");e.checkHosts=[]{throw std::runtime_error("running host");};refuses([&]{runNative(e,false);});assert(!fs::exists(e.active));
     }
     {
-        auto e=make(L"duplicate");previous(e.scanRoots[0]/L"other.aex");refuses([&]{runNative(e,false);});assert(!fs::exists(e.active/L"FSTR Stretch.aex"));
+        auto e=make(L"duplicate");previous(e.scanRoots[0]/L"other.AEX");refuses([&]{runNative(e,false);});assert(!fs::exists(e.active/L"FSTR Stretch.aex"));
     }
     {
         auto e=make(L"pending");fs::create_directories(e.backups/L"interrupted");refuses([&]{runNative(e,false);});assert(!fs::exists(e.active/L"FSTR Stretch.aex"));

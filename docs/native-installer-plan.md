@@ -73,3 +73,11 @@ snapshot must match. No new principals/rights, arbitrary ACLs or silent masking.
 A subsequent backup ACL change refuses Restore. A broad comparison proposal was
 rejected by automatic review and never applied. All execution remains isolated
 native test fixtures until separately accepted administrator installation.
+
+
+SetNamedSecurityInfo may retain the AUTO_INHERITED bookkeeping flag after Restore;
+accept only the two exact protected original descriptors (P or P+AI), with all
+original ACE principal/mask/flags and owner/group exact. The backup publication
+still requires its exact P form. Neither variant permits future inheritance or
+new grants. Native user-profile root uses FOLDERID_UserProfiles; .AEX scans are
+case-insensitive to avoid missing uppercase duplicates.
