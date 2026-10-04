@@ -203,6 +203,48 @@ technical-design work, not runtime feasibility, completed code or test PASS.
 - GPU/Metal acceleration: historical plans exist; no new cycle is approved.
 - The accepted macOS CPU performance cycle is complete; do not label it unfinished.
 
+## Commercial activation and license management — 2026-10-04
+
+User accepted adding this block to the development plan after discussing the
+reference “Reset / Register Pro” header. This is a planned commercial workflow,
+not implemented licensing or authorization to publish, purchase a service or
+connect customer data. Preserve every existing update requirement and Evidence.
+Mac implementation/acceptance comes first; the same product workflow applies to
+Windows when that platform resumes.
+
+- Before activation, offer **Activate…**: enter a purchased license key and a
+  link to buy the plugin. After activation, offer **License…**: show license
+  status and provide deactivation/transfer to another computer.
+- Include **About**, product version and support access in this window. Keep
+  the parameter panel free of the visible Version row. Do not use “Register Pro”
+  unless a separate free/Pro product model is later approved.
+- Investigate a native entry beside the effect's global Reset. AE owns that
+  header; the supported Options/DO_DIALOG route does not yet prove that its
+  caption can be changed to Activate/License. Verify actual Mac/Windows UI
+  placement and caption support before promising this layout. If unavailable,
+  propose an accessible native entry rather than imitate the header by drawing
+  over it. Keep the Grid Positions Reset independent.
+- Once activated, ordinary editing, RAM Preview and rendering work offline.
+  No network requests or activation dialogs in render/MFR callbacks, and no
+  measurable regression of the accepted render path from repeated license work.
+- Choose the sales channel before designing key issuance and verification:
+  evaluate the platform's licensing integration if selling through aescripts;
+  for a direct store, design authenticated key issuance/validation and local
+  activation storage. Channel/provider, price, activation limits, trial behavior,
+  unlicensed output, transfer rules and render-node entitlement remain undecided.
+  A license key alone is not a complete licensing system.
+- Before implementation, define activation states, invalid/revoked-key handling,
+  offline behavior, unavailable service behavior, secure local storage and
+  transfer/recovery. Preserve saved projects, parameter IDs, animation and
+  installer backups; never place license secrets in project streams or logs.
+
+Acceptance for U11: verified native entry and readable window; valid/invalid-key
+flows; state retained after AE restart; activated offline editing/preview/render;
+deactivation/transfer and service-failure handling according to the approved
+policy; About version preserved; no render/MFR network/UI work, no secret logging,
+and scoped project/output/performance regression checks on each target platform.
+Status: PLANNED. Provider-dependent design and runtime checks are NOT RUN.
+
 ## Active update task and check mapping — rules8.0.0
 
 Branch: feat/next-update. Parent work is retained: backlog decisions plus the
@@ -224,7 +266,8 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U7 | Optional rendered Show Grid, defaultoff | Superseding pixel-output contract; selected/unselected/playback/plane/layout lifecycle; defaultoff exact output; on appears in exports;8/16/32-bit alpha/origin/cancel | Shared CPU source implemented;84Rust/272Python + strict Clippy PASS; exact Dev20 Mac scoped default/switch/export/reopen/key/depth/plane/quality/Wave/deselected/playback/other-layer PASS; Dev44 ordinary Undo/Redo, deletion, save/reopen (including canceled binding), scoped camera/parent and60-frame MFR requested ON/OFF exact pixels PASS; Windows NOT_RUN |
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Mac plugin checks precede resumed native installer work; protected snapshot receipts and exclusive fresh publication implemented, five native test targets PASS; frontend/package acceptance pending; Windows deferred |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
-| U10 | Integration, validation and final task reconciliation | All U1–U9 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
+| U10 | Integration, validation and final task reconciliation | All U1–U9 and U11 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
+| U11 | Commercial activation and license management | Select channel/policy; verify native Activate/License entry, About, key/restart/offline/transfer/failure flows and render/MFR isolation | PLANNED; placement/provider/policy design and runtime checks NOT RUN; Mac first, Windows deferred |
 
 The user removed U7 export/cache exclusion on2026-10-04: optional rendered grid
 pixels are now authorized. The old additive-only research is historical for its

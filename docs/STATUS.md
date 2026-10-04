@@ -1115,3 +1115,16 @@ preserved; the native About dialog itself was not opened. Evidence:
 outputs/update-094-about-only-mac/verification.json. This supersedes Dev44 as the
 installed local candidate; previous payload remains backed up outside Adobe.
 Installer/frontend/package obligations and Windows deferral remain unchanged.
+
+
+### Commercial licensing plan addition — 2026-10-04
+
+User authorized adding activation/license management to the development plan.
+U11 in feature-backlog.md records Activate before registration, License after
+activation, About/version/support in the window, activated offline operation and
+render/MFR isolation. Native placement beside global Reset must be investigated;
+no arbitrary host-header caption capability is assumed. Sales channel/provider
+and commercial policies require definition before dependent implementation.
+This is documentation-only planning, not implemented licensing or release
+acceptance. Existing U0–U10 obligations/Evidence remain; U10 now includes U11.
+Mac first, Windows deferred and local-only publication restrictions persist.
