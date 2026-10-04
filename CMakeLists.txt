@@ -64,6 +64,21 @@ if(ELASTICGRID_BUILD_TESTS)
     target_compile_options(elasticgrid_installer_snapshot_tests PRIVATE -Wall -Wextra -Werror)
     elasticgrid_enable_test_assertions(elasticgrid_installer_snapshot_tests)
     add_test(NAME elasticgrid_installer_snapshot COMMAND elasticgrid_installer_snapshot_tests)
+    add_executable(elasticgrid_installer_receipt_tests
+        tests/test_installer_receipt_macos.cpp installer/macos/SnapshotReceipt.cpp
+        installer/macos/PayloadSnapshot.cpp installer/macos/AtomicExchange.cpp
+        installer/macos/PreparedJournal.cpp installer/macos/ExchangeCoordinator.cpp)
+    target_include_directories(elasticgrid_installer_receipt_tests PRIVATE installer/macos)
+    target_compile_options(elasticgrid_installer_receipt_tests PRIVATE -Wall -Wextra -Werror)
+    elasticgrid_enable_test_assertions(elasticgrid_installer_receipt_tests)
+    add_test(NAME elasticgrid_installer_receipt COMMAND elasticgrid_installer_receipt_tests)
+    add_executable(elasticgrid_installer_fresh_tests
+        tests/test_installer_fresh_macos.cpp installer/macos/FreshPublication.cpp
+        installer/macos/SnapshotReceipt.cpp installer/macos/PayloadSnapshot.cpp)
+    target_include_directories(elasticgrid_installer_fresh_tests PRIVATE installer/macos)
+    target_compile_options(elasticgrid_installer_fresh_tests PRIVATE -Wall -Wextra -Werror)
+    elasticgrid_enable_test_assertions(elasticgrid_installer_fresh_tests)
+    add_test(NAME elasticgrid_installer_fresh COMMAND elasticgrid_installer_fresh_tests)
   endif()
   add_executable(elasticgrid_plane_axis_cache_tests tests/test_plane_axis_cache.cpp)
   target_link_libraries(elasticgrid_plane_axis_cache_tests PRIVATE elasticgrid_core)

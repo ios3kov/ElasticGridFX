@@ -1,8 +1,8 @@
 # Future update feature backlog
 
-Updated: 2026-10-03. The user authorized implementing this update locally for
-Mac and Windows. Individual items remain incomplete until their evidence below
-is closed. This work does not reopen the published 0.9.3-perf.1 release.
+Updated: 2026-10-04. The user authorized implementing this update locally.
+Finish Mac first; Windows resumes after Mac completion. Individual items remain
+incomplete until their scoped evidence below is closed. This work does not reopen the published 0.9.3-perf.1 release.
 
 ## Confirmed user requests
 
@@ -51,7 +51,7 @@ neutral geometry for the current topology.
   wave animation, elasticity or plane/corner transforms.
 
 Status: IMPLEMENTED locally in U2; see native Reset checkpoints in STATUS.md.
-Final integrated Mac/Windows candidate acceptance remains open.
+Final integrated Mac candidate acceptance remains open; Windows acceptance is deferred.
 
 ## Next update interface plan
 
@@ -219,10 +219,10 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U2 | Current-time Grid Positions reset | Core neutral-state tests; native build; AE exact-time key preservation and Undo/Redo validation | Core PASS; Mac diagnostic8a2e30c native current-time key preservation + static/animated Undo/Redo PASS; ordinary fb9ae4f reopen/current-time Reset/Undo8 checks PASS; Windows pending |
 | U3 | Simple English labels, single-row Grid Positions, equal popup widths | Preserve IDs/option values; native builds; AE panel inspection/old-project load; common popup width without clipping | Mac8a2e30c visible popups equal130 units, longest captions fully fit; inline Reset matches Fit Layer; ordinary fb9ae4f four visible popups PASS; 6314811 native wide/narrow Reset visibility and matching Fit Layer dimensions PASS; Dev44 expanded Wave Axis width/captions PASS; Windows pending |
 | U4 | Collapsible Wave Animation section | Group only changes UI; waves/keys/saved values and playback match; build + AE checks | Implemented; shared Rust tests PASS; Mac collapsed and Dev44 expanded five-control section inspected; Dev44 native full Wave/chain pixel smoke PASS; Windows AE NOT RUN |
-| U5 | Live range feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Immediate saved-field response implemented after user permits changed old appearance; retained keys/wire unchanged; numeric fractional/eased/wave drag PASS; Mac Dev8 old Radius keys, native drag/Undo/Redo, scripted response/save-reopen PASS; Dev12 scripted range-boundary response, annotation/export separation, drag/Undo/Redo/save-reopen PASS in bounded Mac fixture; Dev16 first-frame hidden-default regression fixed and native reverse drag/Undo/Redo/saved-copy reopen PASS; mouse scalar scrubbing USER-REPORTED PASS; broader range lifecycle pending |
-| U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; old-project migration pending |
+| U5 | Live range feedback and affected-range drawing | Editable deformation model defined first; unit numeric/serialization tests; real AE slider/drag/Undo checks | Immediate saved-field response implemented after user permits changed old appearance; retained keys/wire unchanged; numeric fractional/eased/wave drag PASS; Mac Dev8 old Radius keys, native drag/Undo/Redo, scripted response/save-reopen PASS; Dev12 scripted range-boundary response, annotation/export separation, drag/Undo/Redo/save-reopen PASS in bounded Mac fixture; Dev16 first-frame hidden-default regression fixed and native reverse drag/Undo/Redo/saved-copy reopen PASS; mouse scalar scrubbing USER-REPORTED PASS; Dev44 lifecycle plus immediate saved-key change/Undo PASS in scoped Mac fixtures |
+| U6 | Automatic spacing | Legacy/new-instance policy defined first; no crossings/degeneracy; old-project output retained | Implemented; 67 Rust tests PASS and Mac new-instance default verified; Mac Dev44 ordinary0.9.3 missing-stream/animated-spacing migration and save/reopen PASS in bounded neutral fixture; Windows deferred |
 | U7 | Optional rendered Show Grid, defaultoff | Superseding pixel-output contract; selected/unselected/playback/plane/layout lifecycle; defaultoff exact output; on appears in exports;8/16/32-bit alpha/origin/cancel | Shared CPU source implemented;84Rust/272Python + strict Clippy PASS; exact Dev20 Mac scoped default/switch/export/reopen/key/depth/plane/quality/Wave/deselected/playback/other-layer PASS; Dev44 ordinary Undo/Redo, deletion, save/reopen (including canceled binding), scoped camera/parent and60-frame MFR requested ON/OFF exact pixels PASS; Windows NOT_RUN |
-| U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Partially implemented helpers retained; paused until plugin behavior is complete |
+| U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Mac plugin checks precede resumed native installer work; protected snapshot receipts and exclusive fresh publication implemented, five native test targets PASS; frontend/package acceptance pending; Windows deferred |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
 | U10 | Integration, validation and final task reconciliation | All U1–U9 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
 
@@ -237,10 +237,11 @@ Native source changes require fresh builds/identity; runtime, performance,
 migration and installation checks are not inferred from old release/CI results.
 No significant block is complete merely because its code compiles.
 
-Platform scope confirmed by the user on 2026-10-03: this update targets both
-macOS Apple Silicon and Windows x64 together. Shared product behavior must match;
-platform builds, installation and host evidence are tracked separately. No
-macOS-only release substitutes for completion of the agreed two-platform scope.
+Platform sequencing superseded by the user on 2026-10-04: finish macOS Apple
+Silicon first, then return to Windows x64. Shared feature requirements remain;
+Windows build, host and installer checks are deferred and keep NOT RUN status.
+They do not block the separately accepted Mac delivery. Local-only authorization
+continues: no push, PR, remote CI, main change or release publication.
 
 ### Static choice controls — latest user correction, 2026-10-03
 
@@ -265,7 +266,7 @@ explicit count change. AE callback/Undo/save/reopen acceptance remains pending.
 A read-only Version row displays 0.9.4 Dev 1 (Dev 2 for diagnostics). Package,
 PiPL and About version derive from the same Cargo version.
 
-| U11 | Uniform density without deformation change | Real FFI tests for all counts, immutable grid/key bytes, saved layout roundtrip; native AE count-change, Undo and reopen | Source implemented; 73 Rust tests PASS; AE and Windows pending |
+| U11 | Uniform density without deformation change | Real FFI tests for all counts, immutable grid/key bytes, saved layout roundtrip; native AE count-change, Undo and reopen | Source implemented; Dev44 Mac animated7/6→11/9, Undo/Redo and save/reopen exact pixels/key metadata PASS; prior uniform guide/drag checks retained; Windows deferred |
 
 
 ### Scripted density checkpoint — 2026-10-03
@@ -394,3 +395,15 @@ Extended ACLs, links and unsupported object types are refused. Native fixture
 and read-only installed-bundle checks are recorded in STATUS.md. Coordinator
 tests use authentic pre-mutation snapshots; durable metadata and distribution
 authentication are still frontend obligations, not established by a SHA alone.
+
+
+### Mac-first completion checkpoint — 2026-10-04
+
+[Scoped closure evidence](update-094-mac-closure-checkpoint-2026-10-04.json) closes
+the observed Mac spacing migration, saved-field range response and animated
+density lifecycle scenarios on exact Dev44. It does not transfer those results
+to a newly built final artifact. Next U8 block: trusted native fixed-root/host/
+duplicate collector and staging, then user-facing Install/Restore and a real
+package cycle. The protected snapshots-v1 receipt and exclusive fresh-publication
+primitive preserve both trees and refuse unknown recovery. Their native fixture
+checks are not the final installer frontend or privileged installation proof.

@@ -6,8 +6,10 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active local update — rules8.0.0
 
-Priority: complete plugin behavior, validate both platforms, then finish
-installers. User corrected this order; U8 remains paused. Branch feat/next-update;
+Priority updated by the user on 2026-10-04: finish macOS first; return to
+Windows after Mac completion. Order: remaining Mac plugin acceptance, Mac
+installer/Restore, then exact integrated Mac candidate and local delivery.
+Windows obligations remain deferred, not accepted or removed. Branch feat/next-update;
 LOCAL ONLY: no push, PR, remote CI or publication authorized.
 
 Installed **0.9.4 Dev44**, source db230124cea1e7aba82c6ec35e37a842b6de5a64,
@@ -39,11 +41,12 @@ change. Live scalar feedback is USER-REPORTED PASS. Earlier native density and
 reverse-gesture evidence retains its exact source scope; see
 [feature backlog](feature-backlog.md) and dated checkpoints below.
 
-Remaining: expanded Wave native UI inspection (custom controls inaccessible to
-current Cua; composition-only helper cannot be widened without authorization),
-Windows build/runtime validation (no local Windows/MSVC host; remote publication
-not authorized), then installers/integration. Current update is incomplete;
-there is no whole-update, Windows, installer or release acceptance.
+Expanded Wave native UI inspection PASS on Dev44 after user expansion; five
+controls and common popup width verified. Legacy spacing/range and animated density have now passed the scoped Mac
+checks linked below. Remaining Mac work: finish native Install/Restore, build
+and validate the exact integrated Mac delivery. Windows build/runtime and its
+installer are deferred by the user. Current Mac delivery remains incomplete;
+there is no installer, Windows or release acceptance.
 
 ## Published macOS release
 
@@ -1049,3 +1052,41 @@ Static audit's one heuristic auth/rate-limit finding is a test mock at
 tests/test_target_ae_acceptance.py:54, not an HTTP route; adjudicated false
 positive. Audit does not assess release readiness. Logs stay in local
 outputs/update-094-phased-validation. No Rust/native source was changed.
+
+
+### Mac-first closure checks — 2026-10-04
+
+User explicitly deferred Windows until Mac completion; Windows obligations and
+NOT RUN records remain. Source tooling73373d9, installed ordinary Dev44/db230124,
+AE25.6x101 PID27219; loaded image UUID/path/hash PASS after controlled old/new
+compatibility cycle. New Dev44 remains installed; old bundles retained outside
+Adobe. No main/remote/CI/publication change.
+
+A freshly created ordinary0.9.3 (54c215b, without AutomaticSpacing) fixture has
+three animated spacing keys .013/4/25 and Radius keys1/3/6. Dev44 opens it with
+AutomaticSpacing=false, preserves all those keys, and renders the exact old
+neutral frame. Density4/4→9/8 and new-copy save/reopen retain pixels and policy.
+This is bounded migration evidence, not every legacy project or the published
+f611312 exact artifact. On an independently saved deformed animated fixture,
+7/6→11/9, native Cmd+Z/Cmd+Shift+Z and new-copy save/reopen preserve exact decoded
+pixels, four Grid key times and three Radius key times/values. Editing the old
+Radius key3→6 changes137570 decoded channels immediately; native Undo restores
+all recorded key metadata and exact pixels. Separate core tests cover encoded
+arbitrary data. [Evidence](update-094-mac-closure-checkpoint-2026-10-04.json).
+
+Installer work resumed AFTER these plugin checks. Native SnapshotReceipt stores
+immutable pre-mutation full-tree expectations in a private transaction directory;
+it contains no destinations. A fresh child process reads them and restores the
+original exchange; changed current bytes refuse recovery without deletion.
+FreshPublication shares the destination lock, requires absent destination and
+same-volume verified staging, writes durable snapshot expectations, then uses
+exclusive atomic rename. There is no overwrite/copy/delete fallback. SIGKILL
+before and after publication is classified using the retained pre-mutation
+receipt; collisions, links, lock contention and changed installations are
+refused. Five strict Release CTest targets PASS in disposable fixtures; both new targets
+also PASS under AddressSanitizer/UndefinedBehaviorSanitizer.
+The native frontend still must collect/authenticate fixed roots, metadata,
+duplicate/host state, stage and durably flush files, provide Install/Restore UI,
+and pass real privileged package acceptance. These are internal primitives, not
+a completed installer or a Mac release. Outputs/update-094-mac-installer-final
+retains the native test log. Windows installation remains deferred.

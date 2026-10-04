@@ -1,0 +1,261 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "scope": "Mac-first plugin acceptance checkpoint; no installer or release acceptance",
+  "candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-62c29c58fd2fcff5827d9146",
+    "commit": "db230124cea1e7aba82c6ec35e37a842b6de5a64",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "2b0d2ecd660078776bbb549ea318e540a98f7ec284975821f2a4109f2838d2ad",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "host": {
+    "ae_version": "25.6x101",
+    "pid": 27219,
+    "os": "macOS 26.6.2",
+    "architecture": "arm64"
+  },
+  "loaded_image_status": "PASS",
+  "spacing_migration": {
+    "status": "PASS",
+    "pixels_exact": {
+      "production-new-frame": true,
+      "production-new-density": true,
+      "production-new-reopened": true
+    },
+    "old_policy": {
+      "ae_version": "25.6x101",
+      "automatic_spacing": 0,
+      "spacing_value": 4,
+      "spacing_keys": [
+        [
+          0,
+          0.01300000026822
+        ],
+        [
+          0.2,
+          4
+        ],
+        [
+          1,
+          25
+        ]
+      ],
+      "grid_times": [],
+      "radius_keys": [
+        [
+          0,
+          1
+        ],
+        [
+          0.2,
+          3
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "columns": 4,
+      "rows": 4
+    },
+    "reopened": {
+      "ae_version": "25.6x101",
+      "automatic_spacing": 0,
+      "spacing_value": 4,
+      "spacing_keys": [
+        [
+          0,
+          0.01300000026822
+        ],
+        [
+          0.2,
+          4
+        ],
+        [
+          1,
+          25
+        ]
+      ],
+      "grid_times": [],
+      "radius_keys": [
+        [
+          0,
+          1
+        ],
+        [
+          0.2,
+          3
+        ],
+        [
+          1,
+          6
+        ]
+      ],
+      "columns": 9,
+      "rows": 8
+    }
+  },
+  "animated_density": {
+    "status": "PASS",
+    "checks": {
+      "animated-density_pixels": true,
+      "animated-density_keys": true,
+      "animated-undo_pixels": true,
+      "animated-undo_keys": true,
+      "animated-redo_pixels": true,
+      "animated-redo_keys": true,
+      "animated-reopened_pixels": true,
+      "animated-reopened_keys": true,
+      "undo_counts": true,
+      "redo_counts": true
+    }
+  },
+  "saved_field_radius": {
+    "status": "PASS",
+    "changed_channels": 137570,
+    "undo_exact": true,
+    "undo_key_metadata_exact": true
+  },
+  "old_candidate": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-bd6fc793fc4111918cb06880",
+    "commit": "54c215b901a5c8c50a336ef83f642ad5b48b8636",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "fa3ca1f5579187cd15612199ff71c8085835f1a41cbb352f689ea2c8a2eea959",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.3"
+  },
+  "evidence_root": "/Users/os3kov/Documents/Codex/2026-10-01/https-github-com-ios3kov-elasticgridfx-https/outputs/update-094-mac-final-legacy",
+  "evidence_sha256": {
+    "animated-baseline.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "animated-baseline.jsx": "083dc5da76e84473d8d0cba1c32ee4da5ac8091ffb07d7596cd87389de79ba6f",
+    "animated-baseline.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "animated-density-results.json": "2483dad016624008b38e5a124ef1eed03f34a6caabe520b79a0a5ba3b5ebd97a",
+    "animated-density-set.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-density-set.jsx": "4c8b1351b5c32d9b984aaacb86f3ccdc028c2cd9d41827055329c82782d85f75",
+    "animated-density.aep": "122f7b4b3987df2a52a930c423c89ca4ac5339b4116d5eef1c6d2d7ecbe0f1d5",
+    "animated-density.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-density.jsx": "5006b231621a20702407ffa58396276ede124415d1eceeab8a99d1d9e471e0cf",
+    "animated-density.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "animated-open.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "animated-open.jsx": "ad6446a6b949515219e1a4515b4f8c9fdab51920387d045ecbfcd66662df8148",
+    "animated-range-set.json": "881cb87435fa995f0be171542cb07314c69978a6d4dec900c18296c71c264efe",
+    "animated-range-set.jsx": "3a0559bb501e7f68a6043a18ec7da0f2fc47b4f888398685d4f028f52552db48",
+    "animated-range-undo.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-range-undo.jsx": "3f92939306f9e5c0fd4056815f35f5e997419b4ec87c9c979bbccd177eab6d66",
+    "animated-range-undo.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "animated-range.json": "881cb87435fa995f0be171542cb07314c69978a6d4dec900c18296c71c264efe",
+    "animated-range.jsx": "3f4b822d430538b858e586e1db285a8bc746f957a46d791d9608ce93043357ca",
+    "animated-range.png": "7f8e8185bfb0dcdffc293a425de05389b0d6696015b9d47f0d172a124bcf8872",
+    "animated-redo.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-redo.jsx": "47ec555b8ade8c4156c1287f5460e415d4939b488c3469b391735889a1260413",
+    "animated-redo.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "animated-reopened.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-reopened.jsx": "c7e622360282c59c36418397681f04c3f287dee05a970cab6a24767b7b22e646",
+    "animated-reopened.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "animated-save.json": "fffbaaf4a8aa6377b591c7a5cca1bfd22e7cb5beb372024a47b38f177c2b7e15",
+    "animated-save.jsx": "1917732ef56e33aec20f80b83bdccb1d47636cf8e95cbade4e32c2d486dce086",
+    "animated-undo.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "animated-undo.jsx": "55a92cedd45f8f21532637a64df17280a23f224982fdc8949218ec54163a08ed",
+    "animated-undo.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "baseline.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "baseline.jsx": "72b1ee33d75bce6d400521f0af47578553d43b5a2dee78e26836108eaffd3b46",
+    "baseline.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "close-old-research.jsx": "38b31541fd5df1d8a5c925d07c306c08af83951e6c129e79f4f5b76206969996",
+    "density-set.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "density-set.jsx": "0395f96c69057d17fc07114dbe1bb99aeace0d1953e9a68b1a9410ca439eb335",
+    "density.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "density.jsx": "72bf5a87533f2a8d3864bda6d2dd30ea8a95e63a845584bb1cf2ab7176bda7b6",
+    "density.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "genuine-baseline-failure.json": "93ac56b3119d69734f39ef32bdfceec814aa8b08b410f419d9309a3cd1f9192e",
+    "genuine-baseline.jsx": "016f5e6cd97abc09d72236db494cb377c754b0bae54ec0e3acab6d25d2279913",
+    "genuine-binding.json": "ec2a26c17e82ab18d50c5fc73d9ae387422fa9f3476582792a300b684d005705",
+    "genuine-binding.jsx": "c23c1a2d82e6459215ae209bc07800dea63f0466610fba112f920197d8a24e5e",
+    "genuine-density-set.jsx": "98fb7ef1029c064cbbb4dfc1ed27d0e08fd89a98d900055b2ce327adb978db2d",
+    "genuine-density.jsx": "28586cedca3b68cfa9724a9865ad86db13c6bf0060bd835dbf2b7b81fb7c8367",
+    "genuine-reopened.jsx": "cdcde56df5d61fc7402476293889ec65e7a35a1177c398db3c13d8a1d6b63eaf",
+    "genuine-save.jsx": "9f7aeabd91014c33d06f939158f4dfabc29eaf423ccb19a1a06a3a4538f41807",
+    "genuine-spacing-set.jsx": "637aede5be8d9e238d3402593cfd07163f94a70189a5a215b212794569796f70",
+    "genuine-spacing.jsx": "db9ed9a49c7d32c9848b0c560f3f06765ee4e863aae0ba4f6c885ba2f2459708",
+    "genuine-state.json": "e2b088a0f4fce44c555b2c9a819f882bbbb431a89f290731f294503157233acd",
+    "genuine-state.jsx": "646a68cb3e1f1e3cbb51c3e5ec7f4dd3d33b1f258ed5b1bffc3d2fd93ca0e968",
+    "inventory.json": "ad1d8d31ddda7f4d92d72976258afbd0ac5527a63c120bbf306e4e505ea41523",
+    "inventory.jsx": "db7c021d1cfe4c68450010367c21458bef897ffc2205533840e32974fea31c3f",
+    "migrated.aep": "565fd8cb62444ebe31e9bd33116a66cb419b1334e1762b5a466ad67337afb6a5",
+    "open.json": "66930c8d0cef74cbcaf208c6dfb8a64577b55ba921a91e4be7bcbda7c9055f32",
+    "open.jsx": "ba9b8d60b9ca23bbe9d0b738b934747aca88bf75ce23722580236c0f81c9d2d6",
+    "original-old-inventory.json": "593cec9632416aefcf3598b6dfb1c5bb8022755ddca7d7dc5fc17b8167ee86ff",
+    "original-old-inventory.jsx": "6ad2a64e88b53c5fb604a6ab072954f137c4614553dda697b35e1b39c9a5ba94",
+    "original-old-open.jsx": "48697fe64ddd3d436b2aeecd14ccad6cd7021f6ea9c1a1b5a755126daf646506",
+    "pre-automatic-open-failure.json": "75c14d61198e92f45289dca058b83b290e1ec9a7f73a76cbf7e14fae33d34e46",
+    "pre-automatic-open.jsx": "e925b96b75a94589a76a09bd0d129d31c6482e7ca79433693c17b3ffb4e1e829",
+    "pre-automatic-state.json": "605de24c212e288da17747f1417d40cd49212ae5da00ab941f345567b9940b8b",
+    "pre-automatic-state.jsx": "05272660ea0a71806a4e0d48935edfbd847da4cba4e449d01ee6796e931ef5d3",
+    "production-migrated.aep": "4d6a8b5fae1f95647486fe19149192e9aaafa1cc5bea051bbe11c46e6d53893e",
+    "production-new-density-set.json": "ab75a53758ad1744ce3545dd9994658f7e813d086e4cde43be5d23d5738394f1",
+    "production-new-density-set.jsx": "641f8c98431a0ab35aaea72cb80cfd1d40f44c421662c251cdbaec4d513682fc",
+    "production-new-density.json": "ab75a53758ad1744ce3545dd9994658f7e813d086e4cde43be5d23d5738394f1",
+    "production-new-density.jsx": "8256ebe711fbecde10cceea388cc3e5480d8debf5f130ab29ab6c80f3d0a48cf",
+    "production-new-density.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+    "production-new-frame.json": "9299e1bc6b7017df2d8ccfabdd7a3ebb347b11236dcb42bce2005d870941fe69",
+    "production-new-frame.jsx": "3c94ec6b49803f77c84aba08daa2d5fc09a7b8f46a2d9e3e802ec566f287d21d",
+    "production-new-frame.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+    "production-new-open.json": "9299e1bc6b7017df2d8ccfabdd7a3ebb347b11236dcb42bce2005d870941fe69",
+    "production-new-open.jsx": "8bf601f859897edd8a9c2cdeea0712b903a1211b8174dc863f386cf4d52f1e57",
+    "production-new-reopened.json": "ab75a53758ad1744ce3545dd9994658f7e813d086e4cde43be5d23d5738394f1",
+    "production-new-reopened.jsx": "44b79201eb58f39386c2c433448933ef447b1d84591c9efdedb318a48b4ddced",
+    "production-new-reopened.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+    "production-new-save.json": "ab75a53758ad1744ce3545dd9994658f7e813d086e4cde43be5d23d5738394f1",
+    "production-new-save.jsx": "a5169b815b70561174666635262b5444a1b1c36b62997ce2e888a62b0d512a53",
+    "production-old-close.jsx": "3d0950319db9604867a3fba4a57b00307c52cda949979f9eff60240d7c353f5d",
+    "production-old-create-failure.json": "a69ac8bf596701e5eb6ce50b6226db867c65685aad1814aa428b52b1e45d6bde",
+    "production-old-create.jsx": "d45e2556ffbdf969b2a90d460fc8a02e45b76fe627d50df3dc6f12dc0a7d53cc",
+    "production-old-create2-failure.json": "65eb2653c42e4f2c7911b3f3e61d9a051ca302f513361582aaa97bb0a2be1688",
+    "production-old-create2.jsx": "caae697f4079819fae538e0a5f6b290d2a774309f7cf1c98e2d3a6c5b6349137",
+    "production-old-finish.json": "f303b8ece1f611d1b69695cddf987a0d1c674bcda5d79b7d93843a862162dd31",
+    "production-old-finish.jsx": "45e90dad61e4f303f39cdab634fc0c9a266498a0b07b72ef1f55b79558b951cc",
+    "production-old-save.json": "bf9db658277035188137997aeb59a9688d83748e0c593f6395ec3773d9b2b2c5",
+    "production-old-save.jsx": "6706b40b3fbef385bababc1b98d260af5e7146fa26a33e4be77bb64e3d4af729",
+    "production-old-spacing.aep": "4f6e9c90f1f723adc63db7e40e50a1826161d0a65416cf07e80c2972a0b790a2",
+    "production-old-spacing.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+    "range-results.json": "96f681eed0af5bafdb2af6f8d9dac89acceb892c875125816f667474134a1955",
+    "reopened.json": "51a5fa0836ae30764710d9464a186c71b26ca51f71a08f25caedc4116efcce24",
+    "reopened.jsx": "c0e11bf930119baa411be0be6310abe1e2dc5be1d5c478d7db5ad5bdb66f3aa0",
+    "reopened.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "return-new-install.json": "1a6e5c74193cc4ff84651f4b2618f28594c961459d157b8539adcd123de96cab",
+    "save.json": "51a5fa0836ae30764710d9464a186c71b26ca51f71a08f25caedc4116efcce24",
+    "save.jsx": "2799080932c6eec21bddac0ea6f360c9436046c88254bb798b2b090861be24e5",
+    "spacing-results.json": "4f242eaa8b4ea28368bed606f6f03619cb8f706349e62034278e2e2c3d07fece",
+    "spacing-set.json": "51a5fa0836ae30764710d9464a186c71b26ca51f71a08f25caedc4116efcce24",
+    "spacing-set.jsx": "315ed79a3fc164374e490e592b35299fbeeaee6a926ac02dc377d053d5116bda",
+    "spacing.json": "51a5fa0836ae30764710d9464a186c71b26ca51f71a08f25caedc4116efcce24",
+    "spacing.jsx": "66475436589d5e3c63c5ed99ec540032a9bad2f6273d4c90e9170600d79aff8c",
+    "spacing.png": "6529fb5cdda0256337d5747795e6d862203cbc10fc61f54ede7e4f37ede1f40b",
+    "temporary-old-install.json": "a4ab42a40428374e86aba23979a32ff6f816068c4b32108074f12cc23a331404"
+  },
+  "limitations": [
+    "The migration fixture uses ordinary 0.9.3 checkpoint 54c215b, not the published f611312 release artifact.",
+    "Old spacing frame is a neutral geometry fixture; hidden legacy keys and policy are retained.",
+    "Animated deformed density checks retain four Grid key times and three Radius key values; arbitrary encoded Grid bytes are verified by independent core tests, not scripting.",
+    "Historical research plane v1 fixture was rejected by readiness guard; no render acceptance claimed.",
+    "Initial script wrong path, old label and item-count guard failures remain retained as harness failures.",
+    "No Windows, installer frontend, privileged installation or release PASS."
+  ]
+}
