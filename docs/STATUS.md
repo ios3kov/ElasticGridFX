@@ -4,17 +4,44 @@ Updated: 2026-10-04. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
-## Active local update — rules8.0.0
+## Active update — Mac and Windows, rules8.0.0
 
-Priority updated by the user on 2026-10-04: finish macOS first; return to
-Windows after Mac completion. Order: remaining Mac plugin acceptance, Mac
-installer/Restore, then exact integrated Mac candidate and local delivery.
-Windows obligations remain deferred, not accepted or removed. Branch feat/next-update;
-LOCAL ONLY: no push, PR, remote CI or publication authorized.
+Current scope: finish native Install/Restore delivery for both platforms, keeping
+accepted plugin bytes unchanged. Branch feat/next-update is published for the
+user-authorized Windows CI continuation; source fixes/docs on that branch are
+allowed. No main, PR, merge or release action is authorized by this continuation.
+The earlier local-only and Windows-deferred decisions were superseded by the
+user's later Windows implementation and specific branch/CI authorization.
 
-Installed **0.9.4 Dev44**, source db230124cea1e7aba82c6ec35e37a842b6de5a64,
-Build ID EGFX-62c29c58fd2fcff5827d9146. Exact loaded UUID/path/hash PASS.
-Shared source passes86Rust/272Python and strict all-target probe Clippy.
+Installed Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
+Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped
+pixel/key/save/reopen evidence recorded below; marketplace activation remains
+blocked on author SDK access. Windows: **0.9.4 Dev56**, source
+cbb7468b36e9b94b4c575b3de1c27863ebe8caf2, Build ID
+EGFX-376f97bdd493cd2fbce61edd, AEX SHA256
+669436b62a06baef0eba895e8e72b50f89e448ff396c24c43e16a2f93c15bd6c.
+Exact Windows build/24 CTest/86 Rust/Clippy/PiPL PASS at CI37189319759;
+all ten delivered manual checklist items USER-REPORTED PASS. Actual Windows
+OS/AE version and loaded identity were not captured. Broader MFR/aerender/
+controlled-host/migration release checks are not inferred from that report.
+Real speed measurement was explicitly excluded by the user; optimized shared
+CPU renderer/quality remain unchanged. See windows-update-parity-2026-10-04.md.
+
+U8 native app/exe implementation now exists. Mac exact Dev52 disposable-root
+frontend fixtures and five native coordinator CTest targets PASS; final Mac app
+built/signed/strict signature verification PASS from60fe49c. Visual capture
+returned a computer-use timeout; real administrator install/Restore NOT RUN.
+Windows native disposable-root fixtures and unchanged Dev56 fetch PASS at
+CI37201385419; executable compilation with warnings as errors PASS, but linker
+manifest conflict stopped packaging. Fix: request the same requireAdministrator
+level in linker-generated and explicit manifests; final inspection/packaging
+pending. Original failures remain FAIL. See native-installer-plan.md and newest
+U8 checkpoints below. Current delivery is a validation candidate, not a release.
+
+### Retained Mac Dev44 acceptance scope
+
+The following records remain bound to their original artifact and are not
+transferred to Dev52 or Windows without the separately stated evidence.
 
 Dev44 Mac AE25.6x101 acceptance PASS: ordinary binding/addition Undo/Redo;
 delete/Undo/Redo; corresponding frame pixels exact; saved initialized and
@@ -43,10 +70,9 @@ reverse-gesture evidence retains its exact source scope; see
 
 Expanded Wave native UI inspection PASS on Dev44 after user expansion; five
 controls and common popup width verified. Legacy spacing/range and animated density have now passed the scoped Mac
-checks linked below. Remaining Mac work: finish native Install/Restore, build
-and validate the exact integrated Mac delivery. Windows build/runtime and its
-installer are deferred by the user. Current Mac delivery remains incomplete;
-there is no installer, Windows or release acceptance.
+checks linked below. Remaining current work: finish native installer packaging and real administrator
+Install/Restore acceptance for both targets. Current accepted plugin and native
+fixture scope are stated above; a full release remains incomplete.
 
 ## Published macOS release
 
@@ -1313,3 +1339,13 @@ fields exact; Restore explicitly reapplies only that original permission set
 and verifies the resulting deterministic full snapshot. No unknown ACL policy
 is accepted and no system installer action has run. Native CI pending again;
 preceding failures remain FAIL. Diagnostics are only in disposable test code.
+
+
+Windows c7d60b6 CI37201385419: all disposable native installer fixtures PASS
+(including update/Restore/repeat, target tamper, backup ACL tamper, interrupted
+operation, blocked host, uppercase duplicate, pending, lock and reparse). Pinned
+Dev56 fetch PASS. /W4 /WX exe compilation PASS; linker failed due conflicting
+asInvoker/requireAdministrator manifest snippets. Fixed linker request to the
+same explicit requireAdministrator policy, never disabling UAC. Final PE manifest
+inspection remains pending. Latest Mac package is v2 from60fe49c (ordinary Dev52
+unchanged), ZIP SHA256 f364d64d80084afa7c1da908bb6ea11dd07429b198b18f32eebf6a7fc86b59e7.
