@@ -1191,3 +1191,18 @@ passes strict clang warnings including conversion warnings. These are explicitly
 not Win32/MSVC/Windows AE results. Windows-only null/worker UI guard test added
 to the existing Windows CTest build, still NOT RUN until that runner executes.
 Evidence: outputs/update-094-windows-parity. Benchmarks/speed tests not run.
+
+
+### Windows CI publication and Reset ABI correction — 2026-10-04
+
+User authorized sending feat/next-update for Windows CI after the local-only
+checkpoint. Published e5f4491; run37189091016 passed all24 Windows CTest targets
+(including native License null/worker guards) and packaging-tool tests, then
+failed Rust compilation: Grid Positions Reset continuation used isize while
+Windows SDK A_intptr_t binds i64. Replaced the private continuation state with
+the exact SDK ABI alias, including diagnostic builds. No stream/parameter or
+render changes. Three Reset regression tests pass locally; next exact-head
+Windows build pending. Evidence: outputs/update-094-windows-ci-e5f4491/job.log.
+Automatically triggered Mac run37189091025 was cancelled to avoid redundant
+benchmark work; this is not a passing Mac gate. Main/release and installed Mac
+payload unchanged; Windows AE runtime and broader U8/U10 obligations remain open.

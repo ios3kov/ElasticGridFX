@@ -1,6 +1,8 @@
 //! Topic-only arbitrary parameter UI. Never draws into rendered image pixels.
 use super::*;
 use ae::drawbot::{ColorRgba, PointF32, RectF32, TextAlignment, TextTruncation};
+// Use the SDK ABI type: Windows binds A_intptr_t as i64, Mac as isize.
+type Refcon = ae::sys::A_intptr_t;
 
 // Bounded test-only observations. Never enabled in the default product build;
 // records geometry/dispatch only, without project names or arbitrary payloads.
@@ -22,7 +24,7 @@ pub(crate) fn observe(event: &mut ae::EventExtra) {
             if entry.1 >= 40 { return; }
             entry.1 += 1;
             let point = event.screen_point();
-            let state: [isize;4] = std::array::from_fn(|i| event.continue_refcon(i));
+            let state: [Refcon;4] = std::array::from_fn(|i| event.continue_refcon(i));
             let _ = writeln!(entry.0, "{} point={:?} send={} last={} state={:?}",
                 label,point,event.send_drag(),event.last_time(),state);
             if label == "click" {
@@ -97,12 +99,12 @@ pub(crate) fn draw(event: &mut ae::EventExtra) -> Result<(), ae::Error> {
 // A drag continuation has its own event data. Capture the hit rectangle at
 // DO_CLICK instead of reading effect_win fields which the SDK only guarantees
 // for DO_CLICK/DRAW/ADJUST_CURSOR. Four integers, no retained host pointers.
-const RESET_GESTURE: isize = 0x45474658;
-fn capture(rect: RectF32) -> [isize; 4] {
-    [RESET_GESTURE, rect.left.to_bits() as isize, rect.top.to_bits() as isize,
-        ((rect.width as u32) << 16 | rect.height as u32) as isize]
+const RESET_GESTURE: Refcon = 0x45474658;
+fn capture(rect: RectF32) -> [Refcon; 4] {
+    [RESET_GESTURE, rect.left.to_bits() as Refcon, rect.top.to_bits() as Refcon,
+        ((rect.width as u32) << 16 | rect.height as u32) as Refcon]
 }
-fn restore(state: [isize; 4]) -> Option<RectF32> {
+fn restore(state: [Refcon; 4]) -> Option<RectF32> {
     if state[0] != RESET_GESTURE || state[1] < 0 || state[1] as u64 > u32::MAX as u64 ||
         state[2] < 0 || state[2] as u64 > u32::MAX as u64 ||
         state[3] <= 0 || state[3] as u64 > u32::MAX as u64 { return None; }
@@ -180,7 +182,7 @@ mod tests {
         assert!(!contains(retained, ae::Point { h: 110, v: 310 }));
         assert!(!contains(retained, ae::Point { h: 0, v: 316 }));
         for bad in [[0;4], [1, state[1], state[2], state[3]],
-            [RESET_GESTURE, f32::NAN.to_bits() as isize, state[2], state[3]],
+            [RESET_GESTURE, f32::NAN.to_bits() as Refcon, state[2], state[3]],
             [RESET_GESTURE, state[1], state[2], (131 << 16) | 16]] {
             assert!(restore(bad).is_none());
         }
