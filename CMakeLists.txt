@@ -42,6 +42,17 @@ function(elasticgrid_enable_test_assertions target)
 endfunction()
 
 if(ELASTICGRID_BUILD_TESTS)
+  add_executable(elasticgrid_license_dialog_tests tests/test_license_dialog.cpp)
+  target_include_directories(elasticgrid_license_dialog_tests PRIVATE src)
+  elasticgrid_enable_test_assertions(elasticgrid_license_dialog_tests)
+  add_test(NAME elasticgrid_license_dialog COMMAND elasticgrid_license_dialog_tests)
+  if(WIN32)
+    add_executable(elasticgrid_license_window_tests tests/test_license_window_win.cpp src/bridge/license_window_win.cpp)
+    target_link_libraries(elasticgrid_license_window_tests PRIVATE user32 shell32 ole32)
+    elasticgrid_enable_test_assertions(elasticgrid_license_window_tests)
+    add_test(NAME elasticgrid_license_window_guards COMMAND elasticgrid_license_window_tests)
+    set_tests_properties(elasticgrid_license_window_guards PROPERTIES TIMEOUT 10)
+  endif()
   if(APPLE)
     add_executable(elasticgrid_installer_exchange_tests
         tests/test_installer_exchange_macos.cpp installer/macos/AtomicExchange.cpp

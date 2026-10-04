@@ -481,3 +481,18 @@ Support browser destination remains unverified due to tooling failure. See
 licensing-integration-2026-10-04.md. No key entry/verification, device entitlement,
 marketplace adapter or activated status is fabricated. U11 as a whole remains
 open until provider integration and its acceptance, Windows remains deferred.
+
+
+### Windows resumption and optimization scope — latest decision, 2026-10-04
+
+User now requires all implemented Mac features on Windows and explicitly resumes
+Windows work for that scope, superseding the earlier sequencing deferral where
+applicable. User subsequently excluded real speed measurements: preserve the
+same CPU optimization/quality and check implementation, not benchmark speed.
+Windows License/About/Support bridge and native dialog registration implemented
+in source. Shared update features and CPU cache/SSE paths audited; see
+windows-update-parity-2026-10-04.md. Native MSVC/new AEX/Windows AE correctness
+checks remain NOT RUN, not completed by Mac tests or old AEX. Marketplace
+activation and installers remain open on both platforms. Local-only authority
+persists. U9/U10 retain non-performance correctness/build gates; Windows speed
+measurements are not required for this current user scope.

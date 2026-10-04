@@ -1168,3 +1168,26 @@ outputs/update-094-license-window-mac/verification.json. Dev48 is retained in a
 backup outside Adobe; Dev52 remains installed. Provider activation still BLOCKED
 on author materials; Windows deferred; native installer/frontend release work
 remains pending. No full commercial release/performance acceptance claim.
+
+
+### Windows parity resumed — 2026-10-04
+
+User resumed Windows update parity and excluded speed measurements. Implemented
+native Win32 License/About/Support/Close bridge, shared License... header and
+matching PiPL/GlobalSetup IDoDialog; no new license/backend or render mutation.
+CPU source audit confirms the same axis/row caches, exact-copy path, quality,
+SmartFX/MFR flags and x64 SSE availability. GCD/std::thread scheduling differs,
+Metal is not a Windows backend; no speed promise/benchmark required. Native
+Windows build/AE NOT RUN due to no Windows/MSVC/SDK here; old AEX not reusable.
+Installed Mac Dev52 unchanged; source development builds56/57/58/59. Local-only
+constraint persists. See windows-update-parity-2026-10-04.md; U8/U10/provider
+obligations preserved.
+
+
+Windows parity local verification: 86 Rust tests, strict Clippy, 15 host contract,
+23 About/build identity checks, 20 Windows packet tests and 7 selected Release
+core/dialog correctness targets PASS on Mac. The dialog wire-layout parser also
+passes strict clang warnings including conversion warnings. These are explicitly
+not Win32/MSVC/Windows AE results. Windows-only null/worker UI guard test added
+to the existing Windows CTest build, still NOT RUN until that runner executes.
+Evidence: outputs/update-094-windows-parity. Benchmarks/speed tests not run.

@@ -45,9 +45,9 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {55}
-        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {54}
-        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {53} else {52};
+    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {59}
+        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {58}
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {57} else {56};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
@@ -138,6 +138,15 @@ fn main() {
         println!("cargo:rustc-link-lib=framework=AppKit");
     }
 
+    if target_os == "windows" {
+        cc::Build::new().cpp(true).std("c++20")
+            .file(root.join("src/bridge/license_window_win.cpp"))
+            .warnings(true).compile("elasticgrid_license_ui");
+        println!("cargo:rustc-link-lib=user32");
+        println!("cargo:rustc-link-lib=shell32");
+        println!("cargo:rustc-link-lib=ole32");
+    }
+
     for path in [
         "src/core/GridModel.cpp",
         "src/core/GridModel.h",
@@ -160,6 +169,8 @@ fn main() {
         "src/bridge/elasticgrid_ffi.h",
         "src/bridge/hand_cursor.mm",
         "src/bridge/license_window.mm",
+        "src/bridge/license_window_win.cpp",
+        "src/bridge/license_dialog_template.h",
         "src/gpu/warp.metal",
         "src/gpu/metal_backend.mm",
     ] {
@@ -209,7 +220,7 @@ fn main() {
             OutFlags::DeepColorAware |
             OutFlags::SendUpdateParamsUI |
             OutFlags::CustomUI |
-            if target_os == "macos" { OutFlags::IDoDialog } else { OutFlags::empty() }
+            if target_os == "macos" || target_os == "windows" { OutFlags::IDoDialog } else { OutFlags::empty() }
         ),
         Property::AE_Effect_Global_OutFlags_2(out_flags2),
         Property::AE_Effect_Match_Name("com.elasticgrid.fx.warp"),

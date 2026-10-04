@@ -11,7 +11,7 @@ mod show_grid;
 mod range_feedback;
 mod control_layout;
 mod version_row;
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 mod license_window;
 #[cfg(feature="preview-overlay-probe")]
 mod preview_overlay_probe;
@@ -954,7 +954,7 @@ impl AdobePluginGlobal for Plugin {
         in_data: ae::InData,
         _: ae::OutData,
     ) -> Result<(), ae::Error> {
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", target_os = "windows"))]
         in_data.effect().set_options_button_name("License...")?;
         // UI order is independent of persistent IDs (derived from unchanged Params names).
         params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
@@ -1128,7 +1128,7 @@ impl AdobePluginGlobal for Plugin {
         self.lifecycle_probe.observe(&cmd, &in_data);
         match cmd {
             ae::Command::GlobalSetup => {
-                #[cfg(target_os = "macos")]
+                #[cfg(any(target_os = "macos", target_os = "windows"))]
                 out_data.set_out_flag(ae::OutFlags::IDoDialog, true);
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
                 // One noninteractive diagnostic per host setup, never per frame.

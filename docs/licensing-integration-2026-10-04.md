@@ -125,3 +125,15 @@ checks PASS. Evidence: outputs/update-094-license-window-mac/verification.json.
 This closes the bounded Mac independent-window implementation/checks; provider
 activation, caption switching, subscription/offline/transfer policy and Windows
 remain unimplemented/unverified. Installer obligations are not closed by U11.
+
+
+## Windows UI source implementation — superseding deferral
+
+User explicitly resumed Windows feature parity. Shared header registration,
+PiPL/GlobalSetup IDoDialog and dialog dispatcher now include Windows. Native
+Win32 DialogBoxIndirectParamW provides License/About/Support/Close, with Unicode
+controls, keyboard close/cancel, owned-thread/window checks and exception
+containment. Provider SDK integration is still blocked; native Windows MSVC
+compile/runtime remains NOT RUN here. Older statements about a Mac-only flag or
+Windows deferral above describe their historical checkpoints. See
+windows-update-parity-2026-10-04.md; no speed tests are requested by latest user.
