@@ -64,9 +64,9 @@ class HostContract(unittest.TestCase):
             self.assertIn(text, mapping)
 
     def test_hidden_arbitrary_layout_has_required_native_ui_flag(self):
-        self.assertIn('NO_ECW_UI', block('ControlLayout'))
-        self.assertIn('INVISIBLE', block('ControlLayout'))
-        self.assertIn('TOPIC', block('VersionRow'))
+        for name in ('ControlLayout', 'VersionRow'):
+            self.assertIn('NO_ECW_UI', block(name))
+            self.assertIn('INVISIBLE', block(name))
 
     def test_hidden_shape_controls_preserve_saved_streams_and_old_fallbacks(self):
         for name in ('Falloff', 'ElasticityStrength', 'StretchEasing', 'EasingDistance'):

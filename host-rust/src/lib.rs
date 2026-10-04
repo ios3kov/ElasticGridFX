@@ -1088,7 +1088,8 @@ impl AdobePluginGlobal for Plugin {
         version.set_default(version_row::Data::default())?;
         params.add_customized(Params::VersionRow, "Version", version, |param| {
             param.set_flags(ae::ParamFlag::CANNOT_TIME_VARY);
-            param.set_ui_flags(ae::ParamUIFlags::TOPIC); -1
+            // Keep its disk ID/data for existing projects; version is About-only.
+            param.set_ui_flags(ae::ParamUIFlags::INVISIBLE | ae::ParamUIFlags::NO_ECW_UI); -1
         })?;
 
         params.add_with_flags(Params::ShowGrid, "Show Grid", ae::CheckBoxDef::setup(|f| {

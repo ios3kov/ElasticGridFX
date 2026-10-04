@@ -254,6 +254,19 @@ AE handling of the new CANNOT_TIME_VARY flags is not assumed to preserve old
 output until verified. U3/U10 include this check before acceptance/release.
 
 
+### About-only version — user correction, 2026-10-04
+
+The user now requests version information only in About. Remove the visible
+Version row from Effect Controls on both platforms. This supersedes the earlier
+request for a visible parameter-panel version. Preserve VersionRow's disk ID,
+registration order, static flags and serialized u8 placeholder, hidden with
+INVISIBLE | NO_ECW_UI. Remove its custom drawing; do not delete or shift saved
+streams. About, bundle/package version and internal provenance remain intact.
+Scope is a small UI correction (Light / Development, then Validation). Verify
+stable parameter IDs/hidden arbitrary flags, About bytes, native compilation and
+an owned old-project reopen with unchanged output; inspect actual Mac panel.
+Windows runtime remains deferred; installation/publication authority unchanged.
+
 ### Density redistribution and version display — 0.9.4 Dev 1
 
 Changing Columns/Rows redistributes visible guides uniformly across the current

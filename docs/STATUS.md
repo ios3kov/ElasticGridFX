@@ -1090,3 +1090,14 @@ duplicate/host state, stage and durably flush files, provide Install/Restore UI,
 and pass real privileged package acceptance. These are internal primitives, not
 a completed installer or a Mac release. Outputs/update-094-mac-installer-final
 retains the native test log. Windows installation remains deferred.
+
+
+### Version visibility correction — 2026-10-04
+
+Latest user decision: version in About only, no Version row in Effect Controls.
+Common source now hides the existing VersionRow with INVISIBLE | NO_ECW_UI and
+removes custom drawing, retaining disk ID/order/u8 format and arbitrary dispatch.
+About continues to derive0.9.4 from Cargo; packaging/internal identity is retained.
+Development PiPL builds48/49/50/51 distinguish this update from installed Dev44.
+Source/native build and exact new Mac panel/reopen validation precede acceptance;
+installer obligations remain open. No Windows runtime or release claim.
