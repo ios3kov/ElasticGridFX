@@ -6,48 +6,44 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active local update — rules8.0.0
 
-Current priority: complete plugin behavior (U5 then U7), validate both platforms,
-then finish installers. User explicitly corrected this order; U8 work is paused.
-On2026-10-03 the user chose immediate new influence of existing Tension Radius
-animation. Old appearance may change at opening; preserve the original streams
-and keys. This supersedes the earlier preserve-initial-picture migration hold.
-Installed ordinary candidate is **0.9.4 Dev20** /3095983, Build ID
-EGFX-bf6ecdde379f0831915ad144. Exact loaded UUID/path/hash and visible Version
-PASS. User removed Show Grid's never-in-output requirement on2026-10-04.
-Show Grid is a static checkbox, defaultoff for new/legacy instances. Whenon,
-grid pixels appear in playback/export/downstream effects. Shared CPU code for
-Mac/Windows passes84Rust/272Python and strict all-target probe Clippy.
+Priority: complete plugin behavior, validate both platforms, then finish
+installers. User corrected this order; U8 remains paused. Branch feat/next-update;
+LOCAL ONLY: no push, PR, remote CI or publication authorized.
 
-Mac AE25.6 scoped acceptance PASS: defaultoff exact saved Dev16 picture;
-on/off reversible output; enabled save/reopen exact output; original4Grid keys
-(times0,.2,.5,1) and3Radius keys(0:1,.2:3,1:6) retained; new neutral second
-instance defaultoff exact output;24PNG exports at8/16/32bpc, fitted Four Corners
-and Layer Plane, both qualities; wave on/off; deselected and playback visibility;
-other selected layer does not hide the grid. Own dummy layer/source removed.
-[Exact Dev20 record](show-grid-mac-dev20-2026-10-04.json).
+Installed **0.9.4 Dev44**, source db230124cea1e7aba82c6ec35e37a842b6de5a64,
+Build ID EGFX-62c29c58fd2fcff5827d9146. Exact loaded UUID/path/hash PASS.
+Shared source passes86Rust/272Python and strict all-target probe Clippy.
 
-This closes the old additive-overlay feasibility blocker under the revised
-contract; broad3D/skewed-plane/multiple-instance/Undo lifecycle and Windows
-runtime remain open. Previous Dev16 first-default/reverse-drag checks retain
-their exact original scope; live scalar scrubbing is USER-REPORTED PASS.
-[Dev16 record](first-default-mac-dev16-2026-10-04.json).
+Dev44 Mac AE25.6x101 acceptance PASS: ordinary binding/addition Undo/Redo;
+delete/Undo/Redo; corresponding frame pixels exact; saved initialized and
+canceled-initialization states reopen correctly without idle reinstallation;
+original4Grid/3Radius keys and values1,3,6 retained. Addition still has two Undo
+actions (initialization, then effect addition); no single-action claim.
+MFR requested ON75/OFF: both60-frame aerender runs complete and all decoded
+frames match exactly. Actual concurrent callbacks are not instrumented; no speed
+claim. One default camera with a Y20 parent and one 3D layer passes grid on/off
+and exact restored-frame checks. [Dev44 record](update-094-dev44-lifecycle-2026-10-04.json).
 
-Branch feat/next-update; no push, PR or publication authorized. Current update
-remains incomplete across macOS/Windows. Previous verified test version was
-**0.9.4 Dev 1**, source35a9f3c, Build ID EGFX-2b54838b4bf29f6a45243d07.
-Exact loaded identity and saved-gesture pixel parity PASS on Mac AE25.6.
-Hidden shape/strength/smoothing controls and visible Version row confirmed.
-Owned-fixture density7/6, immutable pixels/three keys and save/reopen PASS.
-Native density drag/Undo/Redo/save-reopen passed on the preceding db97762
-candidate; evidence below retains that exact source scope. Show Grid's tested
-public PREVIEW flag produced no preview callbacks; the feature remains OPEN.
-Local source35a9f3c checks: default Rust74, probe Rust76, Python267 and strict
-Clippy PASS. Earlier JSX16-file results retain their original scope. U5 live
-old-deformation response, U7 Show Grid, U8 installers and Windows integration
-remain incomplete. No whole-update or Windows runtime acceptance is claimed.
-See the U0–U11 table in
-[feature backlog](feature-backlog.md). Installed candidates and checks below
-are development evidence, separate from the published release.
+Show Grid is static/defaultoff. User removed the never-in-output requirement;
+enabling it renders grid pixels in playback/export/downstream effects. Earlier
+Dev20 scoped defaultoff/switch/export/reopen/key/depth/plane/quality/Wave and
+unselected playback checks retain their exact artifact scope:
+[Dev20 Show Grid](show-grid-mac-dev20-2026-10-04.json).
+The initial Dev20 ordinary Undo failure is preserved in
+[its lifecycle record](update-094-dev20-lifecycle-2026-10-04.json), not relabeled.
+Dev44 fixes the observed redo loss without changing the rendering ABI.
+
+Legacy Tension Radius animation immediately influences old deformation under
+the user's choice. Original streams/keys are retained; initial appearance may
+change. Live scalar feedback is USER-REPORTED PASS. Earlier native density and
+reverse-gesture evidence retains its exact source scope; see
+[feature backlog](feature-backlog.md) and dated checkpoints below.
+
+Remaining: expanded Wave native UI inspection (custom controls inaccessible to
+current Cua; composition-only helper cannot be widened without authorization),
+Windows build/runtime validation (no local Windows/MSVC host; remote publication
+not authorized), then installers/integration. Current update is incomplete;
+there is no whole-update, Windows, installer or release acceptance.
 
 ## Published macOS release
 
@@ -993,7 +989,9 @@ Undo; foreign, partial and keyed streams keep the transaction conflict policy.
 No current-time mutation, expression edits from render/UpdateParamsUI, cached
 geometry or renderer fallback is introduced. The renderer ignores receipts.
 
-Acceptance is NOT RUN until native new/legacy creation, ordinary Undo/Redo,
-deletion/restore, save/reopen, first-frame and MFR evidence is recorded.
-Native sequence snapshot behavior remains a hypothesis. Mac installed Dev40
-safe deferred route; Dev44 source checks in progress. Windows remains NOT RUN.
+Native ordinary Undo/Redo, deletion/restore and save/reopen PASS on installed
+Dev44. The original animation streams and exact corresponding pixels survive;
+initialization remains its own Undo action. The versioned receipt roundtrip and
+legacy empty state are covered by source tests. MFR requested ON/OFF native comparison passes60 exact frames per run; actual
+parallel callback execution is not instrumented. Scoped camera/parent checks PASS; expanded Wave UI remains open. Windows NOT RUN.
+See [Dev44 evidence](update-094-dev44-lifecycle-2026-10-04.json).

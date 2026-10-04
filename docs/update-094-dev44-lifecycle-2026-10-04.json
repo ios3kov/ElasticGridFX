@@ -1,0 +1,225 @@
+{
+  "status": "PASS",
+  "checks": {
+    "original_keys": true,
+    "fully_initialized": true,
+    "undo_binding_preserved": true,
+    "redo_binding_restored": true,
+    "effect_counts": true,
+    "undo-full_exact": true,
+    "delete_exact": true,
+    "redo-delete_exact": true,
+    "undo-initialization_exact": true,
+    "redo-initialization_exact": true,
+    "redo-full_exact": true,
+    "undo-delete_exact": true
+  },
+  "states": {
+    "baseline": {
+      "bindings": [
+        5
+      ],
+      "effects": 1,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "stable-two": {
+      "bindings": [
+        5,
+        5
+      ],
+      "effects": 2,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "undo-initialization": {
+      "bindings": [
+        5,
+        0
+      ],
+      "effects": 2,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "redo-initialization": {
+      "bindings": [
+        5,
+        5
+      ],
+      "effects": 2,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "undo-full": {
+      "bindings": [
+        5
+      ],
+      "effects": 1,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "redo-full": {
+      "bindings": [
+        5,
+        5
+      ],
+      "effects": 2,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "delete": {
+      "bindings": [
+        5
+      ],
+      "effects": 1,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "undo-delete": {
+      "bindings": [
+        5,
+        5
+      ],
+      "effects": 2,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    },
+    "redo-delete": {
+      "bindings": [
+        5
+      ],
+      "effects": 1,
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "show_grid": 1,
+      "time": 0.2
+    }
+  },
+  "initialization_undo_actions": 2,
+  "note": "One action cancels deferred binding, the next cancels addition; no History shortcut used.",
+  "schema": 1,
+  "date": "2026-10-04",
+  "artifact": {
+    "version": "0.9.4 Dev44",
+    "source_commit": "db230124cea1e7aba82c6ec35e37a842b6de5a64",
+    "build_id": "EGFX-62c29c58fd2fcff5827d9146"
+  },
+  "host": "AE25.6x101 / macOS26.6.2 arm64",
+  "source_checks": {
+    "Rust": 86,
+    "Python": 272,
+    "strict_Clippy": "PASS"
+  },
+  "save_reopen": {
+    "status": "PASS",
+    "grid_keys": 4,
+    "radius_keys": 3,
+    "radius_values": [
+      1,
+      3,
+      6
+    ],
+    "pixels_exact": true
+  },
+  "loaded_identity": "PASS UUID/path/hash",
+  "mfr": {
+    "status": "PASS",
+    "frames_per_run": 60,
+    "mfr_cli": [
+      "ON 75",
+      "OFF 75"
+    ],
+    "mismatches": [],
+    "actual_parallel_callbacks": "NOT INSTRUMENTED",
+    "scope": "aerender completes with MFR requested ON/OFF and exact decoded PNG pixels; no concurrency or speed claim",
+    "project_sha256": "3ddd23a68137fe9bb53c4d8bca27aeef889be66c83b8daf969ee82f4cf7ac188",
+    "logs": {
+      "on.log": "a08a14b9126e607dc62166587ce1b41bac798fd7a78634dd02f79cb1ac533416",
+      "off.log": "9e87192c1de0c49b504d1356b5e40564b8730cb87791e42a3f0215f4122bd4ce"
+    }
+  },
+  "remaining": [
+    "expanded Wave native UI NOT RUN: custom control inaccessible through current Cua, gesture helper not authorized for this area",
+    "Windows build/runtime NOT RUN: no Windows host/MSVC locally; remote publication not authorized",
+    "installers WAIT_PLUGIN_VALIDATION"
+  ],
+  "evidence_folder": "outputs/update-094-dev44-mac",
+  "files_sha256": {
+    "lifecycle/baseline.json": "f3a0d2ff3d539c7b163d398e5aec5c5932c39b5d3fa07c65b8db0fbc66440314",
+    "lifecycle/baseline.jsx": "1761266de9309b293a35702bdbd6e924e78415f8edc30fedf830c52bfae7c404",
+    "lifecycle/baseline.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "lifecycle/delete.json": "f3a0d2ff3d539c7b163d398e5aec5c5932c39b5d3fa07c65b8db0fbc66440314",
+    "lifecycle/delete.jsx": "9e82af381a876502eab02560ebf175f531088b55707a57ad685657b7a01e1e8f",
+    "lifecycle/delete.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "lifecycle/receipt-reopen.aep": "f529e3b2013697a545206b8adc3bec7cbe1e8a4e4dbaf3de91e61f8778cb6eb6",
+    "lifecycle/redo-add.jsx": "da4adb7b200ae1d402a92db938bb9156a3df6ad3142243c597c1ea5959a12451",
+    "lifecycle/redo-delete.json": "f3a0d2ff3d539c7b163d398e5aec5c5932c39b5d3fa07c65b8db0fbc66440314",
+    "lifecycle/redo-delete.jsx": "89dfc828c11f9ec3bd4d3276a5754b21accb7d748c4b2f22367f68258980a2dc",
+    "lifecycle/redo-delete.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "lifecycle/redo-full.json": "022552b039e0df172868282e004eb61c2507724db12e73ed7870f3068e694efd",
+    "lifecycle/redo-full.jsx": "4eba8d79cf6b042696ffef4dfbbd804d10bef0b38a495ab3c3e3fd9debf52d1e",
+    "lifecycle/redo-full.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f",
+    "lifecycle/redo-initialization.json": "022552b039e0df172868282e004eb61c2507724db12e73ed7870f3068e694efd",
+    "lifecycle/redo-initialization.jsx": "1ece9d830a1dae9a50bcd162fdff6e9dbad9bf76b76217acc97b8472c189710b",
+    "lifecycle/redo-initialization.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f",
+    "lifecycle/reopen.json": "653fa50d6485795e84e4cc7aa3723a588fb75dd38101b39615f31fd8895562e6",
+    "lifecycle/reopen.jsx": "adcbd1d30327d686237d648d0c71cfeee15d130b762ca0559a4693567b848763",
+    "lifecycle/reopen.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "lifecycle/results.json": "cb0532f5b184796bee0bda4cfaf41e86883d23c1e7607baff7ab458b15190fbd",
+    "lifecycle/stable-two.json": "022552b039e0df172868282e004eb61c2507724db12e73ed7870f3068e694efd",
+    "lifecycle/stable-two.jsx": "1cf45628974bf8d2d9a3c2695bf733d5cf71cf8645baa4c4ce4d9b901de7eb59",
+    "lifecycle/stable-two.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f",
+    "lifecycle/two.json": "022552b039e0df172868282e004eb61c2507724db12e73ed7870f3068e694efd",
+    "lifecycle/two.jsx": "f9b1a441a67495ee7f48ed65fbe3069db20842b79a05a6095f22fd000c3c3c8b",
+    "lifecycle/two.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f",
+    "lifecycle/undo-add.jsx": "1f5379705af6b7b48e820ddf365ec5300bbc7c7edf1e91a3e574fbf6ebf97aec",
+    "lifecycle/undo-delete.json": "022552b039e0df172868282e004eb61c2507724db12e73ed7870f3068e694efd",
+    "lifecycle/undo-delete.jsx": "a34a7ac5277e8696788bac279d95c0966dc3fc58e2de8c8befc200c6b16f32fe",
+    "lifecycle/undo-delete.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f",
+    "lifecycle/undo-full.json": "f3a0d2ff3d539c7b163d398e5aec5c5932c39b5d3fa07c65b8db0fbc66440314",
+    "lifecycle/undo-full.jsx": "e512544967e7172928dfddd96c0dc508574f4ac4b48ff89995d72eab1c930273",
+    "lifecycle/undo-full.png": "c3177863a9553ebf4fd55f1c907110110fb24ed83f26508b6f0940272389b72c",
+    "lifecycle/undo-initialization.json": "4e246150076dc9d78567e00144bea15ca413a92d84ca49cd42e0fc500a1e23b8",
+    "lifecycle/undo-initialization.jsx": "6911a055f0347366b1567fd5ec814deae703908d1f2ffdd43a6cf2cbe8ddc0b0",
+    "lifecycle/undo-initialization.png": "14645e8c88c65c3b0e9121922be8f5b6a30a3373c1804e55cba78d4d44c71a1f"
+  },
+  "geometry": {
+    "status": "PASS",
+    "camera_parent_grid_changes_pixels": true,
+    "restored_exact": true,
+    "state": {
+      "grid_keys": 4,
+      "radius_keys": 3,
+      "layers": 1,
+      "items": 2
+    },
+    "scope": "one owned 3D layer, Y20 parent, default camera; no arbitrary geometry certification"
+  },
+  "canceled_initialization_save_reopen": {
+    "status": "PASS",
+    "bindings_after_idle": [
+      5,
+      0
+    ],
+    "effects": 2,
+    "grid_keys": 4,
+    "radius_keys": 3,
+    "evidence_folder": "outputs/update-094-dev44-mac/canceled-reopen"
+  }
+}
