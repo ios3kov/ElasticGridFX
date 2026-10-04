@@ -83,6 +83,17 @@ std::wstring runNative(const InstallEnvironment& e,bool restore){
     need(pending.empty(),"An interrupted installation was found. Choose Restore before another installation.");need(payload::count==1,"Invalid Windows payload layout.");const auto& f=payload::files[0];std::vector<unsigned char> embedded(f.bytes,f.bytes+f.size);need(sha(embedded)==f.sha256,"Embedded payload checksum failed.");if(present && identity(e.active/target)==payload::buildId){need(snapshot(e.active/target).hash==f.sha256,"Installed identity has different bytes; preserved.");return L"This version is already installed.";}
     GUID uuid{};need(CoCreateGuid(&uuid)==S_OK,"Cannot allocate transaction.");wchar_t guid[40];need(StringFromGUID2(uuid,guid,40)>0,"Cannot format transaction.");FILETIME time{};GetSystemTimeAsFileTime(&time);auto ticks=(static_cast<unsigned long long>(time.dwHighDateTime)<<32)|time.dwLowDateTime;auto tx=e.backups/(std::to_wstring(ticks)+L"-"+guid);secure(tx);write(tx/L"staged.aex",f.bytes,f.size);auto candidate=snapshot(tx/L"staged.aex");need(candidate.hash==f.sha256 && identity(tx/L"staged.aex")==payload::buildId,"Wrong staged candidate.");Receipt r{present,present?snapshot(e.active/target):Snapshot{},candidate};auto text=std::string("FSTR-WINDOWS-1\n")+(present?"1\n":"0\n")+encode(r.candidate)+(present?encode(r.old):"");write(tx/L"prepared",text.data(),text.size());environment(e,present);need(snapshot(tx/L"staged.aex")==candidate && (!present || snapshot(e.active/target)==r.old),"Payload changed before publication; retained for recovery.");
     bool ok=present?ReplaceFileW((e.active/target).c_str(),(tx/L"staged.aex").c_str(),(tx/L"previous.aex").c_str(),0,nullptr,nullptr)!=0:MoveFileExW((tx/L"staged.aex").c_str(),(e.active/target).c_str(),MOVEFILE_WRITE_THROUGH)!=0;
-    need(ok,"Publication incomplete. Transaction retained; choose Restore for inspection. Partial ReplaceFile failures may require manual recovery.");environment(e,true);auto post=snapshot(e.active/target);need(post.hash==f.sha256 && post.volume==candidate.volume && post.high==candidate.high && post.low==candidate.low && (!present || snapshot(tx/L"previous.aex")==r.old),"Post-install verification failed; files retained.");text=encode(post);write(tx/L"published",text.data(),text.size());mark(tx,L"installed");return present?L"Installed. Previous version saved in Backups.":L"Installed. No previous version was present.";
+    need(ok,"Publication incomplete. Transaction retained; choose Restore for inspection. Partial ReplaceFile failures may require manual recovery.");environment(e,true);auto post=snapshot(e.active/target);need(post.hash==f.sha256,"Post-install bytes differ; files retained.");
+    need(post.volume==candidate.volume && post.high==candidate.high && post.low==candidate.low,"Post-install file identity differs; files retained.");
+    if(present){auto old=snapshot(tx/L"previous.aex");if(!(old==r.old)){
+        std::string reason="Backup verification differs:";
+        if(old.volume!=r.old.volume || old.high!=r.old.high || old.low!=r.old.low)reason+=" file identity";
+        if(old.hash!=r.old.hash || old.size!=r.old.size)reason+=" bytes";
+        if(old.attributes!=r.old.attributes)reason+=" attributes";
+        if(CompareFileTime(&old.created,&r.old.created)!=0)reason+=" creation time";
+        if(CompareFileTime(&old.modified,&r.old.modified)!=0)reason+=" write time";
+        if(old.acl!=r.old.acl)reason+=" access rules";
+        throw std::runtime_error(reason+". Both versions retained.");}}
+    text=encode(post);write(tx/L"published",text.data(),text.size());mark(tx,L"installed");return present?L"Installed. Previous version saved in Backups.":L"Installed. No previous version was present.";
 }
 }
