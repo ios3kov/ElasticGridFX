@@ -8,12 +8,20 @@
 #include <aclapi.h>
 namespace fs=std::filesystem;
 using namespace fstr::installer;
+fs::path fixtureRoot;
+void dumpSecurity(const fs::path& p){
+    PSECURITY_DESCRIPTOR descriptor=nullptr;
+    auto error=GetNamedSecurityInfoW(const_cast<wchar_t*>(p.c_str()),SE_FILE_OBJECT,OWNER_SECURITY_INFORMATION|GROUP_SECURITY_INFORMATION|DACL_SECURITY_INFORMATION,nullptr,nullptr,nullptr,nullptr,&descriptor);
+    if(error!=ERROR_SUCCESS)return;
+    LPWSTR text=nullptr;if(ConvertSecurityDescriptorToStringSecurityDescriptorW(descriptor,SDDL_REVISION_1,OWNER_SECURITY_INFORMATION|GROUP_SECURITY_INFORMATION|DACL_SECURITY_INFORMATION,&text,nullptr)){std::wcout<<p.filename().wstring()<<L": "<<text<<std::endl;LocalFree(text);}LocalFree(descriptor);
+}
+
 template<class F> void refuses(F f){bool failed=false;try{f();}catch(const std::exception& e){failed=true;std::cout<<"Refused: "<<e.what()<<'\n';}assert(failed);}
 void previous(const fs::path& p){fs::create_directories(p.parent_path());std::ofstream f(p,std::ios::binary);f<<"MZ com.elasticgrid.fx.warp ElasticGridBuildID=EGFX-222222222222222222222222";}
 std::string bytes(const fs::path& p){std::ifstream f(p,std::ios::binary);return {std::istreambuf_iterator<char>(f),std::istreambuf_iterator<char>()};}
 int fixtureMain(){
     std::cout<<std::unitbuf;
-    wchar_t temp[MAX_PATH];assert(GetTempPathW(MAX_PATH,temp));GUID id{};assert(CoCreateGuid(&id)==S_OK);wchar_t guid[40];assert(StringFromGUID2(id,guid,40));fs::path root=fs::path(temp)/(std::wstring(L"egfx-native-installer-")+guid);fs::create_directory(root);
+    wchar_t temp[MAX_PATH];assert(GetTempPathW(MAX_PATH,temp));GUID id{};assert(CoCreateGuid(&id)==S_OK);wchar_t guid[40];assert(StringFromGUID2(id,guid,40));fs::path root=fs::path(temp)/(std::wstring(L"egfx-native-installer-")+guid);fs::create_directory(root);fixtureRoot=root;
     auto make=[&](const wchar_t* name){std::wcout<<L"Fixture: "<<name<<std::endl;auto p=root/name;fs::create_directories(p/L"scan");return InstallEnvironment{p/L"scan/FSTR FX",p/L"Backups",{p/L"scan"},[]{}};};
     {
         auto e=make(L"fresh");assert(runNative(e,false).starts_with(L"Installed."));auto before=bytes(e.active/L"FSTR Stretch.aex");assert(runNative(e,false)==L"This version is already installed.");assert(runNative(e,true).starts_with(L"No previous version"));assert(bytes(e.active/L"FSTR Stretch.aex")==before);
@@ -50,4 +58,10 @@ int fixtureMain(){
     }
     std::cout<<"Native Windows installer fixture checks PASS; retained at "<<root<<'\n';return 0;
 }
-int main(){try{return fixtureMain();}catch(const std::exception& e){std::cerr<<"Native fixture FAIL: "<<e.what()<<std::endl;return 1;}}
+int main(){try{return fixtureMain();}catch(const std::exception& e){std::cerr<<"Native fixture FAIL: "<<e.what()<<std::endl;
+    // Diagnostics are compiled into this disposable fixture executable only.
+    auto backups=fixtureRoot/L"update/Backups";if(fs::exists(backups))for(const auto& tx:fs::directory_iterator(backups)){
+        auto prepared=tx.path()/L"prepared";if(fs::exists(prepared))std::cout<<"Prepared fixture: "<<bytes(prepared)<<std::endl;
+        dumpSecurity(tx.path()/L"previous.aex");
+    }
+    dumpSecurity(fixtureRoot/L"update/scan/FSTR FX/FSTR Stretch.aex");return 1;}}
