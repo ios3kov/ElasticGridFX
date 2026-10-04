@@ -1097,7 +1097,21 @@ retains the native test log. Windows installation remains deferred.
 Latest user decision: version in About only, no Version row in Effect Controls.
 Common source now hides the existing VersionRow with INVISIBLE | NO_ECW_UI and
 removes custom drawing, retaining disk ID/order/u8 format and arbitrary dispatch.
-About continues to derive0.9.4 from Cargo; packaging/internal identity is retained.
-Development PiPL builds48/49/50/51 distinguish this update from installed Dev44.
+About continues to derive 0.9.4 from Cargo; packaging/internal identity is retained.
+Development PiPL builds 48/49/50/51 distinguish this update from installed Dev44.
 Source/native build and exact new Mac panel/reopen validation precede acceptance;
 installer obligations remain open. No Windows runtime or release claim.
+
+
+About-only correction is now installed on Mac (ordinary Dev48), source
+bfe4036e9baa201fc1e24dcf3fb7f8a02e568429, build
+EGFX-7f95d683e74ad94347c4e1ec. AE PID35685 loaded its exact UUID/path and
+payload hash. Native Effect Controls screenshot confirms no Version row.
+The saved animated-density fixture opens unchanged; its frame and all recorded
+animation times/values, density and spacing match Dev44, including save/reopen.
+15 host contract checks, 23 build identity/About checks, 86 Rust tests and strict
+Clippy PASS; signed package verification PASS. About generation and command are
+preserved; the native About dialog itself was not opened. Evidence:
+outputs/update-094-about-only-mac/verification.json. This supersedes Dev44 as the
+installed local candidate; previous payload remains backed up outside Adobe.
+Installer/frontend/package obligations and Windows deferral remain unchanged.
