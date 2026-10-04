@@ -1154,3 +1154,17 @@ remains BLOCKED on author materials; native window validation pending.
 Development PiPL builds52/53/54/55 distinguish the new UI candidate. Host contract
 15 and About/build identity23 tests PASS; cargo check PASS. Mac runtime validation
 and signed candidate identity must precede installed/accepted claims.
+
+
+Independent Mac License UI is now installed as ordinary Dev52 source740dbaa,
+build EGFX-01242dd7b423e5aa1384abae. Exact loaded identity PASS; native header
+License... beside Reset, click/open, About0.9.4/return and Close PASS in AE25.6.
+Support click processed without failure alert; browser destination verification
+is incomplete (browser policy-loader error, unrelated subsequent Chrome page).
+UI invocation causes AE's ordinary DO_DIALOG dirty mark; all recorded key/value
+state and pixels remain unchanged, including save/reopen. Rust86 + strict Clippy,
+host contract15 and About/build identity23 PASS. Evidence:
+outputs/update-094-license-window-mac/verification.json. Dev48 is retained in a
+backup outside Adobe; Dev52 remains installed. Provider activation still BLOCKED
+on author materials; Windows deferred; native installer/frontend release work
+remains pending. No full commercial release/performance acceptance claim.

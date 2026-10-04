@@ -273,7 +273,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Mac plugin checks precede resumed native installer work; protected snapshot receipts and exclusive fresh publication implemented, five native test targets PASS; frontend/package acceptance pending; Windows deferred |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
 | U10 | Integration, validation and final task reconciliation | All U1–U9 and U11 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
-| U11 | Commercial activation and license management | Select channel/policy; verify native Activate/License entry, About, key/restart/offline/transfer/failure flows and render/MFR isolation | RESEARCH STARTED; header naming API verified; aescripts + Plugin Play selected; provider SDKs/policy pending; native/runtime NOT RUN; Mac first, Windows deferred |
+| U11 | Commercial activation and license management | Select channel/policy; verify native Activate/License entry, About, key/restart/offline/transfer/failure flows and render/MFR isolation | Independent Mac License/About UI IMPLEMENTED; Dev52 native entry/open/About/return/Close and scoped pixel/key reopen PASS; Support destination verification incomplete; aescripts + Plugin Play activation BLOCKED on SDKs/policy; Windows deferred |
 
 The user removed U7 export/cache exclusion on2026-10-04: optional rendered grid
 pixels are now authorized. The old additive-only research is historical for its
@@ -469,3 +469,15 @@ duplicate collector and staging, then user-facing Install/Restore and a real
 package cycle. The protected snapshots-v1 receipt and exclusive fresh-publication
 primitive preserve both trees and refuse unknown recovery. Their native fixture
 checks are not the final installer frontend or privileged installation proof.
+
+
+### U11 independent UI checkpoint
+
+The user authorized independent UI before vendor SDK availability. Mac Dev52
+provides a stable native License... entry next to global Reset with a truthful
+provider-not-connected status, About/version and support action. Native bounded
+open/About/return/Close and old animated fixture pixel/key save/reopen PASS.
+Support browser destination remains unverified due to tooling failure. See
+licensing-integration-2026-10-04.md. No key entry/verification, device entitlement,
+marketplace adapter or activated status is fabricated. U11 as a whole remains
+open until provider integration and its acceptance, Windows remains deferred.

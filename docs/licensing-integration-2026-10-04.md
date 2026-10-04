@@ -106,3 +106,22 @@ and the Rust entry skips render-engine UI. No new third-party dependency, HTTP
 request, credential storage or render callback work. Windows dialog remains
 deferred and does not gain the Mac-only flag. Native host validation follows
 compilation; neither source support nor a build is host acceptance.
+
+
+## Exact Mac UI acceptance checkpoint
+
+Ordinary Dev52 source740dbaa, build EGFX-01242dd7b423e5aa1384abae installed and
+its loaded UUID/path verified in AE25.6. Native License... appears next to global
+Reset. Clicking it opens the independent window; About shows0.9.4 and correct
+copyright, OK returns to License, Close returns to AE. Support click was processed
+without an openURL-failure alert; browser destination verification remains
+incomplete due to browser policy-loader failure and an unrelated later Chrome
+page observation. Do not report full Support destination verification PASS.
+AE marks the project dirty after DO_DIALOG; no project stream mutation was
+introduced. Recorded keys/density/spacing and exact frame match Dev48 before and
+after UI and after saving/reopening a separate test copy. Rust86, Clippy with
+warnings denied, host contract15, About/build identity23 and signed payload
+checks PASS. Evidence: outputs/update-094-license-window-mac/verification.json.
+This closes the bounded Mac independent-window implementation/checks; provider
+activation, caption switching, subscription/offline/transfer policy and Windows
+remain unimplemented/unverified. Installer obligations are not closed by U11.
