@@ -1286,3 +1286,19 @@ COM declarations), before native fixture execution. Corrected path helper naming
 explicit COM header and Unicode native UI declarations; next run pending.
 Unnecessary plugin rebuild/Mac speed workflows cancelled, unchanged accepted
 Dev56 is the package payload. Edge sampling CTest also PASS on current Mac tree.
+
+
+U8 Windows follow-up: b0ccf24 compile PASS but fixture failed before useful
+exception reporting. 8bccb2e fixed exclusive-handle security inspection; fresh
+install/idempotence PASS, replacement failed backup metadata verification.
+f27bb36 CI37200139164 confirms access rules alone differ after NTFS backup
+rename; original file identity, bytes, attributes and times matched. Automatic
+review rejected a broad ACL comparison proposal, which was not applied. Current
+implementation instead compares owner/group and exact preplanned DACL alternatives
+(original or verified staged protected-parent DACL), independently requiring
+trusted write principals. It binds the retained full snapshot and requires exact
+original full snapshot after Restore; backup-ACL tamper fixture added. Next CI
+pending, no administrator Windows installation claim. See native-installer-plan.
+Native Edge Behavior demonstration produces three distinct outputs for the same
+fixture: outputs/edge-behavior-example/comparison.png (left Clamp, center Wrap,
+right Mirror). This is shared PlaneRenderer evidence, not AE popup runtime proof.

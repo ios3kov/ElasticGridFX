@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <sddl.h>
+#include <aclapi.h>
 namespace fs=std::filesystem;
 using namespace fstr::installer;
 template<class F> void refuses(F f){bool failed=false;try{f();}catch(const std::exception& e){failed=true;std::cout<<"Refused: "<<e.what()<<'\n';}assert(failed);}
@@ -18,6 +20,12 @@ int fixtureMain(){
     }
     {
         auto e=make(L"update");previous(e.active/L"FSTR Stretch.aex");auto before=bytes(e.active/L"FSTR Stretch.aex");assert(runNative(e,false).starts_with(L"Installed."));assert(bytes(e.active/L"FSTR Stretch.aex")!=before);assert(runNative(e,true).starts_with(L"Previous version restored"));assert(bytes(e.active/L"FSTR Stretch.aex")==before);assert(runNative(e,false).starts_with(L"Installed."));std::ofstream(e.active/L"FSTR Stretch.aex",std::ios::app)<<"tamper";refuses([&]{runNative(e,true);});
+    }
+    {
+        auto e=make(L"backup-acl");previous(e.active/L"FSTR Stretch.aex");assert(runNative(e,false).starts_with(L"Installed."));auto installed=bytes(e.active/L"FSTR Stretch.aex");auto tx=fs::directory_iterator(e.backups)->path();
+        PSECURITY_DESCRIPTOR descriptor=nullptr;assert(ConvertStringSecurityDescriptorToSecurityDescriptorW(L"D:P(A;FA;;;SY)(A;FA;;;BA)",SDDL_REVISION_1,&descriptor,nullptr));PACL acl=nullptr;BOOL present=FALSE,defaulted=FALSE;assert(GetSecurityDescriptorDacl(descriptor,&present,&acl,&defaulted) && present);
+        auto file=tx/L"previous.aex";assert(SetNamedSecurityInfoW(const_cast<wchar_t*>(file.c_str()),SE_FILE_OBJECT,DACL_SECURITY_INFORMATION|PROTECTED_DACL_SECURITY_INFORMATION,nullptr,nullptr,acl,nullptr)==ERROR_SUCCESS);LocalFree(descriptor);
+        refuses([&]{runNative(e,true);});assert(bytes(e.active/L"FSTR Stretch.aex")==installed);
     }
     {
         auto e=make(L"interrupted-post-publication");previous(e.active/L"FSTR Stretch.aex");auto before=bytes(e.active/L"FSTR Stretch.aex");assert(runNative(e,false).starts_with(L"Installed."));auto tx=fs::directory_iterator(e.backups)->path();assert(fs::remove(tx/L"installed"));refuses([&]{runNative(e,false);});assert(runNative(e,true).starts_with(L"Previous version restored"));assert(bytes(e.active/L"FSTR Stretch.aex")==before);
