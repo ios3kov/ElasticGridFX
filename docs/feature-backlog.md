@@ -496,3 +496,14 @@ checks remain NOT RUN, not completed by Mac tests or old AEX. Marketplace
 activation and installers remain open on both platforms. Local-only authority
 persists. U9/U10 retain non-performance correctness/build gates; Windows speed
 measurements are not required for this current user scope.
+
+
+### U8 native frontend checkpoint — 2026-10-04
+
+Native Mac app / Windows exe with Install and Restore implemented locally;
+unchanged accepted candidate bytes are embedded. See native-installer-plan.md
+and STATUS.md for acceptance and evidence. Standard Windows root is x64
+ProgramFiles/Adobe/Common/Plug-ins/7.0/MediaCore, superseding CommonProgramFiles.
+Mac isolated fixtures and payload checks are passing; Windows MSVC/package and
+real administrator installation/Restore acceptance remain pending. All prior
+U0–U11 requirements, marketplace dependency and release boundaries are retained.

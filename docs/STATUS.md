@@ -1244,3 +1244,32 @@ Evidence: outputs/FSTR-Stretch-0.9.4-Windows-Dev56/user-acceptance-2026-10-04.js
 Native installers/update backup workflow and real marketplace SDK activation
 remain open; full U10/release reconciliation still required. No merge/release
 authority follows from this acceptance; main and installed Mac unchanged.
+
+
+### U8 native frontends — in development 2026-10-04
+
+User requested native Install/Restore for both targets after Dev56's ten-item
+manual acceptance. Implemented fixed-root Mac app and Windows executable with
+embedded unchanged accepted payloads (Mac Dev52 EGFX-01242dd7b423e5aa1384abae,
+Windows Dev56 EGFX-376f97bdd493cd2fbce61edd). Installer source identity is separate
+from plugin source identity; no plugin rebuild or speed measurement is required.
+See native-installer-plan.md for U8.1–U8.6 acceptance and failure boundaries.
+
+Local payload/decision Python checks:9 PASS. Mac arm64 frontend compiles with
+warnings as errors; native disposable-root fixtures exercise exact signed Dev52
+and retained Dev48, fresh/idempotent/update/restore, tampering, blocked hosts,
+duplicates, links and incomplete transactions. Isolated roots preserve evidence;
+no installed Adobe payload was changed by these checks. Expanded interrupted
+publication/locking cases also PASS, as do the five native Mac core CTest
+targets. Final package checks remain in progress. Static code
+scanner reports one existing heuristic in test_target_ae_acceptance.py (an
+acceptance fixture, not an authentication endpoint); no new installer finding.
+Scanner output is not release or privileged-executor certification.
+
+Windows native MSVC/runtime fixtures/package and real administrator Install/
+Restore acceptance on both platforms remain NOT RUN at this checkpoint. Full
+release, marketplace SDK activation, main/merge authority remain separate.
+Windows native installation root corrected to x64 ProgramFiles/Adobe/Common;
+earlier CommonProgramFiles note is superseded, see plan primary references.
+Evidence: outputs/native-installer-development/. Next: finish native checks,
+package Mac app, execute Windows installer CI on the authorized feature branch.

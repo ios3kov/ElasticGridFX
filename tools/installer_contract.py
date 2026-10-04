@@ -8,7 +8,7 @@ import re
 
 TARGETS = {
     'macos-arm64': 'Library/Application Support/Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/FSTR Stretch.plugin',
-    'windows-x64': 'Adobe/Plug-ins/7.0/MediaCore/FSTR FX/FSTR Stretch.aex',
+    'windows-x64': 'Adobe/Common/Plug-ins/7.0/MediaCore/FSTR FX/FSTR Stretch.aex',
 }
 TRIPLES = {'macos-arm64': 'aarch64-apple-darwin', 'windows-x64': 'x86_64-pc-windows-msvc'}
 BACKUP_ROOTS = {

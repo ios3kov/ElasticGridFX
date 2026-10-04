@@ -1,0 +1,80 @@
+name: Native installer validation
+on:
+  push:
+    branches: [feat/next-update]
+    paths:
+      - 'installer/**'
+      - 'tools/*installer*'
+      - 'tests/*installer*'
+      - 'CMakeLists.txt'
+      - '.github/workflows/native-installers.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: native-installer-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows-installer:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.12'
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+        with:
+          arch: x64
+      - name: Embedded-payload and decision checks
+        run: python -m unittest tests.test_installer_payload tests.test_installer_contract -v
+      - name: Build and execute isolated native Windows installer fixtures
+        run: |
+          cmake -S . -B build-installer -A x64 -DELASTICGRID_BUILD_BENCH=OFF
+          cmake --build build-installer --config Release --target elasticgrid_native_installer_tests
+          ctest --test-dir build-installer -C Release -R '^elasticgrid_native_installer$' --output-on-failure
+      - name: Fetch unchanged user-accepted Dev56 payload
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python tools/fetch_installer_candidate.py --out dist/installer-candidate
+      - name: Build native Install Restore executable
+        run: >-
+          python tools/build_native_installer.py
+          --payload "dist/installer-candidate/FSTR Stretch.aex"
+          --manifest "dist/installer-candidate/FSTR Stretch.windows-artifact.json"
+          --expected-build-id EGFX-376f97bdd493cd2fbce61edd
+          --out dist/native-installer
+      - name: Inspect x64 executable and embedded elevation manifest
+        shell: pwsh
+        run: |
+          dumpbin /headers "dist/native-installer/FSTR Stretch Installer.exe" > dist/native-installer/headers.txt
+          dumpbin /dependents "dist/native-installer/FSTR Stretch Installer.exe" > dist/native-installer/dependents.txt
+          mt.exe '-inputresource:dist/native-installer/FSTR Stretch Installer.exe;#1' -out:dist/native-installer/embedded.manifest
+          if (-not (Select-String -Path dist/native-installer/headers.txt -Pattern 'machine \(x64\)' -Quiet)) { throw 'Not x64' }
+          if (-not (Select-String -Path dist/native-installer/embedded.manifest -Pattern 'requireAdministrator' -Quiet)) { throw 'Missing elevation manifest' }
+          if (Select-String -Path dist/native-installer/dependents.txt -Pattern 'MSVCP140|VCRUNTIME140' -Quiet) { throw 'Installer must use static CRT' }
+      - name: Save scoped result
+        run: |
+          python -c "import json,pathlib,os; p=pathlib.Path('dist/native-installer/installer-artifact.json'); d=json.loads(p.read_text()); d.update(ci_run=os.environ['GITHUB_RUN_ID'], native_windows_fixtures='PASS', pe_x64_and_elevation_manifest='PASS', administrator_installation='NOT RUN'); p.write_text(json.dumps(d,indent=2)+'\n')"
+      - name: Upload installer validation candidate
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: FSTR-Stretch-Windows-Installer-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            dist/native-installer/FSTR Stretch Installer.exe
+            dist/native-installer/installer-artifact.json
+            dist/native-installer/headers.txt
+            dist/native-installer/dependents.txt
+            dist/native-installer/embedded.manifest
+      - name: Retain failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: FSTR-Installer-Diagnostics-${{ github.sha }}
+          path: |
+            dist/native-installer/build.log
+            build-installer/Testing/Temporary/LastTest.log
