@@ -102,3 +102,24 @@ benchmark repetition; no passing Mac gate is claimed for these runs. Speed
 measurements remain excluded. This is a Windows validation candidate, not final
 AE-host acceptance or a commercial release. Prior local-only notes describe the
 earlier checkpoint and are superseded only for this authorized branch build.
+
+
+## Windows manual checklist accepted by user — 2026-10-04
+
+User reported OK for all10 checklist items against the delivered Windows
+0.9.4 Dev56 candidate (source cbb7468, BuildID EGFX-376f97bdd493cd2fbce61edd,
+SHA256 669436b62a06baef0eba895e8e72b50f89e448ff396c24c43e16a2f93c15bd6c):
+AE launch/application; grid drag/Undo; uniform density with preserved deformation;
+live Affected Lines including old animation; current-time Reset/keys/resize;
+Show Grid with another selection and Preview; Wave controls; save/reopen;
+Preview/render correctness; License/About/Support/Close.
+
+Result is USER-REPORTED MANUAL PASS for this checklist, superseding NOT RUN
+for these manually exercised workflows only. Exact AE/Windows versions and
+loaded binary identity were not captured on the test machine; no screenshot/
+automated runtime packet supplied. Separate MFR/aerender/cold-start/migration
+coverage is not inferred. Speed measurements excluded by user; no timing claim.
+Evidence: outputs/FSTR-Stretch-0.9.4-Windows-Dev56/user-acceptance-2026-10-04.json.
+Native installers/update backup workflow and real marketplace SDK activation
+remain open; full U10/release reconciliation still required. No merge/release
+authority follows from this acceptance; main and installed Mac unchanged.
