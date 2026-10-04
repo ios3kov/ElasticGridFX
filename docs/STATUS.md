@@ -1206,3 +1206,20 @@ Windows build pending. Evidence: outputs/update-094-windows-ci-e5f4491/job.log.
 Automatically triggered Mac run37189091025 was cancelled to avoid redundant
 benchmark work; this is not a passing Mac gate. Main/release and installed Mac
 payload unchanged; Windows AE runtime and broader U8/U10 obligations remain open.
+
+
+### Windows validation candidate built — 2026-10-04
+
+Exact source cbb7468b36e9b94b4c575b3de1c27863ebe8caf2 passed Windows run37189319759:
+24 CTest cases (including native License guards), 86 Rust tests, Clippy, optimized
+release build, x64 PE/EffectMain/dependencies/imports and byte-exact PiPL. Candidate
+0.9.4 Dev56 BuildID EGFX-376f97bdd493cd2fbce61edd; AEX SHA256
+669436b62a06baef0eba895e8e72b50f89e448ff396c24c43e16a2f93c15bd6c. Downloaded
+archive/manifest/embedded BuildID/inventory hashes verified locally. Reconstructed
+Windows CRLF checkout with Windows file permission semantics matches CI source
+hash exactly. Evidence: outputs/update-094-windows-ci-e5f4491/delivery-verification.json;
+user packet: outputs/FSTR-Stretch-0.9.4-Windows-Dev56. No speed tests requested.
+Windows AE load/UI/render/Undo/MFR remain NOT RUN, not inferred from build tests.
+Actual marketplace activation and native installers remain open. Installed Mac
+Dev52, main and release unchanged. This documentation checkpoint does not change
+the candidate: its exact source remains cbb7468, not the documentation-only HEAD.

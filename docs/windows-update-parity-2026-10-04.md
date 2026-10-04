@@ -85,3 +85,20 @@ click test. New source must pass exact-head MSVC/Rust/PE/PiPL gates before givin
 an updated AEX to the user. Actual host acceptance focuses on License/About/
 Support/Close, keys/projects/Undo and rendering correctness; speed measurements
 are excluded. Remote publication/build requires lifting the local-only boundary.
+
+
+## Subsequent Windows CI checkpoint
+
+User authorized branch publication for the Windows build. First run37189091016
+passed24 Windows core tests but exposed Reset continuation ABI mismatch. The
+private state now uses SDK A_intptr_t, retaining Mac/Windows semantics and all
+existing streams. Source cbb7468 passed run37189319759:24 CTest cases,86 Rust
+tests, Clippy, optimized release build and exact PE/PiPL packaging gates. Native
+License null/worker guards now PASS on Windows; actual AE dialog interaction is
+still NOT RUN. BuildID EGFX-376f97bdd493cd2fbce61edd, version0.9.4 Dev56. Archive,
+AEX hash, embedded identity and source reconstruction checked after download.
+The automatically triggered repeat Mac workflows were cancelled to avoid
+benchmark repetition; no passing Mac gate is claimed for these runs. Speed
+measurements remain excluded. This is a Windows validation candidate, not final
+AE-host acceptance or a commercial release. Prior local-only notes describe the
+earlier checkpoint and are superseded only for this authorized branch build.
