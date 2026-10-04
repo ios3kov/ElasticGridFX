@@ -1,0 +1,421 @@
+{
+  "schema": 1,
+  "date": "2026-10-04",
+  "artifact": {
+    "artifact_type": "AE native effect (.plugin)",
+    "build_id": "EGFX-62c29c58fd2fcff5827d9146",
+    "commit": "db230124cea1e7aba82c6ec35e37a842b6de5a64",
+    "profile": "release",
+    "schema": 1,
+    "settings_sha256": "18d334fe7dab9e69c3d1a8ab5f9ee36cdc573e6dced905af977bb3e7c002fcf4",
+    "source_sha256": "2b0d2ecd660078776bbb549ea318e540a98f7ec284975821f2a4109f2838d2ad",
+    "source_state": "clean",
+    "target": "aarch64-apple-darwin",
+    "toolchain": {
+      "cxx": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)"
+    },
+    "version": "0.9.4"
+  },
+  "host": {
+    "ae": "25.6x101",
+    "pid": 18624,
+    "os": "macOS26.6.2 arm64"
+  },
+  "status": "SCOPED_NATIVE_PASS_WINDOWS_NOT_RUN",
+  "loaded_identity": {
+    "status": "PASS",
+    "report": "../../outputs/update-094-dev44-mac/fresh-session-identity-pinned/EGFX-check-d25bffedd5ec4c968e549005b8720457/report.json",
+    "sha256": "254c554ae22ef3f63d77426e00197e4c96dc6d7c74321f8f5cc056fab206243b"
+  },
+  "native_runs": {
+    "phased-smoke-fresh-session": {
+      "pixels": {
+        "status": "PASS",
+        "export_rgb_scale": 0.1,
+        "checks": {
+          "bypass_identity": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "identity_static_a": {
+            "status": "PASS",
+            "max_abs": 0.9308003783226013,
+            "mean_abs": 0.03637218561338375,
+            "changed_fraction": 0.4028538352475969
+          },
+          "static_a_static_b": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "animated_a_animated_b": {
+            "status": "PASS",
+            "max_abs": 1.0246433019638062,
+            "mean_abs": 0.0511666277307487,
+            "changed_fraction": 0.635817323326266
+          },
+          "identity_reset": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "chain_before_corner_chain_corner_identity": {
+            "status": "PASS",
+            "max_abs": 0.00030517578125,
+            "mean_abs": 7.839880435083053e-08,
+            "changed_fraction": 0.0
+          },
+          "chain_corner_identity_chain_corner_moved": {
+            "status": "PASS",
+            "max_abs": 1.0286107063293457,
+            "mean_abs": 0.3048718988094898,
+            "changed_fraction": 0.9851845107246452
+          }
+        },
+        "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification"
+      },
+      "files_sha256": {
+        "reset-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_before_corner-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "clear-own.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.json": "a2af031100322f20d9bf1ad935d748a1db3455fbf32af3397fe2a0acdfd0ab2c",
+        "prepared.json": "868651e0ac97080b3a7c28b3cc3dcd22edff9ab27e1a07c8fe3c8d36078df647",
+        "animated_a-export.json": "8eb4c3f7368e2cfefd09e6934198b23966d8e6203796281ff5a356482ccf76ab",
+        "chain_corner_identity-export.json": "b3847e68b962dca436b1fef9249193f275dc1e855966a60accbb9147df7ecdb1",
+        "prepare.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "capture.json": "0d1718f72ba0d3287278cf619e0a2e28fa4614c57df18f52ef76a8d964e14450",
+        "chain_before_corner.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "static_b-set.json": "7605ab432045ab017c97ed21df5bb077011ecfc17f4cce105f52e3eee9bda6a3",
+        "reset.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_a-set.json": "fe99fa719a30f0a69c951be58ea51617720ec3c2077b454c36b637c64b2ca2cc",
+        "cleanup.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved.png": "e824485aed74f199cf7e29d003e181f36a5681b2e84a1a3d8f8b0ea6af08ace3",
+        "pattern.png": "fc69af5cb675b4b1c436276e7e367ca0e42026c8d0083ecbbf19c5789a592f64",
+        "static_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-set.json": "9732325981506c7032970f96aa0aa29ec18e0757ff729273e81f6bda90edbaf8",
+        "bypass-export.json": "3353a10405f15b953ccb9bd31b92230861ce2736bcea29ade71a27b471db892b",
+        "chain_corner_identity.png": "fc2d7e0e27eae15d606bf95d132956afd2220df36517dc7d5b3c00375834794b",
+        "reset-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.json": "e8d5f98539a295e0e25aeb670f2948e2c183d6990238263a1485360fc4df6a19",
+        "chain_before_corner-set.json": "fcd40cdda1b32889b632f71a17133d900cff035a213da66397607e4ce4089ce7",
+        "chain_corner_identity-set.json": "321251b46a9d6ebbfc9fed4488b9566f82333bf42b1adc6a7b66dc08ae42d6dc",
+        "chain_corner_identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_b-export.json": "ab579a59993eae8a27e2ffccf505e91294640a95b01350eb32028d43a0ecb0b2",
+        "bypass-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a.png": "3f26bc50362758f9e6fa98b349f7f6d16f813f29e582d753406e153915326a04",
+        "pixels.json": "6512333bb6522cc2c998a8248e1e8a845eae57ca4c7dd246d2443b02670abc3c",
+        "static_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_b.png": "273736ff634ea98a6b2ca90aa275b06f4c77214e3514df3575a37173a4d62a90",
+        "reset-set.json": "3c2dc75d469e59756581e91b992b5409f04284fa7124a067c9cf2f6836699b76",
+        "identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.json": "ec135f6eb5a57cf343e97358d5846278af85f11218439158243ca8588344b1a9",
+        "chain_corner_moved-export.json": "f9e345b4836b9a040b64da1a8ff818cf835c755825e131efb6d7d9f4652953a7",
+        "chain_before_corner-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "reset-export.json": "467d4824c30e4f0a799088b253bd4d6c46c3769cdbf11ee6cc5e434bd120dba6",
+        "static_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-set.json": "ed9b7d3b309560cad03ef095f15d8952e394dd99def35e5749a01cd54ae02790",
+        "static_a-export.json": "5fe20238dda70bd127f26e2aafb888f615fa7bb5c574263ecc46f304a9bf64f8",
+        "animated_b-set.json": "5884c5f210553db9850f932313e860ba6285c356a00ef17cf32c9a960d4d7b9b",
+        "chain_before_corner-export.json": "0f5472b71d8f4faf501a3149ef45b07eff1857ac9a531bd1f65bdc241f61b72d",
+        "static_b.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "identity-export.json": "c1bd7f132a1736d08a410254e6b7d98488904509bc2e8d51341aca016d519d51",
+        "bypass.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "static_a.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e"
+      }
+    },
+    "phased-smoke-fresh-repeat": {
+      "pixels": {
+        "status": "PASS",
+        "export_rgb_scale": 0.1,
+        "checks": {
+          "bypass_identity": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "identity_static_a": {
+            "status": "PASS",
+            "max_abs": 0.9308003783226013,
+            "mean_abs": 0.03637218561338375,
+            "changed_fraction": 0.4028538352475969
+          },
+          "static_a_static_b": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "animated_a_animated_b": {
+            "status": "PASS",
+            "max_abs": 1.0246433019638062,
+            "mean_abs": 0.0511666277307487,
+            "changed_fraction": 0.635817323326266
+          },
+          "identity_reset": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "chain_before_corner_chain_corner_identity": {
+            "status": "PASS",
+            "max_abs": 0.00030517578125,
+            "mean_abs": 7.839880435083053e-08,
+            "changed_fraction": 0.0
+          },
+          "chain_corner_identity_chain_corner_moved": {
+            "status": "PASS",
+            "max_abs": 1.0286107063293457,
+            "mean_abs": 0.3048718988094898,
+            "changed_fraction": 0.9851845107246452
+          }
+        },
+        "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification"
+      },
+      "files_sha256": {
+        "reset-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_before_corner-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.json": "a491d7c3466ce7b882456b87b097d0b0a0129abbc0f5c81caf490873064352db",
+        "prepared.json": "530e6e260adbe8130b0b403dd6634a7e144ce3be3be967dd0ccab4560f1a20cf",
+        "animated_a-export.json": "db40b324da659151e09bf76224a62a910a82b69e5f118ca3f1085d8c189e22f4",
+        "chain_corner_identity-export.json": "283548b757bc72e19eed58ddd5cc82f7b8229945d4b27ff50c1bc27c6cde060a",
+        "prepare.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "capture.json": "9608fc5325be747038e780321b91ff2f85026401a92b2a49228f2e7392b03e1e",
+        "chain_before_corner.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "static_b-set.json": "3bdcf5d5ab140172ed29a6192bb0fc146411f7ff0290ecd9d4807b9a104415f8",
+        "reset.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_a-set.json": "147d6c28c4f7175ce907ff2b357706ee5027a57f88fa66833835f8a393da38a1",
+        "cleanup.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved.png": "e824485aed74f199cf7e29d003e181f36a5681b2e84a1a3d8f8b0ea6af08ace3",
+        "pattern.png": "fc69af5cb675b4b1c436276e7e367ca0e42026c8d0083ecbbf19c5789a592f64",
+        "static_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-set.json": "53f5d8e21c816efdeee25d22c94813f9343f6a70294d46834c853c4c3c65852f",
+        "bypass-export.json": "e8095659c1c810a4597957aa3edd18e6df0415ceac324b18d7d84e1aaff8902f",
+        "chain_corner_identity.png": "fc2d7e0e27eae15d606bf95d132956afd2220df36517dc7d5b3c00375834794b",
+        "reset-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.json": "64866904572301115090201b65bf086c5c52c476f9fbbe91c08ec9753aece1ad",
+        "chain_before_corner-set.json": "cf94cf2a569e0bb89d29cf89ae2d95d19cd63e52b2bb99e6feb3a8b35ddd9561",
+        "chain_corner_identity-set.json": "87eb30293d97bad93d46b6abdb4e09bbf812bb65a58608dc9b67da229c92c642",
+        "chain_corner_identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_b-export.json": "ef0f08511937fa757e0aa1dc2f97f4bdd62c5e6f19928ccd15b98681b3fd2420",
+        "bypass-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a.png": "3f26bc50362758f9e6fa98b349f7f6d16f813f29e582d753406e153915326a04",
+        "pixels.json": "6512333bb6522cc2c998a8248e1e8a845eae57ca4c7dd246d2443b02670abc3c",
+        "static_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_b.png": "273736ff634ea98a6b2ca90aa275b06f4c77214e3514df3575a37173a4d62a90",
+        "reset-set.json": "0887ae4eec08db5da18dea1ed68d86da1366a298eddd675bdc5c8b2735a57ef1",
+        "identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.json": "bd1f3a701aad53b10be6c74f3e459f382deebe2b30fa26f4bd987639f7a0c889",
+        "chain_corner_moved-export.json": "17ce483af515e48a5d82488ef8a83e8586cceb407c27cbc50289dbd843c16b1a",
+        "chain_before_corner-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "reset-export.json": "eac968bc00e4e51499a979bf1fd52efe88a2b024afcbf2446e7f02c0c1b2ca78",
+        "static_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-set.json": "7dafacb94c764086a161768674a8d4ecc6011c08d7c7803a6a9a981b110fce99",
+        "static_a-export.json": "04ed3f5708530fedab94f42cdf412453ee035c1e0da6087b6fa61a7974e0fc74",
+        "animated_b-set.json": "b0a757897c42e40f8ef44b66cf12fb721dd7593d22d594dea86a478b32728669",
+        "chain_before_corner-export.json": "fc8735d01f704a486be5bb5eeb8347a27913f985784590c3b018fabfa03d47d4",
+        "static_b.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "identity-export.json": "7bf13cdb0a14e1bd2330fc6578a97ea17ebb4d7714d1ffe7c2c5eb02bc9fd6a5",
+        "bypass.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "static_a.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e"
+      }
+    },
+    "phased-after-dialog-dismissed": {
+      "pixels": {
+        "status": "PASS",
+        "export_rgb_scale": 0.1,
+        "checks": {
+          "bypass_identity": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "identity_static_a": {
+            "status": "PASS",
+            "max_abs": 0.9308003783226013,
+            "mean_abs": 0.03637218561338375,
+            "changed_fraction": 0.4028538352475969
+          },
+          "static_a_static_b": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "animated_a_animated_b": {
+            "status": "PASS",
+            "max_abs": 1.0246433019638062,
+            "mean_abs": 0.0511666277307487,
+            "changed_fraction": 0.635817323326266
+          },
+          "identity_reset": {
+            "status": "PASS",
+            "max_abs": 0.0,
+            "mean_abs": 0.0,
+            "changed_fraction": 0.0
+          },
+          "chain_before_corner_chain_corner_identity": {
+            "status": "PASS",
+            "max_abs": 0.00030517578125,
+            "mean_abs": 7.839880435083053e-08,
+            "changed_fraction": 0.0
+          },
+          "chain_corner_identity_chain_corner_moved": {
+            "status": "PASS",
+            "max_abs": 1.0286107063293457,
+            "mean_abs": 0.3048718988094898,
+            "changed_fraction": 0.9851845107246452
+          }
+        },
+        "scope": "PNG image smoke incl. Adjustment Layer -> ElasticGrid -> Corner Pin; not HDR accuracy, guide-drag or GPU verification"
+      },
+      "files_sha256": {
+        "reset-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_before_corner-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-export.json": "a528f475246fbfeada71fdbbd201fa8e975346000fa2965f9d989a58c69cee91",
+        "prepared.json": "78c4afe4ec03792f8e12e1eeb2c138f6e3186a3e393c223e94e8888a14ce5fc6",
+        "animated_a-export.json": "bb62f8e5edbab5d1e584e5efec8d38a4b5565ec6bebb854a56cd51e71d170b2d",
+        "chain_corner_identity-export.json": "f3a7abab70f4d28f78cb24f0f87682118a96040d6e05b2a237bef8eb50d11a12",
+        "prepare.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "capture.json": "a3bfc9684aba2bac90ba8c22a145025f7bfc2bb85ac54bae3d15a28d7046a53c",
+        "chain_before_corner.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "static_b-set.json": "d5f0f70551af7858ab5b5d93dc55492989289573c290c551deaff262ed4b4ad0",
+        "reset.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_a-set.json": "47babc1e85d418d08380f02286fb99fda026bc1563ed0606c692044145301783",
+        "cleanup.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved.png": "e824485aed74f199cf7e29d003e181f36a5681b2e84a1a3d8f8b0ea6af08ace3",
+        "pattern.png": "fc69af5cb675b4b1c436276e7e367ca0e42026c8d0083ecbbf19c5789a592f64",
+        "static_a-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-set.json": "9da5b15edfcdcf7a2a2af33ca366c6ee7d6e8f28de7c7e65f2c255e59b0b1fbf",
+        "bypass-export.json": "556f6e380a78c1aae5aa6192624ade89ad40d47ef85620d4240e7415913b0829",
+        "chain_corner_identity.png": "fc2d7e0e27eae15d606bf95d132956afd2220df36517dc7d5b3c00375834794b",
+        "reset-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_moved-set.json": "0ab4636a8820fc94bd15d71544f090292e0a865501c6d3c7078811d5ffe16b86",
+        "chain_before_corner-set.json": "3176f416ac9d2d7dbb3e0fc5b7fa761914c9d2cc78e6decdca245ffebfff7f15",
+        "chain_corner_identity-set.json": "8bef2f0bf17a151b26efe174b485d97e5aa2908998ec3d9ed7bc624b80e01e26",
+        "chain_corner_identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_b-export.json": "f5b6867ce7222980335d631047a5f86a6ca842dfcacfcac7da037d0bd2cfc084",
+        "bypass-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "animated_a.png": "3f26bc50362758f9e6fa98b349f7f6d16f813f29e582d753406e153915326a04",
+        "pixels.json": "6512333bb6522cc2c998a8248e1e8a845eae57ca4c7dd246d2443b02670abc3c",
+        "static_b-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "chain_corner_identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "animated_b.png": "273736ff634ea98a6b2ca90aa275b06f4c77214e3514df3575a37173a4d62a90",
+        "reset-set.json": "308a5137f6336b38f3f4f7e171d72031080a1c46931fac627df8e3c630a0d97f",
+        "identity-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "bypass-set.json": "8bd5902ce54ae34526d2ff62ea134ee4b4c8a09dc2688f4a333a9b1043013467",
+        "chain_corner_moved-export.json": "389832a6f61d8faeb571fdd5fd540c4cbd4d41358033fa3f94679c0603f1b505",
+        "chain_before_corner-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "reset-export.json": "8a96380d27f6e472f07ebd0cc0ba53f7166c0faad4839d48e2a68984287bd3c5",
+        "static_b-set.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "identity-export.jsx.transport.log": "74d01a0c051c963d9a9b8ab9dbeab1723f0ad8534ea9fa6a942f358d7fa011b4",
+        "static_a-set.json": "7a97e8a4b04797b3c17013adac0732813675aef0e427e1148a937098106fb303",
+        "static_a-export.json": "8567aebe70af65a5b2cac08f543efdee708359cc43ae5186a868ab5805c18a30",
+        "animated_b-set.json": "c36df0205600c49d23d356860526b333843f341ed77155b3a662822fc9e53920",
+        "chain_before_corner-export.json": "16d1d1f343ed794496c0aaca4bbac3d6473dea1363a371588e1963fa580d746f",
+        "static_b.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e",
+        "identity-export.json": "967dd57f4140db21394cbcba49e2a637b25790dd8bd41cfb197ae1349c3d06bd",
+        "bypass.png": "b2aabd635fd141abc32257d06d4ab59b66ccdd63d38e6026f2e2eb7887eeee32",
+        "static_a.png": "e3733c7a9489b68eb54cf6ad50e6f7d35fb954afcfec1895b743be83e7616d8e"
+      }
+    }
+  },
+  "integrated_runner": {
+    "status": "pixels PASS; overall runner BLOCKED by remaining acceptance gates",
+    "report": "../../outputs/update-094-dev44-mac/integrated-phased-runner/EGFX-smoke-9696348055b6402b834ffd8f24ac6a87/integrated-result.json",
+    "sha256": "db0e1184f1d3ed439e80bf4196b77bb374f9a29bd12ce1c6a9345c10478396b6",
+    "steps": 22
+  },
+  "failure_reproduction": {
+    "monolithic": "FAIL frame_static_a before native idle initialization",
+    "next_phased_run_before_dialog_dismissal": "FAIL static_a_export",
+    "modal_observed": "EffectMain returned BadCallbackParameter (516) (25 :: 237)",
+    "after_one_native_Return": "PASS all ten frames and seven pixel comparisons in same process",
+    "conclusion": "Fixture must return to AE between creation, setters and exports. Native error modal prevents later idle initialization until dismissed. No native renderer/receipt source change was needed.",
+    "point_value_read": "Hidden Point scripting .value still reports invalid numeric result even in working scene; not used as initialization or pixel oracle."
+  },
+  "tool_sources_sha256": {
+    "tools/ae_smoke_runner.py": "3dc145a53811baca50cbd85a6e5a35a2b21c50dbfd04f29668a6a96e2841e896",
+    "tools/windows_ae_validation.py": "d6325a8d3855893a8979546ab23b838672fb50c90b1d1c9002a8ab3b72a0edd9",
+    "tests/ae_runtime_smoke.jsx": "c22cc9ece17a22ab6a8d1919ff98ea91129cdcafaf4931bd4205b5b952979598",
+    "tests/ae_runtime_smoke_phased.jsx": "09bca53ce7ddf293e94510a6c260929aaf3e10bd948ca086cc052897e9a70fe7"
+  },
+  "remaining": [
+    "Windows build/runtime NOT RUN; local Mac lacks Windows/MSVC and remote push/CI is not authorized",
+    "new source checkpoint artifact needs subsequent platform gates before delivery/release",
+    "installers WAIT_PLUGIN_VALIDATION"
+  ],
+  "publication": "LOCAL ONLY",
+  "source_checks": {
+    "schema": 1,
+    "python": {
+      "status": "PASS_COMBINED",
+      "unique_tests": 277,
+      "initial": "274 pass; 3 sandbox permission errors retained in python-tests.txt",
+      "scoped_reruns": "all12 process-guard and2 native-image tests PASS with required access"
+    },
+    "javascript": {
+      "status": "PASS",
+      "files": 17,
+      "scope": "mock guard/regression checks; native evidence separate"
+    },
+    "audit": {
+      "exit_code": 1,
+      "adjudication": "false positive at tests/test_target_ae_acceptance.py:54: mocked payload verification, not an HTTP/auth route",
+      "release_readiness": "not_assessed"
+    },
+    "native": "update-094-dev44-mac/integrated-phased-runner; exact installed Dev44; no Windows claim",
+    "logs_sha256": {
+      "python-tests.txt": "0d2e08f64ba20be49ef79cde49b5ee774f43df67edd9355292f78554c1ff8395",
+      "process-guard-tests.txt": "081b349d147a0493eb259c8ea2f1edff01f218c54e60b7fef448d9e06c23119e",
+      "native-identity-tests.txt": "29ee11b8132e6583e40cd4e953682a247db884c8ce4cc9537c07e786da68e465",
+      "js-tests.txt": "14093bbb0210a07fee7c2aa35eeabb40d6425295f65858e8efb1a16bf768e72f",
+      "phased-ready-guard-js.txt": "ba13f79099de46be42c7d81e0b34a350892c0d9167e149925062f26d6bc8d972"
+    }
+  },
+  "integrated_runner_with_binding_guard": {
+    "report": "../../outputs/update-094-dev44-mac/integrated-phased-ready-guard/EGFX-smoke-dc6b5cff34b34e28bbee00eb7a871f91/integrated-result.json",
+    "sha256": "297ac01054ef34bc4175569e9cbe025b24dd6164bf2033f9ce32a3c009c033c5",
+    "steps": 22,
+    "pixels": "PASS",
+    "pending_binding": "reject before rendering; no Point .value oracle"
+  }
+}

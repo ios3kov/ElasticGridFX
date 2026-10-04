@@ -12,6 +12,7 @@ import sys
 import uuid
 
 import build_identity as bi
+from windows_ae_validation import run_phased_smoke
 from install_candidate import checked_path, signature
 from live_identity import running_ae
 from smoke_pixels import FRAMES, pattern, validate_frames
@@ -83,6 +84,7 @@ def prepare(parent: Path, build: dict) -> tuple[Path, dict]:
                     loaded_build_id=None, actual_ae_execution=False,
                     runner_sha256=bi.digest(Path(__file__).read_bytes()),
                     jsx_sha256=bi.digest(source.encode()),
+                    phased_jsx_sha256=bi.digest((ROOT/'tests/ae_runtime_smoke_phased.jsx').read_bytes()),
                     comparator_sha256=bi.digest((ROOT/'tools/smoke_pixels.py').read_bytes()),
                     fixture_sha256=bi.digest((folder/'pattern.png').read_bytes()))
     bi.dump(folder/'run.json', metadata)
@@ -188,9 +190,10 @@ def execute(folder: Path, metadata: dict, ae_app: Path, installed: Path,
         raise ValueError('AE process changed before pixel capture')
     metadata['target_pid'] = pid
     metadata['ae_execution_attempted'] = True
-    exit_code = _run_jsx(folder, 'run.jsx', identifier)
-    if exit_code != 0:
-        raise ValueError('AE smoke script exited '+str(exit_code)+'; see retained transport log')
+    def mac_transport(_app, script, _result):
+        return dict(returncode=_run_jsx(folder, script.name, identifier),
+                    log=str(folder/(script.name+'.transport.log')))
+    metadata['smoke_phases'] = run_phased_smoke(ae_app, folder, metadata['run_id'], mac_transport)
     pixels = inspect_capture(folder, metadata)
     metadata['actual_ae_execution'] = True
     metadata['pixels'] = pixels

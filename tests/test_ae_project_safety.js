@@ -123,3 +123,25 @@ for (const model of [group([value]), group([{ ...group([value]), name: 'Wave Ani
   assert.equal(value.numKeys, 2);
 }
 console.log('PASS: flat/grouped Wave parameter lookup preserves the original parameter object');
+
+// File.exists is a construction-time snapshot in this mock. A delayed export
+// must be observed through a fresh File and a missing/empty export must time out.
+for (const [readyAt, length, expected] of [[2, 100, true], [0, 100, true], [2, 0, false], [Infinity, 100, false]]) {
+  let ticks = 0, reads = 0;
+  lookupContext.File = function (name) {
+    assert.equal(name, '/owned/frame.png'); reads++;
+    this.exists = ticks >= readyAt;
+    this.length = this.exists ? length : 0;
+  };
+  lookupContext.$ = { sleep(ms) { assert.equal(ms, 100); ticks++; } };
+  const file = lookupContext.egfxWaitForPng('/owned/frame.png');
+  assert.equal(file !== null, expected);
+  if (expected) {
+    assert.equal(ticks, readyAt);
+    assert.equal(reads, readyAt + 1);
+  } else {
+    assert.equal(ticks, 50);
+    assert.equal(reads, 50);
+  }
+}
+console.log('PASS: delayed PNG export, fresh File observation and bounded missing/empty timeout');

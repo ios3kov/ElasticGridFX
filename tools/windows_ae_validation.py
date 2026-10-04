@@ -205,7 +205,7 @@ def prepare_workspace(parent: Path, build: dict) -> tuple[Path, dict]:
     folder.mkdir()
     pattern(folder / "pattern.png")
     source = (ROOT / "tests/ae_runtime_smoke.jsx").read_text(encoding="utf-8")
-    config = dict(run_id=run_id, folder=str(folder))
+    config = dict(run_id=run_id, folder=str(folder), reset_owned_after_capture=True)
     for name, fn in (("arm", "elasticGridSmokeArm"), ("disarm", "elasticGridSmokeDisarm"), ("run", "elasticGridSmoke")):
         (folder / (name + ".jsx")).write_text(
             source + "\n" + fn + "(" + json.dumps(config) + ");\n", encoding="utf-8"
@@ -241,10 +241,60 @@ def phase_record(path: Path, run_id: str, expected: str) -> dict:
     return data
 
 
+def validate_prepared(data: dict, run_id: str) -> dict:
+    ids = data.get("item_ids")
+    if (type(data.get("schema")) is not int or data.get("schema") != 1 or data.get("run_id") != run_id or
+            data.get("status") != "PREPARED" or not isinstance(ids, list) or
+            len(ids) != 5 or any(type(i) is not int or i <= 0 for i in ids) or
+            len(set(ids)) != 5 or type(data.get("comp_id")) is not int or
+            type(data.get("chain_id")) is not int or data.get("comp_id") not in ids or
+            data.get("chain_id") not in ids or data.get("comp_id") == data.get("chain_id")):
+        raise ValueError("invalid prepared fixture identity")
+    return data
+
+
+def write_smoke_phase(folder: Path, name: str, config: dict, function: str) -> Path:
+    # Names/function are coordinator-owned constants; never execute result text.
+    if function not in ("egfxPhasedPrepare", "egfxPhasedCapture"):
+        raise ValueError("unknown smoke phase")
+    script = folder / name
+    source = (ROOT / "tests/ae_runtime_smoke.jsx").read_text(encoding="utf-8")
+    source += "\n" + (ROOT / "tests/ae_runtime_smoke_phased.jsx").read_text(encoding="utf-8")
+    with script.open("x", encoding="utf-8") as handle:
+        handle.write(source + "\n" + function + "(" + json.dumps(config) + ");\n")
+    return script
+
+
+def run_phased_smoke(afterfx: Path, folder: Path, run_id: str, transport_runner=None) -> dict:
+    config = dict(run_id=run_id, folder=str(folder))
+    def phase(name: str, function: str, result: str, expected: str) -> dict:
+        script = write_smoke_phase(folder, name, config, function)
+        transport = (transport_runner or run_jsx)(afterfx, script, folder / result)
+        if transport["returncode"] != 0:
+            raise ValueError("smoke phase transport failed: " + name)
+        record = phase_record(folder / result, run_id, expected)
+        return dict(transport=transport, record=record)
+    checks = {"prepare": phase("prepare.jsx", "egfxPhasedPrepare", "prepared.json", "PREPARED")}
+    config["prepared"] = validate_prepared(checks["prepare"]["record"], run_id)
+    for frame in FRAMES:
+        config["frame_name"] = frame
+        for action, expected in (("set", "READY"), ("export", "EXPORTED")):
+            config["action"] = action
+            name = frame + "-" + action
+            checks[name] = phase(name + ".jsx", "egfxPhasedCapture", name + ".json", expected)
+    config["action"] = "cleanup"
+    checks["cleanup"] = phase("cleanup.jsx", "egfxPhasedCapture", "capture.json", "CAPTURED")
+    return checks
+
+
 def inspect_capture(folder: Path, run_id: str) -> dict:
     capture = json.loads((folder / "capture.json").read_text(encoding="utf-8-sig"))
     if capture.get("run_id") != run_id or capture.get("status") != "CAPTURED":
         raise ValueError("AE smoke capture failed")
+    if not (capture.get("fresh_guard") == "CLEAN" or
+            (capture.get("fresh_guard") == "DIRTY_UNAVAILABLE" and
+             capture.get("fresh_project_revision") == "1")):
+        raise ValueError("AE smoke did not restore a clean owned project for roundtrip")
     result = validate_frames(folder)
     result["frames_sha256"] = {name: sha256_file(folder / (name + ".png")) for name in FRAMES}
     result["ae_version"] = capture.get("ae_version")
@@ -301,7 +351,7 @@ def execute(args) -> dict:
     if running_selected_ae(args.afterfx) != pid:
         raise ValueError("After Effects process changed during validation")
 
-    result["checks"]["smoke_transport"] = run_jsx(args.afterfx, folder / "run.jsx", folder / "capture.json")
+    result["checks"]["smoke_phases"] = run_phased_smoke(args.afterfx, folder, metadata["run_id"])
     result["checks"]["pixels"] = inspect_capture(folder, metadata["run_id"])
     if result["checks"]["pixels"].get("status") == "FAIL":
         raise ValueError("pixel validation failed")

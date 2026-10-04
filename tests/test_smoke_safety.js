@@ -8,6 +8,7 @@ const source = fs.readFileSync(process.env.EG_SMOKE_JSX || path.join(__dirname, 
 function run(options = {}) {
     const folder = '/test-owned';
     const config = {run_id:'a'.repeat(32), folder};
+    if (options.resetOwned) config.reset_owned_after_capture = true;
     const files = {[folder+'/pattern.png']: 'fixture'};
     if (options.staleResult) files[folder+'/capture.json'] = 'old evidence';
     if (options.staleFrame) files[folder+'/bypass.png'] = 'old frame';
@@ -53,10 +54,11 @@ function run(options = {}) {
         _bpc:16, get bitsPerChannel() {return this._bpc;}, set bitsPerChannel(v) {calls.modified++; this._bpc=v;},
         importFile() {calls.modified++; return footage;},
         items:{addComp() {calls.modified++; return comp;}},
-        close() {calls.closed++;}
+        close() {calls.closed++; return options.closeFails ? false : true;}
     };
     const app = {project,version:'test-fixture-not-AE', effects:[{matchName:fx.matchName}],
-        beginSuppressDialogs() {calls.dialogs++;},endSuppressDialogs() {calls.dialogs--;}};
+        beginSuppressDialogs() {calls.dialogs++;},endSuppressDialogs() {calls.dialogs--;},
+        newProject() {app.project = {file:null,numItems:0,dirty:!!options.freshDirty,revision:1}; return app.project;}};
     function File(name) {
         this.fsName=name;
         const snapshotExists=Object.hasOwn(files,name), snapshotLength=files[name]?.length || 0;
@@ -69,7 +71,7 @@ function run(options = {}) {
     function Folder(name) {this.exists=name===folder;}
     function ImportOptions(file) {this.file=file;}
     const suffix = source.includes('function elasticGridSmoke') ? '\nelasticGridSmoke('+JSON.stringify(config)+');' : '';
-    vm.runInNewContext(source+suffix, {app,File,Folder,ImportOptions}, {timeout:1000});
+    vm.runInNewContext(source+suffix, {app,File,Folder,ImportOptions,CloseOptions:{DO_NOT_SAVE_CHANGES:0}}, {timeout:1000});
     let capture=null;
     try {capture=JSON.parse(files[folder+'/capture.json']);} catch {}
     return {app,calls,files,capture};
@@ -136,3 +138,17 @@ for (const options of [{missingParameter:true},{cornerUnavailable:true},{noOutpu
     assert.notEqual(app.exitCode,0);
 }
 console.log('PASS: 21 smoke capture/ownership/error cases (mock control flow, not AE execution)');
+
+{
+    const {app,calls,capture}=run({resetOwned:true});
+    assert.equal(app.exitCode,0);
+    assert.equal(calls.closed,1);
+    assert.equal(app.project.dirty,false);
+    assert.equal(capture.fresh_guard,'CLEAN');
+}
+for (const options of [{closeFails:true},{freshDirty:true},{foreignProject:{bitsPerChannel:8}},{saved:true},{occupied:true}]) {
+    const {app,calls}=run({...options,resetOwned:true});
+    assert.notEqual(app.exitCode,0);
+    if (options.foreignProject || options.saved || options.occupied) assert.equal(calls.closed,0);
+}
+console.log('PASS: owned reset produces clean follow-up state and rejects failed/foreign cleanup');

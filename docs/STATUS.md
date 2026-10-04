@@ -993,5 +993,59 @@ Native ordinary Undo/Redo, deletion/restore and save/reopen PASS on installed
 Dev44. The original animation streams and exact corresponding pixels survive;
 initialization remains its own Undo action. The versioned receipt roundtrip and
 legacy empty state are covered by source tests. MFR requested ON/OFF native comparison passes60 exact frames per run; actual
-parallel callback execution is not instrumented. Scoped camera/parent checks PASS; expanded Wave UI remains open. Windows NOT RUN.
+parallel callback execution is not instrumented. Scoped camera/parent checks PASS; expanded Wave UI PASS after user expansion and native screenshot inspection. Windows NOT RUN.
 See [Dev44 evidence](update-094-dev44-lifecycle-2026-10-04.json).
+
+### Dev44 continuation: Wave layout accepted; fresh-scene failure open
+
+Expanded Wave Animation contains all five controls, with visible labels and
+Axis popup matching the observed Plane/Edge/Quality width. User-assisted
+expansion and agent native screenshot inspection PASS; no screenshot file
+is claimed. Shared project-roundtrip export now waits for a fresh nonempty
+PNG before closing its owned scene; native roundtrip PASS. Windows smoke
+cleanup has an opt-in guarded fresh-project reset, with local regression tests.
+These test/tool changes remain local and are not part of the installed artifact.
+
+Full smoke remains FAIL. Separating creation, setters and exports did not
+resolve it. A single owned Wave fixture reproduces a black viewer with Plane
+Kind0 and disabled hidden bindings; hidden point reads report invalid numeric
+result. Exact saved fixture reopen repeats it. Root cause is not established;
+new-instance/deferred binding is under investigation. Earlier scoped Undo,
+save/reopen and MFR pixel PASS do not establish whole-candidate acceptance.
+Diagnostic outputs: outputs/update-094-dev44-mac/wave-isolation and phased-smoke
+variants. The experimental phased fixture is not integrated or accepted.
+Windows local packet predates these edits and must be regenerated after a
+verified checkpoint. Installers stay deferred until plugin validation succeeds.
+
+### Deferred smoke correction and native recovery — 2026-10-04
+
+The black-frame investigation is resolved for the tested scenario. The legacy
+monolithic script starts non-neutral rendering before AE can execute deferred
+plane binding. Its render-error dialog then prevents later idle callbacks.
+Observed native dialog: BadCallbackParameter516 (25::237). Closing that dialog
+restores initialization without restarting AE or changing plugin source.
+
+Two complete phased runs before the failure and one after dismissing the dialog
+PASS all10 frames and7 pixel comparisons, including Adjustment Layer -> FSTR ->
+Corner Pin. The old saved Wave fixture also binds/exports in a fresh session.
+A hidden Point scripting .value error alone is not an initialization oracle:
+it also occurs in an initialized, correctly rendering fixture. Five enabled
+expressions/PlaneKind and independent exported pixels establish the scoped result.
+
+Mac and Windows coordinators now share separate prepare/set/export/cleanup calls.
+Exact nonce/item IDs/schema/scene guards and create-only phase outputs are
+retained; Windows packet includes the new fixture and Mac acceptance packaging
+includes its coordinator dependency. The integrated Mac coordinator passes22
+steps and decoded pixels on PID18624, with exact installed Dev44 UUID/hash/Build
+ID independently PASS. Native plugin source remains db230124; tool/docs changes
+do not change the installed artifact. Windows build/runtime remains NOT RUN.
+See [phased smoke evidence](update-094-phased-smoke-2026-10-04.json). Historical
+failed captures remain FAIL; installer work stays after platform validation.
+
+Source validation for the coordinator changes:277 unique Python tests PASS
+combined (initial sandbox run had3 permission errors; required-access reruns
+pass all12 process-guard and2 native-image cases). All script safety checks PASS.
+Static audit's one heuristic auth/rate-limit finding is a test mock at
+tests/test_target_ae_acceptance.py:54, not an HTTP route; adjudicated false
+positive. Audit does not assess release readiness. Logs stay in local
+outputs/update-094-phased-validation. No Rust/native source was changed.

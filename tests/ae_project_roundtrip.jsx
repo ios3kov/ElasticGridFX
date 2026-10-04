@@ -11,6 +11,16 @@ function egfxWaveParam(root, name) {
     }
     return null;
 }
+// PNG export may complete after saveFrameToPng returns. Re-read the File
+// object while the owned project remains open; closing it can cancel export.
+function egfxWaitForPng(path) {
+    for (var attempt = 0; attempt < 50; attempt++) {
+        var freshFile = new File(path);
+        if (freshFile.exists && freshFile.length > 0) return freshFile;
+        $.sleep(100);
+    }
+    return null;
+}
 (function () {
     var MATCH_NAME = "com.elasticgrid.fx.warp";
     var config = typeof ELASTICGRID_ROUNDTRIP_CONFIG === "undefined" ? null : ELASTICGRID_ROUNDTRIP_CONFIG;
@@ -178,7 +188,8 @@ function egfxWaveParam(root, name) {
             return;
         }
         reopenedComp.saveFrameToPng(0.75, pngFile);
-        if (!pngFile.exists || pngFile.length <= 0) {
+        pngFile = egfxWaitForPng(pngFile.fsName);
+        if (pngFile === null) {
             fail(stage);
             return;
         }

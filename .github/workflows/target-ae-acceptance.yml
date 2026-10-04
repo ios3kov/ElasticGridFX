@@ -27,6 +27,7 @@ jobs:
             python3 -m unittest discover -s tests -p 'test_acceptance_package_permissions.py' -v
             python3 -m unittest discover -s tests -p 'test_smoke_pixels.py' -v
             node tests/test_smoke_safety.js
+            node tests/test_phased_smoke_safety.js
             node tests/test_smoke_loader_safety.js
           } 2>&1 | tee "$RUNNER_TEMP/acceptance-evidence/tests.log"
           bash -n RUN_ELASTICGRID_AE_TEST_MAC.command

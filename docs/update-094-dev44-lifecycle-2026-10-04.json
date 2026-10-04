@@ -155,7 +155,6 @@
     }
   },
   "remaining": [
-    "expanded Wave native UI NOT RUN: custom control inaccessible through current Cua, gesture helper not authorized for this area",
     "Windows build/runtime NOT RUN: no Windows host/MSVC locally; remote publication not authorized",
     "installers WAIT_PLUGIN_VALIDATION"
   ],
@@ -221,5 +220,28 @@
     "grid_keys": 4,
     "radius_keys": 3,
     "evidence_folder": "outputs/update-094-dev44-mac/canceled-reopen"
+  },
+  "wave_ui": {
+    "status": "PASS",
+    "method": "user expanded group; agent inspected native screenshot",
+    "controls": [
+      "Wave Amplitude",
+      "Wave Frequency",
+      "Wave Phase",
+      "Wave Speed",
+      "Wave Axis"
+    ],
+    "axis_popup": "same observed width as Plane/Edge/Quality; captions visible",
+    "scope": "installed Dev44 only; no screenshot file saved"
+  },
+  "new_scene_regression": {
+    "status": "REPRODUCED_FIXTURE_FAILURE_SCOPED_RECOVERY_PASS",
+    "scope": "owned 319x241 32bpc Wave fixture; wave amplitude10 frequency1.3 phase35 speed0",
+    "observed": "Plane Kind0; five hidden bindings disabled; hidden point reads invalid numeric result; black viewer",
+    "reopen": "same failure after reopening exact saved fixture",
+    "evidence": "outputs/update-094-dev44-mac/wave-isolation",
+    "cause": "Monolithic pre-idle export plus retained native render-error modal; same-process recovery verified after dismissal",
+    "full_smoke": "FAIL at direct Wave or Adjustment Layer frame depending on fixture; earlier lifecycle PASS scope remains unchanged",
+    "followup": "update-094-phased-smoke-2026-10-04.json"
   }
 }

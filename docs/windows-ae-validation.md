@@ -93,3 +93,25 @@ For complete first-application coverage, repeat from a fresh AE launch for the
 required matrix of 8/16/32 bpc, solid/text/Checkerboard-precomp and applicable
 2D/3D cases. A completed automated case is LIMITED until transient-dialog
 observation and the remaining interactive/MFR checks are also recorded.
+
+## Deferred plane initialization and smoke phases
+
+The runner prepares the owned fixture, returns control to AE, then executes each
+parameter change and PNG export in separate script calls. It checks the run nonce,
+exact project item IDs, layer/effect layout and fresh output at every step.
+Creation and immediate non-neutral rendering in one script prevent AE's idle
+initialization and can trigger a render-error dialog. Such a dialog blocks later
+idle initialization until dismissed. Do not run the legacy monolithic smoke
+script as a replacement for the phased coordinator. A failed native phase remains
+FAIL; close its visible error dialog before another run. Windows runtime of the
+new coordinator remains NOT RUN until exercised on the exact Windows candidate.
+
+Before each setter/export, the fixture checks that all five hidden binding
+expressions are enabled/error-free and Plane Kind is1/2/3. Pending binding fails
+the phase before rendering. Hidden Point .value is deliberately not used as an
+initialization oracle. The same guard passes all22 integrated Mac steps; this
+does not establish Windows runtime support.
+
+The Windows2022 CI image lists Node.js in its installed/cached tools
+([official runner inventory](https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md),
+checked2026-10-04); remote execution of the updated workflow is NOT RUN.

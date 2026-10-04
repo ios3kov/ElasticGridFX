@@ -54,7 +54,9 @@ jobs:
         run: ctest --test-dir build-win -C Release --output-on-failure
 
       - name: Test Windows packager and AE validation packet
-        run: python -m unittest tests.test_package_windows tests.test_finalize_windows_validation tests.test_windows_ae_validation tests.test_windows_first_application
+        run: |
+          python -m unittest tests.test_package_windows tests.test_finalize_windows_validation tests.test_windows_ae_validation tests.test_windows_first_application
+          node tests/test_phased_smoke_safety.js
 
       - name: Check locked Rust graph
         run: cargo metadata --locked --format-version 1 --manifest-path host-rust/Cargo.toml > NUL
@@ -144,6 +146,7 @@ jobs:
             tools/smoke_pixels.py
             tools/build_identity.py
             tests/ae_runtime_smoke.jsx
+            tests/ae_runtime_smoke_phased.jsx
             tests/ae_project_roundtrip.jsx
             tests/ae_first_application.jsx
             docs/windows-ae-validation.md

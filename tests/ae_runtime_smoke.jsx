@@ -300,6 +300,24 @@ function elasticGridSmoke(config) {
                     owned.bitsPerChannel = initialBpc;
                     owned.workingSpace = initialSpace;
                     owned.linearizeWorkingSpace = initialLinearize;
+                    // The Windows coordinator immediately starts another guarded
+                    // test. Item removal leaves this disposable project dirty.
+                    // Reset only the exact owned, fully cleaned unsaved project.
+                    if (config.reset_owned_after_capture === true) {
+                        if (app.project !== owned || owned.file !== null || owned.numItems !== 0)
+                            throw new Error("Owned empty cleanup unavailable");
+                        if (owned.close(CloseOptions.DO_NOT_SAVE_CHANGES) === false)
+                            throw new Error("Owned cleanup close failed");
+                        owned = null;
+                        var freshProject = app.newProject();
+                        if (freshProject === null || freshProject !== app.project)
+                            throw new Error("Fresh project unavailable");
+                        var freshState = elasticGridCurrentProjectState();
+                        result.fresh_guard = freshState.guard;
+                        result.fresh_project_revision = freshState.project_revision;
+                        if (!elasticGridHasTestProjectOwnership(result.fresh_guard, result.fresh_project_revision))
+                            throw new Error("Fresh project is not clean");
+                    }
                 } catch (cleanupError) { result.status = "FAIL"; result.stage = "cleanup"; }
             }
         }
@@ -315,6 +333,8 @@ function elasticGridSmoke(config) {
                     ',"stage":'+quote(result.stage)+',"ae_version":'+quote(result.ae_version)+
                     ',"project_bpc":32,"fixture_color":"unmanaged","loaded_build_id":null,"guard":'+quote(result.guard)+
                     ',"project_revision":'+quote(result.project_revision)+
+                    ',"fresh_guard":'+quote(result.fresh_guard || "NOT_CHECKED")+
+                    ',"fresh_project_revision":'+quote(result.fresh_project_revision || "NOT_CHECKED")+
                     ',"error_number":'+(result.error_number == null ? 'null' : String(result.error_number))+
                     ',"error_line":'+(result.error_line == null ? 'null' : String(result.error_line))+'}');
                 resultFile.close();

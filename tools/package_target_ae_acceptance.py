@@ -7,9 +7,9 @@ import build_identity as bi
 
 ROOT=Path(__file__).resolve().parents[1]
 FILES=('RUN_ELASTICGRID_AE_TEST_MAC.command',
-       'tools/target_ae_acceptance.py','tools/ae_smoke_runner.py','tools/live_identity.py',
+       'tools/target_ae_acceptance.py','tools/ae_smoke_runner.py','tools/windows_ae_validation.py','tools/live_identity.py',
        'tools/smoke_pixels.py','tools/build_identity.py','tools/install_candidate.py',
-       'tests/ae_runtime_smoke.jsx','diagnostics/candidate-fd69988.json',
+       'tests/ae_runtime_smoke.jsx','tests/ae_runtime_smoke_phased.jsx','diagnostics/candidate-fd69988.json',
        'diagnostics/TARGET_AE_ACCEPTANCE_README_RU.txt')
 CANDIDATE_SHA='68c135f1a2a9390a0032a31d9073c8111bff6dd43691b9222ec50fad3913982e'
 
