@@ -243,7 +243,13 @@ flows; state retained after AE restart; activated offline editing/preview/render
 deactivation/transfer and service-failure handling according to the approved
 policy; About version preserved; no render/MFR network/UI work, no secret logging,
 and scoped project/output/performance regression checks on each target platform.
-Status: PLANNED. Provider-dependent design and runtime checks are NOT RUN.
+Status: RESEARCH STARTED. User selected aescripts **and Plugin Play** on
+2026-10-04. Header-caption API support is verified in SDK25.6 and the pinned
+Rust wrapper; native UI and provider runtime checks are NOT RUN. See
+[licensing integration checkpoint](licensing-integration-2026-10-04.md).
+User confirmed no author access yet. Provider integration is BLOCKED on SDKs,
+test entitlements and dual-market/offline policy;
+do not design a direct-store key issuer or assume cross-market key compatibility.
 
 ## Active update task and check mapping — rules8.0.0
 
@@ -267,7 +273,7 @@ macOS arm64 / Windows x64 until verified otherwise.
 | U8 | Safe Mac/Windows installation and rollback | Dry-run/path/identity/backup tests; exact candidate install, load and rollback on each target platform | Mac plugin checks precede resumed native installer work; protected snapshot receipts and exclusive fresh publication implemented, five native test targets PASS; frontend/package acceptance pending; Windows deferred |
 | U9 | Windows runtime closure and dependency instructions | Corrected exact candidate identity; x64 dependencies; load/UI/pixel/roundtrip/first-application/MFR/aerender host packet | NOT RUN; Windows host unavailable here |
 | U10 | Integration, validation and final task reconciliation | All U1–U9 and U11 requirements/checks accounted for with exact candidate Evidence; docs/manifest/CI; cleanup inventory; no old PASS transfer | Pending |
-| U11 | Commercial activation and license management | Select channel/policy; verify native Activate/License entry, About, key/restart/offline/transfer/failure flows and render/MFR isolation | PLANNED; placement/provider/policy design and runtime checks NOT RUN; Mac first, Windows deferred |
+| U11 | Commercial activation and license management | Select channel/policy; verify native Activate/License entry, About, key/restart/offline/transfer/failure flows and render/MFR isolation | RESEARCH STARTED; header naming API verified; aescripts + Plugin Play selected; provider SDKs/policy pending; native/runtime NOT RUN; Mac first, Windows deferred |
 
 The user removed U7 export/cache exclusion on2026-10-04: optional rendered grid
 pixels are now authorized. The old additive-only research is historical for its

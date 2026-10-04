@@ -1128,3 +1128,17 @@ and commercial policies require definition before dependent implementation.
 This is documentation-only planning, not implemented licensing or release
 acceptance. Existing U0–U10 obligations/Evidence remain; U10 now includes U11.
 Mac first, Windows deferred and local-only publication restrictions persist.
+
+
+### U11 integration research — 2026-10-04
+
+Sales channels confirmed by user: aescripts and Plugin Play. SDK25.6 and pinned
+Rust binding expose PF_SetOptionsButtonName during ParamSetup; IDoDialog needs
+matching PiPL/global flags and an Instance dialog handler. This resolves the
+source-level caption uncertainty, not actual host placement or caption refresh.
+Public vendor material does not supply native adapter contracts/product IDs/test
+entitlements; none found in project/output inventory. User confirmed no
+author access yet; provider integration is BLOCKED on vendor materials. No fake licensing or guessed key generator added; installed
+Dev48/render unchanged. Native header/prototype and provider acceptance NOT RUN.
+See licensing-integration-2026-10-04.md for source references, vendor packet
+requirements, dual-market/offline unknowns and dependency-ordered acceptance.
