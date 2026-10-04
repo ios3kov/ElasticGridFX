@@ -59,13 +59,17 @@ Windows instructions already delivered to the user.
 [Adobe troubleshooting path](https://helpx.adobe.com/premiere/desktop/troubleshooting/crash-issues/premiere-freezes-on-the-splash-screen.html).
 
 
-Windows native fixture research: NTFS re-inherits backup DACLs on the backup
-rename. Do not mask/ignore changed ACLs: require original owner/group, all old
-non-security fields and original file identity/bytes; permit only the original
-DACL or the staged file's verified protected-parent DACL, both known before
-publication and bound in prepared. Every snapshot independently refuses unknown
-write principals. Then bind the exact retained full snapshot in its own durable
-receipt. Restore requires exact retained/installed snapshots and verifies the
-original full metadata/bytes after restoration. A later backup ACL change must
-refuse Restore. An earlier broad comparison proposal was rejected by automatic
-review and never applied; this explicit preplanned policy replaces that proposal.
+Windows native fixture research: ReplaceFileW freezes the backup's original
+DACL (INHERITED_ACE cleared, protected DACL), instead of re-inheriting staged
+permissions. Exact disposable-fixture security descriptors established this;
+the earlier re-inheritance hypothesis was disproved. Compute that deterministic
+protected original descriptor from prepared, require it exactly together with
+original owner/group, file identity, bytes, attributes and timestamps. Bind the
+exact retained full snapshot in its own durable receipt. Restore checks exact
+retained/installed snapshots; ReplaceFileW's permission merge is replaced with
+the exact prepared original permission set, protected against new inheritance,
+then every original metadata field and the deterministic protected security
+snapshot must match. No new principals/rights, arbitrary ACLs or silent masking.
+A subsequent backup ACL change refuses Restore. A broad comparison proposal was
+rejected by automatic review and never applied. All execution remains isolated
+native test fixtures until separately accepted administrator installation.

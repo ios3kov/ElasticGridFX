@@ -1302,3 +1302,14 @@ pending, no administrator Windows installation claim. See native-installer-plan.
 Native Edge Behavior demonstration produces three distinct outputs for the same
 fixture: outputs/edge-behavior-example/comparison.png (left Clamp, center Wrap,
 right Mirror). This is shared PlaneRenderer evidence, not AE popup runtime proof.
+
+
+Windows fixture10d7f1f CI37200489252 disproves the prior re-inheritance
+hypothesis: backup permissions are frozen (same owner/group/principal masks,
+INHERITED_ACE removed, DACL protected). The active replacement combines old
+explicit permissions and staged inheritance. Current correction computes the
+exact protected original descriptor from prepared, with all other snapshot
+fields exact; Restore explicitly reapplies only that original permission set
+and verifies the resulting deterministic full snapshot. No unknown ACL policy
+is accepted and no system installer action has run. Native CI pending again;
+preceding failures remain FAIL. Diagnostics are only in disposable test code.
