@@ -1273,3 +1273,16 @@ Windows native installation root corrected to x64 ProgramFiles/Adobe/Common;
 earlier CommonProgramFiles note is superseded, see plan primary references.
 Evidence: outputs/native-installer-development/. Next: finish native checks,
 package Mac app, execute Windows installer CI on the authorized feature branch.
+
+
+U8 package follow-up: Mac installer app from clean c9b62a8 compiled/signed and
+strict signature verification PASS. Delivery ZIP SHA256
+054cc637ac722fcb3879688cc9a1f6e4a5c62cec3fa3cbe10f59354b5c69567b;
+outputs/FSTR-Stretch-0.9.4-Mac-Installer/installer-artifact.json separates
+installer source from unchanged Dev52. Native UI observation returned timeout;
+visual/administrator installation acceptance NOT RUN, no system replacement.
+Windows CI37199357535 failed compile (filesystem ADL name collision and missing
+COM declarations), before native fixture execution. Corrected path helper naming,
+explicit COM header and Unicode native UI declarations; next run pending.
+Unnecessary plugin rebuild/Mac speed workflows cancelled, unchanged accepted
+Dev56 is the package payload. Edge sampling CTest also PASS on current Mac tree.
