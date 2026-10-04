@@ -18,7 +18,7 @@ int main(int argc,const char* argv[]) {
             NSAlert* alert=[NSAlert new];alert.messageText=@"FSTR Stretch Installer";
             alert.informativeText=[NSString stringWithFormat:@"Version %s\n\nInstall saves your previous version. Restore brings it back. Close Adobe render applications first.\n\nIf you use a custom plug-in folder, remove older FSTR copies there first.\n\nBackups: /Library/Application Support/FSTR FX/Backups",fstr::payload::version];
             [alert addButtonWithTitle:@"Install"];[alert addButtonWithTitle:@"Restore"];[alert addButtonWithTitle:@"Close"];
-            auto choice=[alert runModal];if(choice==NSAlertThirdButtonReturn)break;
+            auto choice=[alert runModal];if(choice!=NSAlertFirstButtonReturn && choice!=NSAlertSecondButtonReturn)break;
             NSString* action=choice==NSAlertFirstButtonReturn?@"--install":@"--restore";
             // AppleScript's quoted form protects spaces, quotes and shell syntax
             // in the selected app's path. Only a fixed action is appended.

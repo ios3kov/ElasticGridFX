@@ -81,3 +81,9 @@ original ACE principal/mask/flags and owner/group exact. The backup publication
 still requires its exact P form. Neither variant permits future inheritance or
 new grants. Native user-profile root uses FOLDERID_UserProfiles; .AEX scans are
 case-insensitive to avoid missing uppercase duplicates.
+
+Already-protected originals keep their exact descriptor on repeated update; this
+alternative is allowed only when prepared proves SE_DACL_PROTECTED. Unprotected
+originals cannot use the unchanged-descriptor alternative. Repeated Install →
+Restore → Install is an explicit fixture. Mac cancellation exits instead of
+interpreting unexpected modal responses as Restore.
