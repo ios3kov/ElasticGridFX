@@ -89,3 +89,20 @@ commercial Release gate. Development proof does not authorize publication.
 
 Installed ordinary Mac Dev48 remains unchanged by this research. It has no
 commercial activation yet. No activated/trial/revoked status is fabricated.
+
+## Independent Mac UI implementation — 2026-10-04
+
+User separately authorized building the independent window before vendor SDKs.
+Mac now declares IDoDialog consistently in PiPL and GlobalSetup, sets the native
+`License...` caption only in ParamsSetup and handles Instance::do_dialog. The
+caption is deliberately stable while the provider is absent; no fake Activate
+button or input that discards keys. Native AppKit window states that licensing
+is not connected and the development build works without activation. About
+shows the Cargo product version; Support opens the public project issues page
+only on a user click, with a fallback URL if the browser cannot be opened.
+Close performs no project/parameter/license write. About returns to License.
+The native bridge requires main thread/NSApp, contains Objective-C exceptions,
+and the Rust entry skips render-engine UI. No new third-party dependency, HTTP
+request, credential storage or render callback work. Windows dialog remains
+deferred and does not gain the Mac-only flag. Native host validation follows
+compilation; neither source support nor a build is host acceptance.

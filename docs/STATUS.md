@@ -1142,3 +1142,15 @@ author access yet; provider integration is BLOCKED on vendor materials. No fake 
 Dev48/render unchanged. Native header/prototype and provider acceptance NOT RUN.
 See licensing-integration-2026-10-04.md for source references, vendor packet
 requirements, dual-market/offline unknowns and dependency-ordered acceptance.
+
+
+### Independent Mac licensing window — Development
+
+User authorized independent UI before marketplace SDKs. Native License... header
+entry and AppKit License/About/Support/Close window implemented for Mac; About
+uses Cargo0.9.4 and VersionRow stays hidden. No activation adapter, key collection,
+network validation, saved-project changes or renderer changes. Store integration
+remains BLOCKED on author materials; native window validation pending.
+Development PiPL builds52/53/54/55 distinguish the new UI candidate. Host contract
+15 and About/build identity23 tests PASS; cargo check PASS. Mac runtime validation
+and signed candidate identity must precede installed/accepted claims.

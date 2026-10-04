@@ -45,9 +45,9 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {51}
-        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {50}
-        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {49} else {48};
+    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {55}
+        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {54}
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {53} else {52};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
@@ -125,6 +125,7 @@ fn main() {
             .include(&out_dir)
             .file(root.join("src/gpu/metal_backend.mm"))
             .file(root.join("src/bridge/hand_cursor.mm"))
+            .file(root.join("src/bridge/license_window.mm"))
             .flag_if_supported("-fobjc-arc")
             .flag_if_supported("-fvisibility=hidden")
             .warnings(true);
@@ -158,6 +159,7 @@ fn main() {
         "src/bridge/elasticgrid_ffi.cpp",
         "src/bridge/elasticgrid_ffi.h",
         "src/bridge/hand_cursor.mm",
+        "src/bridge/license_window.mm",
         "src/gpu/warp.metal",
         "src/gpu/metal_backend.mm",
     ] {
@@ -206,7 +208,8 @@ fn main() {
             OutFlags::NonParamVary |
             OutFlags::DeepColorAware |
             OutFlags::SendUpdateParamsUI |
-            OutFlags::CustomUI
+            OutFlags::CustomUI |
+            if target_os == "macos" { OutFlags::IDoDialog } else { OutFlags::empty() }
         ),
         Property::AE_Effect_Global_OutFlags_2(out_flags2),
         Property::AE_Effect_Match_Name("com.elasticgrid.fx.warp"),

@@ -11,6 +11,8 @@ mod show_grid;
 mod range_feedback;
 mod control_layout;
 mod version_row;
+#[cfg(target_os = "macos")]
+mod license_window;
 #[cfg(feature="preview-overlay-probe")]
 mod preview_overlay_probe;
 mod ui_projection;
@@ -930,6 +932,10 @@ use super::*;
 struct Instance { receipt: binding_receipt::State }
 ae::define_effect!(Plugin, Instance, Params);
 impl AdobePluginInstance for Instance {
+    #[cfg(does_dialog)]
+    fn do_dialog(&mut self, _: &mut PluginState) -> Result<(), ae::Error> {
+        license_window::show()
+    }
     fn flatten(&self) -> Result<(u16, Vec<u8>), ae::Error> { Ok(self.receipt.flatten()) }
     fn unflatten(version: u16, bytes: &[u8]) -> Result<Self, ae::Error> {
         Ok(Self { receipt: binding_receipt::State::unflatten(version, bytes)? })
@@ -948,6 +954,8 @@ impl AdobePluginGlobal for Plugin {
         in_data: ae::InData,
         _: ae::OutData,
     ) -> Result<(), ae::Error> {
+        #[cfg(target_os = "macos")]
+        in_data.effect().set_options_button_name("License...")?;
         // UI order is independent of persistent IDs (derived from unchanged Params names).
         params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
             f.set_options(&["Layer Plane", "Four Corners"]);
@@ -1120,6 +1128,8 @@ impl AdobePluginGlobal for Plugin {
         self.lifecycle_probe.observe(&cmd, &in_data);
         match cmd {
             ae::Command::GlobalSetup => {
+                #[cfg(target_os = "macos")]
+                out_data.set_out_flag(ae::OutFlags::IDoDialog, true);
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
                 // One noninteractive diagnostic per host setup, never per frame.
                 eprintln!("{}", build_identity::DIAGNOSTIC.replace('\r', " | "));
