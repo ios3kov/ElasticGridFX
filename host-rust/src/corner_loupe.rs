@@ -16,7 +16,11 @@ thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::c
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
 pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);GESTURE_FRAME.set(None);}
 fn finish_native(button_down:bool){
-    if !button_down&&ACTIVE.get().is_some_and(|g|g.native){clear();}
+    if !button_down&&ACTIVE.get().is_some_and(|g|g.native){
+        // A stationary release does not imply leaving the hit-tested corner.
+        // Preserve its scoped pointer anchor so a second press needs no motion.
+        ACTIVE.set(None);PREVIOUS.set(None);GESTURE_FRAME.set(None);
+    }
 }
 fn start_native(g:Gesture){
     if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){GESTURE_FRAME.set(None);}
@@ -35,13 +39,10 @@ pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,
     // Never arm from a drag, or read the DRAW union as mouse coordinates.
     if native_button_down(){
         if ACTIVE.get().is_some(){return false;}
-        if let (Ok(owner),Some(pointer),Some(h))=(owner(input,id),native_pointer(),HOVER.get()){
+        if let (Ok(owner),Some(pointer))=(owner(input,id),native_pointer()){
             let now=Observation{owner,window:ui::event_window_code(event),time:input.current_time(),
                 scale:input.time_scale(),corners:[0.;8]};
-            if let Some(index)=pressed_hover(h,now,pointer){
-                start_native(Gesture{owner,window:now.window,index,native:true});
-                HOVER.set(None);return true;
-            }
+            if start_hover(now,pointer){return true;}
         }
         return false;
     }
@@ -50,6 +51,18 @@ pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,
         window:ui::event_window_code(event),time:input.current_time(),scale:input.time_scale(),
         index,pointer:native_pointer()?})));
     false
+}
+fn start_hover(now:Observation,pointer:(f64,f64))->bool{
+    if ACTIVE.get().is_some(){return false;}
+    let Some(index)=HOVER.get().and_then(|h|pressed_hover(h,now,pointer))else{return false;};
+    start_native(Gesture{owner:now.owner,window:now.window,index,native:true});
+    true
+}
+fn track_hover(now:Observation,index:usize,pointer:(f64,f64)){
+    if ACTIVE.get().is_some_and(|g|g.native&&g.owner==now.owner&&g.index==index&&
+        (g.window==0||g.window==now.window)){
+        HOVER.set(Some(Hover{owner:now.owner,window:now.window,time:now.time,scale:now.scale,index,pointer}));
+    }
 }
 fn pressed_hover(h:Hover,now:Observation,pointer:(f64,f64))->Option<usize>{
     (h.owner==now.owner&&h.window==now.window&&h.time==now.time&&h.scale==now.scale&&
@@ -99,10 +112,7 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id
     let now=Observation{owner,window:ui::event_window_code(event),
         time:input.current_time(),scale:input.time_scale(),corners};
     if ACTIVE.get().is_none()&&native_button_down(){
-        if let Some(index)=HOVER.get().and_then(|h|pressed_hover(h,now,native_pointer()?)){
-            start_native(Gesture{owner,window:now.window,index,native:true});
-            HOVER.set(None);
-        }
+        if let Some(pointer)=native_pointer(){start_hover(now,pointer);}
     }
     #[cfg(all(feature="preview-overlay-probe",target_os="macos"))]{
         unsafe extern "C"{fn eg_loupe_button_probe()->i32;}
@@ -121,6 +131,7 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id
                 // Covers live native Point previews even if supervision is
                 // deferred until mouse-up. Ignore scrubbing and whole-plane moves.
                 if ACTIVE.get().is_none(){native_change(input,index,id);}
+                if let Some(pointer)=native_pointer(){track_hover(now,index,pointer);}
             }
         }
     }
@@ -129,7 +140,7 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id
 
 pub(crate) fn active(input:&ae::InData,event:&ae::EventExtra,id:Option<ae::aegp::PluginId>)->Option<usize>{
     let g=ACTIVE.get()?;
-    if g.native&&!native_button_down(){clear();return None;}
+    if g.native&&!native_button_down(){finish_native(false);return None;}
     (g.owner==owner(input,id).ok()?&&(g.window==0||g.window==ui::event_window_code(event))).then_some(g.index)
 }
 fn source(event:&ae::EventExtra,x:f32,y:f32)->Result<(f32,f32),ae::Error>{
@@ -355,6 +366,29 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         let at=|x:usize,y:usize|&p[(y*SIZE+x)*4..(y*SIZE+x+1)*4];
         assert_eq!(at(64,64),[255,100,100,20]);assert_eq!(at(0,0),[0,0,0,0]);
         assert_eq!(at(64,70),[255,255,255,255]);assert_eq!(at(63,63),[255,99,99,20]);
+    }
+    #[test]fn moved_native_corner_retains_its_new_pointer_anchor_after_release(){
+        clear();let pointer=(148.,460.);
+        let now=Observation{owner:7,window:1,time:10,scale:25,corners:[0.;8]};
+        start_native(Gesture{owner:7,window:0,index:2,native:true});
+        track_hover(now,1,(99.,99.));assert!(HOVER.get().is_none());
+        track_hover(now,2,pointer);finish_native(false);
+        assert!(!start_hover(now,(123.,456.)));assert!(start_hover(now,pointer));
+        clear();assert!(!start_hover(now,pointer));
+    }
+    #[test]fn stationary_repeated_press_needs_no_new_hover_or_point_motion(){
+        clear();let pointer=(123.,456.);
+        let h=Hover{owner:7,window:1,time:10,scale:25,index:2,pointer};
+        let now=Observation{owner:7,window:1,time:10,scale:25,corners:[0.;8]};
+        HOVER.set(Some(h));
+        for _ in 0..3{
+            assert!(start_hover(now,pointer));
+            assert!(!start_hover(now,pointer)); // a held press does not start twice
+            GESTURE_FRAME.set(Some(GestureFrame{key:request_key(0),finished:true}));
+            finish_native(false);
+            assert!(ACTIVE.get().is_none());assert!(GESTURE_FRAME.get().is_none());
+        }
+        clear();assert!(!start_hover(now,pointer));
     }
     #[test]fn stationary_corner_press_is_qualified_without_parameter_motion(){
         let h=Hover{owner:7,window:1,time:10,scale:25,index:2,pointer:(123.,456.)};

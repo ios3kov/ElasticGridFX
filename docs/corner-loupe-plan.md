@@ -150,3 +150,10 @@ Lens samples the gesture snapshot at the moving target; render pixels unchanged.
 Release clears active work before new hover arming; same-corner supervision
 cannot rearm work. Tests cover repeat, completion/error and changing host stamps.
 Native acceptance NOT RUN; original Mac-hang attribution remains UNCONFIRMED.
+
+Dev140 repeated stationary press still FAIL in native user check. Dev144 includes
+a FAIL-before-fix test invoking the actual shared hover-start path three times
+without new hover events or coordinate changes. Native release now preserves
+the hit-tested scope/pointer anchor, while lifecycle cancellation still clears
+it. Active single-corner movement follows the pointer anchor for later repress.
+Gesture frame completion/budget unchanged. Native acceptance remains NOT RUN.

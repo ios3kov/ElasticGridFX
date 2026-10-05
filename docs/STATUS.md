@@ -1823,3 +1823,25 @@ stationary press/drag/Undo and absence of slowdown requested, still NOT RUN.
 Windows CI37358711191 and Mac CI37358711209 PENDING at checkpoint. Local
 evidence outputs/corner-repeat-dev140/verification.json. No RAM Preview launched,
 original whole-Mac incident remains OPEN/UNCONFIRMED, no promotion.
+
+Dev140 repeated stationary press USER-REPORTED FAIL: first press works, later
+presses still require corner motion. Slowness acceptance not separately confirmed.
+Dev144 regression reproduces the missing transition without AE: same pointer/
+corner pressed/released three times, no extra hover/motion. Before fix FAIL log
+outputs/corner-repress-dev144/before-fix.log. Root in this state model: the hover
+anchor is consumed on start and clear() deletes it at native release. The former
+Dev140 test only reset request state, never exercised the real hover-start path.
+
+Dev144 shares hover-start between AdjustCursor and DRAW; preserves the scoped
+owner/view/time/scale/pointer anchor on native start/release. Full lifecycle clear
+and non-corner hover still invalidate it. Single-corner native movement updates
+that active corner's pointer anchor so repress after movement works without a
+new hover event. Existing pointer/scope guards reject other targets. The Dev140
+one-frame-per-gesture budget, completion-before-refresh and error guards remain.
+No timers/OS event injection/background requests/renderer/keys/schema changes.
+116 Rust tests and20 Python contracts PASS; strict Clippy/build follow. Native
+repeated-press/slowness acceptance NOT RUN, original Mac-hang incident OPEN.
+
+Contract count correction: the combined first-application/host unittest run
+records20 tests, not24; earlier Dev140 checkpoint overcounted this suite. Logs
+remain retained; Rust test totals unaffected.
