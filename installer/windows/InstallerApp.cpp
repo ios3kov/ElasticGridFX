@@ -5,6 +5,20 @@
 #include <exception>
 
 namespace {
+INT_PTR CALLBACK waitingDialog(HWND window,UINT message,WPARAM wparam,LPARAM){
+    if(message==WM_CLOSE){EndDialog(window,IDCANCEL);return TRUE;}
+    if(message==WM_COMMAND && HIWORD(wparam)==BN_CLICKED){
+        auto id=LOWORD(wparam);if(id==IDOK || id==IDCANCEL){EndDialog(window,id);return TRUE;}
+    }
+    return FALSE;
+}
+bool continueAfterClosingHosts(HWND parent){
+    elasticgrid::license_ui::DialogTemplate d;
+    d.dword(0x80c800c0);d.dword(0);d.word(3);d.word(0);d.word(0);d.word(300);d.word(90);d.word(0);d.word(0);d.text(u"Close Adobe applications");d.word(9);d.text(u"Segoe UI");
+    d.control(0x50000000,12,12,276,36,100,0x82,u"Close After Effects and other Adobe render applications, then click Continue. Your selected action will continue.");
+    d.control(0x50010001,80,60,96,18,IDOK,0x80,u"Continue");d.control(0x50010000,188,60,96,18,IDCANCEL,0x80,u"Cancel");
+    return DialogBoxIndirectParamW(GetModuleHandleW(nullptr),reinterpret_cast<const DLGTEMPLATE*>(d.words.data()),parent,waitingDialog,0)==IDOK;
+}
 INT_PTR CALLBACK dialog(HWND window,UINT message,WPARAM wparam,LPARAM){
     if(message==WM_CLOSE){EndDialog(window,0);return TRUE;}
     if(message!=WM_COMMAND || HIWORD(wparam)!=BN_CLICKED)return FALSE;
@@ -12,7 +26,18 @@ INT_PTR CALLBACK dialog(HWND window,UINT message,WPARAM wparam,LPARAM){
     if(id!=1 && id!=101)return FALSE;
     EnableWindow(GetDlgItem(window,1),FALSE);EnableWindow(GetDlgItem(window,101),FALSE);
     SetCursor(LoadCursorW(nullptr,IDC_WAIT));
-    try {auto result=fstr::installer::runNative(fstr::installer::systemEnvironment(),id==101);MessageBoxW(window,result.c_str(),L"FSTR Stretch",MB_OK);SetCursor(LoadCursorW(nullptr,IDC_ARROW));EndDialog(window,0);return TRUE;}
+    try {
+        auto environment=fstr::installer::systemEnvironment();
+        for(;;){
+            try {environment.checkHosts();break;}
+            catch(const fstr::installer::HostsRunning&){
+                SetCursor(LoadCursorW(nullptr,IDC_ARROW));
+                if(!continueAfterClosingHosts(window)){EndDialog(window,0);return TRUE;}
+                SetCursor(LoadCursorW(nullptr,IDC_WAIT));
+            }
+        }
+        // Only the pre-transaction check retries; engine errors retain recovery.
+        auto result=fstr::installer::runNative(environment,id==101);MessageBoxW(window,result.c_str(),L"FSTR Stretch",MB_OK);SetCursor(LoadCursorW(nullptr,IDC_ARROW));EndDialog(window,0);return TRUE;}
     catch(const std::exception& error){std::wstring text;for(const char* c=error.what();*c;++c)text.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*c)));MessageBoxW(window,text.c_str(),L"Installation stopped",MB_OK|MB_ICONWARNING);}
     SetCursor(LoadCursorW(nullptr,IDC_ARROW));EnableWindow(GetDlgItem(window,1),TRUE);EnableWindow(GetDlgItem(window,101),TRUE);return TRUE;
 }

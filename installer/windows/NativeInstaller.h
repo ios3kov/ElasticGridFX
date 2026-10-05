@@ -11,9 +11,14 @@
 #include <objbase.h>
 #include <filesystem>
 #include <functional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 namespace fstr::installer {
+class HostsRunning final : public std::runtime_error {
+public:
+    HostsRunning():std::runtime_error("Close After Effects and other Adobe render applications, then click Continue."){}
+};
 struct InstallEnvironment {
     std::filesystem::path active, backups;
     std::vector<std::filesystem::path> scanRoots;

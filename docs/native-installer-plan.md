@@ -117,3 +117,13 @@ Completion flow: after successful Install or Restore, including already-installe
 show the result once and exit after OK on both platforms. Errors/cancelled
 authorization retain the retry/Close path. User's Dev116 Mac already-installed
 result is accepted separately from replacement/Restore, which remain NOT RUN.
+
+Host-close continuation: retain the selected Install/Restore action and present
+Continue/Cancel when a verified running Adobe host is found before any transaction.
+Continue repeats full preflight and resumes that action; it never returns to the
+action picker. Cancel ends the session. Incomplete process scans, permissions,
+conflicts or errors after transaction start retain the stopped/recovery path.
+No process is terminated automatically. Mac CLI exit75 is reserved for typed
+HostsRunning from a separate pre-transaction check, not engine exceptions.
+Apple transport authority: https://developer.apple.com/library/archive/technotes/tn2065/_index.html
+Windows uses a native Continue/Cancel modal with the same preflight-only retry.

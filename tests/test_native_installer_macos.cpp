@@ -29,7 +29,14 @@ int main(int argc,char* argv[]){
         refuses([&]{runNative(e,true);});
     }
     {
-        auto e=make("blocked-host");e.checkHosts=[]{throw std::runtime_error("host running");};refuses([&]{runNative(e,false);});assert(!fs::exists(e.active));
+        auto e=make("blocked-host");e.checkHosts=[]{throw HostsRunning();};
+        bool waiting=false;try{runNative(e,false);}catch(const HostsRunning&){waiting=true;}
+        assert(waiting && !fs::exists(e.active) && !fs::exists(e.backups));
+        e.checkHosts=[]{};assert(runNative(e,false).starts_with("Installed."));
+        auto installed=snap(e.active/"FSTR Stretch.plugin");
+        e.checkHosts=[]{throw HostsRunning();};refuses([&]{runNative(e,true);});
+        assert(snap(e.active/"FSTR Stretch.plugin").sha256==installed.sha256);
+        e.checkHosts=[]{};assert(runNative(e,true).starts_with("No previous version"));
     }
     {
         auto e=make("duplicate");fs::copy(previous,e.scanRoots[0]/"ElasticGrid.plugin",fs::copy_options::recursive);refuses([&]{runNative(e,false);});assert(!fs::exists(e.active));

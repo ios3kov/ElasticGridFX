@@ -42,7 +42,12 @@ int fixtureMain(){
         auto e=make(L"interrupted-post-publication");previous(e.active/L"FSTR Stretch.aex");auto before=bytes(e.active/L"FSTR Stretch.aex");assert(runNative(e,false).starts_with(L"Installed."));auto tx=fs::directory_iterator(e.backups)->path();assert(fs::remove(tx/L"installed"));refuses([&]{runNative(e,false);});assert(runNative(e,true).starts_with(L"Previous version restored"));assert(bytes(e.active/L"FSTR Stretch.aex")==before);
     }
     {
-        auto e=make(L"host");e.checkHosts=[]{throw std::runtime_error("running host");};refuses([&]{runNative(e,false);});assert(!fs::exists(e.active));
+        auto e=make(L"host");e.checkHosts=[]{throw HostsRunning();};
+        bool waiting=false;try{runNative(e,false);}catch(const HostsRunning&){waiting=true;}
+        assert(waiting && !fs::exists(e.active) && !fs::exists(e.backups));
+        e.checkHosts=[]{};assert(runNative(e,false).starts_with(L"Installed."));
+        e.checkHosts=[]{throw HostsRunning();};refuses([&]{runNative(e,true);});
+        e.checkHosts=[]{};assert(runNative(e,true).starts_with(L"No previous version"));
     }
     {
         auto e=make(L"duplicate");previous(e.scanRoots[0]/L"other.AEX");refuses([&]{runNative(e,false);});assert(!fs::exists(e.active/L"FSTR Stretch.aex"));

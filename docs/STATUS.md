@@ -1588,3 +1588,20 @@ ZIP SHA256 fe67ef6162d072366a7ce92ed522c6c65ec7d62f1c09f44a47a0d8d6b977a96b.
 Successful-operation exit runtime and administrator Install/Restore NOT RUN;
 Windows frontend compilation NOT RUN. These remain distinct from the previous
 initial-window PASS and user already-installed result. Exact plugin unchanged.
+
+### Host-close installer continuation
+
+User requests continuing the selected installation after closing AE instead of
+returning to the main menu. Mac/Windows now retain Install/Restore and display
+Continue/Cancel on typed pre-transaction HostsRunning. Mac maps this initial
+check only to CLI exit75 / NSAppleScript error75; errors during runNative remain
+exit1, never automatically retried. Windows preflight catches the typed refusal
+before calling the engine. Every Continue repeats verification; incomplete scan
+and other errors retain existing refusal/recovery. No host is force-closed.
+Updated isolated fixtures exercise no filesystem mutation on running host,
+installation after clearing the host, blocked Restore and Restore after clearing.
+Mac strict build + fresh/repeat/update/restore/tamper/host/duplicate/link/pending/
+interrupted/lock fixtures PASS, output /private/tmp/egfx-native-frontend-1FHLig.
+Evidence outputs/mac-installer-host-continuation/native-fixtures.log.
+9 Python payload/decision checks PASS. Windows compilation and native GUI
+Continue/cancel/real administrator flows pending. Plugin bytes unchanged, Demo OFF.
