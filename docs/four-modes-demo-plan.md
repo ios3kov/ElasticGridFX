@@ -10,13 +10,13 @@ No old acceptance transfers to a new plugin artifact. No main/merge/release.
 |---|---|---|
 | M1 | Comp mode retains ordinal1/current Layer Plane behavior, including automatic 3D handling | Old-mode pixel/ID regression; native old project reopen |
 | M2 | Layer mode adds ordinal3, fitting 2D sourceRectAtTime bounds; existing 3D automatic plane handling retained | Transformed small 2D footage/text; animated source bounds; UI/render agreement |
-| M3 | Flat mode retains ordinal2/current Four Corners; neutral grid does not pin source to destination | Skewed neutral pass-through and deformed core regression |
+| M3 | Surface mode (formerly Flat) retains ordinal2/current Four Corners; neutral grid does not pin source to destination | Skewed neutral pass-through and deformed core regression |
 | M4 | Perspective adds ordinal4: pin source canvas (or already-projected text basis) to destination quad and inverse grid before one sampler | Analytic corner/center coordinates; pixels at all depths/qualities; corner drag |
 | M5 | All modes share grid, Wave, Show Grid, sampling quality, abort and saved animation; no mode switch rewrites parameters | Owned pre-render snapshot, Undo/save/reopen and animated mode matrix |
 | D1 | Demo design is FSTR FX inside each cell; future preview/export watermark | Design only; actual licensing integration is a prerequisite |
 | D2 | Demo rollout is OFF even without license; no watermark or public fake activation toggle | Both render routes remain unchanged; explicit compile-time disabled policy |
 
-UI names: Comp mode / Flat mode / Layer mode / Perspective. The last caption
+UI display names now: Comp mode / Layer mode / Surface mode / Perspective. The last caption
 is kept short to preserve native popup sizing without dummy options. Existing popup
 ordinals1/2 retain meaning; new choices append so saved projects are not reinterpreted.
 Flat/Perspective are short engineering-selected labels based on the user request.
@@ -230,3 +230,11 @@ output path, corrected without scene mutation. Last PNG was asynchronous; immedi
 reader failed, subsequent completed-frame comparison PASS. User UI confirmation
 pending. Windows37311196442 PASS, Mac37311196440 IN_PROGRESS; native Windows NOT RUN.
 Evidence outputs/edge-fixed-dev104/native-wave-pixels.json, loaded-identity and CI.
+
+
+Dev104 native visual inspection via Cua PASS: Layer and Perspective show disabled
+Clamp; Comp restores active None; Flat had active None. Hidden canonical edge row
+absent. User-modified owned scene preserved as edge-ui-check.aep before switching.
+New additive user decision: rename displayed Flat mode to Surface mode on both
+platforms, retaining saved ordinal2, internal Mode::Flat, deformation and keys.
+Dev108 changes captions/build number only; new visual/package/CI verification pending.

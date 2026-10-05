@@ -46,8 +46,8 @@ Comp/Flat remain editable. Saved choices are preserved. Installed **0.9.4 Dev104
 Build ID EGFX-ab9b2b3b3a3d8e9cb7493c49. Package/signature/atomic replacement/loaded identity PASS.
 98 Rust/15 host contracts/Clippy PASS. Native AE25.6 temporary-wave pixel comparisons
 PASS: Layer/Perspective Clamp and saved None outputs are byte-exact, Comp/Flat differ.
-Original choice restored; reference scene and prior binary backed up. UI disabled/
-enabled mode-switch acceptance pending user confirmation. Windows CI37311196442
+Original choice restored; reference scene and prior binary backed up. Native Cua UI PASS: disabled Clamp in Layer/Perspective, active None restored
+in Comp; Flat active None, hidden canonical edge row absent. Windows CI37311196442
 PASS; Mac37311196440 IN_PROGRESS. Windows native AE NOT RUN. Initial installer
 rejected branded archive before swap; correct internal archive installed successfully.
 Neutral-grid comparison initially failed an invalid expectation that edges must differ;
@@ -1436,3 +1436,9 @@ were repaired; numerical algorithms remain unchanged. Retained scanner finding
 at tests/test_target_ae_acceptance.py is a mocked-fixture false positive.
 Mac AE/new Windows artifact acceptance still NOT RUN. Source-check logs are
 retained in outputs/four-modes-source-checks outside the repository.
+
+### Surface caption continuation
+
+User requests Flat mode renamed Surface mode for Mac and Windows. Dev108 shared
+caption-only implementation; ordinals/internal enum/geometry unchanged. Native
+Dev104 edge policy visual checks PASS, new caption candidate checks pending.

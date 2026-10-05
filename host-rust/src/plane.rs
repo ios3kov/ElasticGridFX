@@ -3,12 +3,12 @@ use super::*;
 use std::ptr::NonNull;
 
 // Existing ordinals are serialized. Append new modes, never reorder old ones.
-pub(crate) const DISPLAY_MODE_OPTIONS:[&str;4]=["Comp mode","Layer mode","Flat mode","Perspective"];
+pub(crate) const DISPLAY_MODE_OPTIONS:[&str;4]=["Comp mode","Layer mode","Surface mode","Perspective"];
 // This permutation is its own inverse. Stored ordinals never change.
 pub(crate) fn display_mode_value(value:i32)->Result<i32,ae::Error>{
     match value{1|4=>Ok(value),2=>Ok(3),3=>Ok(2),_=>Err(ae::Error::BadCallbackParameter)}
 }
-pub(crate) const MODE_OPTIONS: [&str;4]=["Comp mode","Flat mode","Layer mode","Perspective"];
+pub(crate) const MODE_OPTIONS: [&str;4]=["Comp mode","Surface mode","Layer mode","Perspective"];
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub(crate) enum Mode {Comp,Flat,Layer,Perspective}
 impl Mode {
@@ -90,7 +90,7 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
     use super::ui_disabled;
     #[test] fn display_order_roundtrips_every_saved_mode_without_reinterpretation(){
         for value in 1..=4 {assert_eq!(super::display_mode_value(super::display_mode_value(value).unwrap()),Ok(value));}
-        assert_eq!(super::DISPLAY_MODE_OPTIONS[super::display_mode_value(2).unwrap() as usize-1],"Flat mode");
+        assert_eq!(super::DISPLAY_MODE_OPTIONS[super::display_mode_value(2).unwrap() as usize-1],"Surface mode");
         assert_eq!(super::DISPLAY_MODE_OPTIONS[super::display_mode_value(3).unwrap() as usize-1],"Layer mode");
         assert!(super::display_mode_value(0).is_err());
     }
