@@ -38,8 +38,12 @@ SHA2564efca39bb44072196307651bd2a173ac2d787918d1ad3c6d313c7da759d5e4d2.
 Windows new behavior in AE NOT RUN. Mac CI37306339475 FAIL: quality test reference
 switch omitted None under warnings-as-errors. Reference now includes transparent
 taps and all four edges in8/16/32bpc; exact ASan/UBSan strict compile/run PASS.
-Production renderer/binary unchanged by this test correction. CI rerun pending.
+Production renderer/binary unchanged by this test correction. Follow-up Mac37307305064 and Windows37307305067 PASS on test-only ecb9ac8.
 No release, merge, installer replacement or diagnostic build.
+
+New user decision: fixed Clamp and disabled Edge Behavior in Layer/Perspective;
+Comp/Flat remain editable. Saved choices are preserved. Dev104 implementation
+prepared; installed Dev100 does not yet contain this new policy. Native/CI pending.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.

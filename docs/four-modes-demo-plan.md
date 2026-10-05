@@ -204,3 +204,17 @@ Mac CI37306339475 FAIL from test_quality.cpp exhaustive switch missing None.
 Corrected independent quality oracle to return transparent taps, with float/8/16bpc
 coverage for all four edges; strict ASan/UBSan compile/run PASS. Production source
 and installed artifact unchanged by reference-test correction. Rerun pending.
+
+
+### Mode-specific edge simplification (2026-10-05)
+
+User decision: Layer and Perspective always evaluate Clamp; disable Edge Behavior
+and display Clamp there. Comp and Flat retain editable None/Clamp/Wrap/Mirror.
+Do not overwrite canonical saved choice on mode switch or UPDATE_PARAMS_UI;
+returning to editable modes restores it. This intentionally changes evaluation
+of old Layer/Perspective scenes with non-Clamp choices, preserving stored data.
+Shared legacy and SmartFX parameter snapshots apply the same policy; no platform
+sampler fork. Reject stale selector action while locked without writing saved
+choice. Acceptance: all saved choices map to Clamp only in Layer/Perspective,
+editable-mode roundtrip, native disabled/enabled visual, native evaluated pixels,
+Mac/Windows exact builds. Implementation Dev104; native/CI verification pending.

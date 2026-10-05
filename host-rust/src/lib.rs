@@ -573,7 +573,8 @@ fn smart_render_snapshot(
         wave_phase: checked_float(params, Params::WavePhase)? as f32,
         wave_speed: checked_float(params, Params::WaveSpeed)? as f32,
         wave_axis: checked_popup(params, Params::WaveAxis)?,
-        edge_mode: checked_popup(params, Params::EdgeMode)?,
+        edge_mode: edge::effective(checked_popup(params, Params::PlaneMode)?,
+            checked_popup(params, Params::EdgeMode)?)?,
         quality: checked_popup(params, Params::Quality)?,
         time_seconds,
         canvas_width,
@@ -759,7 +760,8 @@ fn evaluated_params(
         wave_phase: params.get(Params::WavePhase)?.as_float_slider()?.value() as f32,
         wave_speed: params.get(Params::WaveSpeed)?.as_float_slider()?.value() as f32,
         wave_axis: params.get(Params::WaveAxis)?.as_popup()?.value(),
-        edge_mode: params.get(Params::EdgeMode)?.as_popup()?.value(),
+        edge_mode: edge::effective(params.get(Params::PlaneMode)?.as_popup()?.value(),
+            params.get(Params::EdgeMode)?.as_popup()?.value())?,
         quality: params.get(Params::Quality)?.as_popup()?.value(),
         time_seconds,
         threads: 0,
@@ -1184,6 +1186,10 @@ impl AdobePluginGlobal for Plugin {
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::EdgeSelector)==Some(param_index){
+                    if edge::locked(params.get(Params::PlaneMode)?.as_popup()?.value())? {
+                        edge::update_ui(params)?;
+                        return Ok(());
+                    }
                     let selected=params.get(Params::EdgeSelector)?.as_popup()?.value();
                     {let mut saved=params.get_mut(Params::EdgeMode)?;
                     saved.as_popup_mut()?.set_value(edge::stored(selected)?);saved.set_value_changed();}
