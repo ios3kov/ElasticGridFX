@@ -9,7 +9,14 @@ pub(crate) struct State {
 }
 impl State {
     pub(crate) fn read(params: &ae::Parameters<Params>, checkout: bool) -> Result<Self, ae::Error> {
-        let enabled = if checkout {params.checkout(Params::ShowGrid)?.as_checkbox()?.value()}
+        Self::read_enabled(params, checkout, None)
+    }
+    pub(crate) fn read_demo(params: &ae::Parameters<Params>, checkout: bool) -> Result<Self, ae::Error> {
+        if !demo::ENABLED {return Ok(Self::default());}
+        Self::read_enabled(params, checkout, Some(true))
+    }
+    fn read_enabled(params: &ae::Parameters<Params>, checkout: bool, forced: Option<bool>) -> Result<Self, ae::Error> {
+        let enabled = if let Some(value) = forced {value} else if checkout {params.checkout(Params::ShowGrid)?.as_checkbox()?.value()}
             else {params.get(Params::ShowGrid)?.as_checkbox()?.value()};
         if !enabled {return Ok(Self::default());}
         let (counts, layout) = if checkout {
@@ -26,6 +33,15 @@ impl State {
     }
     pub(crate) fn render(&self, output: &mut ae::Layer, p: &EgRenderParams,
                          saved: &GridArb, plane: &plane::State) -> Result<(), ae::Error> {
+        self.render_kind(output, p, saved, plane, false)
+    }
+    pub(crate) fn render_demo(&self, output: &mut ae::Layer, p: &EgRenderParams,
+                              saved: &GridArb, plane: &plane::State) -> Result<(), ae::Error> {
+        if !demo::ENABLED {return Ok(());}
+        self.render_kind(output, p, saved, plane, true)
+    }
+    fn render_kind(&self, output: &mut ae::Layer, p: &EgRenderParams,
+                   saved: &GridArb, plane: &plane::State, watermark: bool) -> Result<(), ae::Error> {
         if !self.enabled {return Ok(());}
         let mut evaluated = saved.clone();
         (evaluated.column_lines, evaluated.row_lines) = plane::evaluated_axes(p)?;
@@ -40,16 +56,28 @@ impl State {
             else {Some((x * f64::from(p.canvas_width), y * f64::from(p.canvas_height)))}
         };
         let mut segments = Vec::with_capacity(self.counts.0 + self.counts.1);
+        if watermark {
+            for cell_y in view.grid.row_lines.windows(2) {
+                for cell_x in view.grid.column_lines.windows(2) {
+                    for (a,b) in demo::strokes([f64::from(cell_x[0]),f64::from(cell_y[0]),
+                                              f64::from(cell_x[1]),f64::from(cell_y[1])]) {
+                        if let (Some(a),Some(b))=(map(a.0,a.1),map(b.0,b.1)) {segments.push((a,b));}
+                    }
+                }
+            }
+        } else {
         for &x in &view.grid.column_lines[1..view.grid.column_lines.len()-1] {
             if let (Some(a), Some(b)) = (map(f64::from(x), 0.0), map(f64::from(x), 1.0)) {segments.push((a,b));}
         }
         for &y in &view.grid.row_lines[1..view.grid.row_lines.len()-1] {
             if let (Some(a), Some(b)) = (map(0.0, f64::from(y)), map(1.0, f64::from(y))) {segments.push((a,b));}
         }
+        }
         let (width, height, stride, depth) = (output.width(), output.height(), output.row_bytes(), output.bit_depth());
         if width == 0 || height == 0 || stride == 0 {return Err(ae::Error::BadCallbackParameter);}
         let mut canvas = Canvas::new(output.buffer_mut(), width, height, stride, depth,
                                     (p.output_origin_x, p.output_origin_y))?;
+        if watermark {canvas.color=[1.0,1.0,1.0,1.0];}
         for (a,b) in segments {
             canvas.stroke(a,b, &mut || {
                 if let Some(abort) = p.abort_fn {
@@ -64,7 +92,7 @@ impl State {
 }
 
 struct Canvas<'a> {bytes: &'a mut [u8], width: usize, height: usize, stride: usize,
-                   reversed: bool, component: usize, origin: (i32,i32)}
+                   reversed: bool, component: usize, origin: (i32,i32), color: [f64;4]}
 impl<'a> Canvas<'a> {
     fn new(bytes: &'a mut [u8], width: usize, height: usize, stride: isize, depth: i16,
            origin: (i32,i32)) -> Result<Self,ae::Error> {
@@ -72,13 +100,13 @@ impl<'a> Canvas<'a> {
         let pitch = stride.checked_abs().ok_or(ae::Error::BadCallbackParameter)? as usize;
         if width==0 || height==0 || width.checked_mul(component*4).is_none_or(|v|v>pitch) ||
             pitch.checked_mul(height).is_none_or(|v|v>bytes.len()) {return Err(ae::Error::BadCallbackParameter);}
-        Ok(Self {bytes,width,height,stride:pitch,reversed:stride<0,component,origin})
+        Ok(Self {bytes,width,height,stride:pitch,reversed:stride<0,component,origin,color:[1.0,0.0,0.35,1.0]})
     }
     fn blend(&mut self, x: usize, y: usize, coverage: f64) {
         let row = if self.reversed {self.height-1-y} else {y};
         let start = row*self.stride + x*self.component*4;
-        // Premultiplied source-over, fixed blue, coverage includes antialiasing.
-        for (i, color) in [1.0,0.0,0.35,1.0].into_iter().enumerate() {
+        // Premultiplied source-over, coverage includes antialiasing.
+        for (i, color) in self.color.into_iter().enumerate() {
             let offset = start+i*self.component;
             let old = match self.component {
                 1=>f64::from(self.bytes[offset])/255.0,
@@ -140,7 +168,65 @@ impl<'a> Canvas<'a> {
         let mut layer = ae::Layer::from_raw(&mut world, std::ptr::null::<ae::sys::PF_InData>(), None);
         let p: EgRenderParams = unsafe {std::mem::zeroed()};
         State::default().render(&mut layer, &p, &GridArb::uniform(4,4), &plane::State::default()).unwrap();
+        // Even an enabled snapshot cannot bypass the OFF rollout gate.
+        State {enabled:true, ..State::default()}.render_demo(&mut layer, &p, &GridArb::uniform(4,4), &plane::State::default()).unwrap();
         assert_eq!(bytes, vec![17u8;64]);
+    }
+    #[test] fn dormant_renderer_uses_evaluated_grid_and_does_not_write_saved_state() {
+        let grid=GridArb::uniform(1,1);let retained=grid.clone();
+        let mut p: EgRenderParams=unsafe {std::mem::zeroed()};
+        p.columns=1;p.rows=1;p.column_lines=grid.column_lines.as_ptr();
+        p.row_lines=grid.row_lines.as_ptr();p.column_pins=grid.column_pins.as_ptr();
+        p.row_pins=grid.row_pins.as_ptr();p.column_line_count=3;p.row_line_count=3;
+        p.canvas_width=100;p.canvas_height=100;p.falloff=2;
+        p.tension_radius=3.;p.elasticity_strength=1.;p.easing_distance=0.25;
+        p.min_spacing=0.005;p.quality=2;p.edge_mode=1;
+        let mut bytes=vec![0u8;800*100];
+        let mut world: ae::sys::PF_LayerDef=unsafe {std::mem::zeroed()};
+        world.data=bytes.as_mut_ptr().cast();world.width=100;world.height=100;world.rowbytes=800;
+        // Deep world flags resolve depth without a live PF_WorldSuite.
+        world.world_flags=ae::sys::PF_WorldFlag_DEEP as _;
+        let in_data: ae::sys::PF_InData=unsafe {std::mem::zeroed()};
+        let mut layer=ae::Layer::from_raw(&mut world,&in_data as *const ae::sys::PF_InData,None);
+        State {enabled:true,counts:(1,1),layout:control_layout::State::default()}
+            .render_kind(&mut layer,&p,&grid,&plane::State::default(),true).unwrap();
+        for y in 0..2 {for x in 0..2 {
+            assert!((y*50..(y+1)*50).any(|yy| bytes[yy*800+x*400..yy*800+(x+1)*400].iter().any(|&v|v!=0)));
+        }}
+        assert_eq!(grid.column_lines,retained.column_lines);assert_eq!(grid.row_lines,retained.row_lines);
+    }
+    #[test] fn procedural_letters_render_each_cell_with_depth_padding_and_tile_parity() {
+        // Exercise dormant rasterizer directly; production rollout remains OFF.
+        let geometry=plane::State {corners:Some([-10.,-8.,90.,-4.,84.,86.,-6.,80.]), ..plane::State::default()}.geometry().unwrap();
+        let mut lines=Vec::new();
+        for y in 0..2 {for x in 0..2 {
+            for (a,b) in demo::strokes([x as f64/2.,y as f64/2.,(x+1) as f64/2.,(y+1) as f64/2.]) {
+                lines.push((geometry.map(false,a.0,a.1).unwrap(),geometry.map(false,b.0,b.1).unwrap()));
+            }
+        }}
+        assert_eq!(lines.len(),80);
+        for depth in [8,16,32] {
+            let component=(depth/8) as usize; let stride=100*4*component+8;
+            let mut full=vec![0;stride*100];let tile_pitch=35*4*component+8;
+            let mut tile=vec![0;tile_pitch*31];
+            for (bytes,w,h,pitch,origin) in [(&mut full,100,100,stride,(-12,-12)),
+                                            (&mut tile,35,31,tile_pitch,(8,10))] {
+                let mut canvas=Canvas::new(bytes,w,h,pitch as isize,depth,origin).unwrap();
+                canvas.color=[1.;4];
+                for &(a,b) in &lines {canvas.stroke(a,b,&mut ||Ok(())).unwrap();}
+            }
+            for y in 0..31 {
+                assert_eq!(&tile[y*tile_pitch..y*tile_pitch+35*4*component],
+                           &full[(y+22)*stride+20*4*component..(y+22)*stride+55*4*component]);
+            }
+            for row in full.chunks_exact(stride) {assert!(row[100*4*component..].iter().all(|&v|v==0));}
+            // Every mapped cell has visible lettering, not merely one global mark.
+            for y in 0..2 {for x in 0..2 {
+                let center=geometry.map(false,(x as f64+0.5)/2.,(y as f64+0.5)/2.).unwrap();
+                let cx=(center.0+12.) as usize;let cy=(center.1+12.) as usize;
+                assert!((cy-10..cy+10).any(|yy| full[yy*stride+(cx-20)*4*component..yy*stride+(cx+20)*4*component].iter().any(|&v|v!=0)));
+            }}
+        }
     }
     #[test] fn transparent_stroke_and_hdr_use_premultiplied_source_over() {
         let mut bytes=vec![0u8;4];

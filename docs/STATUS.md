@@ -1472,3 +1472,23 @@ User scene preserved as user-preserved.aep; check copy left open in Perspective.
 Loaded identity checked separately in outputs/perspective-dev112/loaded-identity;
 Mac/Windows CI on45350b2 pending. Windows new native behavior NOT RUN.
 Evidence outputs/perspective-dev112/native-pixels.json; no release/merge.
+
+### Procedural Demo watermark — dormant implementation
+
+User authorized original procedural FSTR FX per destination cell, without an
+external logo/font file. D1 renderer implemented in shared Rust host paths for
+Mac/Windows; D2 rollout remains compile-time OFF with explicit bypass before
+parameter reads or pixel access. Legacy/SmartFX hooks use evaluated grid and
+owned snapshots; no saved IDs/streams, UI toggle or fake license changed.
+Vector glyphs transform with each cell, rasterize via existing antialias/depth/
+stride/origin/cancellation primitives. No unremovability or encryption claim.
+Marketplace SDK verification remains required before enabling rollout.
+Dev116 source candidate; installed Dev112 remains unchanged for Perspective
+acceptance. Initial compile/test failures retained in outputs/demo-procedural-dev116;
+101 Rust tests/15 host contracts and strict Clippy PASS. New tests cover OFF
+byte preservation, evaluated-cell renderer, glyph bounds,8/16/32bpc padding and
+negative-origin tile parity on a perspective quad. Static scanner exit1 retained:
+sole finding is the existing mocked-fixture auth false positive, reviewed.
+Release build/CI pending; enabled-demo AE runtime NOT RUN because rollout OFF.
+Existing installer, new Windows native acceptance and
+marketplace activation obligations retained; no main/merge/release.

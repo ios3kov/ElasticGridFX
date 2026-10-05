@@ -13,7 +13,7 @@ No old acceptance transfers to a new plugin artifact. No main/merge/release.
 | M3 | Surface mode (formerly Flat) retains ordinal2/current Four Corners; neutral grid does not pin source to destination | Skewed neutral pass-through and deformed core regression |
 | M4 | Perspective adds ordinal4: pin source canvas (or already-projected text basis) to destination quad and inverse grid before one sampler | Analytic corner/center coordinates; pixels at all depths/qualities; corner drag |
 | M5 | All modes share grid, Wave, Show Grid, sampling quality, abort and saved animation; no mode switch rewrites parameters | Owned pre-render snapshot, Undo/save/reopen and animated mode matrix |
-| D1 | Demo design is FSTR FX inside each cell; future preview/export watermark | Design only; actual licensing integration is a prerequisite |
+| D1 | Demo design is FSTR FX inside each cell; future preview/export watermark | Procedural renderer implemented dormant; licensing integration required before rollout |
 | D2 | Demo rollout is OFF even without license; no watermark or public fake activation toggle | Both render routes remain unchanged; explicit compile-time disabled policy |
 
 UI display names now: Comp mode / Layer mode / Surface mode / Perspective. The last caption
@@ -51,15 +51,20 @@ values only, never AEGP mutation or mutable global geometry.
 
 ## Demo design
 
-One future FSTR FX inscription per destination cell, anchored to cell geometry,
-including deformed/animated cells and guide-density redistribution. A bounded
-vector/glyph implementation should use the evaluated frame snapshot; license
+One FSTR FX inscription per destination cell, anchored to cell geometry,
+including deformed/animated cells and guide-density redistribution. The bounded
+vector/glyph implementation uses the evaluated frame snapshot; license
 verification belongs outside the per-pixel/per-frame loop. Valid registration
 removes text without modifying any saved grid/scalar stream. No global diagonal
 watermark, quality/speed reduction or added restriction is authorized.
 Current policy is Disabled; provider SDK entitlement verification is absent.
-No on/off user control or fake licensed status is introduced. Watermark rasterizer
-and provider activation are deliberately NOT IMPLEMENTED while disabled.
+No on/off user control or fake licensed status is introduced. User authorized
+procedural FSTR FX lettering on 2026-10-05, with rollout still OFF.
+Shared host renderer draws original vector strokes per evaluated destination cell,
+with no external logo/font asset, in both legacy and SmartFX routes on Mac/Windows.
+White premultiplied antialiased strokes use existing tile/origin/depth/abort handling.
+No obfuscation or unremovability claim. Provider activation remains NOT IMPLEMENTED;
+turning on rollout alone is not a complete licensing integration. No user toggle.
 
 ## Sequence / evidence
 
