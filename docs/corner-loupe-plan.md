@@ -36,3 +36,12 @@ Source verification: 92 Rust tests and Clippy all-targets with warnings denied
 PASS; 22 host/package/version Python checks PASS. Static audit completed with
 one unchanged fixture false positive (test_target_ae_acceptance.py:54). No
 static result certifies UI acceptance. Logs retained in outputs/corner-loupe.
+
+Candidate checkpoint: implementation source000ff91; ordinary Dev64. Mac exact
+package/signature and loaded image PASS (EGFX-38c123bf765bbee9c1bc241a).
+Windows CI37291232120 PASS and downloaded AEX identity/checksum verified
+(EGFX-448748c343eede5cd2db801a). Native visual acceptance remains NOT RUN;
+manual check requested in owned loupe.aep. Mac source CI37291232084 still running.
+Local release build succeeded but objcopy debug-info stripping warned about a
+missing libLLVM.dylib in Rust toolchain; recorded, not hidden or counted as UI
+failure. No release-ready claim. No new installer payload adoption yet.

@@ -18,11 +18,19 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev60**, sourcea19f2b6, Build ID
-EGFX-9c71a484d4dabd700c1ad0fa. Loaded identity and scoped old/new-mode pixel
-checks PASS; loupe not yet in this installed candidate. Windows source51a8d3c
-CI37288366891 and native installer CI37288366821 PASS; newer Windows host
-validation pending. Installer payloads still pin accepted Dev52/Dev56.
+Installed now: **0.9.4 Dev64**, source000ff91aeb91249fa94f54d7e7b73890ee965f9a,
+Build ID EGFX-38c123bf765bbee9c1bc241a. Package/signature and exact loaded-image
+identity PASS; centered corner loupe implemented in shared host code. 92 Rust
+and Clippy all-targets PASS, 22 scoped Python checks PASS. New loupe native
+visual drag/release/Undo acceptance NOT RUN; user check requested in owned scene.
+Windows Dev64 CI37291232120 PASS; Build ID EGFX-448748c343eede5cd2db801a,
+AEX SHA256 b2c145401ef8ac3b5b656a07c33e2c1aadfa8b5c1d0fd2195938f7568d860bf2.
+Downloaded packet checksum/embedded identity PASS; Windows AE acceptance of
+this candidate NOT RUN. Mac source CI37291232084 is still running at checkpoint.
+Evidence: outputs/corner-loupe and outputs/FSTR-Stretch-0.9.4-Windows-Dev64.
+Dev60 earlier scoped four-mode pixel/migration evidence stays artifact-specific.
+Installer payloads still pin separately accepted Dev52/Dev56. Demo remains OFF.
+Native activation is still blocked on marketplace SDK access. No release/merge.
 
 Previously accepted Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
 Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped
