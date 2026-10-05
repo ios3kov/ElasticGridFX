@@ -141,3 +141,25 @@ fn scripted_density_without_callback_uses_uniform_read_only_fallback() {
     }
     assert_eq!(bincode::serde::encode_to_vec(&saved,bincode::config::legacy()).unwrap(),before);
 }
+
+#[test]
+fn legacy_viewer_density_reset_interpolates_across_midpoint_without_key_mutation() {
+    // Reported last key pair: retained4x4 with heavily moved rows to3x4.
+    let mut a=GridArb::uniform(4,4);
+    a.row_lines=vec![0.0,0.6167083,0.96255624,0.999_998,0.999999,1.0];
+    let mut b=GridArb::uniform(3,4);
+    b.row_lines=vec![0.0,0.059800364,0.059801362,0.05980236,0.39942962,1.0];
+    let original=[bytes(&a),bytes(&b)];
+    for t in [0.0,0.1,0.49,0.499,0.5,0.501,0.51,0.9,1.0] {
+        let frame=a.interpolate(&b,t);
+        assert!(frame.is_valid());
+        for i in 0..6 {
+            let expected=a.row_lines[i]+(b.row_lines[i]-a.row_lines[i])*t as f32;
+            assert!((frame.row_lines[i]-expected).abs()<1.0e-7);
+        }
+        for (i,value) in frame.column_lines.iter().enumerate() {
+            assert_eq!(*value,i as f32/(frame.column_lines.len()-1) as f32);
+        }
+        assert_eq!([bytes(&a),bytes(&b)],original);
+    }
+}

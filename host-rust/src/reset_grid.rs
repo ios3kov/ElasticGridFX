@@ -13,9 +13,10 @@ fn target(columns: i32, rows: i32) -> Result<GridArb, ae::Error> {
 // current-time key insertion/replacement and Undo; never enumerate/delete keys
 // or switch time-varying state. A neutral repeated reset is a no-op.
 pub(crate) fn apply(params: &mut ae::Parameters<Params>) -> Result<bool, ae::Error> {
-    let columns = params.get(Params::Columns)?.as_slider()?.value();
-    let rows = params.get(Params::Rows)?.as_slider()?.value();
-    let neutral = target(columns, rows)?;
+    let current = params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()?;
+    if !current.is_valid() { return Err(ae::Error::BadCallbackParameter); }
+    // Viewer density does not own the retained animated lattice.
+    let neutral = target(i32::from(current.columns), i32::from(current.rows))?;
     let changed = *params.get(Params::GridState)?.as_arbitrary()?.value::<GridArb>()? != neutral;
     if changed {
         params.get_mut(Params::GridState)?.as_arbitrary_mut()?.set_value(neutral)?;

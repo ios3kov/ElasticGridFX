@@ -1612,3 +1612,26 @@ outputs/mac-installer-dev116-continue/FSTR-Stretch-Installer-Mac.zip
 SHA256 931470f17ab10fa606039c8051a3af62026967623239086e6ba6ba08554eec65.
 GUI Continue/Cancel after live AE refusal and real Install/Restore NOT RUN.
 Windows code/fixtures updated locally, compilation still pending.
+
+### Animated grid midpoint jump — saved scene investigation
+
+User reports discrete last-key transition in currently open showTime.aep.
+Read-only JSX metadata: Grid Positions final times2.4/5.84, both linear6612;
+CUSTOM_VALUE retrieval unsupported by AE scripting, so no key writes attempted.
+Read-only saved binary scan finds last adjacent states4x4 then3x4 with both
+column axes neutral, rows deformed. Native before PNGs2.4/3.2/4.08 identical;
+4.12/4.16/5.84 identical;181589 RGBA components change exactly at midpoint4.12.
+Evidence outputs/grid-animation-jump, project remains unmodified; retained
+local saved-file copy, no public project/material upload.
+Reset incorrectly used viewer counts to replace retained animated topology.
+Now Reset neutralizes existing retained dimensions. Legacy interpolation of
+unequal axes normalizes only a neutral endpoint to the deformed endpoint's
+topology, losing no deformed knot; matching-topology fast path unchanged.
+This fixes this reported neutral-column mismatch without rewriting stored keys.
+Two unequal non-neutral lattices still retain previous step behavior; arbitrary
+non-neutral topology morph is outside this narrow correction and not claimed.
+102 Rust checks PASS with actual reported pair regression across .499/.5/.501
+and unchanged serialized keys; strict Clippy precision fixture spelling repaired,
+follow-up PASS. Dev120 ordinary (121/122/123 diagnostic variants). New binary
+packaging/install/AE after-render and Windows verification pending. Existing
+installer embeds old Dev116 and is not this new plugin candidate. Demo OFF.

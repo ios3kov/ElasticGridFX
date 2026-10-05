@@ -408,9 +408,28 @@ impl ae::ArbitraryData<GridArb> for GridArb {
             return self.clone();
         }
         if self.columns != other.columns || self.rows != other.rows {
-            return if t < 0.5 { self.clone() } else { other.clone() };
+            // Legacy resets could replace the retained lattice with viewer
+            // density. Normalize only neutral axes: no deformed knot is lost.
+            let normalize = |a: &mut Vec<f32>, b: &mut Vec<f32>| -> bool {
+                let neutral = |axis: &[f32]| axis.iter().enumerate().all(|(i, value)|
+                    *value == i as f32 / (axis.len() - 1) as f32);
+                if a.len() == b.len() { true }
+                else if neutral(a) { *a = Self::axis_uniform(b.len()-2).0; true }
+                else if neutral(b) { *b = Self::axis_uniform(a.len()-2).0; true }
+                else { false }
+            };
+            let mut a=self.clone(); let mut b=other.clone();
+            if !normalize(&mut a.column_lines, &mut b.column_lines) ||
+                !normalize(&mut a.row_lines, &mut b.row_lines) {
+                return if t < 0.5 { self.clone() } else { other.clone() };
+            }
+            for grid in [&mut a, &mut b] {
+                grid.columns=(grid.column_lines.len()-2) as u16;
+                grid.rows=(grid.row_lines.len()-2) as u16;
+                grid.canonicalize_pins();
+            }
+            return a.interpolate(&b, value);
         }
-
         let mut out = self.clone();
         for (dst, (a, b)) in out.column_lines.iter_mut().zip(self.column_lines.iter().zip(other.column_lines.iter())) {
             *dst = *a + (*b - *a) * t;
@@ -1633,10 +1652,10 @@ mod tests {
     }
 
     #[test]
-    fn arbitrary_interpolation_steps_topology_changes() {
+    fn arbitrary_interpolation_normalizes_neutral_topology_changes() {
         let a = GridArb::uniform(4, 4);
         let b = GridArb::uniform(7, 5);
-        assert_eq!(a.interpolate(&b, 0.49).columns, 4);
+        assert_eq!(a.interpolate(&b, 0.49).columns, 7);
         assert_eq!(a.interpolate(&b, 0.51).columns, 7);
     }
 
