@@ -95,3 +95,14 @@ on both verified paths before ordinal case-insensitive comparison. This does
 not resolve links, weaken duplicate/security checks or change the fixed target.
 Fresh/mixed-separator, existing uppercase .AEX, duplicate and restore scenarios
 remain required. CI37287630975/37287631033 are retained FAIL, not plugin acceptance.
+
+
+2026-10-05 Mac payload continuation: Dev116 installed/loaded identity, native
+OFF-demo8/16/32bpc, expanded Perspective and Comp drag/Undo passed. User confirms
+loupe with Effect Controls visible/hidden in a chosen Surface/Perspective mode.
+Package Mac native installer with exact unchanged verified Dev116 payload
+EGFX-f0e50f471f52dd30b6fdb7cf (source0a5b712). This changes embedded candidate only,
+not the transaction engine. Windows Dev116 plugin acceptance still pending;
+existing older Windows installer artifacts are not a current Dev116 installer.
+Real administrator Install/Restore remains required and cannot be claimed from
+isolated fixtures/package signature checks. No Developer ID/notarization added.

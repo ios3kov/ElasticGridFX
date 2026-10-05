@@ -1527,3 +1527,16 @@ plugin checks close. Native installer/payload promotion and marketplace SDK
 obligations retained; no main/merge/release. Evidence outputs/demo-procedural-dev116
 (native-pixels.json, gesture-pixels.json, loaded-identity, package-verification.log,
 CI records, windows-identity.json, WINDOWS-CHECK-RU.txt, backups).
+
+### Mac loupe user acceptance and installer payload promotion
+
+User confirmed on installed Dev116: corner magnifier shows the image and closes
+on release with Effect Controls visible and switched to Project. Exact reported
+scope: one of Surface/Perspective as requested; the chosen mode was not specified.
+Retain previous Dev80 two-mode evidence separately; do not infer an unstated mode
+or fresh-instance/no-prefetch scenario. Windows Dev116 user acceptance remains
+pending: user will test and report. Proceed with Mac native installer packaging
+using the unchanged verified Mac Dev116 payload EGFX-f0e50f471f52dd30b6fdb7cf.
+Do not promote Windows payload/installer before that platform's plugin acceptance.
+Mac administrator Install/Restore acceptance remains NOT RUN. Marketplace SDK
+integration and release remain deferred/unfinished, Demo remains OFF.
