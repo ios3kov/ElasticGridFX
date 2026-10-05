@@ -6,9 +6,12 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
+Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.
+
 Current scope: implement the newly authorized four deformation modes and disabled
 Demo design for both platforms; retain native Install/Restore delivery obligations.
-Added centered corner loupe with a central target in Flat/Perspective, UI only,
+Added centered corner loupe with a central target in Surface/Perspective, UI only,
 Mac and Windows; see [loupe contract](corner-loupe-plan.md). Native loupe
 acceptance is pending.
 See [mode/design contract](four-modes-demo-plan.md). Previously accepted installer
@@ -42,13 +45,13 @@ Production renderer/binary unchanged by this test correction. Follow-up Mac37307
 No release, merge, installer replacement or diagnostic build.
 
 New user decision: fixed Clamp and disabled Edge Behavior in Layer/Perspective;
-Comp/Flat remain editable. Saved choices are preserved. Installed **0.9.4 Dev104**, source9bdf4470a7bd46000d8bc349d33eeb41729a9375,
+Comp/Surface remain editable. Saved choices are preserved. Previous **0.9.4 Dev104**, source9bdf4470a7bd46000d8bc349d33eeb41729a9375,
 Build ID EGFX-ab9b2b3b3a3d8e9cb7493c49. Package/signature/atomic replacement/loaded identity PASS.
 98 Rust/15 host contracts/Clippy PASS. Native AE25.6 temporary-wave pixel comparisons
 PASS: Layer/Perspective Clamp and saved None outputs are byte-exact, Comp/Flat differ.
 Original choice restored; reference scene and prior binary backed up. Native Cua UI PASS: disabled Clamp in Layer/Perspective, active None restored
 in Comp; Flat active None, hidden canonical edge row absent. Windows CI37311196442
-PASS; Mac37311196440 IN_PROGRESS. Windows native AE NOT RUN. Initial installer
+PASS; Mac37311196440 PASS. Windows native AE NOT RUN. Initial installer
 rejected branded archive before swap; correct internal archive installed successfully.
 Neutral-grid comparison initially failed an invalid expectation that edges must differ;
 separate deformed fixture verified intended policy. No transfer of old UI acceptance.
@@ -1440,5 +1443,16 @@ retained in outputs/four-modes-source-checks outside the repository.
 ### Surface caption continuation
 
 User requests Flat mode renamed Surface mode for Mac and Windows. Dev108 shared
-caption-only implementation; ordinals/internal enum/geometry unchanged. Native
-Dev104 edge policy visual checks PASS, new caption candidate checks pending.
+caption-only implementation; ordinals/internal enum/geometry unchanged.
+Installed **0.9.4 Dev108**, sourceb7ac1859817ddbc33618acd49f60a90aa8733689,
+Build ID EGFX-60af8664e175098b8c7743ae; package/signature/atomic replacement/loaded image PASS.
+Existing UI order tests2 PASS, host contracts15 PASS. Dev104 edge-policy native
+visual/pixel checks retained separately. Surface caption native visual pending:
+user actively operates AE; Cua stopped input and user asked to confirm label.
+Current scene changes preserved locally; other compositions not edited.
+Windows37312709671 PASS; downloaded exact AEX/manifest identity PASS:
+EGFX-07e85f0eb754ca316d9697e7,
+SHA25681d6de5b2e153d7491f0c23eb962a3b36203be80fb25e6f6f6d41386f685bc1f.
+Windows AE NOT RUN. Mac37312709680 IN_PROGRESS. Native Install/Restore and
+marketplace activation obligations retained; no main/merge/release.
+Evidence outputs/surface-dev108 (identity, CI, package and WINDOWS-CHECK-RU.txt).

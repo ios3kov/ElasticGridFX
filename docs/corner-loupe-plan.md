@@ -4,7 +4,7 @@ Scoped addition to the four-mode update under rules8.0.0. Preserve prior mode,
 Demo, licensing and installer obligations. User confirmed: the loupe itself is
 centered on the corner, with a target at its center. Applies to Mac and Windows.
 
-- L1: Only while dragging an editable corner in Flat mode or Perspective;
+- L1: Only while dragging an editable corner in Surface mode or Perspective;
   no loupe on grid-line drags, Comp mode or Layer mode.
 - L2: Circular 129 UI-unit lens, 3x current viewer scale, center follows the
   evaluated corner. Black/white target arms leave the exact center unobscured.
@@ -116,3 +116,6 @@ Perspective, user answered all okay). Cursor no longer interferes, target visibl
 release restores cursor. The user then reported Comp/Layer mode both confined
 to layer bounds and requested logical menu order; these are new active issues,
 not loupe acceptance failure. Hidden-panel coverage still not established.
+
+2026-10-05 caption update: Surface mode is the former Flat mode. Internal ordinal2
+and loupe behavior unchanged; historical Flat evidence remains artifact-specific.

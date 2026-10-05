@@ -19,8 +19,8 @@ No old acceptance transfers to a new plugin artifact. No main/merge/release.
 UI display names now: Comp mode / Layer mode / Surface mode / Perspective. The last caption
 is kept short to preserve native popup sizing without dummy options. Existing popup
 ordinals1/2 retain meaning; new choices append so saved projects are not reinterpreted.
-Flat/Perspective are short engineering-selected labels based on the user request.
-Mode remains static. Public corner controls/Fit Layer are enabled in Flat (2D)
+Surface replaces the earlier Flat caption by user request; Perspective unchanged.
+Mode remains static. Public corner controls/Fit Layer are enabled in Surface (2D)
 and Perspective; old 3D Flat effective automatic behavior is retained. Other modes
 have derived bounds and no editable corners. Selector stays usable for new modes.
 
@@ -238,3 +238,12 @@ absent. User-modified owned scene preserved as edge-ui-check.aep before switchin
 New additive user decision: rename displayed Flat mode to Surface mode on both
 platforms, retaining saved ordinal2, internal Mode::Flat, deformation and keys.
 Dev108 changes captions/build number only; new visual/package/CI verification pending.
+
+Dev108 b7ac185 EGFX-60af8664e175098b8c7743ae installed: package/signature/atomic replacement/loaded
+identity PASS. Existing UI-order tests2 and host contracts15 PASS. Native caption
+confirmation pending: user operates AE, Cua rejected action on changed state;
+no alternative input used. User asked to confirm Surface display. Windows CI
+37312709671 PASS; downloaded AEX checksum/build/source identity PASS; native
+Windows AE NOT RUN. Mac37312709680 IN_PROGRESS. Source scanner exit1 reviewed
+existing mocked manifest/signature test as false positive, not a network auth route.
+Scanner is not release certification. Original Dev104 Mac CI37311196440 now PASS.
