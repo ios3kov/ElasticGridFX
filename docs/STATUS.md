@@ -35,7 +35,10 @@ Native activation is still blocked on marketplace SDK access. No release/merge.
 Dev68 correction source8d98424a0aaf95df3147e13d6dced56ab9ce11b6: native AE Point
 gestures now start the same lens; 93 Rust tests, Clippy and 15 host-contract
 checks PASS. Mac release/package/signature PASS; not yet installed. Windows
-CI37293880927 and Mac CI37293880981 in progress. Native acceptance NOT RUN.
+CI37293880927 PASS; downloaded Dev68 AEX identity/checksum PASS
+(EGFX-6916efe6320bedc00b79c89c). Windows packet:
+outputs/FSTR-Stretch-0.9.4-Windows-Dev68/FSTR-Stretch-Windows-Dev68.zip.
+Mac CI37293880981 in progress. Native acceptance NOT RUN.
 AE now contains a different unsaved user project; fixture guard refused without
 changing it. Concurrent-use confirmation requested before restart/replacement.
 Evidence: outputs/corner-loupe-dev68. Dev64 remains installed.
