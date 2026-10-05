@@ -1470,7 +1470,7 @@ for8/16/32bpc and both qualities. Native AE25.6 screenshot-quad Final/32bpc PASS
 alpha bbox81,27–438,357;15407 nontransparent pixels above original source top116.
 User scene preserved as user-preserved.aep; check copy left open in Perspective.
 Loaded identity checked separately in outputs/perspective-dev112/loaded-identity;
-Mac/Windows CI on45350b2 pending. Windows new native behavior NOT RUN.
+Mac37317165500/Windows37317165263 on45350b2 PASS. Windows new native behavior NOT RUN.
 Evidence outputs/perspective-dev112/native-pixels.json; no release/merge.
 
 ### Procedural Demo watermark — dormant implementation
@@ -1489,6 +1489,10 @@ acceptance. Initial compile/test failures retained in outputs/demo-procedural-de
 byte preservation, evaluated-cell renderer, glyph bounds,8/16/32bpc padding and
 negative-origin tile parity on a perspective quad. Static scanner exit1 retained:
 sole finding is the existing mocked-fixture auth false positive, reviewed.
-Release build/CI pending; enabled-demo AE runtime NOT RUN because rollout OFF.
+Dev116 source1c97b7d4758bbbcb91435dbaae63224e4e90b307 release build PASS;
+known rust-objcopy/libLLVM resource-helper warning retained (build fallback succeeds).
+Mac37319481143/Windows37319481240 CI IN_PROGRESS; enabled-demo AE runtime
+NOT RUN because rollout OFF. Source diff reviewed against D1/D2; no cleanup
+needed, evidence/backups preserved. Installed Dev112 unchanged.
 Existing installer, new Windows native acceptance and
 marketplace activation obligations retained; no main/merge/release.
