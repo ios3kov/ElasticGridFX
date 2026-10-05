@@ -192,3 +192,15 @@ PASS for all24 quality/edge/case combinations after sandbox no-device result.
 Cua visual FAIL: saved old edge row remains visible beside CONTROL_ONLY selector.
 Dev100 correction additionally marks canonical EdgeMode NO_ECW_UI, retaining
 same saved values and source/render code; new package/UI verification pending.
+
+
+Dev100 package/signature/atomic installation and loaded-image identity PASS.
+Native None4 save/reopen PASS. First capture closed/reopened before PNGs appeared;
+second capture without closing PASS: None245102 transparent pixels versus Clamp0,
+640x480 output. Current native deformation bbox99,163–375,388. UI not accepted:
+Effect Controls locked to none; user asked to unlock/select and inspect order/output.
+Windows CI37306339582 PASS and exact downloaded AEX/manifest identity PASS.
+Mac CI37306339475 FAIL from test_quality.cpp exhaustive switch missing None.
+Corrected independent quality oracle to return transparent taps, with float/8/16bpc
+coverage for all four edges; strict ASan/UBSan compile/run PASS. Production source
+and installed artifact unchanged by reference-test correction. Rerun pending.

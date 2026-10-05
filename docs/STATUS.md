@@ -18,24 +18,28 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev92**, ordinary sourcea26fbae3ea1fe675a60794fc3aea2e0b63cc684c,
-Build ID EGFX-c2b0f08cc2b1b1d7c33e8ccb. Atomic package/signature replacement
-and loaded-image identity PASS. Native AE25.6 Comp expanded pixels PASS:
-original bbox80,116–399,357 now0,0–640,480; 230321 nontransparent pixels outside
-old layer. Layer output bitexact unchanged; Comp/Layer/Comp roundtrip exact.
-User additionally reports PASS for drag/Undo/mode switch/sorted menu.
-Evidence: outputs/comp-output-dev92/native-pixels.json and loaded-identity.
-96 Rust/28 CTest/15 host contract checks and final Clippy PASS. Windows CI
-37304253327 PASS on same source; native Windows new behavior NOT RUN. Mac CI
-37304253224 FAIL from one obsolete Kind0..4 static assertion (other281 PASS),
-corrected in d7167b8; rerun pending. Installer CI37304253222 PASS, no system
-installer action. No diagnostic CSV. Existing loupe acceptance retained below.
+Installed now: **0.9.4 Dev100**, ordinary source6d895e4024fcceff7fa80c5223f05daebe30cddd,
+Build ID EGFX-4613b9d0b6f5453e20445fb7. Package/signature, atomic replacement
+and loaded-image identity PASS. Dev92 Comp drag/Undo/mode/menu acceptance remains
+bound to that artifact; Dev100 adds None transparent edge behavior. New default
+None4 and old saved Wrap2 preservation checked on Dev96; Dev100 None4 save/reopen
+PASS. Native AE25.6 Dev100 None output has245102 transparent pixels, while Clamp
+fills the whole640x480 destination. Evidence: outputs/edge-none-dev100/native-pixels.json.
+Initial frame capture closed/reopened the project too soon and produced no PNGs;
+subsequent capture while project stayed open produced both frames. UI/manual
+acceptance is pending: Effect Controls is locked to none, user asked to unlock
+and inspect. Canonical edge row now has NO_ECW_UI as well as INVISIBLE.
 
-New user request after Dev92 acceptance: Edge Behavior first item None, no
-extra drawn edge pixels. New instances default None; saved Clamp/Wrap/Mirror
-values remain unchanged. Scope includes all depths/qualities, shared Mac/Win,
-legacy/plane samplers and Metal tap safety, native UI Undo/save/reopen and output
-alpha checks. See four-modes-demo-plan.md. Implementation pending.
+97 Rust/28 CTest/282 Python/all JavaScript/15 host contract checks and Clippy PASS
+for the None implementation. Native CPU/Metal parity24 cases PASS; not host GPU
+or real speed evidence. Windows CI37306339582 PASS for installed source;
+downloaded AEX integrity PASS, Build ID EGFX-12022254e434feabf472062a,
+SHA2564efca39bb44072196307651bd2a173ac2d787918d1ad3c6d313c7da759d5e4d2.
+Windows new behavior in AE NOT RUN. Mac CI37306339475 FAIL: quality test reference
+switch omitted None under warnings-as-errors. Reference now includes transparent
+taps and all four edges in8/16/32bpc; exact ASan/UBSan strict compile/run PASS.
+Production renderer/binary unchanged by this test correction. CI rerun pending.
+No release, merge, installer replacement or diagnostic build.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.
@@ -60,7 +64,7 @@ acceptance pending.
 Comp whole-frame output and sorted Comp / Layer / Flat / Perspective native
 workflow user acceptance PASS on Dev92. Retained Dev84/Dev88 partial/failure
 records remain historical; Dev92 supersedes the clipping defect. New None edge
-behavior is separately pending, not implied by Comp acceptance.
+behavior has native pixel checks; manual UI acceptance remains pending.
 
 Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
 Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old

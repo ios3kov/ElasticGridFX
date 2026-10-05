@@ -34,6 +34,7 @@ static int resolve_ref(int i, int n, EdgeMode edge) {
         case EdgeMode::Clamp: return std::clamp(i, 0, n - 1);
         case EdgeMode::Wrap: return wrap_ref(i, n);
         case EdgeMode::Mirror: return mirror_ref(i, n);
+        case EdgeMode::None: return i >= 0 && i < n ? i : -1;
     }
     return std::clamp(i, 0, n - 1);
 }
@@ -71,6 +72,7 @@ static std::array<double, 4> reference_bicubic(
     for (int ky = 0; ky < 4; ++ky) {
         for (int kx = 0; kx < 4; ++kx) {
             const double w = wy[ky] * wx[kx];
+            if (iy[ky] < 0 || ix[kx] < 0) continue;
             const float* q = src.data() + (iy[ky] * sw + ix[kx]) * 4;
             for (int c = 0; c < 4; ++c) out[c] += double(q[c]) * w;
         }
@@ -105,6 +107,7 @@ static std::array<double, 4> reference_bicubic_integer(
     for (int ky = 0; ky < 4; ++ky) {
         for (int kx = 0; kx < 4; ++kx) {
             const double w = wy[ky] * wx[kx];
+            if (iy[ky] < 0 || ix[kx] < 0) continue;
             const T* q = src.data() + (iy[ky] * sw + ix[kx]) * 4;
             for (int c = 0; c < 4; ++c) out[c] += double(q[c]) * w;
         }
@@ -138,7 +141,7 @@ int main() {
     const auto xl = buildInverseLUT(gx.lines(), DW, 0.61f, 0.19f);
     const auto yl = buildInverseLUT(gy.lines(), DH, 0.61f, 0.19f);
 
-    for (EdgeMode edge : {EdgeMode::Clamp, EdgeMode::Wrap, EdgeMode::Mirror}) {
+    for (EdgeMode edge : {EdgeMode::Clamp, EdgeMode::Wrap, EdgeMode::Mirror, EdgeMode::None}) {
         RenderSettings rs;
         rs.quality = SampleQuality::Bicubic;
         rs.edge = edge;
@@ -184,7 +187,7 @@ int main() {
             src16[i+3] = static_cast<std::uint16_t>(4096 + ((541*x + 829*y) % 28673));
         }
     }
-    for (EdgeMode edge : {EdgeMode::Clamp, EdgeMode::Wrap, EdgeMode::Mirror}) {
+    for (EdgeMode edge : {EdgeMode::Clamp, EdgeMode::Wrap, EdgeMode::Mirror, EdgeMode::None}) {
         RenderSettings rs; rs.quality = SampleQuality::Bicubic; rs.edge = edge; rs.threads = 1;
         auto prep = prepareWarpRGBAf(SW, SH, DW, DH, xl, yl, rs);
         std::vector<std::uint8_t> dst8(DW * DH * 4, 0);
