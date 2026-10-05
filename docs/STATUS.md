@@ -1777,3 +1777,20 @@ mouse union read, input synthesis, timer, permission, idle async-request change,
 key write or renderer change. Hover clears on non-corner motion and lifecycle
 release; stale owner/view/time/pointer mismatches reject it. Mac/Windows native
 pointer queries are read-only. Native stationary-press acceptance remains NOT RUN.
+
+Dev132 Mac CI37355265994 PASS; Windows37355265964 PASS on source5caf51b.
+Dev136 sourcea89b949:111 Rust tests, strict Clippy and24 focused Python guards
+PASS; Windows CI37356962042 PASS, Mac37356962076 PENDING. First local hand-built
+package incorrectly named the resource elasticgrid_ae.rsrc instead of the
+canonical ElasticGrid.rsrc; user reported missing effect. Live-image UUID PASS
+was insufficient to establish effect registration. Failed package retained in
+outputs/corner-click-dev136 and explicitly NOT an accepted candidate.
+Corrected package follows tools/build_macos_sdkless.command resource/plist
+layout, identical source/binary identity EGFX-32a69e569c44fdc85fe98a7f. Installer
+refused same-ID/different-payload overwrite; its authenticated Restore retained
+both versions, then corrected Install succeeded. Exact installed file hashes/
+permissions PASS. Native app.effects reports exactly one FSTR Stretch with
+matchName com.elasticgrid.fx.warp; preserved scene reopens without missing-effect
+warning. Corrected evidence outputs/corner-click-dev136-fixed. Original scene
+never overwritten after the missing-effect opening. Stationary press acceptance
+requested again, still NOT RUN; original Mac hang remains OPEN/UNCONFIRMED.
