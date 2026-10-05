@@ -142,3 +142,11 @@ Dev136 adds a foreground UI pointer-qualified, hit-tested hover anchor scoped
 to effect/view/time. It starts the lens on a held corner press without changing
 Point values; existing changed-corner fallback retained. No idle frame-request
 policy expansion. Stationary-press host acceptance NOT RUN.
+
+Dev136 repeated press acceptance FAIL: only first press works, severe slowdown
+reported. Dev140 caps async completion/refresh to one fixed frame per gesture;
+pending polls keep original request identity, terminal errors finish it too.
+Lens samples the gesture snapshot at the moving target; render pixels unchanged.
+Release clears active work before new hover arming; same-corner supervision
+cannot rearm work. Tests cover repeat, completion/error and changing host stamps.
+Native acceptance NOT RUN; original Mac-hang attribution remains UNCONFIRMED.

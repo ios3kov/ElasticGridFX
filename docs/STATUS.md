@@ -1794,3 +1794,21 @@ matchName com.elasticgrid.fx.warp; preserved scene reopens without missing-effec
 warning. Corrected evidence outputs/corner-click-dev136-fixed. Original scene
 never overwritten after the missing-effect opening. Stationary press acceptance
 requested again, still NOT RUN; original Mac hang remains OPEN/UNCONFIRMED.
+
+Dev136 stationary/repeated press USER-REPORTED FAIL: first press works, later
+presses fail and severe UI slowdown appears. No RAM Preview was launched by the
+agent. Separate current scene copy retained in outputs/corner-repeat-dev140;
+AE closed and authenticated Restore returned exact Dev132 bytes (manifest PASS).
+Original Mac hang remains unconfirmed, not equated to this new regression.
+
+Dev140 corrective scope: completed gesture-frame work cannot restart from DRAW
+refreshes or host timestamp changes. Pending polls retain the original exact
+owner/view/time/scale/stamp; one terminal receipt or error completes gesture work
+before refresh. One fixed UI snapshot per gesture, lens sample position still
+follows the corner; no output-renderer/quality/key changes. A new press after
+release resets the request. Native supervision of the same active corner does
+not reset it. Release is processed before arming the next hover, avoiding a
+subsequent DRAW clearing the newly armed corner. Tests cover repeated timestamps,
+terminal/error completion and release/repress of the same corner. Native click/
+repeated-gesture/slowness acceptance remains NOT RUN; Dev132 kept installed
+until candidate package validation. No main/merge/release authorization implied.

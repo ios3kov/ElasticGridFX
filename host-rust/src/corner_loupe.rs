@@ -14,7 +14,14 @@ struct Hover {owner:i32,window:i32,time:i32,scale:u32,index:usize,pointer:(f64,f
 thread_local! {static HOVER:std::cell::Cell<Option<Hover>>=const{std::cell::Cell::new(None)};}
 thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
-pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);}
+pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);GESTURE_FRAME.set(None);}
+fn finish_native(button_down:bool){
+    if !button_down&&ACTIVE.get().is_some_and(|g|g.native){clear();}
+}
+fn start_native(g:Gesture){
+    if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){GESTURE_FRAME.set(None);}
+    ACTIVE.set(Some(g));
+}
 fn native_pointer()->Option<(f64,f64)>{
     #[cfg(any(target_os="macos",target_os="windows"))]{
         unsafe extern "C"{fn eg_loupe_pointer(x:*mut f64,y:*mut f64)->bool;}
@@ -32,12 +39,13 @@ pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,
             let now=Observation{owner,window:ui::event_window_code(event),time:input.current_time(),
                 scale:input.time_scale(),corners:[0.;8]};
             if let Some(index)=pressed_hover(h,now,pointer){
-                ACTIVE.set(Some(Gesture{owner,window:now.window,index,native:true}));
+                start_native(Gesture{owner,window:now.window,index,native:true});
                 HOVER.set(None);return true;
             }
         }
         return false;
     }
+    finish_native(false);
     HOVER.set(index.filter(|&i|i<4).and_then(|index|Some(Hover{owner:owner(input,id).ok()?,
         window:ui::event_window_code(event),time:input.current_time(),scale:input.time_scale(),
         index,pointer:native_pointer()?})));
@@ -63,7 +71,7 @@ fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>
     match (result,disposed){(Ok(v),Ok(()))=>Ok(v),(Err(e),_)|(_,Err(e))=>Err(e)}
 }
 pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Option<ae::aegp::PluginId>){
-    if let Ok(owner)=owner(input,id){if index<4 {ACTIVE.set(Some(Gesture{owner,
+    if let Ok(owner)=owner(input,id){if index<4 {GESTURE_FRAME.set(None);ACTIVE.set(Some(Gesture{owner,
         window:ui::event_window_code(event),index,native:false}));}}
 }
 pub(crate) fn native_button_down()->bool{
@@ -76,7 +84,7 @@ pub(crate) fn native_button_down()->bool{
 }
 pub(crate) fn native_change(input:&ae::InData,index:usize,id:Option<ae::aegp::PluginId>){
     if index<4&&native_button_down(){if let Ok(owner)=owner(input,id){
-        ACTIVE.set(Some(Gesture{owner,window:0,index,native:true}));
+        start_native(Gesture{owner,window:0,index,native:true});
     }}
 }
 fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
@@ -86,12 +94,13 @@ fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
     }}found
 }
 pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id:Option<ae::aegp::PluginId>){
+    finish_native(native_button_down());
     let Ok(owner)=owner(input,id) else{clear();return;};
     let now=Observation{owner,window:ui::event_window_code(event),
         time:input.current_time(),scale:input.time_scale(),corners};
     if ACTIVE.get().is_none()&&native_button_down(){
         if let Some(index)=HOVER.get().and_then(|h|pressed_hover(h,now,native_pointer()?)){
-            ACTIVE.set(Some(Gesture{owner,window:now.window,index,native:true}));
+            start_native(Gesture{owner,window:now.window,index,native:true});
             HOVER.set(None);
         }
     }
@@ -158,6 +167,15 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
 }
 #[derive(Clone,Copy,PartialEq,Eq)]
 struct FrameKey{owner:i32,window:i32,time:i32,scale:u32,stamp:[i8;4]}
+// One immutable request per mouse gesture. Window refreshes and host timestamps
+// cannot rearm completed work; only a new press creates another request.
+#[derive(Clone,Copy)]
+struct GestureFrame {key:FrameKey,finished:bool}
+fn gesture_request(state:&mut Option<GestureFrame>,proposed:FrameKey)->Option<FrameKey>{
+    let r=state.get_or_insert(GestureFrame{key:proposed,finished:false});
+    (!r.finished).then_some(r.key)
+}
+fn gesture_finished(){GESTURE_FRAME.set(GESTURE_FRAME.get().map(|r|GestureFrame{finished:true,..r}));}
 struct Frame{key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
 // Bounded owner history; switching between multiple effect rows must not
 // rearm a warm request at every playback time. Full history fails closed for
@@ -166,6 +184,7 @@ const WARM_OWNERS:usize=32;
 type WarmRequests=[Option<(i32,i32,u32,bool)>;WARM_OWNERS];
 const EMPTY_WARM:WarmRequests=[None;WARM_OWNERS];
 thread_local!{
+    static GESTURE_FRAME:std::cell::Cell<Option<GestureFrame>>=const{std::cell::Cell::new(None)};
     static FRAME:std::cell::RefCell<Option<Frame>>=const{std::cell::RefCell::new(None)};
     static VIEW:std::cell::Cell<Option<(i32,i32)>>=const{std::cell::Cell::new(None)};
     static WARM:std::cell::Cell<WarmRequests>=const{std::cell::Cell::new(EMPTY_WARM)};
@@ -190,6 +209,13 @@ fn warm_completed(warm:&mut WarmRequests,owner:i32){
 // SDK25.6 AE_EffectUI.h:419 explicitly limits reserved_job_manageP to
 // Effect pane custom UI. Never ask a Comp/Layer context for an AsyncManager.
 pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
+    finish_native(native_button_down());
+    let result=prepare_frame_inner(input,event,id);
+    // Do not turn a failed checkout/copy/refresh into a per-DRAW retry loop.
+    if result.is_err()&&GESTURE_FRAME.get().is_some_and(|r|owner(input,id).ok()==Some(r.key.owner)){gesture_finished();}
+    result
+}
+fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
     if event.window_type()!=ae::WindowType::Effect{return Ok(());}
     let owner=owner(input,id)?;
     let gesture=ACTIVE.get().is_some_and(|g|g.owner==owner)&&native_button_down();
@@ -201,12 +227,19 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
     let id=id.ok_or(ae::Error::BadCallbackParameter)?;
     let window=VIEW.get().filter(|v|v.0==owner).map(|v|v.1).unwrap_or(ae::sys::PF_Window_COMP);
     let render=ae::aegp::suites::Render::new()?;
-    let key=FrameKey{owner,window,time:input.current_time(),scale:input.time_scale(),stamp:render.current_timestamp()?.a};
-    if FRAME.with_borrow(|f|f.as_ref().is_some_and(|f|f.key==key)){return Ok(());}
+    if gesture&&GESTURE_FRAME.get().is_some_and(|r|r.finished){return Ok(());}
+    let proposed=FrameKey{owner,window,time:input.current_time(),scale:input.time_scale(),stamp:render.current_timestamp()?.a};
+    let key=if gesture {
+        let mut state=GESTURE_FRAME.get();let key=gesture_request(&mut state,proposed);
+        GESTURE_FRAME.set(state);let Some(key)=key else{return Ok(());};key
+    }else{proposed};
+    if FRAME.with_borrow(|f|f.as_ref().is_some_and(|f|f.key==key)){
+        if gesture{gesture_finished();}return Ok(());
+    }
     let interface=ae::aegp::suites::PFInterface::new()?;
     let layers=ae::aegp::suites::Layer::new()?;
     let layer=interface.effect_layer(input.effect_ref())?;
-    let time=interface.convert_effect_to_comp_time(input.effect_ref(),input.current_time(),input.time_scale())?;
+    let time=interface.convert_effect_to_comp_time(input.effect_ref(),key.time,key.scale)?;
     let manager=ae::pf::suites::EffectCustomUI::new()?.context_async_manager(input.as_ptr(),*event)?;
     let receipt=if window==ae::sys::PF_Window_COMP{
         let comp=layers.layer_parent_comp(layer)?;
@@ -237,8 +270,8 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
         Ok(Frame{key,width:w,height:h,region,pixels})
     })();
     let checked=render.checkin_frame(receipt);
-    // A terminal host receipt must not be requeued by idle draws even if
-    // validation/copy/checkin failed. Active gestures may still retry.
+    // A terminal receipt finishes both warm and gesture work, including errors.
+    if gesture{gesture_finished();}
     let mut warm=WARM.get();warm_completed(&mut warm,owner);WARM.set(warm);
     match (result,checked){(Ok(frame),Ok(()))=>{
         FRAME.with_borrow_mut(|f|*f=Some(frame));
@@ -264,6 +297,30 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 }
 #[cfg(test)] mod tests{
     use super::*;
+    fn request_key(stamp:i8)->FrameKey{FrameKey{owner:7,window:1,time:10,scale:25,stamp:[stamp;4]}}
+    #[test]fn held_press_cannot_requeue_after_completion_or_host_timestamp_changes(){
+        let first=request_key(0);let mut state=None;
+        assert!(gesture_request(&mut state,first)==Some(first));
+        for stamp in 1..100{assert!(gesture_request(&mut state,request_key(stamp))==Some(first));}
+        state.as_mut().unwrap().finished=true;
+        for stamp in 0..100{assert!(gesture_request(&mut state,request_key(stamp)).is_none());}
+    }
+    #[test]fn release_and_same_corner_second_press_start_independent_requests(){
+        clear();start_native(Gesture{owner:7,window:1,index:2,native:true});
+        GESTURE_FRAME.set(Some(GestureFrame{key:request_key(0),finished:true}));
+        start_native(Gesture{owner:7,window:0,index:2,native:true});
+        assert!(GESTURE_FRAME.get().unwrap().finished); // supervision cannot rearm
+        finish_native(false);assert!(ACTIVE.get().is_none());assert!(GESTURE_FRAME.get().is_none());
+        start_native(Gesture{owner:7,window:1,index:2,native:true});
+        let mut state=GESTURE_FRAME.get();assert!(gesture_request(&mut state,request_key(1)).is_some());
+        clear();
+    }
+    #[test]fn failed_or_terminal_gesture_work_cannot_restart_until_release(){
+        clear();GESTURE_FRAME.set(Some(GestureFrame{key:request_key(0),finished:false}));
+        gesture_finished();let mut state=GESTURE_FRAME.get();
+        assert!(gesture_request(&mut state,request_key(1)).is_none());
+        clear();assert!(GESTURE_FRAME.get().is_none());
+    }
     #[test]fn multiple_effects_cannot_rearm_warm_requests_on_each_playback_frame(){
         let mut warm=EMPTY_WARM;
         assert!(request_allowed(&mut warm,7,0,25,false,false));
