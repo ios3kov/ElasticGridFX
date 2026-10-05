@@ -88,3 +88,20 @@ extern "C" bool eg_loupe_button_down() {
         owner != GetCurrentProcessId()) return false;
     return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
 }
+
+// No ShowCursor counter: transparent image applies only to this UI cursor.
+extern "C" bool eg_set_loupe_cursor(bool hidden) {
+    if (!hidden) { SetCursor(LoadCursorW(nullptr, IDC_ARROW)); return true; }
+    DWORD owner = 0;
+    const HWND foreground = GetForegroundWindow();
+    if (!foreground || GetWindowThreadProcessId(foreground, &owner) != GetCurrentThreadId() ||
+        owner != GetCurrentProcessId()) return false;
+    static HCURSOR blank = []() {
+        BYTE mask[128]; BYTE pixels[128] = {};
+        for (auto &b : mask) b = 0xff;
+        return CreateCursor(GetModuleHandleW(nullptr), 0, 0, 32, 32, mask, pixels);
+    }();
+    if (!blank) return false;
+    SetCursor(blank);
+    return true;
+}

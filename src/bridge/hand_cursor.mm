@@ -19,3 +19,14 @@ extern "C" int eg_loupe_button_probe() {
            ([NSApp isActive] ? 2 : 0) |
            (([NSEvent pressedMouseButtons] & 1U) != 0 ? 4 : 0);
 }
+
+// Replace the cursor image locally; no hide/unhide stack or global visibility counter.
+extern "C" bool eg_set_loupe_cursor(bool hidden) {
+    if (![NSThread isMainThread]) return false;
+    if (!hidden) { [[NSCursor arrowCursor] set]; return true; }
+    if (![NSApp isActive]) return false;
+    static NSCursor *blank = [[NSCursor alloc] initWithImage:
+        [[NSImage alloc] initWithSize:NSMakeSize(1, 1)] hotSpot:NSZeroPoint];
+    [blank set];
+    return true;
+}

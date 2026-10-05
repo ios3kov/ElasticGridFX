@@ -96,3 +96,11 @@ shown with F3, no initial error. Native drag/image/release acceptance pending.
 Probe74 generated repeated verification dialogs; saved scene and closed
 project before verified PID21494 SIGTERM and safe replacement. No force-kill
 or deletion of user scenes. Evidence in outputs/corner-loupe-probe78.
+
+Probe78 Perspective drag USER-REPORTED PASS: image under the corner is
+visible, lens disappears on release, no repeated verification error. User
+requested hiding the hand cursor while the lens is visible. Dev80 implements
+transparent local cursor images on Mac/Windows without global visibility
+counters; restore on release/cancel/deactivate/context close and failed lens.
+Rendering and saved parameters remain unchanged. Native cursor acceptance
+and Flat/hidden-panel coverage remain pending.

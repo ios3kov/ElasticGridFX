@@ -31,7 +31,7 @@ pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Optio
     if let Ok(owner)=owner(input,id){if index<4 {ACTIVE.set(Some(Gesture{owner,
         window:ui::event_window_code(event),index,native:false}));}}
 }
-fn native_button_down()->bool{
+pub(crate) fn native_button_down()->bool{
     #[cfg(any(target_os="macos",target_os="windows"))]{
         unsafe extern "C"{fn eg_loupe_button_down()->bool;}
         // Read-only native UI state. Never called from a render worker.

@@ -59,6 +59,17 @@ thread_local! {
     static GUIDE_DRAGGING: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
 }
 
+thread_local! {static LOUPE_CURSOR:std::cell::Cell<bool>=const{std::cell::Cell::new(false)};}
+fn loupe_cursor(hidden:bool)->bool{
+    #[cfg(any(target_os="macos",target_os="windows"))]{
+        unsafe extern "C"{fn eg_set_loupe_cursor(hidden:bool)->bool;}
+        if hidden||LOUPE_CURSOR.get(){
+            let applied=unsafe{eg_set_loupe_cursor(hidden)};
+            LOUPE_CURSOR.set(hidden&&applied);return applied;
+        }
+    }
+    false
+}
 fn hand_cursor(dragging: bool) -> ae::CursorType {
     #[cfg(target_os = "macos")]
     {
@@ -86,6 +97,7 @@ fn set_drag_cursor(dragging: bool) {
 }
 
 pub fn release_cursor() {
+    loupe_cursor(false);
     corner_loupe::clear();
     GUIDE_DRAGGING.set(false);
     // Leave the selected tool's cursor to AE. PF_SetCursor(NONE) is invalid
@@ -431,19 +443,19 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     supplier:&ae::drawbot::Supplier,surface:&ae::drawbot::Surface,id:Option<ae::aegp::PluginId>) {
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::loupe(in_data,event,0,if plane.state.corner_controls().is_some(){1}else{0},false);
-    let Some(corners)=plane.state.corner_controls() else{corner_loupe::clear();return;};
+    let Some(corners)=plane.state.corner_controls() else{loupe_cursor(false);corner_loupe::clear();return;};
     corner_loupe::observe(in_data,event,corners,id);
     let active=corner_loupe::active(in_data,event,id);
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::loupe(in_data,event,1,active.map(|v|v as isize).unwrap_or(-1),false);
-    let Some(index)=active else{return;};
+    let Some(index)=active else{loupe_cursor(false);return;};
     if let Ok(center)=layer_to_frame(in_data,event,plane,corners[2*index] as f32,corners[2*index+1] as f32) {
         // UI enhancement must never abort a valid drag if its async frame is pending.
         let result=corner_loupe::draw(in_data,event,supplier,surface,center,id);
         #[cfg(feature="preview-overlay-probe")]
         super::preview_overlay_probe::loupe(in_data,event,2,index as isize,result.is_err());
-        let _=result;
-    }
+        loupe_cursor(result.is_ok());
+    } else {loupe_cursor(false);}
 }
 
 fn draw_effect_control(
@@ -625,6 +637,11 @@ pub fn adjust_cursor(
 ) -> Result<(), ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
+    }
+    if LOUPE_CURSOR.get()&&!corner_loupe::native_button_down(){loupe_cursor(false);}
+    if LOUPE_CURSOR.get()&&loupe_cursor(true) {
+        event.set_cursor(ae::CursorType::Custom);
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);return Ok(());
     }
     let dragging = GUIDE_DRAGGING.get();
     if !dragging {
