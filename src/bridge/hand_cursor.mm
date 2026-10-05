@@ -30,3 +30,10 @@ extern "C" bool eg_set_loupe_cursor(bool hidden) {
     [blank set];
     return true;
 }
+
+// Read-only pointer position; used only to qualify a previously hit-tested corner.
+extern "C" bool eg_loupe_pointer(double *x, double *y) {
+    if (![NSThread isMainThread] || ![NSApp isActive] || !x || !y) return false;
+    const NSPoint p = [NSEvent mouseLocation];
+    *x = p.x; *y = p.y; return true;
+}

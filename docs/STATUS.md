@@ -1754,3 +1754,26 @@ preventing idle retry loops; active gestures still permitted. Source review
 bounds owner history and checks no frame handle survives checkin.
 Earlier Dev128 follow-up Windows CI37354389182 PASS on test-only c14bb0c; it does
 not cover the new multi-owner policy. Mac follow-up still running at checkpoint.
+
+Dev132 source5caf51b, BID EGFX-dcb60c943ae33947aa41755b: Mac bundle/
+signature/archive/manifest PASS. Installer ZIP SHA256
+79a2bf3db94dbf228e29039d47c857347111a677d583c498bd069e81a62306af.
+User confirmed native administrator installation completed. System plugin files
+match the candidate manifest exactly; installed codesign deep/strict PASS.
+Windows CI37355265964 PASS on this exact source. Mac CI37355265994 PENDING
+at this checkpoint, full preflight running with no failed steps. Loaded host
+identity, native feedback/Undo/after-scrub hidden-panel loupe and RAM Preview
+NOT RUN. A short non-playback user check requested; no heavy preview launched.
+Local evidence outputs/redraw-work-dev132/verification.json. Original critical
+Mac hang remains OPEN, cause UNCONFIRMED; no release/merge/promotion.
+
+Dev132 short native check USER-REPORTED PASS: corner motion/release, Undo, and
+loupe after changing time with Effect Controls hidden. User reports lens appears
+only after movement; new requirement is appearance on stationary corner press.
+Dev136 candidate records only a hit-tested corner hover at foreground UI pointer
+position, scoped to owner/viewer/time/scale. A held left-button press at that
+position starts the native Point gesture without a coordinate change. No DRAW
+mouse union read, input synthesis, timer, permission, idle async-request change,
+key write or renderer change. Hover clears on non-corner motion and lifecycle
+release; stale owner/view/time/pointer mismatches reject it. Mac/Windows native
+pointer queries are read-only. Native stationary-press acceptance remains NOT RUN.

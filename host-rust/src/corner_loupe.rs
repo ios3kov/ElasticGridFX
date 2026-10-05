@@ -9,9 +9,44 @@ const PURPOSE:u32=0x4653544c;
 struct Gesture {owner:i32,window:i32,index:usize,native:bool}
 #[derive(Clone,Copy)]
 struct Observation {owner:i32,window:i32,time:i32,scale:u32,corners:[f64;8]}
+#[derive(Clone,Copy)]
+struct Hover {owner:i32,window:i32,time:i32,scale:u32,index:usize,pointer:(f64,f64)}
+thread_local! {static HOVER:std::cell::Cell<Option<Hover>>=const{std::cell::Cell::new(None)};}
 thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
-pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);}
+pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);}
+fn native_pointer()->Option<(f64,f64)>{
+    #[cfg(any(target_os="macos",target_os="windows"))]{
+        unsafe extern "C"{fn eg_loupe_pointer(x:*mut f64,y:*mut f64)->bool;}
+        let (mut x,mut y)=(0.,0.);
+        if unsafe{eg_loupe_pointer(&mut x,&mut y)}&&x.is_finite()&&y.is_finite(){return Some((x,y));}
+    }
+    None
+}
+pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,id:Option<ae::aegp::PluginId>)->bool{
+    // A press can request one viewer update without writing any Point value.
+    // Never arm from a drag, or read the DRAW union as mouse coordinates.
+    if native_button_down(){
+        if ACTIVE.get().is_some(){return false;}
+        if let (Ok(owner),Some(pointer),Some(h))=(owner(input,id),native_pointer(),HOVER.get()){
+            let now=Observation{owner,window:ui::event_window_code(event),time:input.current_time(),
+                scale:input.time_scale(),corners:[0.;8]};
+            if let Some(index)=pressed_hover(h,now,pointer){
+                ACTIVE.set(Some(Gesture{owner,window:now.window,index,native:true}));
+                HOVER.set(None);return true;
+            }
+        }
+        return false;
+    }
+    HOVER.set(index.filter(|&i|i<4).and_then(|index|Some(Hover{owner:owner(input,id).ok()?,
+        window:ui::event_window_code(event),time:input.current_time(),scale:input.time_scale(),
+        index,pointer:native_pointer()?})));
+    false
+}
+fn pressed_hover(h:Hover,now:Observation,pointer:(f64,f64))->Option<usize>{
+    (h.owner==now.owner&&h.window==now.window&&h.time==now.time&&h.scale==now.scale&&
+        (h.pointer.0-pointer.0).abs()<=2.0&&(h.pointer.1-pointer.1).abs()<=2.0).then_some(h.index)
+}
 // PF effect_ref changes across AE native Point preview callbacks. Retain only
 // the documented stream ID, disposing every acquired handle in this callback.
 fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>{
@@ -54,6 +89,12 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id
     let Ok(owner)=owner(input,id) else{clear();return;};
     let now=Observation{owner,window:ui::event_window_code(event),
         time:input.current_time(),scale:input.time_scale(),corners};
+    if ACTIVE.get().is_none()&&native_button_down(){
+        if let Some(index)=HOVER.get().and_then(|h|pressed_hover(h,now,native_pointer()?)){
+            ACTIVE.set(Some(Gesture{owner,window:now.window,index,native:true}));
+            HOVER.set(None);
+        }
+    }
     #[cfg(all(feature="preview-overlay-probe",target_os="macos"))]{
         unsafe extern "C"{fn eg_loupe_button_probe()->i32;}
         let flags=unsafe{eg_loupe_button_probe()};
@@ -257,6 +298,18 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         let at=|x:usize,y:usize|&p[(y*SIZE+x)*4..(y*SIZE+x+1)*4];
         assert_eq!(at(64,64),[255,100,100,20]);assert_eq!(at(0,0),[0,0,0,0]);
         assert_eq!(at(64,70),[255,255,255,255]);assert_eq!(at(63,63),[255,99,99,20]);
+    }
+    #[test]fn stationary_corner_press_is_qualified_without_parameter_motion(){
+        let h=Hover{owner:7,window:1,time:10,scale:25,index:2,pointer:(123.,456.)};
+        let n=Observation{owner:7,window:1,time:10,scale:25,corners:[0.;8]};
+        assert_eq!(pressed_hover(h,n,(123.,456.)),Some(2));
+        assert_eq!(pressed_hover(h,n,(125.,454.)),Some(2));
+        assert_eq!(pressed_hover(h,n,(126.,456.)),None);
+        assert_eq!(pressed_hover(h,Observation{owner:8,..n},h.pointer),None);
+        assert_eq!(pressed_hover(h,Observation{window:2,..n},h.pointer),None);
+        assert_eq!(pressed_hover(h,Observation{time:11,..n},h.pointer),None);
+        assert_eq!(pressed_hover(h,Observation{scale:50,..n},h.pointer),None);
+        HOVER.set(Some(h));clear();assert!(HOVER.get().is_none());
     }
     #[test]fn native_point_observation_distinguishes_one_corner_from_plane_motion(){
         let a=[0.,0.,10.,0.,10.,10.,0.,10.];let mut b=a;

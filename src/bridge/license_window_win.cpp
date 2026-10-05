@@ -105,3 +105,15 @@ extern "C" bool eg_set_loupe_cursor(bool hidden) {
     SetCursor(blank);
     return true;
 }
+
+// Read-only pointer query on this foreground UI thread; no input synthesis.
+extern "C" bool eg_loupe_pointer(double *x, double *y) {
+    DWORD owner = 0;
+    const HWND foreground = GetForegroundWindow();
+    if (!x || !y || !foreground ||
+        GetWindowThreadProcessId(foreground, &owner) != GetCurrentThreadId() ||
+        owner != GetCurrentProcessId()) return false;
+    POINT p;
+    if (!GetCursorPos(&p)) return false;
+    *x = p.x; *y = p.y; return true;
+}

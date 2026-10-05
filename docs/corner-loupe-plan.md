@@ -135,3 +135,10 @@ Dev132 closes a demonstrated multi-owner hole in the Dev124 warm policy. A fixed
 Completion is remembered independently of the one retained frame copy. No idle
 request after capacity; gestures remain allowed. Original-symptom host and
 after-scrub hidden-pane acceptance still pending; Demo OFF and keys unchanged.
+
+Dev132 short non-playback user check PASS for Undo, release, and after-scrub
+hidden-pane image. Stationary press before any Point motion is still missing.
+Dev136 adds a foreground UI pointer-qualified, hit-tested hover anchor scoped
+to effect/view/time. It starts the lens on a held corner press without changing
+Point values; existing changed-corner fallback retained. No idle frame-request
+policy expansion. Stationary-press host acceptance NOT RUN.

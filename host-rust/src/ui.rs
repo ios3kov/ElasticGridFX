@@ -647,6 +647,7 @@ pub fn adjust_cursor(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
@@ -661,7 +662,13 @@ pub fn adjust_cursor(
         let plane=ViewPlane::read(in_data,params,event)?;
         let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
-        if hit_test(in_data, grid, &plane, event, event.screen_point())?.is_none() {
+        let hit=hit_test(in_data,grid,&plane,event,event.screen_point())?;
+        if corner_loupe::hover(in_data,event,hit.and_then(|(axis,index)|(axis==DRAG_CORNER).then_some(index)),plugin_id){
+            event.set_cursor(hand_cursor(false));
+            event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::UPDATE_NOW);
+            return Ok(());
+        }
+        if hit.is_none() {
             // Documented AdjustCursor handoff; never call PF_SetCursor(NONE).
             // Do not mark handled, so AE can use the currently selected tool.
             return Ok(());

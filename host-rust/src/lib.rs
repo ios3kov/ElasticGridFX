@@ -1306,7 +1306,7 @@ impl AdobePluginGlobal for Plugin {
                         plane::sync_event_ui(&in_data,params)?;
                         ui::draw(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?;
                     }
-                    ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra)?,
+                    ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::NewContext => range_feedback::clear(&extra),
                     ae::Event::CloseContext => {range_feedback::clear(&extra);corner_loupe::close();ui::release_cursor();},
                     ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),
