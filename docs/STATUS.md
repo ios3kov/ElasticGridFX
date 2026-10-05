@@ -1647,3 +1647,23 @@ Package the exact Dev120 in the native administrator installer for human
 authorization. After installation, reopen saved session and compare same2.4–5.84
 frames, retain original key count/types and endpoint geometry. Native Dev120
 acceptance and current Windows compilation NOT RUN. No main/push/release.
+
+### Critical Mac RAM Preview incident — Dev120
+
+User reports AE stalls during plugin animation RAM Preview then whole Mac
+hangs; forced reboot confirmed. Installed disk identity is Dev120 source3c39a69
+EGFX-5fa3daad62f2d9425b6364d3. Loaded identity during incident not independently
+verified. ResetCounter19:46 reports force_off. After reboot observed severe
+load/swap pressure; this alone is not plugin attribution. Earlier Jetsam16:21/
+16:25 reports list AE largest process on16GB Mac; do not assign those events to
+latest hang. Old AE disk-write diagnostics likewise are not latest crash proof.
+Evidence outputs/ram-preview-hang-dev120/incident.json, local-only diagnostic
+summary. No repeated RAM Preview, host closure or software installation performed.
+Source review risk: Surface/Perspective Effect-pane DRAW calls loupe async full
+frame preparation without an active corner gesture; global timestamp/refresh
+interaction and playback requests need investigation. Retained64MiB copy bound
+is after host render request and is not a host-memory budget. Root cause remains
+UNCONFIRMED; no speculative fix accepted. Release/installer promotion blocked
+on incident resolution; previous green tests do not certify RAM Preview safety.
+Next: identify exact incident scene/time/settings, inspect request lifecycle,
+then bounded isolated verification before any user full-preview acceptance.
