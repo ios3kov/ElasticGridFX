@@ -118,21 +118,33 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
 #[derive(Clone,Copy,PartialEq,Eq)]
 struct FrameKey{owner:i32,window:i32,time:i32,scale:u32,stamp:[i8;4]}
 struct Frame{key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
+// Bounded owner history; switching between multiple effect rows must not
+// rearm a warm request at every playback time. Full history fails closed for
+// idle preparation while active corner gestures remain available.
+const WARM_OWNERS:usize=32;
+type WarmRequests=[Option<(i32,i32,u32,bool)>;WARM_OWNERS];
+const EMPTY_WARM:WarmRequests=[None;WARM_OWNERS];
 thread_local!{
     static FRAME:std::cell::RefCell<Option<Frame>>=const{std::cell::RefCell::new(None)};
     static VIEW:std::cell::Cell<Option<(i32,i32)>>=const{std::cell::Cell::new(None)};
-    static WARM:std::cell::Cell<Option<(i32,i32,u32)>>=const{std::cell::Cell::new(None)};
+    static WARM:std::cell::Cell<WarmRequests>=const{std::cell::Cell::new(EMPTY_WARM)};
 }
-pub(crate) fn close(){clear();FRAME.with_borrow_mut(|f|*f=None);VIEW.set(None);WARM.set(None);}
+pub(crate) fn close(){clear();FRAME.with_borrow_mut(|f|*f=None);VIEW.set(None);WARM.set(EMPTY_WARM);}
 // Permit one initial preview frame per owner, then require a corner gesture.
 // An unfinished warm request can be polled at that same time; advancing the
 // timeline must not replace it with requests for every playback frame.
-fn request_allowed(warm:&mut Option<(i32,i32,u32)>,owner:i32,time:i32,scale:u32,
+fn request_allowed(warm:&mut WarmRequests,owner:i32,time:i32,scale:u32,
                    gesture:bool,cached_owner:bool)->bool {
     if gesture { return true; }
     if cached_owner { return false; }
-    if warm.is_none_or(|key|key.0!=owner) { *warm=Some((owner,time,scale)); }
-    *warm==Some((owner,time,scale))
+    if let Some(key)=warm.iter().flatten().find(|key|key.0==owner) {
+        return !key.3 && key.1==time && key.2==scale;
+    }
+    let Some(slot)=warm.iter_mut().find(|slot|slot.is_none()) else{return false;};
+    *slot=Some((owner,time,scale,false));true
+}
+fn warm_completed(warm:&mut WarmRequests,owner:i32){
+    if let Some(key)=warm.iter_mut().flatten().find(|key|key.0==owner){key.3=true;}
 }
 // SDK25.6 AE_EffectUI.h:419 explicitly limits reserved_job_manageP to
 // Effect pane custom UI. Never ask a Comp/Layer context for an AsyncManager.
@@ -184,6 +196,9 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
         Ok(Frame{key,width:w,height:h,region,pixels})
     })();
     let checked=render.checkin_frame(receipt);
+    // A terminal host receipt must not be requeued by idle draws even if
+    // validation/copy/checkin failed. Active gestures may still retry.
+    let mut warm=WARM.get();warm_completed(&mut warm,owner);WARM.set(warm);
     match (result,checked){(Ok(frame),Ok(()))=>{
         FRAME.with_borrow_mut(|f|*f=Some(frame));
         // Background warm completion must not trigger a global redraw/render loop.
@@ -208,8 +223,26 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 }
 #[cfg(test)] mod tests{
     use super::*;
+    #[test]fn multiple_effects_cannot_rearm_warm_requests_on_each_playback_frame(){
+        let mut warm=EMPTY_WARM;
+        assert!(request_allowed(&mut warm,7,0,25,false,false));
+        assert!(request_allowed(&mut warm,8,0,25,false,false));
+        for time in 1..10000 {
+            for owner in [7,8] {assert!(!request_allowed(&mut warm,owner,time,25,false,false));}
+        }
+    }
+    #[test]fn warm_history_is_bounded_and_completed_owners_cannot_requeue(){
+        let mut warm=EMPTY_WARM;
+        for owner in 0..WARM_OWNERS as i32 {assert!(request_allowed(&mut warm,owner,0,25,false,false));}
+        assert!(!request_allowed(&mut warm,100,0,25,false,false));
+        assert!(request_allowed(&mut warm,100,9,25,true,false));
+        warm_completed(&mut warm,0);
+        assert!(!request_allowed(&mut warm,0,0,25,false,false));
+        assert!(request_allowed(&mut warm,0,0,25,true,false));
+        assert!(request_allowed(&mut warm,1,0,25,false,false));
+    }
     #[test]fn playback_does_not_queue_loupe_frames_after_initial_warm(){
-        let mut warm=None;
+        let mut warm=EMPTY_WARM;
         assert!(request_allowed(&mut warm,7,0,25,false,false));
         assert!(request_allowed(&mut warm,7,0,25,false,false));
         for time in 1..10000 {assert!(!request_allowed(&mut warm,7,time,25,false,false));}

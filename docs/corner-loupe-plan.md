@@ -129,3 +129,9 @@ warm request and active corner gestures. Unit policy coverage PASS; native reque
 lifecycle, playback stability and after-scrub hidden-pane loupe coverage NOT RUN.
 One initial warm request still exists; do not claim zero background host work or
 a proven root cause. Earlier hidden-pane acceptance does not cover this policy.
+
+Dev132 closes a demonstrated multi-owner hole in the Dev124 warm policy. A fixed
+32-owner history prevents alternating effect rows from rearming playback requests.
+Completion is remembered independently of the one retained frame copy. No idle
+request after capacity; gestures remain allowed. Original-symptom host and
+after-scrub hidden-pane acceptance still pending; Demo OFF and keys unchanged.

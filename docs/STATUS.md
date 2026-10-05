@@ -1737,3 +1737,20 @@ expect pre-cache/pre-UI-guard spelling. Updating the guards to follow cached SDK
 loaders and checked-out retained grid without removing old fail-closed assertions.
 Product/installed binary unchanged by this test-only correction. Windows and
 follow-up Mac CI results remain pending. AE currently closed, playback NOT RUN.
+
+Follow-up request-policy review found a concrete multi-instance defect in the
+Dev124/128 mitigation: alternating owners resets its single warm key, allowing
+new idle playback requests. A regression test FAIL before repair is retained in
+outputs/redraw-work-dev128/multi-owner-before.log (no live Mac reproduction).
+Dev132 uses32 bounded owner warm records; completed owners cannot restart after
+frame-copy eviction. Pending owners can poll only their original time/scale.
+New idle owners after capacity fail closed; active corner gestures remain allowed.
+No pixel/source/key change. Dev128 installed until exact Dev132 replacement.
+This repairs the reproduced policy defect, not proof of the whole-Mac hang cause.
+
+Dev132 final policy checks:110 Rust tests and strict all-target Clippy PASS.
+Terminal receipts mark warm work finished even if copy/validation/checkin fails,
+preventing idle retry loops; active gestures still permitted. Source review
+bounds owner history and checks no frame handle survives checkin.
+Earlier Dev128 follow-up Windows CI37354389182 PASS on test-only c14bb0c; it does
+not cover the new multi-owner policy. Mac follow-up still running at checkpoint.
