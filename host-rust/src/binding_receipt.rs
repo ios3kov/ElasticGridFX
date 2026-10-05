@@ -4,7 +4,7 @@
 use super::*;
 use std::cell::RefCell;
 
-const CURRENT: u16 = 2;
+const CURRENT: u16 = 3;
 const MAGIC: &[u8; 8] = b"EGFXBND1";
 #[derive(Default)]
 pub(crate) struct State { generation: u16 }

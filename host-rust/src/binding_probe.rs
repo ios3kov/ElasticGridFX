@@ -6,7 +6,7 @@ const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR"
 pub fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
     let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
         else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
-    match kind {0.0|1.0|4.0=>Ok(false),2.0|3.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
+    match kind {0.0|1.0|4.0|5.0=>Ok(false),2.0|3.0|6.0|7.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
 }
 
 // Shared UI/render snapshot. No AEGP calls: all dependencies are PF parameters.
@@ -42,6 +42,21 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
     Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true,parameter_basis:None,render_kind:plane::RenderKind::Layer,source_corners:None}))
 }
 
+pub fn sampled_comp_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
+    ->Result<Option<plane::State>,ae::Error>{
+    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
+        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    if !matches!(kind,5.0|6.0|7.0){return sampled_plane(in_data,params,checkout,frame_context);}
+    let origin=if frame_context {in_data.pre_effect_source_origin()} else {ae::Point{h:0,v:0}};
+    let mut corners=[0.;8];
+    for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate(){
+        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?} else {params.get(id)?.as_point()?.float_value()?};
+        corners[2*i]=p.x-f64::from(origin.h);corners[2*i+1]=p.y-f64::from(origin.v);
+    }
+    Ok(Some(plane::State{corners:Some(corners),comp_space:kind==7.0,
+        render_kind:plane::RenderKind::Layer,..plane::State::default()}))
+}
+
 pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
     let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
@@ -71,8 +86,8 @@ pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,ch
 fn comp_space_kind(kind:f64,frame_context:bool,automatic:bool)->Result<bool,ae::Error>{
     match kind {
         0.0 if automatic && frame_context=>Err(ae::Error::BadCallbackParameter),
-        0.0|1.0|3.0|4.0=>Ok(false),
-        2.0=>Ok(true),
+        0.0|1.0|3.0|4.0|5.0|6.0=>Ok(false),
+        2.0|7.0=>Ok(true),
         _=>Err(ae::Error::BadCallbackParameter),
     }
 }
@@ -141,11 +156,21 @@ pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
         }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     }
     params.add_with_flags(Params::ResearchPlaneKind,NAMES[4],ae::FloatSliderDef::setup(|f| {
-        setup_float(f,(0.0,4.0),(0.0,4.0),0.0,0,false);
+        setup_float(f,(0.0,7.0),(0.0,7.0),0.0,0,false);
     }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     Ok(())
 }
 fn expressions()->Vec<String>{
+    let mut values:Vec<String>=[(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|
+        include_str!("binding_point_v4.jsx").replace("@RIGHT@",if right {"+r.width"} else {""})
+            .replace("@BOTTOM@",if bottom {"+r.height"} else {""})
+            .replace("@COMPX@",if right {"thisComp.width"} else {"0"})
+            .replace("@COMPY@",if bottom {"thisComp.height"} else {"0"})).into();
+    values.push(include_str!("binding_kind_v4.jsx").into());
+    values
+}
+
+fn v3_expressions()->Vec<String>{
     let mut values:Vec<String>=[(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|
         include_str!("binding_point_v3.jsx").replace("@RIGHT@",if right {"+r.width"} else {""})
             .replace("@BOTTOM@",if bottom {"+r.height"} else {""})).into();
@@ -290,24 +315,29 @@ fn undo_preserved(generation:u16,states:&[Snapshot],previous:&[String],legacy:&[
         || (generation>=2 && exact_binding(states,previous)))
 }
 #[cfg(fstr_auto_binding)]
+fn undo_preserved_v3(generation:u16,states:&[Snapshot],v3:&[String])->bool{
+    generation>=3&&exact_binding(states,v3)
+}
+#[cfg(fstr_auto_binding)]
 pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<BindingOutcome,String>{
     let mut host = Adapter::new(id,effect,layer,basic)?;
     let generation = binding_receipt::query(id,effect,None).map_err(err)?;
     let states = (0..5).map(|i|host.read(i)).collect::<Result<Vec<_>,_>>()?;
     let previous = previous_expressions();
     let legacy = legacy_expressions();
-    if undo_preserved(generation,&states,&previous,&legacy) {
+    let v3=v3_expressions();
+    if undo_preserved(generation,&states,&previous,&legacy) || undo_preserved_v3(generation,&states,&v3) {
         host.validate_target()?;
         return Ok(BindingOutcome::UndoPreserved);
     }
     let expected = expressions();
     let exact=exact_binding(&states,&expected);
-    let old=if exact_binding(&states,&previous) {&previous} else {&legacy};
+    let old=if exact_binding(&states,&v3) {&v3} else if exact_binding(&states,&previous) {&previous} else {&legacy};
     let pristine=states.iter().all(|s|s.keys==0 && !s.enabled && s.expression.is_empty());
     // Mark the generation BEFORE the Undo group. Undo of an owned upgrade
     // restores old expressions with generation2 and must not trigger re-upgrade.
-    let marked=generation<2 && (exact || exact_binding(&states,old) || pristine);
-    if marked {binding_receipt::query(id,effect,Some(2)).map_err(err)?;}
+    let marked=generation<3 && (exact || exact_binding(&states,old) || pristine);
+    if marked {binding_receipt::query(id,effect,Some(3)).map_err(err)?;}
     let outcome=match binding_transaction::install_or_upgrade(&mut host,&expected,old) {
         Ok(outcome)=>outcome,
         Err(failure)=>{
@@ -377,10 +407,21 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
             assert_eq!(comp_space_kind(2.0,frame,true),Ok(true));
             assert_eq!(comp_space_kind(3.0,frame,true),Ok(false));
             assert_eq!(comp_space_kind(4.0,frame,true),Ok(false));
-            for invalid in [-1.0,0.5,5.0,f64::NAN,f64::INFINITY] {
+            assert_eq!(comp_space_kind(5.0,frame,true),Ok(false));
+            assert_eq!(comp_space_kind(6.0,frame,true),Ok(false));
+            assert_eq!(comp_space_kind(7.0,frame,true),Ok(true));
+            for invalid in [-1.0,0.5,8.0,f64::NAN,f64::INFINITY] {
                 assert!(comp_space_kind(invalid,frame,true).is_err());
             }
         }
+    }
+    #[test] fn v3_saved_upgrade_and_v4_undo_preserve_old_expressions(){
+        let old=v3_expressions();let new=expressions();
+        assert_ne!(old,new);
+        let mut states:Vec<_>=old.iter().map(|expression|Snapshot{expression:expression.clone(),enabled:true,keys:0}).collect();
+        assert!(!undo_preserved_v3(2,&states,&old));
+        assert!(undo_preserved_v3(3,&states,&old));
+        states[0].keys=1;assert!(!undo_preserved_v3(3,&states,&old));
     }
     #[test] fn first_owned_upgrade_and_upgrade_undo_are_distinct(){
         let old=previous_expressions();let legacy=legacy_expressions();let new=expressions();

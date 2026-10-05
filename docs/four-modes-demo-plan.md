@@ -102,3 +102,15 @@ Requested display order: Comp mode / Layer mode / Flat mode / Perspective.
 Existing saved PlaneMode ordinals2=Flat,3=Layer cannot simply be swapped.
 A versioned/proxy selector migration must preserve the selected mode and existing
 keys on old project reopen/Undo. No ordinal reorder has been implemented yet.
+
+User confirmed Comp mode must span the entire composition, even for a smaller
+layer. V4 owned plane bindings derive Comp corners with fromComp (2D) or
+fromCompToSurface (3D raster); 3D native text retains comp-space sampling.
+Dedicated kinds5/6/7 distinguish these domains. Layer/Flat/Perspective retain
+v3 bounds. Upgrade exact v3 via receipt generation3 and reversible owned
+expression transaction; old v1/v2 and undone bindings retain prior policy.
+New expression source reference: Adobe Expression Language Reference,
+https://helpx.adobe.com/after-effects/desktop/work-with-expressions/expression-language-reference/expression-language-reference.html
+V3 regression and V4 transformed 640x480 Comp/smaller-layer expression tests
+PASS; native grid/render alignment still pending. Menu order is still unchanged
+until a saved-mode-safe selector migration is implemented.

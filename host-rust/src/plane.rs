@@ -126,7 +126,7 @@ impl State {
         }
         if mode == Mode::Comp || (mode==Mode::Flat && layer_is_3d(params,checkout)?) {
             #[cfg(fstr_binding_probe)]
-            if let Some(derived)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {return Ok(derived);}
+            if let Some(derived)=if mode==Mode::Comp {binding_probe::sampled_comp_plane(in_data,params,checkout,frame_context)?} else {binding_probe::sampled_plane(in_data,params,checkout,frame_context)?} {return Ok(derived);}
             return Ok(Self::default());
         }
         let perspective=mode==Mode::Perspective;
