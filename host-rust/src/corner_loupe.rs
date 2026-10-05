@@ -36,6 +36,17 @@ fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
 pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8]){
     let now=Observation{owner:input.as_ref().effect_ref as usize,window:ui::event_window_code(event),
         time:input.current_time(),scale:input.time_scale(),corners};
+    #[cfg(all(feature="preview-overlay-probe",target_os="macos"))]{
+        unsafe extern "C"{fn eg_loupe_button_probe()->i32;}
+        let flags=unsafe{eg_loupe_button_probe()};
+        super::preview_overlay_probe::loupe(input,event,3,flags as isize,false);
+        let bits=PREVIOUS.get().map(|old|{
+            i32::from(old.owner==now.owner) | (i32::from(old.window==now.window)<<1) |
+            (i32::from(old.time==now.time&&old.scale==now.scale)<<2) |
+            (changed_corner(&old.corners,&now.corners).map(|i| (i as i32+1)<<3).unwrap_or(0))
+        }).unwrap_or(-1);
+        super::preview_overlay_probe::loupe(input,event,4,bits as isize,false);
+    }
     if let Some(old)=PREVIOUS.get(){
         if old.owner==now.owner&&old.window==now.window&&old.time==now.time&&old.scale==now.scale&&native_button_down(){
             if let Some(index)=changed_corner(&old.corners,&now.corners){

@@ -13,3 +13,9 @@ extern "C" bool eg_loupe_button_down() {
     return [NSThread isMainThread] && [NSApp isActive] &&
         (([NSEvent pressedMouseButtons] & 1U) != 0);
 }
+
+extern "C" int eg_loupe_button_probe() {
+    return ([NSThread isMainThread] ? 1 : 0) |
+           ([NSApp isActive] ? 2 : 0) |
+           (([NSEvent pressedMouseButtons] & 1U) != 0 ? 4 : 0);
+}

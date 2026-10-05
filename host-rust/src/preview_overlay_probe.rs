@@ -49,7 +49,9 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra)->bool {
             let mouse=if recognized(window) && [ae::sys::PF_Event_DO_CLICK,ae::sys::PF_Event_DRAG,ae::sys::PF_Event_ADJUST_CURSOR].contains(&raw.e_type) {
                 let p=event.screen_point();Some((p.h,p.v))
             } else {None};
-            log.append(raw.e_type,window,input.current_time(),input.time_scale(),mouse,(-2,-2,-1));
+            if ![ae::sys::PF_Event_IDLE,ae::sys::PF_Event_ADJUST_CURSOR].contains(&raw.e_type){
+                log.append(raw.e_type,window,input.current_time(),input.time_scale(),mouse,(-2,-2,-1));
+            }
         }
     }
     !recognized(window)
