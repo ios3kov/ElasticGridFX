@@ -13,7 +13,10 @@ int main(int argc,const char* argv[]) {
             } catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
         }
         if(argc!=1)return 2; // No arbitrary destinations, test roots or payload input.
-        [NSApplication sharedApplication];[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];[NSApp activateIgnoringOtherApps:YES];
+        [NSApplication sharedApplication];[NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        // This app uses NSAlert's modal loop rather than NSApplication::run.
+        // Complete the launch lifecycle explicitly before presenting the UI.
+        [NSApp finishLaunching];[NSApp activateIgnoringOtherApps:YES];
         for(;;){
             NSAlert* alert=[NSAlert new];alert.messageText=@"FSTR Stretch Installer";
             alert.informativeText=[NSString stringWithFormat:@"Version %s\n\nInstall saves your previous version. Restore brings it back. Close Adobe render applications first.\n\nIf you use a custom plug-in folder, remove older FSTR copies there first.\n\nBackups: /Library/Application Support/FSTR FX/Backups",fstr::payload::version];

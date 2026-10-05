@@ -1540,3 +1540,17 @@ using the unchanged verified Mac Dev116 payload EGFX-f0e50f471f52dd30b6fdb7cf.
 Do not promote Windows payload/installer before that platform's plugin acceptance.
 Mac administrator Install/Restore acceptance remains NOT RUN. Marketplace SDK
 integration and release remain deferred/unfinished, Demo remains OFF.
+
+### Mac installer launch follow-up
+
+Initial c272cc2 package compiled/signed and exact Dev116 embedding/archive
+verification passed; 9 payload/decision tests passed. Native window observation
+repeatedly timed out. A directly launched exact executable remained in
+NSAlert::runModal (outputs/mac-installer-dev116/ui-process-sample.txt), with no
+stderr; this does not prove visible UI acceptance. The modal-only entrypoint
+never called NSApplication::run or finishLaunching. Complete the documented
+launch lifecycle explicitly before showing its first alert.
+Apple authority: https://developer.apple.com/documentation/appkit/nsapplication/finishlaunching%28%29
+Regression window/Close verification pending; no administrator action ran.
+Installer engine and embedded plugin remain unchanged. Windows plugin acceptance
+still pending, Demo OFF.
