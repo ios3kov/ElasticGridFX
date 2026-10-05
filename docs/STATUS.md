@@ -1724,3 +1724,16 @@ checkout temporaries dispose before insertion; only owned retained grid reused;
 current host UI comparisons avoid persistent Undo-stale state; no-op corner
 release still ends gesture. No renderer or saved-stream byte changes. Logs local
 outputs/redraw-work-dev128. Mac package build follows from clean committed source.
+
+Dev128 clean Mac package/signature/archive PASS, source10c808f, BID
+EGFX-5de4d8b966a262b8e0741f0c. Native installer package SHA256
+719539541617fe38df3f43b2de06f99690835240ecff16e2dc15bae5ffd39e90.
+Saved a separate showTime-before-dev128.aep copy before quitting AE. System disk
+payload now matches every file hash of the Dev128 manifest; native installer
+reported AlreadyInstalled after user interaction. Do not infer loaded acceptance.
+Published source10c808f to authorized feat/next-update CI only. Native installer
+CI37353761077 PASS. Mac CI37353761076 FAIL: three source-string guards still
+expect pre-cache/pre-UI-guard spelling. Updating the guards to follow cached SDK
+loaders and checked-out retained grid without removing old fail-closed assertions.
+Product/installed binary unchanged by this test-only correction. Windows and
+follow-up Mac CI results remain pending. AE currently closed, playback NOT RUN.

@@ -9,17 +9,29 @@ HOST = (ROOT / 'host-rust/src/lib.rs').read_text()
 class FirstApplicationContracts(unittest.TestCase):
     def test_exception_is_limited_to_pending_automatic_frame(self):
         self.assertIn('kind == 0.0 && frame_context && cfg!(fstr_auto_binding)', BINDING)
-        self.assertIn('&& pending_frame_identity(params, checkout)?', BINDING)
+        self.assertIn('&& pending_frame_identity(reads)?', BINDING)
         self.assertIn('resolve_comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding),initial_identity)?', BINDING)
         self.assertIn('0.0 if automatic && frame_context=>Err(ae::Error::BadCallbackParameter)', BINDING)
 
     def test_identity_proof_checks_out_smartfx_dependencies(self):
         proof=BINDING.split('fn pending_frame_identity(',1)[1].split('pub fn add_params(',1)[0]
-        for token in ['checked_float(params,id)',
-                      'checked_popup(params,Params::PlaneMode)?', 'params.checkout(Params::GridState)?',
+        for token in ['reads.float(id)',
+                      'reads.popup(Params::PlaneMode)?', 'reads.params.checkout(Params::GridState)?',
                       'i32::from(grid.columns)','i32::from(grid.rows)','Params::WaveAmplitude',
                       'Params::StretchEasing','Params::MinSpacing']:
             self.assertIn(token,proof)
+        # Follow the callback-local cache to its SDK loaders; the shared grid
+        # must originate in SmartPreRender checkout, not the invalid ordinary array.
+        readers=(ROOT/'host-rust/src/param_reads.rs').read_text()
+        for token in ['if self.checkout {checked_float(self.params,id)}',
+                      'if self.checkout {checked_popup(self.params,id)}']:
+            self.assertIn(token,readers)
+        snapshot=HOST.split('fn smart_render_snapshot(',1)[1].split('#[repr(C)]',1)[0]
+        self.assertIn('let checked = params.checkout(Params::GridState)?;',snapshot)
+        self.assertIn('retained_grid(&value)?',snapshot)
+        self.assertIn('Reads::new(params,true,Some(&grid))',snapshot)
+        self.assertIn('State::read_values(&reads,&in_data,true)?',snapshot)
+        self.assertIn('if let Some(grid)=reads.grid {return Ok(matches(grid));}',proof)
         self.assertNotIn('Params::Columns',proof)
         self.assertNotIn('Params::Rows',proof)
         self.assertNotIn('.resized(',proof)

@@ -151,7 +151,9 @@ class HostContract(unittest.TestCase):
         self.assertIn('ae::ParamUIFlags::DISABLED,corners_disabled', update)
         self.assertIn('definition.update_param_ui()', update)
         # SDK CONTROL_ONLY copy is cosmetic; no saved parameter mutation.
-        self.assertIn('(*params.get(Params::ModeSelector)?).clone()', update)
+        self.assertIn('let current=params.get(Params::ModeSelector)?;', update)
+        self.assertIn('let mut mode=(*current).clone();', update)
+        self.assertIn('if popup_ui_changed(',update)
         self.assertNotIn('params.get_mut(', update)
         self.assertNotIn('set_value_changed(', update)
         self.assertNotIn('AEGP_SetStreamValue', update)
