@@ -1689,3 +1689,11 @@ switching Effect Controls to Project: the retained frame is time-qualified, so
 a hidden pane may no longer refresh it. Preserve this requirement as pending,
 not silently accepted or removed. Build/package identity and bounded host checks
 remain to be recorded separately.
+
+Dev124 Mac artifact build/signature/archive/manifest PASS, source674c984, BID
+EGFX-b6c190318a974348695d86e0. Native installer package prepared in local
+outputs/ram-preview-hang-dev120/dev124/installer; not installed, no promotion.
+Post-reboot swap7.69GiB observed19:59; heavy host verification not attempted.
+[Frame/redraw source audit](ram-preview-request-audit-2026-10-05.md) found no other
+independent async frame requester; conditional density invalidation, no-op corner
+writes, repeated UI/parameter updates are review candidates, not proven hang causes.
