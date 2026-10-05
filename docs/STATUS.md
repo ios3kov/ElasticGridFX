@@ -1463,5 +1463,12 @@ User Dev108 runtime FAIL: moved corners cross layer limits but image remains cut
 at source rectangle. Dev112 fixes host output bbox and core destination clipping
 for Perspective; source sampling/quad outside transparency unchanged. Old-core
 regression reproduced; source/API/thread/ownership checks preserve existing
-immutable SmartFX and legacy-origin mechanisms. Native/package/CI pending.
-Installed Dev108 remains until verified replacement; no release/merge.
+immutable SmartFX and legacy-origin mechanisms. Installed **0.9.4 Dev112**, source45350b22ec7c26735b468b632d13455c49813b25,
+Build ID EGFX-422a6cfe0dcda2e3448e5aff. Package/signature/atomic replacement PASS.
+98 Rust/15 host contracts PASS, new expanded-destination test PASS under ASan/UBSan
+for8/16/32bpc and both qualities. Native AE25.6 screenshot-quad Final/32bpc PASS:
+alpha bbox81,27–438,357;15407 nontransparent pixels above original source top116.
+User scene preserved as user-preserved.aep; check copy left open in Perspective.
+Loaded identity checked separately in outputs/perspective-dev112/loaded-identity;
+Mac/Windows CI on45350b2 pending. Windows new native behavior NOT RUN.
+Evidence outputs/perspective-dev112/native-pixels.json; no release/merge.

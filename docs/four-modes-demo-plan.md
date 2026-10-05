@@ -266,3 +266,11 @@ Initial ad hoc compile omitted CpuRenderer dependency and failed link, retained;
 corrected reproduction used unmodified committed bridge from separate file.
 Dev112 implementation shared Mac/Windows. Native validation/CI pending; old
 Surface/Comp/Layer and all retained obligations remain.
+
+Dev112 EGFX-422a6cfe0dcda2e3448e5aff package/signature/atomic replacement PASS.
+Regression after-fix ASan/UBSan PASS;98 Rust/15 host contracts PASS. Native AE25.6
+32bpc Final screenshot-quad output PASS: alpha bbox81,27–438,357 (source top116),
+15407 visible pixels above former crop. User scene preserved separately, check
+copy left open for manual review. Exact source45350b2 pushed to authorized branch,
+CI/native Windows pending. No main/merge/release. Dev108 Surface caption observed
+in AE previously; new caption acceptance no longer blocked on hidden panel.
