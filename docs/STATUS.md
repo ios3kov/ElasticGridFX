@@ -18,22 +18,33 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev68**, source8d98424a0aaf95df3147e13d6dced56ab9ce11b6,
-Build ID EGFX-2c119fb9470dcf419a0424df. Mac package/signature and exact
-loaded-image UUID/path PASS. Previous Dev64 retained by atomic replacement.
-93 Rust tests, Clippy all-targets, 15 scoped host-contract checks PASS.
-Windows CI37293880927 and Mac CI37293880981 PASS at this exact source.
-Windows downloaded AEX identity/checksum PASS (EGFX-6916efe6320bedc00b79c89c),
-SHA256 47cbffee6a8a198a3b10cc4f9eb4fd4bee89f7cf4ac3e98794f2f3d72e013caa.
-Windows packet: outputs/FSTR-Stretch-0.9.4-Windows-Dev68/FSTR-Stretch-Windows-Dev68.zip.
-Windows AE acceptance of Dev68 NOT RUN. Mac native loupe visual acceptance
-PENDING MANUAL DRAG; user said not yet checked. Owned loupe-dev68.aep open,
-Perspective mode selected, effect controls visible. Lens native Point tracking
-implemented without setters/key writes or renderer changes. Evidence:
-outputs/corner-loupe-dev68; prior Dev64 evidence retained in outputs/corner-loupe.
-Dev60 earlier scoped four-mode pixel/migration evidence stays artifact-specific.
+Installed now: **0.9.4 Probe78**, diagnostic loupe candidate, source
+8831b2a77aa49c0eee8fc7ba8aeff93e127d8037, Build ID
+EGFX-8d3772b6e6492719146cd85c. Atomic replacement/package/signature PASS;
+Probe74 backup retained. Exact loaded-image UUID/path PASS in AE25.6 (PID23997).
+95 scoped Rust tests and all-target Clippy PASS.
+Native visual acceptance is PENDING; this is not a release candidate.
+
+Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
+that transient PF effect references cannot identify the same native Point drag.
+Probe74 stable AE stream identity restored the loupe, but native visual FAIL:
+incorrect/fallback image and AE internal verification failure from
+PF_GetContextAsyncManager in the Composition UI context. User screenshots and
+bounded diagnostic traces are retained, not relabeled PASS.
+Probe78 requests frames only from the Effect Controls custom UI context and
+copies owned pixels; viewer drawing makes no async-manager request. No fallback
+checker is presented as a successfully acquired frame. Test scene reopened and
+Effect Controls visible without an error at initial inspection. Drag/image/release
+acceptance and hidden-Effect-Controls coverage remain pending.
+Evidence: outputs/corner-loupe-probe70, corner-loupe-probe70b,
+corner-loupe-probe74, corner-loupe-probe78; see corner-loupe-plan.md.
+
+Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
+Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old
+artifacts do not include the latest loupe fixes. New Windows CI/package is pending.
+Dev60 scoped mode/pixel/migration evidence remains artifact-specific.
 Installer payloads still pin separately accepted Dev52/Dev56. Demo remains OFF.
-Native activation still waits for marketplace SDK access. No release/merge.
+Native activation waits for marketplace SDK access. No release/merge.
 
 Previously accepted Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
 Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped

@@ -87,3 +87,12 @@ samples that copy; pending pixels do not masquerade as a successful checker lens
 Only Flat/Perspective prefetch; renderer unchanged. Closed contexts release cache.
 Hidden Effect Controls before any prefetch remains an unresolved coverage case;
 do not claim full loupe acceptance or silently drop it.
+
+Probe78 installed 2026-10-05, source8831b2a, build
+EGFX-8d3772b6e6492719146cd85c. Package/signature, atomic replacement,
+95 Rust tests and Clippy PASS. Exact loaded-image UUID/path PASS in
+AE25.6 PID23997. Saved owned Probe74 scene reopened; Effect Controls
+shown with F3, no initial error. Native drag/image/release acceptance pending.
+Probe74 generated repeated verification dialogs; saved scene and closed
+project before verified PID21494 SIGTERM and safe replacement. No force-kill
+or deletion of user scenes. Evidence in outputs/corner-loupe-probe78.
