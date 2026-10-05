@@ -1635,3 +1635,15 @@ and unchanged serialized keys; strict Clippy precision fixture spelling repaired
 follow-up PASS. Dev120 ordinary (121/122/123 diagnostic variants). New binary
 packaging/install/AE after-render and Windows verification pending. Existing
 installer embeds old Dev116 and is not this new plugin candidate. Demo OFF.
+
+Dev120 clean Mac source3c39a69 package/signature/manifest PASS, BID
+EGFX-5fa3daad62f2d9425b6364d3. Before restart the current session was saved to
+outputs/grid-animation-jump/showTime-session.aep (original Desktop project not
+overwritten); AE closed. Atomic test replacement refused BEFORE swap with
+PermissionError13: previous native installer has protected the destination.
+Receipt outputs/grid-animation-jump/backups/EGFX-update-bf36c963e8234436ab3b6998a5a385b0/receipt.json
+is FAILED_BEFORE_SWAP; do not claim Dev120 installed. System Dev116 retained.
+Package the exact Dev120 in the native administrator installer for human
+authorization. After installation, reopen saved session and compare same2.4–5.84
+frames, retain original key count/types and endpoint geometry. Native Dev120
+acceptance and current Windows compilation NOT RUN. No main/push/release.
