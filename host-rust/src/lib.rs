@@ -18,6 +18,7 @@ mod preview_overlay_probe;
 mod ui_projection;
 mod plane;
 mod demo;
+mod corner_loupe;
 mod fit_layer;
 mod reset_grid;
 mod spacing;
@@ -1136,6 +1137,7 @@ impl AdobePluginGlobal for Plugin {
                 #[cfg(any(target_os = "macos", target_os = "windows"))]
                 out_data.set_out_flag(ae::OutFlags::IDoDialog, true);
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
+                out_data.set_out_flag2(ae::OutFlags2::CustomUiAsyncManager,true);
                 // One noninteractive diagnostic per host setup, never per frame.
                 eprintln!("{}", build_identity::DIAGNOSTIC.replace('\r', " | "));
             }
@@ -1213,7 +1215,7 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
                     ae::Event::Draw(_) => {
                         plane::sync_event_ui(&in_data,params)?;
-                        ui::draw(&in_data, params, &mut extra)?;
+                        ui::draw(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?;
                     }
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra)?,
                     ae::Event::NewContext => range_feedback::clear(&extra),

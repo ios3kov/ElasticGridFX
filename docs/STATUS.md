@@ -8,6 +8,9 @@ their older holds and release-policy statements do not override the state below.
 
 Current scope: implement the newly authorized four deformation modes and disabled
 Demo design for both platforms; retain native Install/Restore delivery obligations.
+Added centered corner loupe with a central target in Flat/Perspective, UI only,
+Mac and Windows; see [loupe contract](corner-loupe-plan.md). Native loupe
+acceptance is pending.
 See [mode/design contract](four-modes-demo-plan.md). Previously accepted installer
 payloads remain unchanged until a new plugin candidate is separately accepted. Branch feat/next-update is published for the
 user-authorized Windows CI continuation; source fixes/docs on that branch are
@@ -15,7 +18,13 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
+Installed now: **0.9.4 Dev60**, sourcea19f2b6, Build ID
+EGFX-9c71a484d4dabd700c1ad0fa. Loaded identity and scoped old/new-mode pixel
+checks PASS; loupe not yet in this installed candidate. Windows source51a8d3c
+CI37288366891 and native installer CI37288366821 PASS; newer Windows host
+validation pending. Installer payloads still pin accepted Dev52/Dev56.
+
+Previously accepted Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
 Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped
 pixel/key/save/reopen evidence recorded below; marketplace activation remains
 blocked on author SDK access. Windows: **0.9.4 Dev56**, source

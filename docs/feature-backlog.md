@@ -551,3 +551,10 @@ ProgramFiles/Adobe/Common/Plug-ins/7.0/MediaCore, superseding CommonProgramFiles
 Mac isolated fixtures and payload checks are passing; Windows MSVC/package and
 real administrator installation/Restore acceptance remain pending. All prior
 U0–U11 requirements, marketplace dependency and release boundaries are retained.
+
+## 2026-10-05 — centered corner loupe
+
+User-confirmed: Flat mode and Perspective corner drags show a loupe centered
+on the corner, with a target exactly in the lens center. Mac and Windows;
+UI only, visible during drag, absent from rendered pixels.
+See [requirements and acceptance](corner-loupe-plan.md).

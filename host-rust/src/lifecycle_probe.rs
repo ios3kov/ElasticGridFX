@@ -228,6 +228,8 @@ impl Probe {
         self.records.push(record);
     }
 
+    pub(crate) fn plugin_id(&self)->Option<ae::aegp::PluginId>{self.id}
+
     fn inspect(&mut self, cmd: &ae::Command, input: &ae::InData) -> Result<i32, ae::Error> {
         if matches!(cmd, ae::Command::GlobalSetup) {
             self.wake=Some(IdleWake::new(input)?);

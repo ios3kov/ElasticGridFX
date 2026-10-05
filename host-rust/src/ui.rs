@@ -86,6 +86,7 @@ fn set_drag_cursor(dragging: bool) {
 }
 
 pub fn release_cursor() {
+    corner_loupe::clear();
     GUIDE_DRAGGING.set(false);
     // Leave the selected tool's cursor to AE. PF_SetCursor(NONE) is invalid
     // on AE 25.6; forcing Arrow here also overrides text/pen/rotation tools.
@@ -334,6 +335,7 @@ fn draw_viewer(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id: Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.in_flags().contains(ae::EventInFlags::DONT_DRAW) {
         return Ok(());
@@ -376,6 +378,7 @@ fn draw_viewer(
         }
     }
     if plane.invalid() {
+        draw_loupe(in_data,event,&plane,&supplier,&surface,plugin_id);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
         return Ok(());
     }
@@ -419,8 +422,19 @@ fn draw_viewer(
     }
 
     draw_range(in_data,params,event,&plane,&supplier,&surface)?;
+    draw_loupe(in_data,event,&plane,&supplier,&surface,plugin_id);
     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
     Ok(())
+}
+
+fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
+    supplier:&ae::drawbot::Supplier,surface:&ae::drawbot::Surface,id:Option<ae::aegp::PluginId>) {
+    let Some(index)=corner_loupe::active(in_data,event) else{return;};
+    let Some(corners)=plane.state.corner_controls() else{corner_loupe::clear();return;};
+    if let Ok(center)=layer_to_frame(in_data,event,plane,corners[2*index] as f32,corners[2*index+1] as f32) {
+        // UI enhancement must never abort a valid drag if its async frame is pending.
+        let _=corner_loupe::draw(in_data,event,supplier,surface,center,id);
+    }
 }
 
 fn draw_effect_control(
@@ -438,9 +452,10 @@ pub fn draw(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id: Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     match event.window_type() {
-        ae::WindowType::Comp | ae::WindowType::Layer => draw_viewer(in_data, params, event),
+        ae::WindowType::Comp | ae::WindowType::Layer => draw_viewer(in_data, params, event, plugin_id),
         ae::WindowType::Effect => draw_effect_control(in_data, params, event),
     }
 }
@@ -467,6 +482,8 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
+        corner_loupe::clear();
+        if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index); }
         if axis==DRAG_COLUMNS || axis==DRAG_ROWS {
             let saved=grid_snapshot(params)?;
             let (refs,side)=if axis==DRAG_COLUMNS {(&controls.column_refs,saved.column_lines.len())}

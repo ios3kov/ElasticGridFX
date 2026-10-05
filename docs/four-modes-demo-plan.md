@@ -70,7 +70,14 @@ and provider activation are deliberately NOT IMPLEMENTED while disabled.
 3. Windows MSVC/FFI/CI and user host validation of the new artifact.
 4. Reconcile installer payload selection only after new plugin acceptance.
 
-Current new-block runtime acceptance: NOT RUN. All previous installer/test failures
+Mac Dev60 scoped pixel acceptance PASS: four neutral modes/3D baseline, Flat skew
+pass-through, Perspective skew/Wave/Show Grid, half-resolution odd-size source,
+animated sourceRect text bounds (error <1e-9), old animated project pixel/key
+metadata and save/reopen. Evidence: outputs/update-094-four-modes-mac. Corner
+drag and full new-mode save/reopen acceptance remain NOT RUN. Windows source
+51a8d3c MSVC/CI PASS37288366891; new Windows host acceptance NOT RUN.
+
+Added [centered corner loupe](corner-loupe-plan.md), preserving this contract. All previous installer/test failures
 and accepted payload identities remain retained. No real speed measurement required.
 
 SDK source review: installed Adobe SDK25.6 AE_Effect.h:3033–3070 documents
