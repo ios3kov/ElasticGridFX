@@ -61,3 +61,9 @@ and multi-corner plane motion do not start a lens. Frame sampling uses three
 affine viewer callbacks per DRAW instead of one callback per lens pixel.
 93 Rust tests and all-targets Clippy PASS; 15 host-contract Python checks PASS.
 Evidence: outputs/corner-loupe-dev68. Native acceptance still NOT RUN.
+
+Dev68 native visual check USER-REPORTED FAIL: no loupe while dragging.
+Loaded exact Dev68 identity PASS does not imply feature acceptance. Add bounded
+probe-only DRAW stages (editable corner, active gesture, drawing result), without
+reading the DRAW event union as mouse input. Diagnose before another ordinary
+replacement; native acceptance remains FAIL until reproduced and fixed.

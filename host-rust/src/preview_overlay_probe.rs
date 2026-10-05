@@ -62,6 +62,13 @@ pub(crate) fn interaction(input:&ae::InData,event:&ae::EventExtra,hit:(isize,isi
             Some((p.h,p.v)),(hit.0,hit.1,i32::from(failed)));
     }}
 }
+// Diagnostic only: do not read the event union as mouse data during DRAW.
+pub(crate) fn loupe(input:&ae::InData,event:&ae::EventExtra,stage:isize,index:isize,failed:bool) {
+    if let Some(Some(logger))=LOG.get(){if let Ok(mut log)=logger.lock(){
+        log.append(200+event.as_ref().e_type,super::ui::event_window_code(event),
+            input.current_time(),input.time_scale(),None,(stage,index,i32::from(failed)));
+    }}
+}
 #[cfg(test)]
 mod tests {
     use super::*;

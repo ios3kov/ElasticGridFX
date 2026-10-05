@@ -429,12 +429,20 @@ fn draw_viewer(
 
 fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     supplier:&ae::drawbot::Supplier,surface:&ae::drawbot::Surface,id:Option<ae::aegp::PluginId>) {
+    #[cfg(feature="preview-overlay-probe")]
+    super::preview_overlay_probe::loupe(in_data,event,0,if plane.state.corner_controls().is_some(){1}else{0},false);
     let Some(corners)=plane.state.corner_controls() else{corner_loupe::clear();return;};
     corner_loupe::observe(in_data,event,corners);
-    let Some(index)=corner_loupe::active(in_data,event) else{return;};
+    let active=corner_loupe::active(in_data,event);
+    #[cfg(feature="preview-overlay-probe")]
+    super::preview_overlay_probe::loupe(in_data,event,1,active.map(|v|v as isize).unwrap_or(-1),false);
+    let Some(index)=active else{return;};
     if let Ok(center)=layer_to_frame(in_data,event,plane,corners[2*index] as f32,corners[2*index+1] as f32) {
         // UI enhancement must never abort a valid drag if its async frame is pending.
-        let _=corner_loupe::draw(in_data,event,supplier,surface,center,id);
+        let result=corner_loupe::draw(in_data,event,supplier,surface,center,id);
+        #[cfg(feature="preview-overlay-probe")]
+        super::preview_overlay_probe::loupe(in_data,event,2,index as isize,result.is_err());
+        let _=result;
     }
 }
 
