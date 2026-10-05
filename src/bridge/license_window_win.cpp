@@ -79,3 +79,12 @@ extern "C" bool eg_show_license_window(const char *version) noexcept {
         return false;
     }
 }
+
+// Called from supervised Point/UI callbacks only, never from render workers.
+extern "C" bool eg_loupe_button_down() {
+    DWORD owner = 0;
+    const HWND foreground = GetForegroundWindow();
+    if (!foreground || !GetWindowThreadProcessId(foreground, &owner) ||
+        owner != GetCurrentProcessId()) return false;
+    return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
+}

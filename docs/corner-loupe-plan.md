@@ -41,7 +41,23 @@ Candidate checkpoint: implementation source000ff91; ordinary Dev64. Mac exact
 package/signature and loaded image PASS (EGFX-38c123bf765bbee9c1bc241a).
 Windows CI37291232120 PASS and downloaded AEX identity/checksum verified
 (EGFX-448748c343eede5cd2db801a). Native visual acceptance remains NOT RUN;
-manual check requested in owned loupe.aep. Mac source CI37291232084 still running.
+manual check requested in owned loupe.aep. Mac source CI37291232084 PASS.
 Local release build succeeded but objcopy debug-info stripping warned about a
 missing libLLVM.dylib in Rust toolchain; recorded, not hidden or counted as UI
 failure. No release-ready claim. No new installer payload adoption yet.
+
+Native Point path correction: AE may consume native Point gestures before custom
+CLICK/DRAG. Append SUPERVISE to the same four existing Point parameters; observe
+UserChangedParam without setters or key writes. Track that owning instance/corner
+only while the left button is down in the foreground AE process. Read-only AppKit
+(main-thread) / Win32 button queries; no OS capture, input synthesis, permission
+prompt, render call or stored project data. Native release clears at next DRAW.
+Dev64 source/native CI remains PASS, but native Point loupe coverage is incomplete;
+replacement candidate Dev68 is under verification, not yet installed or accepted.
+
+Dev68 observes same-frame changes to exactly one corner during a foreground
+left-button gesture, covering native live previews before supervision. Scrubbing
+and multi-corner plane motion do not start a lens. Frame sampling uses three
+affine viewer callbacks per DRAW instead of one callback per lens pixel.
+93 Rust tests and all-targets Clippy PASS; 15 host-contract Python checks PASS.
+Evidence: outputs/corner-loupe-dev68. Native acceptance still NOT RUN.

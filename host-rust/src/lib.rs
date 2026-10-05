@@ -975,7 +975,7 @@ impl AdobePluginGlobal for Plugin {
         ] {
             params.add_with_flags(id, name, ae::PointDef::setup(|f| {
                 f.set_default(point); f.set_restrict_bounds(false);
-            }), ae::ParamFlag::empty(), ae::ParamUIFlags::DISABLED)?;
+            }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::DISABLED)?;
         }
         params.add_with_flags(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
             f.set_label("Fit Layer");
@@ -1148,6 +1148,11 @@ impl AdobePluginGlobal for Plugin {
                     build_identity::DIAGNOSTIC, self.lifecycle_probe.report()));
             }
             ae::Command::UserChangedParam { param_index } => {
+                if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
+                    // Native Point controls may consume the viewer gesture before
+                    // our custom CLICK. Observe the change; never rewrite the point.
+                    corner_loupe::native_change(&in_data,index);
+                }
                 if params.index(Params::TensionRadius)==Some(param_index) {
                     // Radius is now a render dependency of existing deformation.
                     // Never rewrite Grid Positions or any scalar animation keys.

@@ -429,8 +429,9 @@ fn draw_viewer(
 
 fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     supplier:&ae::drawbot::Supplier,surface:&ae::drawbot::Surface,id:Option<ae::aegp::PluginId>) {
-    let Some(index)=corner_loupe::active(in_data,event) else{return;};
     let Some(corners)=plane.state.corner_controls() else{corner_loupe::clear();return;};
+    corner_loupe::observe(in_data,event,corners);
+    let Some(index)=corner_loupe::active(in_data,event) else{return;};
     if let Ok(center)=layer_to_frame(in_data,event,plane,corners[2*index] as f32,corners[2*index+1] as f32) {
         // UI enhancement must never abort a valid drag if its async frame is pending.
         let _=corner_loupe::draw(in_data,event,supplier,surface,center,id);

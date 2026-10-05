@@ -6,15 +6,52 @@ const RADIUS:f32=64.0;
 const ZOOM:f32=3.0;
 const PURPOSE:u32=0x4653544c;
 #[derive(Clone,Copy)]
-struct Gesture {owner:usize,window:i32,index:usize}
+struct Gesture {owner:usize,window:i32,index:usize,native:bool}
+#[derive(Clone,Copy)]
+struct Observation {owner:usize,window:i32,time:i32,scale:u32,corners:[f64;8]}
+thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
-pub(crate) fn clear(){ACTIVE.set(None);}
+pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);}
 pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize){
     if index<4 {ACTIVE.set(Some(Gesture{owner:input.as_ref().effect_ref as usize,
-        window:ui::event_window_code(event),index}));}
+        window:ui::event_window_code(event),index,native:false}));}
 }
+fn native_button_down()->bool{
+    #[cfg(any(target_os="macos",target_os="windows"))]{
+        unsafe extern "C"{fn eg_loupe_button_down()->bool;}
+        // Read-only native UI state. Never called from a render worker.
+        unsafe{eg_loupe_button_down()}
+    }
+    #[cfg(not(any(target_os="macos",target_os="windows")))]{false}
+}
+pub(crate) fn native_change(input:&ae::InData,index:usize){
+    if index<4&&native_button_down(){ACTIVE.set(Some(Gesture{owner:input.as_ref().effect_ref as usize,window:0,index,native:true}));}
+}
+fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
+    let mut found=None;
+    for i in 0..4 {if a[2*i]!=b[2*i]||a[2*i+1]!=b[2*i+1]{
+        if found.is_some(){return None;}found=Some(i);
+    }}found
+}
+pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8]){
+    let now=Observation{owner:input.as_ref().effect_ref as usize,window:ui::event_window_code(event),
+        time:input.current_time(),scale:input.time_scale(),corners};
+    if let Some(old)=PREVIOUS.get(){
+        if old.owner==now.owner&&old.window==now.window&&old.time==now.time&&old.scale==now.scale&&native_button_down(){
+            if let Some(index)=changed_corner(&old.corners,&now.corners){
+                // Covers live native Point previews even if supervision is
+                // deferred until mouse-up. Ignore scrubbing and whole-plane moves.
+                if ACTIVE.get().is_none(){native_change(input,index);}
+            }
+        }
+    }
+    PREVIOUS.set(Some(now));
+}
+
 pub(crate) fn active(input:&ae::InData,event:&ae::EventExtra)->Option<usize>{
-    ACTIVE.get().filter(|g|g.owner==input.as_ref().effect_ref as usize&&g.window==ui::event_window_code(event)).map(|g|g.index)
+    let g=ACTIVE.get()?;
+    if g.native&&!native_button_down(){clear();return None;}
+    (g.owner==input.as_ref().effect_ref as usize&&(g.window==0||g.window==ui::event_window_code(event))).then_some(g.index)
 }
 fn source(event:&ae::EventExtra,x:f32,y:f32)->Result<(f32,f32),ae::Error>{
     if !x.is_finite()||!y.is_finite()||x.abs()>32767.0||y.abs()>32767.0{return Err(ae::Error::BadCallbackParameter);}
@@ -72,6 +109,11 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
     };
     if receipt.is_null(){return Err(ae::Error::BadCallbackParameter);}
     let result=(||{
+        // Viewer frame->source is affine (pan/zoom/pixel aspect). Obtain its
+        // two basis vectors once, rather than thousands of SDK calls per lens.
+        let c=source(event,center.x,center.y)?;
+        let xp=source(event,center.x+1.0,center.y)?;
+        let yp=source(event,center.x,center.y+1.0)?;
         let world=render.receipt_world(receipt)?;
         let worlds=ae::aegp::suites::World::new()?;
         let (w,h)=worlds.size(world)?;let stride=worlds.row_bytes(world)?;
@@ -80,7 +122,8 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         if ptr.is_null(){return Err(ae::Error::BadCallbackParameter);}
         let region=render.rendered_region(receipt)?;
         Ok(raster(|dx,dy|{
-            let (x,y)=source(event,center.x+dx,center.y+dy).ok()?;
+            let x=c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0);
+            let y=c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1);
             let x=x.round() as i32;let y=y.round() as i32;
             if x<0||y<0||x>=w||y>=h||x<region.left||y<region.top||x>=region.right||y>=region.bottom{return None;}
             let offset=y as usize*stride+x as usize*4;
@@ -101,8 +144,13 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         assert_eq!(at(64,64),[255,100,100,20]);assert_eq!(at(0,0),[0,0,0,0]);
         assert_eq!(at(64,70),[255,255,255,255]);assert_eq!(at(63,63),[255,99,99,20]);
     }
+    #[test]fn native_point_observation_distinguishes_one_corner_from_plane_motion(){
+        let a=[0.,0.,10.,0.,10.,10.,0.,10.];let mut b=a;
+        assert_eq!(changed_corner(&a,&b),None);b[0]=1.;b[1]=2.;assert_eq!(changed_corner(&a,&b),Some(0));
+        b[2]=11.;assert_eq!(changed_corner(&a,&b),None);
+    }
     #[test]fn transparent_pixels_use_checker_and_no_frame_is_retained(){
         assert_eq!(raster(|_,_|Some([0,0,0,0])),raster(|_,_|None));
-        ACTIVE.set(Some(Gesture{owner:123,window:1,index:2}));clear();assert!(ACTIVE.get().is_none());
+        ACTIVE.set(Some(Gesture{owner:123,window:1,index:2,native:false}));clear();assert!(ACTIVE.get().is_none());
     }
 }
