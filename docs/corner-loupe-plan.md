@@ -110,3 +110,9 @@ explicit LoadCursorW received the ANSI IDC_ARROW macro without UNICODE.
 Fix uses MAKEINTRESOURCEW(32512), independent of project character-set
 flags. Mac installed artifact remains bound to source2c2c931; Windows
 replacement CI is separately verified.
+
+Dev80 native loupe/cursor check USER-REPORTED PASS (requested Flat and
+Perspective, user answered all okay). Cursor no longer interferes, target visible,
+release restores cursor. The user then reported Comp/Layer mode both confined
+to layer bounds and requested logical menu order; these are new active issues,
+not loupe acceptance failure. Hidden-panel coverage still not established.

@@ -86,3 +86,19 @@ defines pre-effect origin for frame calls. Expressions use sourceRectAtTime,
 toComp and effect-local propertyGroup/index lookup. Native AE verification of
 that numeric lookup and dynamic bounds is still required. The v2 expression
 strings remain byte-for-byte available for owned migration and old-mode math.
+
+## New native feedback — 2026-10-05 Dev80
+
+User reports Comp mode and Layer mode both show the grid inside the layer.
+Confirmed current implementation: Comp retains old Layer Plane behavior; 2D
+kind1 returns no derived region, so the default domain is the input layer canvas.
+Requested correction interpretation (awaiting short confirmation): Comp domain
+is entire composition, Layer domain is layer bounds. This supersedes M1's old
+behavior preservation only after confirmed scope. Must reconcile the shared
+UI/render coordinate domain, source bounds, transforms, camera and saved state;
+no UI-only expansion that lies about render deformation.
+
+Requested display order: Comp mode / Layer mode / Flat mode / Perspective.
+Existing saved PlaneMode ordinals2=Flat,3=Layer cannot simply be swapped.
+A versioned/proxy selector migration must preserve the selected mode and existing
+keys on old project reopen/Undo. No ordinal reorder has been implemented yet.

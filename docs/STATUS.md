@@ -23,7 +23,8 @@ Installed now: **0.9.4 Dev80**, ordinary build, source
 EGFX-00df8c501ff29181fc542031. Atomic replacement/package/signature and
 exact loaded-image UUID/path PASS in AE25.6. Probe78 backup retained.
 93 scoped Rust tests and all-target Clippy PASS. No diagnostic CSV in this build.
-Native hand-cursor suppression acceptance is pending.
+Native loupe/hand-cursor check USER-REPORTED PASS; user answered all okay
+when asked to check Flat/Perspective and cursor restoration.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.
@@ -35,13 +36,21 @@ and copies owned pixels; viewer drawing makes no async-manager request.
 Probe78 Perspective USER-REPORTED PASS: correct image, disappears on release,
 no error. Dev80 additionally hides the local hand cursor only while a lens is
 successfully drawn, for Mac and Windows. User's edited test scene preserved
-and reopened. Flat and hidden-Effect-Controls coverage remain pending.
+and reopened. Hidden-Effect-Controls coverage remains pending.
 Evidence: outputs/corner-loupe-probe70, corner-loupe-probe70b,
 corner-loupe-probe74, corner-loupe-probe78, corner-loupe-dev80.
 
 Dev80 source published only to authorized feat/next-update for CI.
-Windows37300965301 and Mac37300965421 IN PROGRESS at source2c2c931;
-new Windows artifact download/identity/native acceptance pending.
+Windows37300965301 FAIL at source2c2c931 (ANSI cursor resource passed to
+LoadCursorW); fixed in d62e9cf and new CI queued. Mac37300965421 result
+remains separately bound to source2c2c931. New Windows artifact identity/native
+acceptance pending.
+
+New active native feedback: Comp and Layer domains appear identical on 2D.
+Comp currently retains the old layer canvas; requested whole-composition domain
+needs confirmation and UI/render correction. User also requested display order
+Comp / Layer / Flat / Perspective. Preserve old serialized mode selection during
+any reorder; see four-modes-demo-plan.md. No geometry/order fix claimed yet.
 
 Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
 Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old
