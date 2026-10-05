@@ -446,6 +446,8 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     let Some(corners)=plane.state.corner_controls() else{loupe_cursor(false);corner_loupe::clear();return;};
     corner_loupe::observe(in_data,event,corners,id);
     let active=corner_loupe::active(in_data,event,id);
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(7,
+        corner_loupe::probe_state()|((active.map(|i|i as isize+1).unwrap_or(0))<<8));
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::loupe(in_data,event,1,active.map(|v|v as isize).unwrap_or(-1),false);
     let Some(index)=active else{loupe_cursor(false);return;};
@@ -454,6 +456,7 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
         let result=corner_loupe::draw(in_data,event,supplier,surface,center,id);
         #[cfg(feature="preview-overlay-probe")]
         super::preview_overlay_probe::loupe(in_data,event,2,index as isize,result.is_err());
+        #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(8,corner_loupe::probe_state()|((result.is_ok() as isize)<<8));
         loupe_cursor(result.is_ok());
     } else {loupe_cursor(false);}
 }
@@ -652,6 +655,8 @@ pub fn adjust_cursor(
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(6,
+        corner_loupe::probe_state()|((LOUPE_CURSOR.get() as isize)<<8)|((GUIDE_DRAGGING.get() as isize)<<9));
     if LOUPE_CURSOR.get()&&!corner_loupe::native_button_down(){loupe_cursor(false);}
     if LOUPE_CURSOR.get()&&loupe_cursor(true) {
         event.set_cursor(ae::CursorType::Custom);

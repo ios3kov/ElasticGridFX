@@ -14,15 +14,26 @@ struct Hover {owner:i32,window:i32,time:i32,scale:u32,index:usize,pointer:(f64,f
 thread_local! {static HOVER:std::cell::Cell<Option<Hover>>=const{std::cell::Cell::new(None)};}
 thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
-pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);GESTURE_FRAME.set(None);}
+pub(crate) fn clear(){
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(0,probe_state());
+    ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);GESTURE_FRAME.set(None);
+}
+#[cfg(feature="preview-overlay-probe")]
+pub(crate) fn probe_state()->isize{
+    isize::from(native_button_down())|((ACTIVE.get().is_some() as isize)<<1)|
+        ((HOVER.get().is_some() as isize)<<2)|((GESTURE_FRAME.get().is_some() as isize)<<3)|
+        ((GESTURE_FRAME.get().is_some_and(|r|r.finished) as isize)<<4)
+}
 fn finish_native(button_down:bool){
     if !button_down&&ACTIVE.get().is_some_and(|g|g.native){
+        #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(1,probe_state());
         // A stationary release does not imply leaving the hit-tested corner.
         // Preserve its scoped pointer anchor so a second press needs no motion.
         ACTIVE.set(None);PREVIOUS.set(None);GESTURE_FRAME.set(None);
     }
 }
 fn start_native(g:Gesture){
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(2,probe_state()|((g.index as isize)<<8));
     if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){GESTURE_FRAME.set(None);}
     ACTIVE.set(Some(g));
 }
@@ -35,6 +46,7 @@ fn native_pointer()->Option<(f64,f64)>{
     None
 }
 pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,id:Option<ae::aegp::PluginId>)->bool{
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(3,probe_state()|((index.map(|v|v as isize+1).unwrap_or(0))<<8));
     // A press can request one viewer update without writing any Point value.
     // Never arm from a drag, or read the DRAW union as mouse coordinates.
     if native_button_down(){
@@ -53,6 +65,13 @@ pub(crate) fn hover(input:&ae::InData,event:&ae::EventExtra,index:Option<usize>,
     false
 }
 fn start_hover(now:Observation,pointer:(f64,f64))->bool{
+    #[cfg(feature="preview-overlay-probe")]{
+        let mask=HOVER.get().map(|h|1|((h.owner==now.owner) as isize)<<1|
+            ((h.window==now.window) as isize)<<2|((h.time==now.time) as isize)<<3|
+            ((h.scale==now.scale) as isize)<<4|((pressed_hover(h,now,pointer).is_some()) as isize)<<5).unwrap_or(0)
+            |((ACTIVE.get().is_some() as isize)<<6);
+        super::preview_overlay_probe::transition(4,mask);
+    }
     if ACTIVE.get().is_some(){return false;}
     let Some(index)=HOVER.get().and_then(|h|pressed_hover(h,now,pointer))else{return false;};
     start_native(Gesture{owner:now.owner,window:now.window,index,native:true});
@@ -234,6 +253,7 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
     let mut warm=WARM.get();
     let allowed=request_allowed(&mut warm,owner,input.current_time(),input.time_scale(),gesture,cached_owner);
     WARM.set(warm);
+    #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(5,probe_state()|((allowed as isize)<<8));
     if !allowed { return Ok(()); }
     let id=id.ok_or(ae::Error::BadCallbackParameter)?;
     let window=VIEW.get().filter(|v|v.0==owner).map(|v|v.1).unwrap_or(ae::sys::PF_Window_COMP);

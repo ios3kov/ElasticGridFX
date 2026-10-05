@@ -1855,3 +1855,16 @@ scene reopened. User requested three stationary presses and separate slowness
 feedback, both still NOT RUN. Mac CI37359801465 and Windows37359801528 PENDING.
 Local evidence outputs/corner-repress-dev144/verification.json. Original Mac
 RAM Preview incident OPEN/UNCONFIRMED; no playback, promotion, merge or release.
+
+Dev144 stationary repeated press USER-REPORTED FAIL unchanged. Prior source
+state-machine regression PASS is not native acceptance or proof of root cause.
+No further speculative behavior patch. Probe151 (gesture-probe) adds bounded
+transition evidence: generic CLICK/DRAG/lifecycle, clear/release/start, hovered
+corner scope predicates, AdjustCursor state, DRAW activation and frame success.
+Start/release events are not deduplicated; repetitive state snapshots are.
+Existing4096-record local-only limit retained; gesture-probe suppresses generic
+DRAW/stage0-5 chatter and does not enable PREVIEW callbacks. No native pointer
+coordinates, project paths, frames or host pointers in new records. Product
+behavior/one-frame-per-gesture budget unchanged.118 diagnostic Rust tests PASS;
+strict diagnostic Clippy/build follow. Human stationary press vs moved control
+sequence needed to distinguish lost state from native host event delivery.
