@@ -1568,3 +1568,15 @@ Installer source a1217da25ae797626c36c30fba1277c4e9d5f696; embedded Dev116 sourc
 b7a648ca17799a527fe87b227510c30385341856eafa3897af17fca1d4a4a720.
 Real administrator Install/Restore still NOT RUN; Windows Dev116 user test
 pending. No main/merge/release/publication action performed.
+
+### Installer completion flow correction
+
+User's two screenshots show Done / This version is already installed followed
+by the initial Install/Restore window. This is the old frontend loop, not a
+second error or proof of new publication/backup. The already-installed native
+path was exercised by the user; real replacement and Restore remain NOT RUN.
+After a successful native operation (including already-installed), OK now ends
+the installer session on Mac and Windows. Failed/cancelled authorization retains
+the existing retry/Close behavior. No transaction engine or plugin bytes change.
+Mac rebuild/initial window/Close validation and Windows compilation pending for
+this source. Windows Dev116 plugin acceptance still pending. Demo remains OFF.

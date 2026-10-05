@@ -112,3 +112,8 @@ before the modal alert (no NSApplication::run path). Initial native UI and Close
 now PASS via Cua; exact unchanged plugin payload/ZIP/signature PASS. Candidate:
 outputs/mac-installer-dev116-launch-fix/FSTR-Stretch-Installer-Mac.zip.
 Administrator Install/Restore remains NOT RUN; do not mark U8 complete.
+
+Completion flow: after successful Install or Restore, including already-installed,
+show the result once and exit after OK on both platforms. Errors/cancelled
+authorization retain the retry/Close path. User's Dev116 Mac already-installed
+result is accepted separately from replacement/Restore, which remain NOT RUN.

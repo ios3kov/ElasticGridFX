@@ -37,6 +37,7 @@ int main(int argc,const char* argv[]) {
             NSAlert* outcome=[NSAlert new];outcome.messageText=result?@"Done":@"Installation stopped";
             outcome.informativeText=result.stringValue?:error[NSAppleScriptErrorMessage]?:@"No result received. Inspect Backups before trying again.";
             [outcome addButtonWithTitle:@"OK"];[outcome runModal];
+            if(result)break; // Successful Install/Restore ends this session.
         }
     }
     return 0;

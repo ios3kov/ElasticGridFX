@@ -12,7 +12,7 @@ INT_PTR CALLBACK dialog(HWND window,UINT message,WPARAM wparam,LPARAM){
     if(id!=1 && id!=101)return FALSE;
     EnableWindow(GetDlgItem(window,1),FALSE);EnableWindow(GetDlgItem(window,101),FALSE);
     SetCursor(LoadCursorW(nullptr,IDC_WAIT));
-    try {auto result=fstr::installer::runNative(fstr::installer::systemEnvironment(),id==101);MessageBoxW(window,result.c_str(),L"FSTR Stretch",MB_OK);}
+    try {auto result=fstr::installer::runNative(fstr::installer::systemEnvironment(),id==101);MessageBoxW(window,result.c_str(),L"FSTR Stretch",MB_OK);SetCursor(LoadCursorW(nullptr,IDC_ARROW));EndDialog(window,0);return TRUE;}
     catch(const std::exception& error){std::wstring text;for(const char* c=error.what();*c;++c)text.push_back(static_cast<wchar_t>(static_cast<unsigned char>(*c)));MessageBoxW(window,text.c_str(),L"Installation stopped",MB_OK|MB_ICONWARNING);}
     SetCursor(LoadCursorW(nullptr,IDC_ARROW));EnableWindow(GetDlgItem(window,1),TRUE);EnableWindow(GetDlgItem(window,101),TRUE);return TRUE;
 }
