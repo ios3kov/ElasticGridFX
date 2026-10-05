@@ -1580,3 +1580,11 @@ the installer session on Mac and Windows. Failed/cancelled authorization retains
 the existing retry/Close behavior. No transaction engine or plugin bytes change.
 Mac rebuild/initial window/Close validation and Windows compilation pending for
 this source. Windows Dev116 plugin acceptance still pending. Demo remains OFF.
+
+Completion-fix Mac candidate c84cebe: clean build/strict compiler/signature and
+exact 6-file embedding, ZIP CRC/bytes/executable bits, manifest digests PASS;
+9 payload/decision tests PASS. Evidence outputs/mac-installer-dev116-completion-fix.
+ZIP SHA256 fe67ef6162d072366a7ce92ed522c6c65ec7d62f1c09f44a47a0d8d6b977a96b.
+Successful-operation exit runtime and administrator Install/Restore NOT RUN;
+Windows frontend compilation NOT RUN. These remain distinct from the previous
+initial-window PASS and user already-installed result. Exact plugin unchanged.
