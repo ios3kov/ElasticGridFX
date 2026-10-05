@@ -99,5 +99,25 @@ template<typename T> void compDestination(int depth) {
     for(int y=0;y<h;y++)for(int x=0;x<w;x++)for(int c=0;c<4;c++)
         assert(comp[y*stride+x*4+c]==(x>=8 && y>=8 && x<17 && y<17?T(17):T(0)));
 }
+template<typename T> void perspectiveDestination(int depth) {
+    constexpr int n=9,w=13,h=13,stride=w*4+8;
+    std::vector<T> input(n*n*4,T(17)),output(h*stride,T(231));
+    float axis[]={0,.5f,1};
+    double source[]={0,0,9,0,9,9,0,9};
+    EgPlaneFrame frame{{-4,-5,5,-5,5,4,-4,4},axis,axis,3,3,1,1,n,n,0,0,-6,-7,0,.25f,nullptr,nullptr};
+    EgPlaneImage src{input.data(),n*4*std::ptrdiff_t(sizeof(T)),n,n};
+    EgPlaneImage dst{output.data(),stride*std::ptrdiff_t(sizeof(T)),w,h};
+    EgPlaneReport report{};
+    for(int quality=0;quality<2;quality++) {
+        assert(eg_render_plane_between(&src,&dst,depth,&frame,&report,quality,0,source)==0);
+        for(int y=0;y<h;y++)for(int x=0;x<w;x++)for(int c=0;c<4;c++) {
+            // Full translated source, including negative layer coordinates.
+            const bool inside=x>=2 && x<=11 && y>=2 && y<=11;
+            assert(output[y*stride+x*4+c]==(inside?T(17):T(0)));
+        }
+        for(int y=0;y<h;y++)for(int x=w*4;x<stride;x++)assert(output[y*stride+x]==T(231));
+    }
+}
 int main() { verify<std::uint8_t>();verify<std::uint16_t>();verify<float>();
+perspectiveDestination<std::uint8_t>(8);perspectiveDestination<std::uint16_t>(16);perspectiveDestination<float>(32);
 compDestination<std::uint8_t>(8);compDestination<std::uint16_t>(16);compDestination<float>(32); }

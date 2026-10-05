@@ -129,7 +129,9 @@ int eg_render_plane_between(const EgPlaneImage* source,const EgPlaneImage* outpu
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge,const double* source_corners) noexcept {
     if(!source_corners) {if(report) *report={};return 1;}
-    return renderPlane(source,output,depth,f,report,quality,edge,0,0,source_corners);
+    // Perspective destination is the corner quad, not the source storage rect.
+    // Source sampling and outside-quad transparency remain unchanged.
+    return renderPlane(source,output,depth,f,report,quality,edge,0,0,source_corners,false,false,true);
 }
 int eg_render_plane_region(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,

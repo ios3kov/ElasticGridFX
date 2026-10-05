@@ -247,3 +247,22 @@ no alternative input used. User asked to confirm Surface display. Windows CI
 Windows AE NOT RUN. Mac37312709680 IN_PROGRESS. Source scanner exit1 reviewed
 existing mocked manifest/signature test as false positive, not a network auth route.
 Scanner is not release certification. Original Dev104 Mac CI37311196440 now PASS.
+
+
+### Perspective source-bound clipping bug (2026-10-05)
+
+User Dev108 screenshot shows corners203,-89 /357,-88 /358,-31 /0,241 but
+image cut at original source top edge. Expected full corner-pin mapping outside
+source rectangle. Rules8.0.0 Smart Entry, Process research/state/evidence,
+Engineering Debugging, Native spatial/output/stride requirements reread.
+Root cause: host output bounds/legacy FrameSetup expand Comp only; between-plane
+renderer also clips destination to source canvas. Fix extends Perspective output
+to valid corner bbox on both host paths and disables only destination source-rect
+clipping for between-plane renderer. Outside-quad transparency and original
+source sampling/storage retained, no ABI/ordinals/keys/quality changes.
+Regression translated quad crossing negative source x/y with padded output,
+8/16/32bpc and both qualities: old source assert FAIL reproduced (exit134).
+Initial ad hoc compile omitted CpuRenderer dependency and failed link, retained;
+corrected reproduction used unmodified committed bridge from separate file.
+Dev112 implementation shared Mac/Windows. Native validation/CI pending; old
+Surface/Comp/Layer and all retained obligations remain.

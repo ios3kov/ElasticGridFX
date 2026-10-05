@@ -45,9 +45,9 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {111}
-        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {110}
-        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {109} else {108};
+    let development_build=if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {115}
+        else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {114}
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {113} else {112};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");

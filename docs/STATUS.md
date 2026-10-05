@@ -1456,3 +1456,12 @@ SHA25681d6de5b2e153d7491f0c23eb962a3b36203be80fb25e6f6f6d41386f685bc1f.
 Windows AE NOT RUN. Mac37312709680 IN_PROGRESS. Native Install/Restore and
 marketplace activation obligations retained; no main/merge/release.
 Evidence outputs/surface-dev108 (identity, CI, package and WINDOWS-CHECK-RU.txt).
+
+### Active Perspective clipping fix
+
+User Dev108 runtime FAIL: moved corners cross layer limits but image remains cut
+at source rectangle. Dev112 fixes host output bbox and core destination clipping
+for Perspective; source sampling/quad outside transparency unchanged. Old-core
+regression reproduced; source/API/thread/ownership checks preserve existing
+immutable SmartFX and legacy-origin mechanisms. Native/package/CI pending.
+Installed Dev108 remains until verified replacement; no release/merge.

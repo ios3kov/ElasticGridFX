@@ -788,7 +788,7 @@ fn rendered_canvas(in_data: ae::InData) -> (i32, i32) {
 // Immutable checked-out geometry, no AEGP calls or project mutations.
 fn plane_output_bounds(state: &plane::State, width:i32, height:i32) -> Result<ae::Rect,ae::Error> {
     let canvas=ae::Rect {left:0,top:0,right:width,bottom:height};
-    if state.render_kind!=plane::RenderKind::Comp || state.geometry().is_none() {return Ok(canvas);}
+    if !matches!(state.render_kind,plane::RenderKind::Comp|plane::RenderKind::Perspective) || state.geometry().is_none() {return Ok(canvas);}
     let Some(corners)=state.corners else {return Ok(canvas);};
     let xs=[corners[0],corners[2],corners[4],corners[6]];
     let ys=[corners[1],corners[3],corners[5],corners[7]];
@@ -1281,7 +1281,7 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::FrameSetup { .. } => {
                 let state=plane::State::read(params,&in_data,false,true)?;
-                if state.render_kind==plane::RenderKind::Comp {
+                if matches!(state.render_kind,plane::RenderKind::Comp|plane::RenderKind::Perspective) {
                     let (w,h)=rendered_canvas(in_data);
                     let bounds=plane_output_bounds(&state,w,h)?;
                     // Legacy PF_OutData origin is a 16-bit PF_Point.
@@ -1713,6 +1713,9 @@ mod tests {
         assert_eq!((b.left,b.top,b.right,b.bottom),(-171,-117,471,365));
         let r=intersect_rect(ae::Rect{left:-200,top:-140,right:20,bottom:30},b);
         assert_eq!((r.left,r.top,r.right,r.bottom),(-171,-117,20,30));
+        state.render_kind=plane::RenderKind::Perspective;
+        let b=plane_output_bounds(&state,319,241).unwrap();
+        assert_eq!((b.left,b.top,b.right,b.bottom),(-171,-117,471,365));
         state.render_kind=plane::RenderKind::Layer;
         let b=plane_output_bounds(&state,319,241).unwrap();
         assert_eq!((b.left,b.top,b.right,b.bottom),(0,0,319,241));
