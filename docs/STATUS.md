@@ -1554,3 +1554,17 @@ Apple authority: https://developer.apple.com/documentation/appkit/nsapplication/
 Regression window/Close verification pending; no administrator action ran.
 Installer engine and embedded plugin remain unchanged. Windows plugin acceptance
 still pending, Demo OFF.
+
+Mac installer launch regression — a1217da: clean native build/signature PASS.
+Cua now opens the exact app and shows Version 0.9.4 / Install / Restore / Close;
+screenshot confirms readable layout. Close eventually terminates the app
+(Cua final observation: App quit). First post-click inventory/tree was stale;
+no Install/Restore was selected. Exact 6 embedded files, ZIP CRC, full archive
+bytes/executable flags and binary/archive manifest digests PASS.
+Evidence: outputs/mac-installer-dev116-launch-fix/{installer-artifact.json,
+payload-verification.json,build.log,signature-verification.log}.
+Installer source a1217da25ae797626c36c30fba1277c4e9d5f696; embedded Dev116 source
+0a5b712 / EGFX-f0e50f471f52dd30b6fdb7cf remains unchanged. Delivery ZIP SHA256
+b7a648ca17799a527fe87b227510c30385341856eafa3897af17fca1d4a4a720.
+Real administrator Install/Restore still NOT RUN; Windows Dev116 user test
+pending. No main/merge/release/publication action performed.

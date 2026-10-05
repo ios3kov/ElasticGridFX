@@ -106,3 +106,9 @@ not the transaction engine. Windows Dev116 plugin acceptance still pending;
 existing older Windows installer artifacts are not a current Dev116 installer.
 Real administrator Install/Restore remains required and cannot be claimed from
 isolated fixtures/package signature checks. No Developer ID/notarization added.
+
+Dev116 Mac installer launch fix a1217da: explicitly finish NSApplication launch
+before the modal alert (no NSApplication::run path). Initial native UI and Close
+now PASS via Cua; exact unchanged plugin payload/ZIP/signature PASS. Candidate:
+outputs/mac-installer-dev116-launch-fix/FSTR-Stretch-Installer-Mac.zip.
+Administrator Install/Restore remains NOT RUN; do not mark U8 complete.
