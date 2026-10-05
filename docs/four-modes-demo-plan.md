@@ -145,3 +145,8 @@ Primary SDK25.6 AE_Effect.h:1625 (SmartFX world origins), 2908 (FRAME_SETUP orig
 Dev92 pre-host checks: 96 Rust tests, 28 CTest targets and 15 host contract checks PASS.
 Clippy first failed assignment-formatting lint; corrected rerun PASS. Numerical
 samplers unchanged. Native output and legacy expansion remain NOT RUN.
+
+CIa26fbae Mac37304253224 FAIL: one obsolete first-application static assertion
+expected Kind0..4 before v4 Comp kinds5..7. Other281 Python checks PASS. Update
+assertion to0..7, retaining all identity/ownership/no-project-mutation guards.
+Native installer CI37304253222 PASS; Windows37304253327 pending at checkpoint.
