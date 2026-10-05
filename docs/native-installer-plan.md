@@ -87,3 +87,11 @@ alternative is allowed only when prepared proves SE_DACL_PROTECTED. Unprotected
 originals cannot use the unchanged-descriptor alternative. Repeated Install →
 Restore → Install is an explicit fixture. Mac cancellation exits instead of
 interpreting unexpected modal responses as Restore.
+
+Windows path-case follow-up — 2026-10-05: the fresh fixture on a19f2b6
+refused publication because raw CompareStringOrdinal saw directory_iterator
+backslashes versus environment forward separators. Use fs::path::make_preferred
+on both verified paths before ordinal case-insensitive comparison. This does
+not resolve links, weaken duplicate/security checks or change the fixed target.
+Fresh/mixed-separator, existing uppercase .AEX, duplicate and restore scenarios
+remain required. CI37287630975/37287631033 are retained FAIL, not plugin acceptance.
