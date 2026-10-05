@@ -67,3 +67,11 @@ Loaded exact Dev68 identity PASS does not imply feature acceptance. Add bounded
 probe-only DRAW stages (editable corner, active gesture, drawing result), without
 reading the DRAW event union as mouse input. Diagnose before another ordinary
 replacement; native acceptance remains FAIL until reproduced and fixed.
+
+Probe70b native evidence: button flags7 (UI thread, AE active, left button
+down), same viewer/time, repeated single-corner changes; PF effect_ref owner
+frequently differs between successive DRAW callbacks. A stale supervised
+owner blocks observation from restarting a gesture. Dev72 fix uses the unique
+ID of an existing effect parameter stream via AEGP_GetUniqueStreamID; dispose
+stream/effect refs in each callback, retain only the ID. Probe output is bounded
+and now excludes idle/cursor polling. Ordinary render math remains untouched.

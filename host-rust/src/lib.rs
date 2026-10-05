@@ -1151,7 +1151,7 @@ impl AdobePluginGlobal for Plugin {
                 if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
                     // Native Point controls may consume the viewer gesture before
                     // our custom CLICK. Observe the change; never rewrite the point.
-                    corner_loupe::native_change(&in_data,index);
+                    corner_loupe::native_change(&in_data,index,self.lifecycle_probe.plugin_id());
                 }
                 if params.index(Params::TensionRadius)==Some(param_index) {
                     // Radius is now a render dependency of existing deformation.
@@ -1216,7 +1216,7 @@ impl AdobePluginGlobal for Plugin {
                 match extra.event() {
                     // send_drag is an output request, not an input event tag.
                     // Native AE25.6 observations confirm separate CLICK/DRAG.
-                    ae::Event::Click(_) => ui::click(&in_data, params, &mut extra)?,
+                    ae::Event::Click(_) => ui::click(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
                     ae::Event::Draw(_) => {
                         plane::sync_event_ui(&in_data,params)?;

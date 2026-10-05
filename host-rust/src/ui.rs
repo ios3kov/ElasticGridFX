@@ -432,8 +432,8 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::loupe(in_data,event,0,if plane.state.corner_controls().is_some(){1}else{0},false);
     let Some(corners)=plane.state.corner_controls() else{corner_loupe::clear();return;};
-    corner_loupe::observe(in_data,event,corners);
-    let active=corner_loupe::active(in_data,event);
+    corner_loupe::observe(in_data,event,corners,id);
+    let active=corner_loupe::active(in_data,event,id);
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::loupe(in_data,event,1,active.map(|v|v as isize).unwrap_or(-1),false);
     let Some(index)=active else{return;};
@@ -473,6 +473,7 @@ pub fn click(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.window_type() == ae::WindowType::Effect {
         if params.index(Params::GridState) == Some(event.param_index()) {
@@ -492,7 +493,7 @@ pub fn click(
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
         corner_loupe::clear();
-        if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index); }
+        if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index,plugin_id); }
         if axis==DRAG_COLUMNS || axis==DRAG_ROWS {
             let saved=grid_snapshot(params)?;
             let (refs,side)=if axis==DRAG_COLUMNS {(&controls.column_refs,saved.column_lines.len())}

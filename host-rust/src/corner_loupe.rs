@@ -6,15 +6,30 @@ const RADIUS:f32=64.0;
 const ZOOM:f32=3.0;
 const PURPOSE:u32=0x4653544c;
 #[derive(Clone,Copy)]
-struct Gesture {owner:usize,window:i32,index:usize,native:bool}
+struct Gesture {owner:i32,window:i32,index:usize,native:bool}
 #[derive(Clone,Copy)]
-struct Observation {owner:usize,window:i32,time:i32,scale:u32,corners:[f64;8]}
+struct Observation {owner:i32,window:i32,time:i32,scale:u32,corners:[f64;8]}
 thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
 pub(crate) fn clear(){ACTIVE.set(None);PREVIOUS.set(None);}
-pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize){
-    if index<4 {ACTIVE.set(Some(Gesture{owner:input.as_ref().effect_ref as usize,
-        window:ui::event_window_code(event),index,native:false}));}
+// PF effect_ref changes across AE native Point preview callbacks. Retain only
+// the documented stream ID, disposing every acquired handle in this callback.
+fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>{
+    let id=id.ok_or(ae::Error::BadCallbackParameter)?;
+    let interface=ae::aegp::suites::PFInterface::new()?;
+    let effects=ae::aegp::suites::Effect::new()?;
+    let effect=interface.new_effect_for_effect(input.effect_ref(),id)?;
+    let result=(||{
+        let streams=ae::aegp::suites::Stream::new()?;
+        let stream=streams.new_effect_stream_by_index(effect,id,1)?;
+        streams.unique_stream_id(&stream)
+    })();
+    let disposed=effects.dispose_effect(effect);
+    match (result,disposed){(Ok(v),Ok(()))=>Ok(v),(Err(e),_)|(_,Err(e))=>Err(e)}
+}
+pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Option<ae::aegp::PluginId>){
+    if let Ok(owner)=owner(input,id){if index<4 {ACTIVE.set(Some(Gesture{owner,
+        window:ui::event_window_code(event),index,native:false}));}}
 }
 fn native_button_down()->bool{
     #[cfg(any(target_os="macos",target_os="windows"))]{
@@ -24,8 +39,10 @@ fn native_button_down()->bool{
     }
     #[cfg(not(any(target_os="macos",target_os="windows")))]{false}
 }
-pub(crate) fn native_change(input:&ae::InData,index:usize){
-    if index<4&&native_button_down(){ACTIVE.set(Some(Gesture{owner:input.as_ref().effect_ref as usize,window:0,index,native:true}));}
+pub(crate) fn native_change(input:&ae::InData,index:usize,id:Option<ae::aegp::PluginId>){
+    if index<4&&native_button_down(){if let Ok(owner)=owner(input,id){
+        ACTIVE.set(Some(Gesture{owner,window:0,index,native:true}));
+    }}
 }
 fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
     let mut found=None;
@@ -33,8 +50,9 @@ fn changed_corner(a:&[f64;8],b:&[f64;8])->Option<usize>{
         if found.is_some(){return None;}found=Some(i);
     }}found
 }
-pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8]){
-    let now=Observation{owner:input.as_ref().effect_ref as usize,window:ui::event_window_code(event),
+pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8],id:Option<ae::aegp::PluginId>){
+    let Ok(owner)=owner(input,id) else{clear();return;};
+    let now=Observation{owner,window:ui::event_window_code(event),
         time:input.current_time(),scale:input.time_scale(),corners};
     #[cfg(all(feature="preview-overlay-probe",target_os="macos"))]{
         unsafe extern "C"{fn eg_loupe_button_probe()->i32;}
@@ -52,17 +70,17 @@ pub(crate) fn observe(input:&ae::InData,event:&ae::EventExtra,corners:[f64;8]){
             if let Some(index)=changed_corner(&old.corners,&now.corners){
                 // Covers live native Point previews even if supervision is
                 // deferred until mouse-up. Ignore scrubbing and whole-plane moves.
-                if ACTIVE.get().is_none(){native_change(input,index);}
+                if ACTIVE.get().is_none(){native_change(input,index,id);}
             }
         }
     }
     PREVIOUS.set(Some(now));
 }
 
-pub(crate) fn active(input:&ae::InData,event:&ae::EventExtra)->Option<usize>{
+pub(crate) fn active(input:&ae::InData,event:&ae::EventExtra,id:Option<ae::aegp::PluginId>)->Option<usize>{
     let g=ACTIVE.get()?;
     if g.native&&!native_button_down(){clear();return None;}
-    (g.owner==input.as_ref().effect_ref as usize&&(g.window==0||g.window==ui::event_window_code(event))).then_some(g.index)
+    (g.owner==owner(input,id).ok()?&&(g.window==0||g.window==ui::event_window_code(event))).then_some(g.index)
 }
 fn source(event:&ae::EventExtra,x:f32,y:f32)->Result<(f32,f32),ae::Error>{
     if !x.is_finite()||!y.is_finite()||x.abs()>32767.0||y.abs()>32767.0{return Err(ae::Error::BadCallbackParameter);}
