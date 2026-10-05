@@ -26,11 +26,19 @@ visual drag/release/Undo acceptance NOT RUN; user check requested in owned scene
 Windows Dev64 CI37291232120 PASS; Build ID EGFX-448748c343eede5cd2db801a,
 AEX SHA256 b2c145401ef8ac3b5b656a07c33e2c1aadfa8b5c1d0fd2195938f7568d860bf2.
 Downloaded packet checksum/embedded identity PASS; Windows AE acceptance of
-this candidate NOT RUN. Mac source CI37291232084 is still running at checkpoint.
+this candidate NOT RUN. Mac source CI37291232084 PASS.
 Evidence: outputs/corner-loupe and outputs/FSTR-Stretch-0.9.4-Windows-Dev64.
 Dev60 earlier scoped four-mode pixel/migration evidence stays artifact-specific.
 Installer payloads still pin separately accepted Dev52/Dev56. Demo remains OFF.
 Native activation is still blocked on marketplace SDK access. No release/merge.
+
+Dev68 correction source8d98424a0aaf95df3147e13d6dced56ab9ce11b6: native AE Point
+gestures now start the same lens; 93 Rust tests, Clippy and 15 host-contract
+checks PASS. Mac release/package/signature PASS; not yet installed. Windows
+CI37293880927 and Mac CI37293880981 in progress. Native acceptance NOT RUN.
+AE now contains a different unsaved user project; fixture guard refused without
+changing it. Concurrent-use confirmation requested before restart/replacement.
+Evidence: outputs/corner-loupe-dev68. Dev64 remains installed.
 
 Previously accepted Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
 Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped
