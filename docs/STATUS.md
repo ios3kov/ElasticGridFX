@@ -18,30 +18,22 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev64**, source000ff91aeb91249fa94f54d7e7b73890ee965f9a,
-Build ID EGFX-38c123bf765bbee9c1bc241a. Package/signature and exact loaded-image
-identity PASS; centered corner loupe implemented in shared host code. 92 Rust
-and Clippy all-targets PASS, 22 scoped Python checks PASS. New loupe native
-visual drag/release/Undo acceptance NOT RUN; user check requested in owned scene.
-Windows Dev64 CI37291232120 PASS; Build ID EGFX-448748c343eede5cd2db801a,
-AEX SHA256 b2c145401ef8ac3b5b656a07c33e2c1aadfa8b5c1d0fd2195938f7568d860bf2.
-Downloaded packet checksum/embedded identity PASS; Windows AE acceptance of
-this candidate NOT RUN. Mac source CI37291232084 PASS.
-Evidence: outputs/corner-loupe and outputs/FSTR-Stretch-0.9.4-Windows-Dev64.
+Installed now: **0.9.4 Dev68**, source8d98424a0aaf95df3147e13d6dced56ab9ce11b6,
+Build ID EGFX-2c119fb9470dcf419a0424df. Mac package/signature and exact
+loaded-image UUID/path PASS. Previous Dev64 retained by atomic replacement.
+93 Rust tests, Clippy all-targets, 15 scoped host-contract checks PASS.
+Windows CI37293880927 and Mac CI37293880981 PASS at this exact source.
+Windows downloaded AEX identity/checksum PASS (EGFX-6916efe6320bedc00b79c89c),
+SHA256 47cbffee6a8a198a3b10cc4f9eb4fd4bee89f7cf4ac3e98794f2f3d72e013caa.
+Windows packet: outputs/FSTR-Stretch-0.9.4-Windows-Dev68/FSTR-Stretch-Windows-Dev68.zip.
+Windows AE acceptance of Dev68 NOT RUN. Mac native loupe visual acceptance
+PENDING MANUAL DRAG; user said not yet checked. Owned loupe-dev68.aep open,
+Perspective mode selected, effect controls visible. Lens native Point tracking
+implemented without setters/key writes or renderer changes. Evidence:
+outputs/corner-loupe-dev68; prior Dev64 evidence retained in outputs/corner-loupe.
 Dev60 earlier scoped four-mode pixel/migration evidence stays artifact-specific.
 Installer payloads still pin separately accepted Dev52/Dev56. Demo remains OFF.
-Native activation is still blocked on marketplace SDK access. No release/merge.
-
-Dev68 correction source8d98424a0aaf95df3147e13d6dced56ab9ce11b6: native AE Point
-gestures now start the same lens; 93 Rust tests, Clippy and 15 host-contract
-checks PASS. Mac release/package/signature PASS; not yet installed. Windows
-CI37293880927 PASS; downloaded Dev68 AEX identity/checksum PASS
-(EGFX-6916efe6320bedc00b79c89c). Windows packet:
-outputs/FSTR-Stretch-0.9.4-Windows-Dev68/FSTR-Stretch-Windows-Dev68.zip.
-Mac CI37293880981 in progress. Native acceptance NOT RUN.
-AE now contains a different unsaved user project; fixture guard refused without
-changing it. Concurrent-use confirmation requested before restart/replacement.
-Evidence: outputs/corner-loupe-dev68. Dev64 remains installed.
+Native activation still waits for marketplace SDK access. No release/merge.
 
 Previously accepted Mac: **0.9.4 Dev52**, source740dbaa89d7b9738123de6ede5e968a5af1c2375,
 Build ID EGFX-01242dd7b423e5aa1384abae. Native License/About/Close and scoped
