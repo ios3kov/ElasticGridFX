@@ -18,7 +18,7 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev100**, ordinary source6d895e4024fcceff7fa80c5223f05daebe30cddd,
+Previous candidate: **0.9.4 Dev100**, ordinary source6d895e4024fcceff7fa80c5223f05daebe30cddd,
 Build ID EGFX-4613b9d0b6f5453e20445fb7. Package/signature, atomic replacement
 and loaded-image identity PASS. Dev92 Comp drag/Undo/mode/menu acceptance remains
 bound to that artifact; Dev100 adds None transparent edge behavior. New default
@@ -42,8 +42,16 @@ Production renderer/binary unchanged by this test correction. Follow-up Mac37307
 No release, merge, installer replacement or diagnostic build.
 
 New user decision: fixed Clamp and disabled Edge Behavior in Layer/Perspective;
-Comp/Flat remain editable. Saved choices are preserved. Dev104 implementation
-prepared; installed Dev100 does not yet contain this new policy. Native/CI pending.
+Comp/Flat remain editable. Saved choices are preserved. Installed **0.9.4 Dev104**, source9bdf4470a7bd46000d8bc349d33eeb41729a9375,
+Build ID EGFX-ab9b2b3b3a3d8e9cb7493c49. Package/signature/atomic replacement/loaded identity PASS.
+98 Rust/15 host contracts/Clippy PASS. Native AE25.6 temporary-wave pixel comparisons
+PASS: Layer/Perspective Clamp and saved None outputs are byte-exact, Comp/Flat differ.
+Original choice restored; reference scene and prior binary backed up. UI disabled/
+enabled mode-switch acceptance pending user confirmation. Windows CI37311196442
+PASS; Mac37311196440 IN_PROGRESS. Windows native AE NOT RUN. Initial installer
+rejected branded archive before swap; correct internal archive installed successfully.
+Neutral-grid comparison initially failed an invalid expectation that edges must differ;
+separate deformed fixture verified intended policy. No transfer of old UI acceptance.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.

@@ -218,3 +218,15 @@ sampler fork. Reject stale selector action while locked without writing saved
 choice. Acceptance: all saved choices map to Clamp only in Layer/Perspective,
 editable-mode roundtrip, native disabled/enabled visual, native evaluated pixels,
 Mac/Windows exact builds. Implementation Dev104; native/CI verification pending.
+
+Dev104 source9bdf447, EGFX-ab9b2b3b3a3d8e9cb7493c49:98 Rust/15 host contracts/Clippy PASS.
+Package/signature/atomic installation/loaded identity PASS. Initial branded ZIP
+rejected before swap, old plugin untouched; corrected internal ZIP installed.
+First neutral fixture yielded equal edge outputs (expected exact pass-through),
+so it could not prove editable-edge behavior. A temporary Wave Amplitude15 fixture
+showed Comp/Flat different and Layer/Perspective byte-exact Clamp/None outputs.
+Wave and canonical choices restored. First wave script guard refused incorrect
+output path, corrected without scene mutation. Last PNG was asynchronous; immediate
+reader failed, subsequent completed-frame comparison PASS. User UI confirmation
+pending. Windows37311196442 PASS, Mac37311196440 IN_PROGRESS; native Windows NOT RUN.
+Evidence outputs/edge-fixed-dev104/native-wave-pixels.json, loaded-identity and CI.
