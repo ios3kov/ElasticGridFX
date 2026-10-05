@@ -1697,3 +1697,30 @@ Post-reboot swap7.69GiB observed19:59; heavy host verification not attempted.
 [Frame/redraw source audit](ram-preview-request-audit-2026-10-05.md) found no other
 independent async frame requester; conditional density invalidation, no-op corner
 writes, repeated UI/parameter updates are review candidates, not proven hang causes.
+
+### Redraw/dependency corrective work — Dev128
+
+User authorized repairing the source-audit findings under rules8.0.0. R1 density
+keeps viewer reflow but sets ForceRerender only for Show Grid/Demo pixel overlays;
+AE's own dependency invalidation is not disabled. R2 no-op corner DRAG compares
+exact SDK16.16 values before Point write/CHANGED_VALUE/UPDATE_NOW; gesture
+continuation/release remains handled. R3 popup values and disabled flags are
+compared against the current host definitions before UpdateParamUI; no global UI
+cache. R4 callback-local primitive dependency cache shares reads between plane
+and SmartPreRender construction, including binding kind/points/mode and pending
+neutral guard. The already-owned exact retained grid is reused for that guard.
+No handle/pointer retained, every checkout checked in before caching, no value
+carried to another frame or effect instance. Keys/IDs/defaults/pixels/ROI unchanged.
+Shared Mac/Windows source; Demo remains OFF. Dev128 ordinary/129-131 probes.
+108 Rust tests PASS; strict Clippy PASS before final comment/test tightening.
+Static review only the existing unittest.mock fixture heuristic at
+test_target_ae_acceptance.py:54; no product auth route. Final checks/build/package
+follow below. Native feedback/Undo/after-scrub loupe and full RAM Preview NOT RUN.
+Critical Mac incident still UNCONFIRMED and blocks promotion; no stability claim.
+
+Final Dev128 source checks:108 Rust tests PASS, strict all-target Clippy PASS,
+diff whitespace PASS. Separate review: cached primitives retain exact bits;
+checkout temporaries dispose before insertion; only owned retained grid reused;
+current host UI comparisons avoid persistent Undo-stale state; no-op corner
+release still ends gesture. No renderer or saved-stream byte changes. Logs local
+outputs/redraw-work-dev128. Mac package build follows from clean committed source.

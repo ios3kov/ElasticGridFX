@@ -7,13 +7,15 @@ fn resolve(automatic: bool, legacy_percent: f64) -> f32 {
 }
 
 pub(crate) fn read(params: &ae::Parameters<Params>, checkout: bool) -> Result<f32, ae::Error> {
-    let automatic = if checkout { params.checkout(Params::AutomaticSpacing)?.as_checkbox()?.value() }
-        else { params.get(Params::AutomaticSpacing)?.as_checkbox()?.value() };
-    // Checkout legacy value even in automatic mode: keeps the saved dependency
-    // explicit, with no mutation or migration of its animation.
     let legacy = if checkout { checked_float(params, Params::MinSpacing)? }
         else { params.get(Params::MinSpacing)?.as_float_slider()?.value() };
-    Ok(resolve(automatic, legacy))
+    read_legacy(params,checkout,legacy)
+}
+pub(crate) fn read_legacy(params:&ae::Parameters<Params>,checkout:bool,legacy:f64)->Result<f32,ae::Error>{
+    let automatic=if checkout {params.checkout(Params::AutomaticSpacing)?.as_checkbox()?.value()}
+        else {params.get(Params::AutomaticSpacing)?.as_checkbox()?.value()};
+    // The legacy dependency remains explicit even in automatic mode.
+    Ok(resolve(automatic,legacy))
 }
 
 #[cfg(test)]

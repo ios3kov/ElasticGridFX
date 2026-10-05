@@ -551,6 +551,10 @@ pub fn drag(
     result
 }
 
+fn corner_position_changed(current:(i32,i32),target:(f32,f32))->bool {
+    current!=(ae::Fixed::from(target.0).as_fixed(),ae::Fixed::from(target.1).as_fixed())
+}
+
 fn drag_inner(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
@@ -576,9 +580,18 @@ fn drag_inner(
             (x as f32,y as f32)
         } else {(layer_x,layer_y)};
         let mut param=params.get_mut(plane::CORNERS[index])?;
-        param.as_point_mut()?.set_value((layer_x,layer_y));
-        param.set_value_changed();
-        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
+        // Validate the union tag before reading exact SDK 16.16 values. The
+        // wrapper's f32 getter can lose low bits on large layer coordinates.
+        param.as_point()?;
+        let raw=param.as_ref();
+        let current=unsafe{(raw.u.td.x_value,raw.u.td.y_value)};
+        let changed=corner_position_changed(current,(layer_x,layer_y));
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
+        if changed {
+            param.as_point_mut()?.set_value((layer_x,layer_y));
+            param.set_value_changed();
+            event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::ALWAYS_UPDATE | ae::EventOutFlags::UPDATE_NOW);
+        }
         event.set_send_drag(!event.last_time());
         return Ok(());
     }
@@ -661,6 +674,20 @@ pub fn adjust_cursor(
 
 #[cfg(test)]
 mod cursor_tests {
+    #[test]
+    fn corner_updates_ignore_motion_below_sdk_fixed_precision(){
+        for target in [(0.0,0.0),(-12.75,19.125),(319.0,241.0),(20000.0,-20000.0)] {
+            let current=(ae::Fixed::from(target.0).as_fixed(),ae::Fixed::from(target.1).as_fixed());
+            assert!(!corner_position_changed(current,target));
+            // Even low stored bits at large coordinates must not be lost by
+            // converting the old Point through the wrapper's f32 getters.
+            assert!(corner_position_changed((current.0+1,current.1),target));
+            assert!(corner_position_changed(current,(target.0+0.25,target.1)));
+            assert!(corner_position_changed(current,(target.0,target.1-0.25)));
+        }
+        assert!(!corner_position_changed((0,0),(0.000001,0.000001)));
+        assert!(corner_position_changed((0,0),(1.0/65536.0,0.0)));
+    }
     #[test]
     fn only_known_callback_windows_enter_wrapper_conversion() {
         for w in [ae::sys::PF_Window_COMP,ae::sys::PF_Window_LAYER,ae::sys::PF_Window_EFFECT] {

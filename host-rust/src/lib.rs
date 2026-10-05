@@ -23,6 +23,7 @@ mod corner_loupe;
 mod fit_layer;
 mod reset_grid;
 mod spacing;
+mod param_reads;
 mod grid_row;
 #[cfg(feature="render-diagnostics")]
 mod render_diagnostics;
@@ -548,6 +549,12 @@ impl SmartRenderSnapshot {
     }
 }
 
+fn density_changes_output(show_grid: bool, demo: bool) -> bool { show_grid || demo }
+
+fn popup_ui_changed(value:i32, disabled:bool, desired:i32, desired_disabled:bool)->bool {
+    value!=desired || disabled!=desired_disabled
+}
+
 fn checked_float(params: &ae::Parameters<Params>, param: Params) -> Result<f64, ae::Error> {
     let checked = params.checkout(param)?;
     Ok(checked.as_float_slider()?.value())
@@ -578,28 +585,30 @@ fn smart_render_snapshot(
 
     let (canvas_width, canvas_height) = rendered_canvas(in_data);
 
+    let reads=param_reads::Reads::new(params,true,Some(&grid));
+    let plane=plane::State::read_values(&reads,&in_data,true)?;
     Ok(SmartRenderSnapshot {
-        grid,
         show_grid: show_grid::State::read(params, true)?,
         demo_watermark: show_grid::State::read_demo(params, true)?,
-        plane: plane::State::read(params, &in_data, true, true)?,
-        tension_radius: checked_float(params, Params::TensionRadius)? as f32,
-        falloff: checked_popup(params, Params::Falloff)?,
-        elasticity_strength: checked_float(params, Params::ElasticityStrength)? as f32 / 100.0,
-        min_spacing: spacing::read(params, true)?,
-        stretch_easing: checked_float(params, Params::StretchEasing)? as f32 / 100.0,
-        easing_distance: checked_float(params, Params::EasingDistance)? as f32 / 100.0,
-        wave_amplitude: checked_float(params, Params::WaveAmplitude)? as f32 / 100.0,
-        wave_frequency: checked_float(params, Params::WaveFrequency)? as f32,
-        wave_phase: checked_float(params, Params::WavePhase)? as f32,
-        wave_speed: checked_float(params, Params::WaveSpeed)? as f32,
-        wave_axis: checked_popup(params, Params::WaveAxis)?,
-        edge_mode: edge::effective(checked_popup(params, Params::PlaneMode)?,
-            checked_popup(params, Params::EdgeMode)?)?,
-        quality: checked_popup(params, Params::Quality)?,
+        plane,
+        tension_radius: reads.float(Params::TensionRadius)? as f32,
+        falloff: reads.popup(Params::Falloff)?,
+        elasticity_strength: reads.float(Params::ElasticityStrength)? as f32 / 100.0,
+        min_spacing: spacing::read_legacy(params, true, reads.float(Params::MinSpacing)?)?,
+        stretch_easing: reads.float(Params::StretchEasing)? as f32 / 100.0,
+        easing_distance: reads.float(Params::EasingDistance)? as f32 / 100.0,
+        wave_amplitude: reads.float(Params::WaveAmplitude)? as f32 / 100.0,
+        wave_frequency: reads.float(Params::WaveFrequency)? as f32,
+        wave_phase: reads.float(Params::WavePhase)? as f32,
+        wave_speed: reads.float(Params::WaveSpeed)? as f32,
+        wave_axis: reads.popup(Params::WaveAxis)?,
+        edge_mode: edge::effective(reads.popup(Params::PlaneMode)?,
+            reads.popup(Params::EdgeMode)?)?,
+        quality: reads.popup(Params::Quality)?,
         time_seconds,
         canvas_width,
         canvas_height,
+        grid,
     })
 }
 
@@ -1250,7 +1259,11 @@ impl AdobePluginGlobal for Plugin {
                     control_layout::reflow(&in_data,params,params.index(Params::Columns)==Some(param_index))?;
                     // Reflow viewer references only. Never touch Grid Positions:
                     // a setter here would create/overwrite a key at the playhead.
-                    out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
+                    // Density reflows viewer references without changing the warp.
+                    // Pixel overlays are the only output dependency of this edit.
+                    if density_changes_output(params.get(Params::ShowGrid)?.as_checkbox()?.value(), demo::ENABLED) {
+                        out_data.set_out_flag(ae::OutFlags::ForceRerender, true);
+                    }
 
                 }
             }
@@ -1495,6 +1508,29 @@ impl AdobePluginGlobal for Plugin {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn density_only_requests_pixel_refresh_for_visible_output_overlays(){
+        assert!(!density_changes_output(false,false));
+        for (show_grid,demo) in [(true,false),(false,true),(true,true)] {
+            assert!(density_changes_output(show_grid,demo));
+        }
+    }
+    #[test]
+    fn control_updates_follow_mode_and_edge_changes_in_both_directions(){
+        for mode in 1..=4 { for next_mode in 1..=4 {
+            let current=plane::display_mode_value(mode).unwrap();
+            let next=plane::display_mode_value(next_mode).unwrap();
+            assert_eq!(popup_ui_changed(current,false,next,false),mode!=next_mode);
+            for saved in 1..=4 {
+                let old=edge::display(edge::effective(mode,saved).unwrap()).unwrap();
+                let new=edge::display(edge::effective(next_mode,saved).unwrap()).unwrap();
+                let disabled=edge::locked(mode).unwrap();let next_disabled=edge::locked(next_mode).unwrap();
+                assert_eq!(popup_ui_changed(old,disabled,new,next_disabled),old!=new || disabled!=next_disabled);
+            }
+        }}
+        assert!(popup_ui_changed(1,false,1,true));
+        assert!(popup_ui_changed(1,true,1,false));
+    }
     use super::*;
     use ae::ArbitraryData;
 

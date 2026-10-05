@@ -69,19 +69,25 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
         Err(error)=>return Err(error),
     };
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
-    let mut mode=(*params.get(Params::ModeSelector)?).clone();
-    mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
+    let current=params.get(Params::ModeSelector)?;
     // SDK25.6 Supervisor: change only a CONTROL_ONLY popup copy through
     // UpdateParamUI. No data stream or CHANGED_VALUE on this UI-only control.
     let stored=params.get(Params::PlaneMode)?.as_popup()?.value();
-    mode.as_popup_mut()?.set_value(display_mode_value(stored)?);
-    mode.update_param_ui()?;
+    let desired=display_mode_value(stored)?;
+    if popup_ui_changed(current.as_popup()?.value(),current.ui_flags().contains(ae::ParamUIFlags::DISABLED),desired,mode_disabled) {
+        let mut mode=(*current).clone();
+        mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
+        mode.as_popup_mut()?.set_value(desired);
+        mode.update_param_ui()?;
+    }
     edge::update_ui(params)?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
-        let mut definition=(*current).clone();
-        definition.set_ui_flag(ae::ParamUIFlags::DISABLED,corners_disabled);
-        definition.update_param_ui()?;
+        if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=corners_disabled {
+            let mut definition=(*current).clone();
+            definition.set_ui_flag(ae::ParamUIFlags::DISABLED,corners_disabled);
+            definition.update_param_ui()?;
+        }
     }
     Ok(())
 }
@@ -101,11 +107,11 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
         }
     }
 }
-fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
+fn layer_is_3d(reads:&param_reads::Reads<'_,'_>)->Result<bool,ae::Error>{
     #[cfg(fstr_binding_probe)]
-    {binding_probe::layer_is_3d(params,checkout)}
+    {binding_probe::layer_is_3d(reads)}
     #[cfg(not(fstr_binding_probe))]
-    {let _=(params,checkout);Ok(false)}
+    {let _=reads;Ok(false)}
 }
 #[derive(Clone, Debug, Default)]
 pub(crate) struct State {
@@ -127,19 +133,21 @@ impl State {
         if self.editable_corners { self.corners } else { None }
     }
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
-        let mode = if checkout { checked_popup(params, Params::PlaneMode)? }
-                   else { params.get(Params::PlaneMode)?.as_popup()?.value() };
+        Self::read_values(&param_reads::Reads::new(params,checkout,None),in_data,frame_context)
+    }
+    pub(crate) fn read_values(reads:&param_reads::Reads<'_,'_>,in_data:&ae::InData,frame_context:bool)->Result<Self,ae::Error>{
+        let mode=reads.popup(Params::PlaneMode)?;
         let mode=Mode::from_value(mode)?;
         if mode==Mode::Layer {
             #[cfg(fstr_binding_probe)]
-            {return binding_probe::sampled_layer_plane(in_data,params,checkout,frame_context)
+            {return binding_probe::sampled_layer_plane(in_data,reads,frame_context)
                 .map(|state|state.unwrap_or_default());}
             #[cfg(not(fstr_binding_probe))]
             {return Ok(Self::default());}
         }
-        if mode == Mode::Comp || (mode==Mode::Flat && layer_is_3d(params,checkout)?) {
+        if mode == Mode::Comp || (mode==Mode::Flat && layer_is_3d(reads)?) {
             #[cfg(fstr_binding_probe)]
-            if let Some(derived)=if mode==Mode::Comp {binding_probe::sampled_comp_plane(in_data,params,checkout,frame_context)?} else {binding_probe::sampled_plane(in_data,params,checkout,frame_context)?} {return Ok(derived);}
+            if let Some(derived)=if mode==Mode::Comp {binding_probe::sampled_comp_plane(in_data,reads,frame_context)?} else {binding_probe::sampled_plane(in_data,reads,frame_context)?} {return Ok(derived);}
             return Ok(Self::default());
         }
         let perspective=mode==Mode::Perspective;
@@ -147,15 +155,14 @@ impl State {
         // pre_effect_source_origin is valid only in frame selectors, not UI.
         let origin = if frame_context {in_data.pre_effect_source_origin()} else {ae::Point {h:0,v:0}};
         for (i, id) in CORNERS.into_iter().enumerate() {
-            let value = if checkout {params.checkout(id)?.as_point()?.float_value()?}
-                        else {params.get(id)?.as_point()?.float_value()?};
+            let value=reads.point(id)?;
             // AE already scales points. Remove buffer expansion once to match
             // the logical layer canvas used by the existing SmartFX path.
-            corners[2*i] = value.x - origin.h as f64;
-            corners[2*i+1] = value.y - origin.v as f64;
+            corners[2*i] = value.0 - origin.h as f64;
+            corners[2*i+1] = value.1 - origin.v as f64;
         }
         #[cfg(fstr_binding_probe)]
-        if let Some(base)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {
+        if let Some(base)=binding_probe::sampled_plane(in_data,reads,frame_context)? {
             let basis=base.corners.ok_or(ae::Error::BadCallbackParameter)?;
             let (width,height)=if frame_context {rendered_canvas(*in_data)}
                 else {(in_data.width(),in_data.height())};

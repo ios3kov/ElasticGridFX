@@ -19,9 +19,13 @@ pub(crate) fn effective(mode:i32,saved:i32)->Result<i32,ae::Error>{
 pub(crate) fn update_ui(params:&ae::Parameters<Params>)->Result<(),ae::Error>{
     let mode=params.get(Params::PlaneMode)?.as_popup()?.value();
     let value=params.get(Params::EdgeMode)?.as_popup()?.value();
-    let mut control=(*params.get(Params::EdgeSelector)?).clone();
-    control.set_ui_flag(ae::ParamUIFlags::DISABLED,locked(mode)?);
-    control.as_popup_mut()?.set_value(display(effective(mode,value)?)?);
+    let current=params.get(Params::EdgeSelector)?;
+    let disabled=locked(mode)?;
+    let desired=display(effective(mode,value)?)?;
+    if !popup_ui_changed(current.as_popup()?.value(),current.ui_flags().contains(ae::ParamUIFlags::DISABLED),desired,disabled) {return Ok(());}
+    let mut control=(*current).clone();
+    control.set_ui_flag(ae::ParamUIFlags::DISABLED,disabled);
+    control.as_popup_mut()?.set_value(desired);
     control.update_param_ui()
 }
 #[cfg(test)] mod tests{

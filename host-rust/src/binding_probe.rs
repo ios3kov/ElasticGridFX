@@ -3,25 +3,23 @@ use super::*;
 use binding_transaction::{Host, Snapshot, Outcome};
 const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR", "__FSTR Probe BL", "__FSTR Plane Kind"];
 
-pub fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
-    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
-        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+pub fn layer_is_3d(reads:&param_reads::Reads<'_,'_>)->Result<bool,ae::Error>{
+    let kind=reads.float(Params::ResearchPlaneKind)?;
     match kind {0.0|1.0|4.0|5.0=>Ok(false),2.0|3.0|6.0|7.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
 }
 
 // Shared UI/render snapshot. No AEGP calls: all dependencies are PF parameters.
 // Native 3D text is distinct from raster footage's layer-local effect input.
-pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
+pub fn sampled_plane(in_data:&ae::InData,reads:&param_reads::Reads<'_,'_>,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
-    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
-        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    let kind=reads.float(Params::ResearchPlaneKind)?;
     // 0 pending; 1 2D layer-local; 2 3D text comp-space; 3 3D raster layer-local.
     // The marker is installed last and checked out with the four points.
     // AE may request a neutral first frame before the deferred binding runs.
     // Only an exact initial identity can render without knowing the layer plane.
     // Do not turn an unknown/deformed plane into a successful legacy render.
     let initial_identity = kind == 0.0 && frame_context && cfg!(fstr_auto_binding)
-        && pending_frame_identity(params, checkout)?;
+        && pending_frame_identity(reads)?;
     if !resolve_comp_space_kind(kind,frame_context,cfg!(fstr_auto_binding),initial_identity)? {
         return Ok(None);
     }
@@ -33,36 +31,33 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
     let origin=if frame_context {in_data.pre_effect_source_origin()} else {ae::Point {h:0,v:0}};
     for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
         Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate(){
-        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?}
-            else {params.get(id)?.as_point()?.float_value()?};
-        corners[2*i]=p.x-origin.h as f64;corners[2*i+1]=p.y-origin.v as f64;
+        let p=reads.point(id)?;
+        corners[2*i]=p.0-origin.h as f64;corners[2*i+1]=p.1-origin.v as f64;
     }
     // Degenerate geometry follows the core's exact pass-through contract.
     // No public corner controls are exposed for an automatically derived plane.
     Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true,parameter_basis:None,render_kind:plane::RenderKind::Layer,source_corners:None}))
 }
 
-pub fn sampled_comp_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
+pub fn sampled_comp_plane(in_data:&ae::InData,reads:&param_reads::Reads<'_,'_>,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
-    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
-        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
-    if !matches!(kind,5.0|6.0|7.0){return sampled_plane(in_data,params,checkout,frame_context);}
+    let kind=reads.float(Params::ResearchPlaneKind)?;
+    if !matches!(kind,5.0|6.0|7.0){return sampled_plane(in_data,reads,frame_context);}
     let origin=if frame_context {in_data.pre_effect_source_origin()} else {ae::Point{h:0,v:0}};
     let mut corners=[0.;8];
     for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate(){
-        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?} else {params.get(id)?.as_point()?.float_value()?};
-        corners[2*i]=p.x-f64::from(origin.h);corners[2*i+1]=p.y-f64::from(origin.v);
+        let p=reads.point(id)?;
+        corners[2*i]=p.0-f64::from(origin.h);corners[2*i+1]=p.1-f64::from(origin.v);
     }
     Ok(Some(plane::State{corners:Some(corners),comp_space:kind==7.0,
         render_kind:plane::RenderKind::Comp,..plane::State::default()}))
 }
 
-pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
+pub fn sampled_layer_plane(in_data:&ae::InData,reads:&param_reads::Reads<'_,'_>,frame_context:bool)
     ->Result<Option<plane::State>,ae::Error>{
-    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
-        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    let kind=reads.float(Params::ResearchPlaneKind)?;
     if kind!=4.0 {
-        if let Some(derived)=sampled_plane(in_data,params,checkout,frame_context)? {return Ok(Some(derived));}
+        if let Some(derived)=sampled_plane(in_data,reads,frame_context)? {return Ok(Some(derived));}
         // 3D raster is already a layer-local input canvas.
         if kind==3.0 {return Ok(None);}
         // Old/undone/pending binding cannot establish the new local bounds.
@@ -72,9 +67,8 @@ pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,ch
     let mut corners=[0.0;8];
     for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
         Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate() {
-        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?}
-            else {params.get(id)?.as_point()?.float_value()?};
-        corners[2*i]=p.x-f64::from(origin.h);corners[2*i+1]=p.y-f64::from(origin.v);
+        let p=reads.point(id)?;
+        corners[2*i]=p.0-f64::from(origin.h);corners[2*i+1]=p.1-f64::from(origin.v);
     }
     Ok(Some(plane::State {corners:Some(corners),render_kind:plane::RenderKind::Layer,
         ..plane::State::default()}))
@@ -122,14 +116,11 @@ fn initial_identity_values(grid:&GridArb,topology:(i32,i32),mode:i32,
             .all(|(a,b)|a.to_bits()==b.to_bits())
 }
 
-fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
+fn pending_frame_identity(reads:&param_reads::Reads<'_,'_>)->Result<bool,ae::Error>{
     // SmartPreRender has no valid ordinary params array. All dependencies used
     // in this decision must be checked out just like the owned render snapshot.
-    let float=|id| ->Result<f64,ae::Error>{
-        if checkout {checked_float(params,id)} else {Ok(params.get(id)?.as_float_slider()?.value())}
-    };
-    let mode=if checkout {checked_popup(params,Params::PlaneMode)?}
-        else {params.get(Params::PlaneMode)?.as_popup()?.value()};
+    let float=|id| reads.float(id);
+    let mode=reads.popup(Params::PlaneMode)?;
     let wave=float(Params::WaveAmplitude)?;
     let easing=float(Params::StretchEasing)?;
     let spacing=float(Params::MinSpacing)?;
@@ -137,12 +128,13 @@ fn pending_frame_identity(params:&ae::Parameters<Params>,checkout:bool)->Result<
     // the original stored lattice; do not sanitize or resize invalid data.
     let matches=|grid:&GridArb|initial_identity_values(
         grid,(i32::from(grid.columns),i32::from(grid.rows)),mode,wave,easing,spacing);
-    if checkout {
-        let checked=params.checkout(Params::GridState)?;
+    if let Some(grid)=reads.grid {return Ok(matches(grid));}
+    if reads.checkout {
+        let checked=reads.params.checkout(Params::GridState)?;
         let value=checked.as_arbitrary()?.value::<GridArb>()?;
         Ok(matches(&value))
     } else {
-        let param=params.get(Params::GridState)?;
+        let param=reads.params.get(Params::GridState)?;
         let value=param.as_arbitrary()?.value::<GridArb>()?;
         Ok(matches(&value))
     }

@@ -62,3 +62,20 @@ Candidate NOT INSTALLED; disk plugin remains Dev120. Runtime loupe/playback
 regression NOT RUN, root cause UNCONFIRMED, Windows candidate NOT BUILT.
 Current post-reboot swap measured7.69GiB at19:59+0200. No repeated RAM Preview
 or live heavy rendering attempted. Do not close the incident or promote release.
+
+## Authorized corrective scope — Dev128
+
+User explicitly authorized repairs. R1: density must retain viewer reflow/Undo,
+forcing image rerender only if Show Grid or Demo changes output. Do not claim
+preventing AE's own ordinary dependency invalidation. R2: corner DRAG writes and
+requests immediate update only when the SDK fixed-point destination changes;
+continue/release gesture and loupe lifecycle remain active for no-op callbacks.
+R3: compare native current control values/disabled flags before UpdateParamUI;
+no global UI cache that can go stale after Undo or host reconstruction.
+R4: memoize scalar/point dependency values only within a single immutable plane/
+SmartPreRender read; preserve SDK checkout/checkin, pending-binding exact guards,
+saved animation and errors. No cross-frame cache, parameter schema/default change,
+ROI reduction, output-quality change or platform-specific divergence.
+Acceptance: focused guards/cache tests, complete Rust suite/strict Clippy, clean
+Mac build/package. Native host feedback/Undo/playback and Windows artifact tests
+remain separate; recent whole-Mac hang must stay open until confirmed.
