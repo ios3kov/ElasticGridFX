@@ -669,6 +669,12 @@ pub fn adjust_cursor(
     let grid=&controls.grid;
         let hit=hit_test(in_data,grid,&plane,event,event.screen_point())?;
         if corner_loupe::hover(in_data,event,hit.and_then(|(axis,index)|(axis==DRAG_CORNER).then_some(index)),plugin_id){
+            // SDK25.6 AE_EffectSuites.h:590-595 / AE_EffectUI.h:510:
+            // UPDATE_NOW needs a queued invalidation. Only the new-press
+            // transition queues it; later cursor callbacks do no redraw work.
+            let redraw=ae::pf::suites::App::new()?.invalidate_rect(event.context_handle(),None);
+            #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(9,isize::from(redraw.is_ok()));
+            redraw?;
             event.set_cursor(hand_cursor(false));
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::UPDATE_NOW);
             return Ok(());

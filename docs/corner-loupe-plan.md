@@ -157,3 +157,29 @@ without new hover events or coordinate changes. Native release now preserves
 the hit-tested scope/pointer anchor, while lifecycle cancellation still clears
 it. Active single-corner movement follows the pointer anchor for later repress.
 Gesture frame completion/budget unchanged. Native acceptance remains NOT RUN.
+
+## Native press redraw, Dev152 / diagnostic155
+
+Probe151 exact sourcee5ddc05/BID EGFX-f909f058d6c78b4fe8902137 captured
+134 bounded local records. Initial press: start27, DRAW28 after5ms, lens success29.
+Repress: start40 with scoped hover accepted (predicate63), active42, no viewer
+DRAW until native movement supervision43; DRAW44 after841ms. Thus the missing
+transition is not loss of the hover/active state in this capture. Raw CLICK/DRAG
+are consumed by AE native Point controls. Native acceptance still FAIL.
+
+SDK25.6 authority: AE_EffectUI.h:510 says UPDATE_NOW updates the view when using
+PF_InvalidateRect; AE_EffectSuites.h:590-595 permits invalidation only during
+a non-draw event, with the current context and optional null rect for whole view.
+AppSuite wrapper0.4.0 matches the signature. Previous AdjustCursor start branch
+returned UPDATE_NOW without invalidating the view. Dev152 calls invalidation
+once when hover starts a gesture, before flags; repeated active cursor callbacks
+return without invalidation. Context is callback-local, no pointer retained, no
+timer, OS event injection, parameter/key write, renderer change, global refresh
+or idle frame-request expansion. The original whole-Mac RAM Preview incident
+remains OPEN/UNCONFIRMED; this trace does not establish its cause.
+
+The source placement guard FAIL before fix; native before/after acceptance is
+pending. Diagnostic155 adds transition509 recording invalidation success, with
+the same bounded gesture log; it does not enable PREVIEW callbacks. Private
+raw trace and project remain only under outputs/corner-press-probe151; public
+source docs contain aggregate transition findings only.

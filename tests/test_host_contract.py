@@ -191,6 +191,16 @@ class HostContract(unittest.TestCase):
         identity=(ROOT/'tools/build_identity.py').read_text()
         self.assertIn('ElasticGridBuildID=',identity)
 
+    def test_native_corner_press_invalidates_view_once_before_update_flag(self):
+        # This guard checks SDK call placement, not native redraw acceptance.
+        ui = (ROOT / 'host-rust/src/ui.rs').read_text()
+        adjust = ui.split('pub fn adjust_cursor(', 1)[1].split('#[cfg(test)]', 1)[0]
+        started = adjust.split('if corner_loupe::hover(', 1)[1].split('return Ok(());', 1)[0]
+        self.assertIn('invalidate_rect(event.context_handle(),None)', started)
+        self.assertLess(started.index('invalidate_rect('), started.index('ae::EventOutFlags::UPDATE_NOW'))
+        self.assertEqual(ui.count('invalidate_rect('), 1)
+        self.assertNotIn('refresh_all_windows', adjust)
+
     def test_branding_preserves_effect_match_name(self):
         build=(ROOT/'host-rust/build.rs').read_text()
         self.assertIn('Property::Name("FSTR Stretch")',build)

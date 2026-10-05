@@ -1868,3 +1868,24 @@ coordinates, project paths, frames or host pointers in new records. Product
 behavior/one-frame-per-gesture budget unchanged.118 diagnostic Rust tests PASS;
 strict diagnostic Clippy/build follow. Human stationary press vs moved control
 sequence needed to distinguish lost state from native host event delivery.
+
+Probe151 sourcee5ddc05, BID EGFX-f909f058d6c78b4fe8902137:118 diagnostic
+Rust tests, strict diagnostic Clippy, canonical bundle/PiPL/entrypoints/signature/
+archive/manifest PASS. Native installer reported Installed; exact installed
+payload files/signature PASS. Native AE registry count=1 with canonical matchName
+PASS; separate preserved scene reopened. Surface mode selected through guarded
+SDK scripting; Cua screenshot confirms grid/corner grips visible. Loaded-image
+UUID NOT RUN. Journal-ready baseline has4 records; human two stationary held
+presses plus a moved control requested, native trace NOT RUN. No speculative
+behavior correction, RAM Preview or release action. Original whole-Mac incident
+remains OPEN/UNCONFIRMED. Local evidence outputs/corner-press-probe151.
+
+Probe151 human stationary/moved capture completed:134 records retained locally.
+Repress start succeeds with scope guard63, but viewer DRAW is delayed841ms until
+native corner movement; first activation DRAW follows5ms after start. SDK25.6
+requires PF_InvalidateRect together with UPDATE_NOW; the new-press AdjustCursor
+branch omitted invalidation. Dev152 queues one callback-owned view invalidation
+at the accepted new-press transition; repeated active cursor callbacks do none.
+Diagnostic155 records success without PREVIEW callbacks. Source guard FAIL
+before repair retained. Native fix/slowdown acceptance NOT RUN; original RAM
+Preview incident OPEN/UNCONFIRMED. No rendering/key/idle-request policy change.
