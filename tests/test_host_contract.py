@@ -53,6 +53,7 @@ class HostContract(unittest.TestCase):
     def test_popup_ordinals_describe_current_core_behavior(self):
         self.assertIn('CONTROL_ONLY', block('EdgeSelector'))
         self.assertIn('ParamUIFlags::INVISIBLE', block('EdgeMode'))
+        self.assertIn('ParamUIFlags::NO_ECW_UI', block('EdgeMode'))
         self.assertIn('f.set_default(4)', block('EdgeMode'))
         self.assertIn('CONTROL_ONLY', block('ModeSelector'))
         self.assertIn('plane::DISPLAY_MODE_OPTIONS', block('ModeSelector'))

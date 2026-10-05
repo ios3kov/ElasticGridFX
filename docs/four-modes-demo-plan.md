@@ -180,3 +180,15 @@ only static nonanimated-control count after appending EdgeSelector; fixed to
 include it. Shader offline compiler NOT RUN locally (Metal toolchain absent);
 runtime test compiled, sandbox exposes no GPU, authorized native rerun pending.
 New Dev96 package/native UI/old saved values/output and Windows CI pending.
+
+Dev96 native: old saved Wrap2 retained, fresh defaultNone4 PASS; all four modes
+rendered. None produces245102 transparent pixels vs Clamp full-frame fill. This
+current user's deformation compresses the source footprint (bbox99,123–375,348),
+so a first ad hoc check incorrectly required pixels outside the original layer
+and returned FAIL. Retain that report; it does not demonstrate clipping. Separate
+core expanded None fixture does prove moved pixels outside source storage. Native
+expansion with deliberate outward drag still pending. GPU runtime parity native
+PASS for all24 quality/edge/case combinations after sandbox no-device result.
+Cua visual FAIL: saved old edge row remains visible beside CONTROL_ONLY selector.
+Dev100 correction additionally marks canonical EdgeMode NO_ECW_UI, retaining
+same saved values and source/render code; new package/UI verification pending.

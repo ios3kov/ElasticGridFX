@@ -1091,7 +1091,8 @@ impl AdobePluginGlobal for Plugin {
             f.set_options(&edge::STORED);
             f.set_default(4);
             f.set_value(f.default());
-        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::INVISIBLE)?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY,
+            ae::ParamUIFlags::INVISIBLE | ae::ParamUIFlags::NO_ECW_UI)?;
         params.add_with_flags(Params::EdgeSelector,"Edge Behavior",ae::PopupDef::setup(|f|{
             f.set_options(&edge::DISPLAY);f.set_default(1);f.set_value(1);
         }),ae::ParamFlag::SUPERVISE|ae::ParamFlag::CANNOT_TIME_VARY|ae::ParamFlag::CANNOT_INTERP,
