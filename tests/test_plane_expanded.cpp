@@ -88,8 +88,14 @@ template<typename T> void compDestination(int depth) {
         dst.pixels=comp.data();
         for(int y=0;y<h;y++)for(int x=w*4;x<stride;x++)assert(comp[y*stride+x]==T(231));
     }
+    // None renders only samples from the real source, never repeated edge colors.
+    assert(eg_render_plane_comp(&src,&dst,depth,&frame,&report,1,3)==0);
+    for(int c=0;c<4;c++)assert(comp[c]==0 && comp[(h-1)*stride+(w-1)*4+c]==0);
+    bool moved_outside=false;
+    for(int y=8;y<17;y++)for(int x=17;x<w;x++)moved_outside|=comp[y*stride+x*4]!=0;
+    assert(moved_outside); // transparent edges must not reintroduce layer clipping
     cols[1]=.5f;
-    assert(eg_render_plane_comp(&src,&dst,depth,&frame,&report,1,0)==0);
+    assert(eg_render_plane_comp(&src,&dst,depth,&frame,&report,1,3)==0);
     for(int y=0;y<h;y++)for(int x=0;x<w;x++)for(int c=0;c<4;c++)
         assert(comp[y*stride+x*4+c]==(x>=8 && y>=8 && x<17 && y<17?T(17):T(0)));
 }

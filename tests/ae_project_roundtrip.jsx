@@ -100,7 +100,7 @@ function egfxWaitForPng(path) {
         var waveEnabled = fx.property("Wave Animation");
         var waveAmplitude = egfxWaveParam(fx, "Wave Amplitude");
         var waveSpeed = egfxWaveParam(fx, "Wave Speed");
-        var edge = fx.property("Edge Behavior");
+        var edge = fx.property("__FSTR Edge Value");
         var quality = fx.property("Render Quality");
         if (cols === null || rows === null || elasticity === null || waveEnabled === null || waveAmplitude === null || waveSpeed === null || edge === null || quality === null) {
             fail(stage);
@@ -163,7 +163,7 @@ function egfxWaitForPng(path) {
         var re = (reopenedFx.property("Follow Strength") || reopenedFx.property("Elasticity Strength"));
         var rwa = egfxWaveParam(reopenedFx, "Wave Amplitude");
         var rws = egfxWaveParam(reopenedFx, "Wave Speed");
-        var redge = reopenedFx.property("Edge Behavior");
+        var redge = reopenedFx.property("__FSTR Edge Value");
         var rq = reopenedFx.property("Render Quality");
         if (rc === null || rr === null || re === null || rwa === null || rws === null || redge === null || rq === null) {
             fail(stage);

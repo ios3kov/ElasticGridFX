@@ -35,7 +35,7 @@ function egfxPhasedPrepare(config) {
             var fx = layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
             if (!fx || fx.matchName !== "com.elasticgrid.fx.warp") throw Error("Effect unavailable");
             egfxFixtureParam(fx,"Columns").setValue(4); egfxFixtureParam(fx,"Rows").setValue(4);
-            egfxFixtureParam(fx,"Render Quality").setValue(2); egfxFixtureParam(fx,"Edge Behavior").setValue(1);
+            egfxFixtureParam(fx,"Render Quality").setValue(2); egfxFixtureParam(fx,"__FSTR Edge Value").setValue(1);
             egfxFixtureParam(fx,"Wave Axis").setValue(1); egfxFixtureParam(fx,"Wave Frequency").setValue(1.3);
             egfxFixtureParam(fx,"Wave Phase").setValue(35); egfxFixtureParam(fx,"Wave Speed").setValue(0);
             egfxFixtureParam(fx,"Wave Amplitude").setValue(0); egfxFixtureParam(fx,"Stretch Easing").setValue(0);

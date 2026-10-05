@@ -36,6 +36,7 @@ int resolveIndex(int i, int n, EdgeMode mode) {
         case EdgeMode::Clamp: return std::clamp(i, 0, n - 1);
         case EdgeMode::Wrap: return wrapIndex(i, n);
         case EdgeMode::Mirror: return mirrorIndex(i, n);
+        case EdgeMode::None: return i<0 || i>=n?-1:i;
         default: return std::clamp(i, 0, n - 1);
     }
 }
@@ -211,7 +212,7 @@ void prepareWarpRGBAfInto(PreparedWarpRGBAf& p,
     p.src_width = src_width; p.src_height = src_height;
     p.dst_width = dst_width; p.dst_height = dst_height;
     p.quality = settings.quality;
-    p.transparent_taps = false;
+    p.transparent_taps = settings.edge==EdgeMode::None;
     p.identity = src_width == dst_width && src_height == dst_height &&
                  axisIsIdentity(x_lut, dst_width) && axisIsIdentity(y_lut, dst_height);
 

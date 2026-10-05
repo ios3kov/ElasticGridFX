@@ -76,6 +76,7 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
     let stored=params.get(Params::PlaneMode)?.as_popup()?.value();
     mode.as_popup_mut()?.set_value(display_mode_value(stored)?);
     mode.update_param_ui()?;
+    edge::update_ui(params)?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
         let mut definition=(*current).clone();

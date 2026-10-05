@@ -121,7 +121,7 @@ int main() {
             std::vector<float> src(static_cast<std::size_t>(sp) * tc.sh * 4, 0.0f);
             fill_source(src, sp, tc.sw, tc.sh);
 
-            for (int edge = 1; edge <= 3; ++edge) {
+            for (int edge = 1; edge <= 4; ++edge) {
                 for (int quality = 1; quality <= 2; ++quality) {
                     auto p = make_params(quality, edge, x, 5, xp, y, 4, yp, tc.wave);
                     std::vector<float> cpu(static_cast<std::size_t>(dp) * tc.dh * 4, 0.0f);

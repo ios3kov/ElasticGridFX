@@ -234,7 +234,7 @@ function elasticGridSmoke(config) {
         var amplitude = property(fx, "Wave Amplitude"), speed = property(fx, "Wave Speed");
         property(fx, "Columns").setValue(4); property(fx, "Rows").setValue(4);
         property(fx, "Render Quality").setValue(2);
-        property(fx, "Edge Behavior").setValue(1);
+        property(fx, "__FSTR Edge Value").setValue(1);
         property(fx, "Wave Axis").setValue(1);
         property(fx, "Wave Frequency").setValue(1.3);
         property(fx, "Wave Phase").setValue(35.0);

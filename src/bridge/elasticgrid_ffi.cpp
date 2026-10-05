@@ -48,6 +48,7 @@ eg::EdgeMode edge_from_i32(std::int32_t v) noexcept {
     switch (v) {
         case 2: return eg::EdgeMode::Wrap;
         case 3: return eg::EdgeMode::Mirror;
+        case 4: return eg::EdgeMode::None;
         default: return eg::EdgeMode::Clamp;
     }
 }
@@ -125,6 +126,7 @@ bool axis_uniform_exact(const std::vector<float>& lines) noexcept {
 // taps instead, but only after a bit-exact uniform-grid check: never round a
 // genuinely deformed axis or apply an epsilon-based identity approximation.
 int resolve_identity_pixel(std::int64_t pixel, int extent, eg::EdgeMode edge) noexcept {
+    if (edge==eg::EdgeMode::None) return pixel<0 || pixel>=extent?-1:static_cast<int>(pixel);
     if (extent <= 1) return 0;
     const auto n = static_cast<std::int64_t>(extent);
     if (edge == eg::EdgeMode::Clamp) {
@@ -323,7 +325,7 @@ int prepare_sparse_bridge(int iw, int ih, int ow, int oh,
             const bool outside = pixel < 0 || pixel >= canvas;
             auto map = [&](int& index) {
                 const auto local = static_cast<std::int64_t>(index) - origin;
-                if (outside || local < 0 || local >= extent) {
+                if (index<0 || outside || local < 0 || local >= extent) {
                     index = -1;
                     out.plan.transparent_taps = true;
                 } else index = static_cast<int>(local);

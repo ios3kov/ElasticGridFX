@@ -36,10 +36,11 @@ struct AxisSample {
     Taps taps;
 };
 struct HorizontalRow {
-    int source_y = -1;
+    int source_y = -2; // -1 is a valid transparent row
     std::vector<float> pixels;
 };
 int resolve(std::int64_t index,int extent,EdgeMode edge) {
+    if(edge==EdgeMode::None) return index<0 || index>=extent?-1:static_cast<int>(index);
     if(extent==1) return 0;
     if(edge==EdgeMode::Clamp) return static_cast<int>(std::clamp(index,std::int64_t(0),std::int64_t(extent-1)));
     const std::int64_t period=edge==EdgeMode::Wrap?extent:2LL*(extent-1);
@@ -50,7 +51,8 @@ int resolve(std::int64_t index,int extent,EdgeMode edge) {
 Taps taps(double coordinate,int extent,EdgeMode edge,SampleQuality quality) {
     // Reduce before integer conversion, including coordinates far beyond int64.
     double p=coordinate;
-    if(extent==1) p=0;
+    if(edge==EdgeMode::None) p=std::clamp(p,-2.0,static_cast<double>(extent)+1.0);
+    else if(extent==1) p=0;
     else if(edge==EdgeMode::Clamp) p=std::clamp(p,0.0,static_cast<double>(extent-1));
     else p=std::fmod(p,edge==EdgeMode::Wrap?double(extent):2.0*(extent-1));
     auto base=static_cast<std::int64_t>(std::floor(p));
@@ -82,7 +84,7 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
     std::ptrdiff_t source_stride,std::ptrdiff_t output_stride,
     const PlaneCanvasRegion& region,const PlaneWarp* warp,AbortFn abort,void* refcon) {
     using T=std::remove_cv_t<std::remove_pointer_t<decltype(src.data)>>;
-    if((region.edge!=EdgeMode::Clamp && region.edge!=EdgeMode::Wrap && region.edge!=EdgeMode::Mirror) ||
+    if((region.edge!=EdgeMode::Clamp && region.edge!=EdgeMode::Wrap && region.edge!=EdgeMode::Mirror && region.edge!=EdgeMode::None) ||
        (region.quality!=SampleQuality::Bilinear && region.quality!=SampleQuality::Bicubic))
         throw std::invalid_argument("invalid plane sampling mode");
     if(!std::isfinite(region.surface_units_x) || !std::isfinite(region.surface_units_y) ||

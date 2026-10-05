@@ -26,6 +26,12 @@ struct WarpParams {
     int reserved1;
 };
 
+// Transparent plan taps use -1; never form an out-of-bounds GPU load.
+inline float4 source_pixel(device const float4* src, int x, int y, constant WarpParams& p) {
+    if(x<0 || y<0 || x>=p.src_width || y>=p.src_height) return float4(0.0f);
+    return src[y*p.src_pitch_pixels+x];
+}
+
 kernel void elasticgrid_warp_bilinear(
     device const float4* src [[buffer(0)]],
     device float4* dst [[buffer(1)]],
@@ -38,13 +44,11 @@ kernel void elasticgrid_warp_bilinear(
 
     const LinearSample xs = x_plan[gid.x];
     const LinearSample ys = y_plan[gid.y];
-    const int row0 = ys.i0 * p.src_pitch_pixels;
-    const int row1 = ys.i1 * p.src_pitch_pixels;
 
-    const float4 p00 = src[row0 + xs.i0];
-    const float4 p10 = src[row0 + xs.i1];
-    const float4 p01 = src[row1 + xs.i0];
-    const float4 p11 = src[row1 + xs.i1];
+    const float4 p00 = source_pixel(src,xs.i0,ys.i0,p);
+    const float4 p10 = source_pixel(src,xs.i1,ys.i0,p);
+    const float4 p01 = source_pixel(src,xs.i0,ys.i1,p);
+    const float4 p11 = source_pixel(src,xs.i1,ys.i1,p);
 
     const float4 top = mix(p00, p10, xs.t);
     const float4 bottom = mix(p01, p11, xs.t);
@@ -67,10 +71,9 @@ kernel void elasticgrid_warp_bicubic(
 
     // Same sample order and precomputed Catmull-Rom weights as the CPU path.
     for (int ky = 0; ky < 4; ++ky) {
-        const int row = ys.index[ky] * p.src_pitch_pixels;
         const float wy = ys.weight[ky];
         for (int kx = 0; kx < 4; ++kx) {
-            acc += src[row + xs.index[kx]] * (wy * xs.weight[kx]);
+            acc += source_pixel(src,xs.index[kx],ys.index[ky],p) * (wy * xs.weight[kx]);
         }
     }
 

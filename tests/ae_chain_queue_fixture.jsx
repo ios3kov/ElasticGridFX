@@ -48,7 +48,7 @@ function egfxCaptureChainQueue(config) {
         var names=['__FSTR Probe TL','__FSTR Probe TR','__FSTR Probe BR','__FSTR Probe BL','__FSTR Plane Kind'];
         for(var i=0;i<5;i++){var h=e.property(names[i]);check(h&&h.name===names[i]&&h.expressionEnabled&&h.expressionError==='','Binding unready');}
         check(e.property('__FSTR Plane Kind').value===1,'Plane kind differs');return e;}
-    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('Edge Behavior').setValue(1);egfxWaveParam(e, 'Wave Axis').setValue(1);egfxWaveParam(e, 'Wave Frequency').setValue(1.3);egfxWaveParam(e, 'Wave Phase').setValue(35);egfxFixtureParam(e, 'Stretch Easing').setValue(0);egfxWaveParam(e, 'Wave Speed').setValue(0);egfxWaveParam(e, 'Wave Amplitude').setValue(0);}
+    function defaults(e){e.property('Columns').setValue(4);e.property('Rows').setValue(4);e.property('Render Quality').setValue(2);e.property('__FSTR Edge Value').setValue(1);egfxWaveParam(e, 'Wave Axis').setValue(1);egfxWaveParam(e, 'Wave Frequency').setValue(1.3);egfxWaveParam(e, 'Wave Phase').setValue(35);egfxFixtureParam(e, 'Stretch Easing').setValue(0);egfxWaveParam(e, 'Wave Speed').setValue(0);egfxWaveParam(e, 'Wave Amplitude').setValue(0);}
     function frame(c,name,time){
         stage='frame_'+name;own();check(owned.renderQueue.numItems===0,'Unexpected queue');
         var folder=new Folder(config.folder+'/'+name);check(!folder.exists&&folder.create(),'Stale frame directory');

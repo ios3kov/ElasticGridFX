@@ -150,3 +150,33 @@ CIa26fbae Mac37304253224 FAIL: one obsolete first-application static assertion
 expected Kind0..4 before v4 Comp kinds5..7. Other281 Python checks PASS. Update
 assertion to0..7, retaining all identity/ownership/no-project-mutation guards.
 Native installer CI37304253222 PASS; Windows37304253327 pending at checkpoint.
+
+
+Dev92 native AE25.6 acceptance: actual expanded-output pixels PASS, Layer output
+bitexact unchanged and Comp switch roundtrip exact. Loaded image UUID/path matches
+EGFX-c2b0f08cc2b1b1d7c33e8ccb. User reports drag/Undo/mode/menu PASS. Windows
+37304253327 PASS on a26fbae. See outputs/comp-output-dev92/native-pixels.json.
+
+### Additive Edge None request (2026-10-05)
+
+Source: user after Dev92 acceptance requests first Edge Behavior item that leaves
+layer without additional edge drawing. Contract: None samples transparent black
+outside the original source image, retaining bicubic/bilinear boundary filtering.
+Comp remains a full composition destination; it does not fill missing source pixels.
+UI order None / Clamp / Wrap / Mirror, new instance default None. Preserve stored
+Clamp/Wrap/Mirror ordinals1/2/3; append None4 to hidden canonical data popup and
+use CONTROL_ONLY presentation selector, same native pattern as ModeSelector.
+No animation stopwatch. Save/Undo/reopen must retain old project selections.
+Shared CPU plane/cache/sparse and Metal taps must support transparent samples
+without out-of-bounds access, retaining existing fast paths and tap arithmetic.
+Acceptance: visible four choices/order/default, four modes, 8/16/32bpc and both
+qualities, old-mode outputs unchanged, neutral exactness, partial source storage,
+negative origins, and native None alpha beyond deformed image; Windows CI and
+real AE checks separately labelled. Demo/licensing/installers/loupe untouched.
+
+Edge None source checkpoint:97 Rust tests/28 CTest/282 Python/all JavaScript
+checks/15 corrected host contracts and Clippy PASS. Initial host contract failed
+only static nonanimated-control count after appending EdgeSelector; fixed to
+include it. Shader offline compiler NOT RUN locally (Metal toolchain absent);
+runtime test compiled, sandbox exposes no GPU, authorized native rerun pending.
+New Dev96 package/native UI/old saved values/output and Windows CI pending.

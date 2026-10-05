@@ -18,15 +18,24 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev88**, ordinary source6e9426e, atomic package/signature
-replacement PASS. Loaded-image identity pending; native panel screenshot shows
-Comp mode and the aligned UI-only selector. Dev80 loupe/cursor acceptance remains
-bound to its tested artifact. Dev84 full-composition domain/pixel checks PASS,
-but user then identified FAIL: deformed output still clipped by the source layer.
-Active correction Dev92: advertise the composition destination bounds and use a
-Comp-specific expanded destination sampler without changing source extents,
-quality, axes, saved mode ordinals or Layer/Flat/Perspective behavior. Native
-expanded-output acceptance NOT RUN. Evidence: outputs/comp-output-dev92.
+Installed now: **0.9.4 Dev92**, ordinary sourcea26fbae3ea1fe675a60794fc3aea2e0b63cc684c,
+Build ID EGFX-c2b0f08cc2b1b1d7c33e8ccb. Atomic package/signature replacement
+and loaded-image identity PASS. Native AE25.6 Comp expanded pixels PASS:
+original bbox80,116–399,357 now0,0–640,480; 230321 nontransparent pixels outside
+old layer. Layer output bitexact unchanged; Comp/Layer/Comp roundtrip exact.
+User additionally reports PASS for drag/Undo/mode switch/sorted menu.
+Evidence: outputs/comp-output-dev92/native-pixels.json and loaded-identity.
+96 Rust/28 CTest/15 host contract checks and final Clippy PASS. Windows CI
+37304253327 PASS on same source; native Windows new behavior NOT RUN. Mac CI
+37304253224 FAIL from one obsolete Kind0..4 static assertion (other281 PASS),
+corrected in d7167b8; rerun pending. Installer CI37304253222 PASS, no system
+installer action. No diagnostic CSV. Existing loupe acceptance retained below.
+
+New user request after Dev92 acceptance: Edge Behavior first item None, no
+extra drawn edge pixels. New instances default None; saved Clamp/Wrap/Mirror
+values remain unchanged. Scope includes all depths/qualities, shared Mac/Win,
+legacy/plane samplers and Metal tap safety, native UI Undo/save/reopen and output
+alpha checks. See four-modes-demo-plan.md. Implementation pending.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.
@@ -48,10 +57,10 @@ LoadCursorW); fixed in d62e9cf and new CI queued. Mac37300965421 result
 remains separately bound to source2c2c931. New Windows artifact identity/native
 acceptance pending.
 
-Comp mode full-frame behavior explicitly confirmed by user. Dev84 grid-domain
-fix is partial, not complete native acceptance: source-layer clipping remains.
-Sorted Comp / Layer / Flat / Perspective uses a UI-only native popup while
-retaining old serialized ordinals. Menu interaction/Undo/reopen acceptance pending.
+Comp whole-frame output and sorted Comp / Layer / Flat / Perspective native
+workflow user acceptance PASS on Dev92. Retained Dev84/Dev88 partial/failure
+records remain historical; Dev92 supersedes the clipping defect. New None edge
+behavior is separately pending, not implied by Comp acceptance.
 
 Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
 Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old

@@ -59,7 +59,7 @@ static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     const double* source_corners,bool regional=false,bool layer=false,bool expanded=false) noexcept {
     if(!report) return 1;
     *report={};
-    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
+    if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>3 ||
        !std::isfinite(source_extent_x) || !std::isfinite(source_extent_y) ||
        source_extent_x<0 || source_extent_y<0) return 1;
     const int bytes=depth==8?1:depth==16?2:depth==32?4:0;

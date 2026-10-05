@@ -27,13 +27,13 @@ class HostContract(unittest.TestCase):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
                          LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND +
-                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector'])
+                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector', 'EdgeSelector'])
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
         self.assertEqual(direct, ['PlaneMode', 'ModeSelector', 'ResetPlane'] + LEGACY[:3] +
                          ['ResetGridPositions'] + LEGACY[3:10] + ['WaveGroupStart'] +
-                         LEGACY[10:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
+                         LEGACY[10:16] + ['EdgeSelector'] + LEGACY[16:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
         self.assertIn('Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true', SETUP)
         self.assertEqual(direct[-2:], ['VersionRow', 'ShowGrid'])
         for name in STAGE9_APPEND[1:-1]:
@@ -51,6 +51,9 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('params.checkout(', smart)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
+        self.assertIn('CONTROL_ONLY', block('EdgeSelector'))
+        self.assertIn('ParamUIFlags::INVISIBLE', block('EdgeMode'))
+        self.assertIn('f.set_default(4)', block('EdgeMode'))
         self.assertIn('CONTROL_ONLY', block('ModeSelector'))
         self.assertIn('plane::DISPLAY_MODE_OPTIONS', block('ModeSelector'))
         self.assertIn('ParamUIFlags::INVISIBLE', block('PlaneMode'))
@@ -104,7 +107,7 @@ class HostContract(unittest.TestCase):
                 self.assertNotIn('CONTROL_ONLY', definition)
 
     def test_static_choices_and_animated_grid_waves_keep_approved_policy(self):
-        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector')
+        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector', 'EdgeSelector')
         for name in static:
             self.assertIn('CANNOT_TIME_VARY', block(name))
         self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), len(static))

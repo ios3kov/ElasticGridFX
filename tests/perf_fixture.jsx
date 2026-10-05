@@ -139,7 +139,7 @@ function elasticGridPerfFixture(config) {
             }
         }
         param(fx,"Columns").setValue(8); param(fx,"Rows").setValue(8);
-        param(fx,"Render Quality").setValue(2); param(fx,"Edge Behavior").setValue(1);
+        param(fx,"Render Quality").setValue(2); param(fx,"__FSTR Edge Value").setValue(1);
         param(fx,"Wave Axis").setValue(1); param(fx,"Wave Frequency").setValue(1.3);
         param(fx,"Wave Phase").setValue(35.0); param(fx,"Stretch Easing").setValue(0.0);
         param(fx,"Wave Amplitude").setValue(10.0);

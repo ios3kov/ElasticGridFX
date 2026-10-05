@@ -8,7 +8,7 @@ namespace elasticgrid {
 
 enum class FalloffProfile : std::uint8_t { Smoothstep, Gaussian, Linear };
 enum class WaveAxis : std::uint8_t { Both, ColumnsOnly, RowsOnly };
-enum class EdgeMode : std::uint8_t { Clamp, Wrap, Mirror };
+enum class EdgeMode : std::uint8_t { Clamp, Wrap, Mirror, None };
 enum class SampleQuality : std::uint8_t { Bilinear, Bicubic };
 
 struct ElasticSettings {

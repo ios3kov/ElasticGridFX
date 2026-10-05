@@ -17,6 +17,7 @@ mod license_window;
 mod preview_overlay_probe;
 mod ui_projection;
 mod plane;
+mod edge;
 mod demo;
 mod corner_loupe;
 mod fit_layer;
@@ -112,6 +113,7 @@ pub(crate) enum Params {
     VersionRow,
     ShowGrid,
     ModeSelector,
+    EdgeSelector,
 }
 
 #[derive(Default)]
@@ -1085,11 +1087,15 @@ impl AdobePluginGlobal for Plugin {
             Ok(())
         })?;
 
-        params.add_with_flags(Params::EdgeMode, "Edge Behavior", ae::PopupDef::setup(|f| {
-            f.set_options(&["Clamp", "Wrap", "Mirror"]);
-            f.set_default(1);
+        params.add_with_flags(Params::EdgeMode, "__FSTR Edge Value", ae::PopupDef::setup(|f| {
+            f.set_options(&edge::STORED);
+            f.set_default(4);
             f.set_value(f.default());
-        }), ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::INVISIBLE)?;
+        params.add_with_flags(Params::EdgeSelector,"Edge Behavior",ae::PopupDef::setup(|f|{
+            f.set_options(&edge::DISPLAY);f.set_default(1);f.set_value(1);
+        }),ae::ParamFlag::SUPERVISE|ae::ParamFlag::CANNOT_TIME_VARY|ae::ParamFlag::CANNOT_INTERP,
+            ae::ParamUIFlags::CONTROL_ONLY)?;
         params.add_with_flags(Params::Quality, "Render Quality", ae::PopupDef::setup(|f| {
             // Short captions keep host-owned popups at their standard width.
             // Algorithms/ordinals are unchanged; explain them in the guide.
@@ -1174,6 +1180,17 @@ impl AdobePluginGlobal for Plugin {
                 if params.index(Params::TensionRadius)==Some(param_index) {
                     // Radius is now a render dependency of existing deformation.
                     // Never rewrite Grid Positions or any scalar animation keys.
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
+                }
+                if params.index(Params::EdgeSelector)==Some(param_index){
+                    let selected=params.get(Params::EdgeSelector)?.as_popup()?.value();
+                    {let mut saved=params.get_mut(Params::EdgeMode)?;
+                    saved.as_popup_mut()?.set_value(edge::stored(selected)?);saved.set_value_changed();}
+                    edge::update_ui(params)?;
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
+                }
+                if params.index(Params::EdgeMode)==Some(param_index){
+                    edge::update_ui(params)?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ModeSelector)==Some(param_index) {

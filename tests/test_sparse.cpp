@@ -116,7 +116,7 @@ void validation_and_empty() {
 int main() {
     // First fixture intentionally fails against the legacy local-edge behavior.
     fixture<float>(20, 11, 19, 13, 2, 1, true, false, false);
-    for (int q : {1, 2}) for (int edge : {1, 2, 3}) for (bool deform : {false, true}) {
+    for (int q : {1, 2}) for (int edge : {1, 2, 3, 4}) for (bool deform : {false, true}) {
         for (bool neg : {false, true}) for (bool expanded : {false, true}) {
             fixture<std::uint8_t>(20, 11, 19, 13, q, edge, deform, neg, expanded);
             fixture<std::uint16_t>(20, 11, 19, 13, q, edge, deform, neg, expanded);

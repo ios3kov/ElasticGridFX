@@ -103,7 +103,7 @@ void matrix() {
                 PlaneWarp::prepare(*transform,columns,rows,.4f,.25f);
             assert(warp);
             if(!transform->axisAligned()) assert(!warp->separableAnchor());
-            for(auto edge:{EdgeMode::Clamp,EdgeMode::Wrap,EdgeMode::Mirror})
+            for(auto edge:{EdgeMode::Clamp,EdgeMode::Wrap,EdgeMode::Mirror,EdgeMode::None})
             for(auto quality:{SampleQuality::Bilinear,SampleQuality::Bicubic}) {
                 PlaneCanvasRegion region{41,31};region.edge=edge;region.quality=quality;
                 compare<T>(&*warp,region,41,31,41,31);
