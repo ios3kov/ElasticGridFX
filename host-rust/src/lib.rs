@@ -17,6 +17,7 @@ mod license_window;
 mod preview_overlay_probe;
 mod ui_projection;
 mod plane;
+mod demo;
 mod fit_layer;
 mod reset_grid;
 mod spacing;
@@ -42,9 +43,13 @@ mod build_identity {
 #[cfg(feature="render-diagnostics")]
 fn diagnostic_path(state:&plane::State)->&'static str {
     if state.corners.is_none() {"legacy_cpu"}
-    else if state.comp_space && !state.editable_corners {"plane_layer"}
+    else if state.render_kind==plane::RenderKind::Perspective {"plane_perspective"}
+    else if state.render_kind==plane::RenderKind::Layer || (state.comp_space && !state.editable_corners) {"plane_layer"}
     else {"plane_region"}
 }
+
+// No-license state cannot turn on Demo while rollout remains disabled.
+const _: () = assert!(!demo::ENABLED);
 
 fn set_return_msg_bytes(out_data: &mut ae::OutData, msg: &[u8]) {
     assert!(msg.len() < 256);
@@ -958,7 +963,7 @@ impl AdobePluginGlobal for Plugin {
         in_data.effect().set_options_button_name("License...")?;
         // UI order is independent of persistent IDs (derived from unchanged Params names).
         params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
-            f.set_options(&["Layer Plane", "Four Corners"]);
+            f.set_options(&plane::MODE_OPTIONS);
             f.set_default(1); f.set_value(1);
         }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
         for (id, name, point) in [

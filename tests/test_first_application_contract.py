@@ -34,7 +34,7 @@ class FirstApplicationContracts(unittest.TestCase):
         self.assertIn('a.to_bits()==b.to_bits()',proof)
         self.assertNotIn('epsilon',proof.lower())
         self.assertNotIn('.abs()',proof)
-        self.assertIn('setup_float(f,(0.0,3.0),(0.0,3.0),0.0,0,false)',BINDING)
+        self.assertIn('setup_float(f,(0.0,4.0),(0.0,4.0),0.0,0,false)',BINDING)
         self.assertIn('install_or_upgrade',BINDING)
 
     def test_no_live_parameters_in_smart_render(self):

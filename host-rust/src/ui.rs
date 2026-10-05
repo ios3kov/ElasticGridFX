@@ -626,7 +626,7 @@ mod cursor_tests {
         let state=plane::State {corners:Some([
             193.126991294881,144.064876060526,474.465671864278,124.959806473857,
             474.465671864278,621.680710828136,193.126991294881,558.293851707426
-        ]),editable_corners:false,comp_space:true,parameter_basis:None};
+        ]),editable_corners:false,comp_space:true,parameter_basis:None,..plane::State::default()};
         let p=ViewPlane {geometry:state.geometry(),state,width:640.0,height:480.0,
             projection:None,projection_unavailable:false,comp_space:true};
         assert!(!p.needs_layer_conversion(ae::WindowType::Comp));

@@ -1,8 +1,52 @@
 # Future update feature backlog
 
-Updated: 2026-10-04. The user authorized implementing this update locally.
+Updated: 2026-10-05. The user authorized implementing this update locally.
 Finish Mac first; Windows resumes after Mac completion. Individual items remain
 incomplete until their scoped evidence below is closed. This work does not reopen the published 0.9.3-perf.1 release.
+
+
+## Additional mode and demo requirements — 2026-10-05
+
+Latest user decisions extend the update on both Mac and Windows. Preserve all
+previous requirements, installer work, accepted artifacts and their scoped Evidence.
+This section records requirements/design intent, not implemented behavior or PASS.
+
+### Four deformation modes
+
+1. **Comp mode**: keep the current Layer Plane behavior unchanged. This exact
+   user-approved label supersedes the proposed Composition Mode label.
+2. **Layer mode**: use the same deformation behavior but fit the grid to the
+   actual layer dimensions for 2D layers as well as the existing 3D-layer case.
+3. **Flat mode** (proposed label): keep current Four Corners behavior; corner
+   positions define the deformation region without adding a perspective transform.
+4. **Perspective mode** (proposed label): corner positions also apply a Corner
+   Pin-style perspective transform, with grid deformation inside that plane.
+
+Before implementation define coordinate spaces, source coverage, grid/plane reset,
+mode switching, 2D/3D behavior and project/keyframe compatibility. Preserve saved
+numeric meanings and IDs; do not silently reinterpret existing projects as a new
+mode. Flat/Perspective labels remain proposals, not explicitly approved wording.
+
+### Demo design, disabled for now
+
+The user requests a demo design based on **FSTR FX text inside every grid cell**
+when no valid license file/registration is available. Design it for both platforms,
+including deformed cells, animated density, Preview and exported pixels. A file's
+presence alone must not establish a valid license; provider verification remains
+dependent on the marketplace SDK integration.
+
+**Current rollout decision: Demo stays OFF.** Missing license files, unavailable
+provider SDKs or the current unregistered state must not enable watermarks or
+change current rendering. Do not expose a misleading working demo/license toggle.
+Prepare the design and an explicit disabled rollout policy; activation requires a
+later user decision and actual licensing integration. No diagonal full-frame
+watermark, speed/quality degradation or additional restriction is approved.
+
+Acceptance when later enabled: readable per-cell text, stable preview/export and
+animation behavior, no saved deformation/key changes when licensing state changes,
+valid registration removes demo text, and identical policy on Mac and Windows.
+For the present disabled state, licensed and unregistered rendering remains free
+of demo marks. Implementation and runtime checks for this new block are NOT RUN.
 
 ## Confirmed user requests
 

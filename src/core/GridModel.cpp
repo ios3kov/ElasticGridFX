@@ -184,7 +184,7 @@ bool AxisGrid::influencedInto(std::vector<float>& out,float radius,float spacing
     bool neutral=true;
     for(std::size_t i=1;i+1<lines_.size();++i){
         const float uniform=static_cast<float>(i)/static_cast<float>(lines_.size()-1);
-        displacement[i]=static_cast<double>(lines_[i])-uniform;
+        displacement[i]=static_cast<double>(lines_[i])-static_cast<double>(uniform);
         neutral=neutral && displacement[i]==0.0;
     }
     if(neutral) return true;
@@ -194,10 +194,11 @@ bool AxisGrid::influencedInto(std::vector<float>& out,float radius,float spacing
         for(std::size_t j=0;j<lines_.size();++j){
             const float w=falloffWeight(std::abs(static_cast<float>(i)-static_cast<float>(j)),
                                         radius,FalloffProfile::Smoothstep);
-            sum+=w*displacement[j]; total+=w;
+            const double weight=static_cast<double>(w);
+            sum+=weight*displacement[j]; total+=weight;
         }
         const float uniform=static_cast<float>(i)/static_cast<float>(lines_.size()-1);
-        out[i]=static_cast<float>(uniform+sum/total);
+        out[i]=static_cast<float>(static_cast<double>(uniform)+sum/total);
     }
     enforceMonotonic(out,spacing,&pins_);
     return true;

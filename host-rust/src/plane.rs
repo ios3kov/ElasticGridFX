@@ -2,6 +2,19 @@
 use super::*;
 use std::ptr::NonNull;
 
+// Existing ordinals are serialized. Append new modes, never reorder old ones.
+pub(crate) const MODE_OPTIONS: [&str;4]=["Comp mode","Flat mode","Layer mode","Perspective"];
+#[derive(Clone,Copy,Debug,PartialEq,Eq)]
+pub(crate) enum Mode {Comp,Flat,Layer,Perspective}
+impl Mode {
+    pub fn from_value(value:i32)->Result<Self,ae::Error>{
+        match value {1=>Ok(Self::Comp),2=>Ok(Self::Flat),3=>Ok(Self::Layer),
+            4=>Ok(Self::Perspective),_=>Err(ae::Error::BadCallbackParameter)}
+    }
+}
+#[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
+pub(crate) enum RenderKind {#[default] Region,Layer,Perspective}
+
 pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopRight,
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
 
@@ -20,7 +33,7 @@ fn ui_layer_is_3d(input: &ae::InData) -> Result<bool, ae::Error> {
 }
 
 fn ui_disabled(three_d:bool, mode:i32)->(bool,bool) {
-    (three_d,three_d || mode!=2)
+    (false, !((mode==2 && !three_d) || mode==4))
 }
 
 // PF events permit DISABLED changes, not popup definition reconstruction.
@@ -53,13 +66,9 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
     let mut mode=(*params.get(Params::PlaneMode)?).clone();
     mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
-    // Keep the serialized 2D selection/keyframes untouched. Both stored
-    // ordinals display the effective plane while the entire selector is locked.
-    // PopupDef::set_options owns a temporary CString; dynamic UI definitions
-    // must instead keep names alive through (and after) the host update call.
-    mode.as_mut().u.pd.u.namesptr=if three_d {c"Layer Plane (3D)|Layer Plane (3D)".as_ptr()}
-        else {c"Layer Plane|Four Corners".as_ptr()};
-    mode.as_mut().u.pd.num_choices=2;
+    // Static storage survives UpdateParamUI; keep old saved ordinals intact.
+    mode.as_mut().u.pd.u.namesptr=c"Comp mode|Flat mode|Layer mode|Perspective".as_ptr();
+    mode.as_mut().u.pd.num_choices=4;
     mode.update_param_ui()?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
@@ -72,10 +81,10 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
 
 #[cfg(test)] mod ui_state_tests {
     use super::ui_disabled;
-    #[test] fn layer_switch_locks_both_stored_modes_and_restores_2d_controls() {
-        for mode in [1,2] {
-            assert_eq!(ui_disabled(true,mode),(true,true));
-            assert_eq!(ui_disabled(false,mode),(false,mode!=2));
+    #[test] fn four_mode_corner_editing_respects_2d_and_3d() {
+        for mode in 1..=4 {
+            assert_eq!(ui_disabled(true,mode),(false,mode!=4));
+            assert_eq!(ui_disabled(false,mode),(false,mode!=2 && mode!=4));
         }
     }
 }
@@ -96,6 +105,9 @@ pub(crate) struct State {
     // a normalized domain on the layer plane. Retain the unedited basis for
     // inverse corner picking, including repair of a degenerate user quad.
     pub parameter_basis: Option<[f64;8]>,
+    pub render_kind: RenderKind,
+    // Immutable unedited source basis for Corner Pin; no resampled intermediate.
+    pub source_corners: Option<[f64;8]>,
 }
 impl State {
     pub fn corner_controls(&self) -> Option<[f64; 8]> {
@@ -104,12 +116,20 @@ impl State {
     pub fn read(params: &ae::Parameters<Params>, in_data: &ae::InData, checkout: bool, frame_context: bool) -> Result<Self, ae::Error> {
         let mode = if checkout { checked_popup(params, Params::PlaneMode)? }
                    else { params.get(Params::PlaneMode)?.as_popup()?.value() };
-        if mode == 1 || layer_is_3d(params,checkout)? {
+        let mode=Mode::from_value(mode)?;
+        if mode==Mode::Layer {
+            #[cfg(fstr_binding_probe)]
+            {return binding_probe::sampled_layer_plane(in_data,params,checkout,frame_context)
+                .map(|state|state.unwrap_or_default());}
+            #[cfg(not(fstr_binding_probe))]
+            {return Ok(Self::default());}
+        }
+        if mode == Mode::Comp || (mode==Mode::Flat && layer_is_3d(params,checkout)?) {
             #[cfg(fstr_binding_probe)]
             if let Some(derived)=binding_probe::sampled_plane(in_data,params,checkout,frame_context)? {return Ok(derived);}
             return Ok(Self::default());
         }
-        if mode != 2 { return Err(ae::Error::BadCallbackParameter); }
+        let perspective=mode==Mode::Perspective;
         let mut corners = [0.0; 8];
         // pre_effect_source_origin is valid only in frame selectors, not UI.
         let origin = if frame_context {in_data.pre_effect_source_origin()} else {ae::Point {h:0,v:0}};
@@ -130,13 +150,28 @@ impl State {
                 else {project_parameters(&basis,&corners,width as f64,height as f64)
                     .ok_or(ae::Error::BadCallbackParameter)?};
             return Ok(Self {corners:Some(mapped),editable_corners:true,comp_space:true,
-                parameter_basis:Some(basis)});
+                parameter_basis:Some(basis),render_kind:if perspective {RenderKind::Perspective} else {RenderKind::Region},
+                source_corners:perspective.then_some(basis)});
         }
-        Ok(Self {corners: Some(corners), editable_corners: true,comp_space:false,parameter_basis:None})
+        let (sx,sy)=if frame_context {(f64::from(f32::from(in_data.downsample_x())),
+            f64::from(f32::from(in_data.downsample_y())))} else {(1.0,1.0)};
+        let source=source_rectangle(f64::from(in_data.width())*sx,f64::from(in_data.height())*sy,
+            f64::from(origin.h),f64::from(origin.v))?;
+        Ok(Self {corners: Some(corners), editable_corners: true,comp_space:false,parameter_basis:None,
+            render_kind:if perspective {RenderKind::Perspective} else {RenderKind::Region},
+            source_corners:perspective.then_some(source)})
     }
     pub fn geometry(&self) -> Option<Geometry> {
         self.corners.and_then(|corners| Geometry::new(&corners))
     }
+}
+
+fn source_rectangle(width:f64,height:f64,origin_x:f64,origin_y:f64)->Result<[f64;8],ae::Error>{
+    if ![width,height,origin_x,origin_y].iter().all(|v|v.is_finite()) || width<=0.0 || height<=0.0 {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    Ok([-origin_x,-origin_y,width-origin_x,-origin_y,
+        width-origin_x,height-origin_y,-origin_x,height-origin_y])
 }
 
 fn project_parameters(basis:&[f64;8],points:&[f64;8],width:f64,height:f64)->Option<[f64;8]>{
@@ -226,7 +261,6 @@ unsafe extern "C" {
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     pub(crate) fn eg_render_plane_layer(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
-    #[cfg(test)]
     pub(crate) fn eg_render_plane_between(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32,
                        source_corners: *const f64) -> i32;
@@ -266,11 +300,8 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     let dst = Image {pixels: unsafe {output.data_ptr_mut()}.cast(), row_bytes: output.row_bytes(),
                      width: output.width() as i32, height: output.height() as i32};
     let mut report = Report::default();
-    let render_plane=if state.comp_space && !state.editable_corners {
-        eg_render_plane_layer
-    }else{eg_render_plane_region};
-    let rc = unsafe {render_plane(&src, &dst, output.bit_depth() as i32,
-                         &frame, &mut report, p.quality - 1, p.edge_mode - 1)};
+    let rc=dispatch_render(&src,&dst,output.bit_depth() as i32,&frame,&mut report,
+        (p.quality-1,p.edge_mode-1),state);
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
     match rc {
         0 => Ok(()), 5 => Err(ae::Error::InterruptCancel),
@@ -278,3 +309,24 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
         _ => Err(ae::Error::InternalStructDamaged),
     }
 }
+
+// One shared dispatch for legacy/SmartFX and both platforms. Geometry invalidity
+// retains the existing original-image fallback, including Perspective.
+pub(crate) fn dispatch_render(src:&Image,dst:&Image,depth:i32,frame:&Frame,report:&mut Report,
+                   sampling:(i32,i32),state:&State)->i32 {
+    let (quality,edge)=sampling;
+    // SAFETY: callers own the typed layer/frame/axis allocations for this
+    // synchronous call. The C ABI validates all dimensions, strides and modes.
+    unsafe {
+        if state.render_kind==RenderKind::Perspective && state.geometry().is_some() {
+            let Some(source)=state.source_corners else {return 1;};
+            eg_render_plane_between(src,dst,depth,frame,report,quality,edge,source.as_ptr())
+        } else if state.render_kind==RenderKind::Layer || (state.comp_space && !state.editable_corners) {
+            eg_render_plane_layer(src,dst,depth,frame,report,quality,edge)
+        } else {eg_render_plane_region(src,dst,depth,frame,report,quality,edge)}
+    }
+}
+
+#[cfg(test)]
+#[path="four_modes_tests.rs"]
+mod four_modes_tests;

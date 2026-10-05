@@ -106,7 +106,7 @@ extern "C" int eg_control_axis_reflow(const float* lines, std::int32_t size,
         if (!valid(lines,size) || count < 1 || count > 50 || capacity < count+2 ||
             !refs || !std::isfinite(easing) || !std::isfinite(distance)) return 1;
         const std::vector<float> saved(lines,lines+size);
-        std::vector<float> result; result.reserve(count+2);
+        std::vector<float> result; result.reserve(static_cast<std::size_t>(count+2));
         for (int i=0;i<count+2;++i) {
             const float destination = static_cast<float>(i)/static_cast<float>(count+1);
             result.push_back(i==0 ? 0.0f : i==count+1 ? 1.0f :
@@ -128,7 +128,7 @@ extern "C" int eg_control_axis_read_layout(const float* lines, std::int32_t size
             !positions || !refs || !std::isfinite(easing) || !std::isfinite(distance) ||
             normalized[0]!=0.0f || normalized[count-1]!=1.0f) return 1;
         const std::vector<float> saved(lines,lines+size);
-        std::vector<float> result, references; result.reserve(count); references.reserve(count);
+        std::vector<float> result, references; result.reserve(static_cast<std::size_t>(count)); references.reserve(static_cast<std::size_t>(count));
         for (int i=0;i<count;++i) {
             if (!std::isfinite(normalized[i]) || normalized[i]<0.0f || normalized[i]>1.0f ||
                 (i>0 && normalized[i]<=normalized[i-1])) return 1;
@@ -188,7 +188,7 @@ extern "C" int eg_control_axis_drag_live(float* lines,const std::uint8_t* pins,s
     try{
         if(!valid(lines,size) || !pins || !e || !render || render->live_influence!=1 ||
            (columns!=0 && columns!=1) || !std::isfinite(target) || !std::isfinite(ref) ||
-           ref<=0 || ref>=size-1 || !std::isfinite(e->elasticity_strength)) return 1;
+           ref<=0 || ref>=static_cast<float>(size-1) || !std::isfinite(e->elasticity_strength)) return 1;
         if((columns ? render->column_line_count : render->row_line_count)!=size) return 1;
         // Every trial starts from the stored, projected axis. No hidden overshoot
         // accumulates and no animated state is published before all checks pass.
@@ -223,7 +223,7 @@ extern "C" int eg_control_axis_drag_live(float* lines,const std::uint8_t* pins,s
             if(error<bestError){bestError=error;best=std::move(trial);}
             if(bestError<2e-7f) break;
             if(sign*(value-target)<0) low=amount; else high=amount;
-            if(step==0 && low==high) break; // Unreachable target: closest projected state.
+            if(step==0 && same(low,high)) break; // Unreachable target: closest projected state.
         }
         if(!valid(best.data(),size)) return 4;
         std::copy(best.begin(),best.end(),lines);

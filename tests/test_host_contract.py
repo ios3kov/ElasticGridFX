@@ -51,7 +51,7 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('params.checkout(', smart)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
-        self.assertIn('["Layer Plane", "Four Corners"]', block('PlaneMode'))
+        self.assertIn('f.set_options(&plane::MODE_OPTIONS)', block('PlaneMode'))
         self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
         self.assertIn('["Smooth", "Soft", "Even", "Old Smooth"]', block('Falloff'))
         self.assertIn('f.set_default(1)', block('Falloff'))

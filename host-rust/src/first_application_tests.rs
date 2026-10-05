@@ -21,7 +21,7 @@ fn first_neutral_frame_before_idle_reproduces_rejecting_baseline() {
 #[test]
 fn pending_nonidentity_and_invalid_markers_still_fail_closed() {
     for identity in [false,true] {
-        for kind in [-1.0,0.5,4.0,f64::NAN,f64::INFINITY] {
+        for kind in [-1.0,0.5,5.0,f64::NAN,f64::INFINITY] {
             assert!(resolve_comp_space_kind(kind,true,true,identity).is_err());
         }
     }

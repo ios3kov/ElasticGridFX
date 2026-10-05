@@ -1,13 +1,15 @@
 # Current status
 
-Updated: 2026-10-04. This is the concise entry point for the current product and
+Updated: 2026-10-05. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
-Current scope: finish native Install/Restore delivery for both platforms, keeping
-accepted plugin bytes unchanged. Branch feat/next-update is published for the
+Current scope: implement the newly authorized four deformation modes and disabled
+Demo design for both platforms; retain native Install/Restore delivery obligations.
+See [mode/design contract](four-modes-demo-plan.md). Previously accepted installer
+payloads remain unchanged until a new plugin candidate is separately accepted. Branch feat/next-update is published for the
 user-authorized Windows CI continuation; source fixes/docs on that branch are
 allowed. No main, PR, merge or release action is authorized by this continuation.
 The earlier local-only and Windows-deferred decisions were superseded by the
@@ -1349,3 +1351,18 @@ asInvoker/requireAdministrator manifest snippets. Fixed linker request to the
 same explicit requireAdministrator policy, never disabling UAC. Final PE manifest
 inspection remains pending. Latest Mac package is v2 from60fe49c (ordinary Dev52
 unchanged), ZIP SHA256 f364d64d80084afa7c1da908bb6ea11dd07429b198b18f32eebf6a7fc86b59e7.
+
+## Four-mode source checkpoint — 2026-10-05
+
+Implementation under four-modes-demo-plan.md: Comp/Flat preserved ordinals1/2;
+Layer/Perspective appended3/4, v3 owned expression migration with generation2
+Undo receipt, shared single-sampler pin dispatch and explicit disabled Demo.
+Local90 Rust,282 Python,28 CTest, all JavaScript tests and applicable strict
+C++/Clippy analyzers PASS before the checkpoint commit. Initial Python run
+failed for sandbox process-read restrictions and an obsolete marker-range
+guard; the corrected guard and authorized native-process rerun pass. Initial
+Clippy argument-count issue and pre-existing strict C++ conversion warnings
+were repaired; numerical algorithms remain unchanged. Retained scanner finding
+at tests/test_target_ae_acceptance.py is a mocked-fixture false positive.
+Mac AE/new Windows artifact acceptance still NOT RUN. Source-check logs are
+retained in outputs/four-modes-source-checks outside the repository.

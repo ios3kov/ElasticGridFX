@@ -6,7 +6,7 @@ const NAMES: [&str;5] = ["__FSTR Probe TL", "__FSTR Probe TR", "__FSTR Probe BR"
 pub fn layer_is_3d(params:&ae::Parameters<Params>,checkout:bool)->Result<bool,ae::Error>{
     let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
         else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
-    match kind {0.0|1.0=>Ok(false),2.0|3.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
+    match kind {0.0|1.0|4.0=>Ok(false),2.0|3.0=>Ok(true),_=>Err(ae::Error::BadCallbackParameter)}
 }
 
 // Shared UI/render snapshot. No AEGP calls: all dependencies are PF parameters.
@@ -39,7 +39,30 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
     }
     // Degenerate geometry follows the core's exact pass-through contract.
     // No public corner controls are exposed for an automatically derived plane.
-    Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true,parameter_basis:None}))
+    Ok(Some(plane::State {corners:Some(corners),editable_corners:false,comp_space:true,parameter_basis:None,render_kind:plane::RenderKind::Layer,source_corners:None}))
+}
+
+pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)
+    ->Result<Option<plane::State>,ae::Error>{
+    let kind=if checkout {checked_float(params,Params::ResearchPlaneKind)?}
+        else {params.get(Params::ResearchPlaneKind)?.as_float_slider()?.value()};
+    if kind!=4.0 {
+        if let Some(derived)=sampled_plane(in_data,params,checkout,frame_context)? {return Ok(Some(derived));}
+        // 3D raster is already a layer-local input canvas.
+        if kind==3.0 {return Ok(None);}
+        // Old/undone/pending binding cannot establish the new local bounds.
+        return if frame_context {Err(ae::Error::BadCallbackParameter)} else {Ok(None)};
+    }
+    let origin=if frame_context {in_data.pre_effect_source_origin()} else {ae::Point {h:0,v:0}};
+    let mut corners=[0.0;8];
+    for (i,id) in [Params::ResearchPlaneTL,Params::ResearchPlaneTR,
+        Params::ResearchPlaneBR,Params::ResearchPlaneBL].into_iter().enumerate() {
+        let p=if checkout {params.checkout(id)?.as_point()?.float_value()?}
+            else {params.get(id)?.as_point()?.float_value()?};
+        corners[2*i]=p.x-f64::from(origin.h);corners[2*i+1]=p.y-f64::from(origin.v);
+    }
+    Ok(Some(plane::State {corners:Some(corners),render_kind:plane::RenderKind::Layer,
+        ..plane::State::default()}))
 }
 
 // Pending initialization may hide the UI plane, but must not silently use the
@@ -48,7 +71,7 @@ pub fn sampled_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout
 fn comp_space_kind(kind:f64,frame_context:bool,automatic:bool)->Result<bool,ae::Error>{
     match kind {
         0.0 if automatic && frame_context=>Err(ae::Error::BadCallbackParameter),
-        0.0|1.0|3.0=>Ok(false),
+        0.0|1.0|3.0|4.0=>Ok(false),
         2.0=>Ok(true),
         _=>Err(ae::Error::BadCallbackParameter),
     }
@@ -118,11 +141,20 @@ pub fn add_params(params:&mut ae::Parameters<Params>)->Result<(),ae::Error>{
         }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     }
     params.add_with_flags(Params::ResearchPlaneKind,NAMES[4],ae::FloatSliderDef::setup(|f| {
-        setup_float(f,(0.0,3.0),(0.0,3.0),0.0,0,false);
+        setup_float(f,(0.0,4.0),(0.0,4.0),0.0,0,false);
     }),ae::ParamFlag::empty(),ae::ParamUIFlags::INVISIBLE)?;
     Ok(())
 }
 fn expressions()->Vec<String>{
+    let mut values:Vec<String>=[(false,false),(true,false),(true,true),(false,true)].map(|(right,bottom)|
+        include_str!("binding_point_v3.jsx").replace("@RIGHT@",if right {"+r.width"} else {""})
+            .replace("@BOTTOM@",if bottom {"+r.height"} else {""})).into();
+    values.push(include_str!("binding_kind_v3.jsx").into());
+    values
+}
+
+// All previous expressions are retained byte-for-byte for owned migration.
+fn previous_expressions()->Vec<String>{
     let mut values=legacy_expressions();
     values[4]="// FSTR native plane v2\nvar k=1;if(thisLayer.transform.position.value.length===3){k=3;try{var t=thisLayer.text.sourceText.value;k=2;}catch(e){}}\nk;".into();
     values
@@ -246,41 +278,48 @@ pub fn run(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp
 #[derive(Debug)]
 pub(crate) enum BindingOutcome { Installed, AlreadyInstalled, UndoPreserved }
 #[cfg(fstr_auto_binding)]
-fn cancelled_or_previous(states: &[Snapshot], previous: &[String]) -> bool {
-    states.len() == 5 && (states.iter().all(|s| s.keys == 0 && !s.enabled && s.expression.is_empty())
-        || (previous.len() == 5 && states.iter().zip(previous)
-            .all(|(s,e)| s.keys == 0 && s.enabled && s.expression == *e)))
+fn exact_binding(states:&[Snapshot],expected:&[String])->bool {
+    states.len()==expected.len() && states.iter().zip(expected)
+        .all(|(s,e)|s.keys==0 && s.enabled && s.expression==*e)
+}
+#[cfg(fstr_auto_binding)]
+fn undo_preserved(generation:u16,states:&[Snapshot],previous:&[String],legacy:&[String])->bool {
+    states.len()==5 && ((generation>=1 && states.iter()
+        .all(|s|s.keys==0 && !s.enabled && s.expression.is_empty()))
+        || (generation>=1 && exact_binding(states,legacy))
+        || (generation>=2 && exact_binding(states,previous)))
 }
 #[cfg(fstr_auto_binding)]
 pub fn bind(id:ae::aegp::PluginId,effect:ae::aegp::EffectRefHandle,layer:ae::aegp::LayerHandle,basic:*const ae::sys::SPBasicSuite)->Result<BindingOutcome,String>{
     let mut host = Adapter::new(id,effect,layer,basic)?;
-    let initialized = binding_receipt::query(id,effect,None).map_err(err)?;
+    let generation = binding_receipt::query(id,effect,None).map_err(err)?;
     let states = (0..5).map(|i|host.read(i)).collect::<Result<Vec<_>,_>>()?;
-    let previous = legacy_expressions();
-    if initialized && cancelled_or_previous(&states, &previous) {
+    let previous = previous_expressions();
+    let legacy = legacy_expressions();
+    if undo_preserved(generation,&states,&previous,&legacy) {
         host.validate_target()?;
         return Ok(BindingOutcome::UndoPreserved);
     }
     let expected = expressions();
-    let exact = states.len() == expected.len() && states.iter().zip(&expected)
-        .all(|(s,e)| s.keys == 0 && s.enabled && s.expression == *e);
-    // Mark before entering the binding undo group. Its prior sequence snapshot
-    // must already carry the receipt, so Undo cannot restore an uninitialized
-    // marker and cause the idle callback to recreate the cancelled action.
-    let marked = !initialized && (exact || cancelled_or_previous(&states, &previous));
-    if marked { binding_receipt::query(id,effect,Some(true)).map_err(err)?; }
-    let outcome = match binding_transaction::install_or_upgrade(&mut host,&expected,&previous) {
-        Ok(outcome) => outcome,
-        Err(failure) => {
+    let exact=exact_binding(&states,&expected);
+    let old=if exact_binding(&states,&previous) {&previous} else {&legacy};
+    let pristine=states.iter().all(|s|s.keys==0 && !s.enabled && s.expression.is_empty());
+    // Mark the generation BEFORE the Undo group. Undo of an owned upgrade
+    // restores old expressions with generation2 and must not trigger re-upgrade.
+    let marked=generation<2 && (exact || exact_binding(&states,old) || pristine);
+    if marked {binding_receipt::query(id,effect,Some(2)).map_err(err)?;}
+    let outcome=match binding_transaction::install_or_upgrade(&mut host,&expected,old) {
+        Ok(outcome)=>outcome,
+        Err(failure)=>{
             if marked && host.validate_target().is_ok() {
-                binding_receipt::query(id,effect,Some(false))
+                binding_receipt::query(id,effect,Some(generation))
                     .map_err(|error|format!("{failure:?}; receipt rollback failed: {error:?}"))?;
             }
             return Err(format!("{failure:?}"));
         }
     };
-    Ok(match outcome { Outcome::Installed => BindingOutcome::Installed,
-        Outcome::AlreadyInstalled => BindingOutcome::AlreadyInstalled })
+    Ok(match outcome {Outcome::Installed=>BindingOutcome::Installed,
+        Outcome::AlreadyInstalled=>BindingOutcome::AlreadyInstalled})
 }
 
 // The wrapper locks even a null GetExpression result. Query explicitly and
@@ -337,10 +376,24 @@ fn read_expression(basic:*const ae::sys::SPBasicSuite,id:ae::aegp::PluginId,
             assert_eq!(comp_space_kind(1.0,frame,true),Ok(false));
             assert_eq!(comp_space_kind(2.0,frame,true),Ok(true));
             assert_eq!(comp_space_kind(3.0,frame,true),Ok(false));
-            for invalid in [-1.0,0.5,4.0,f64::NAN,f64::INFINITY] {
+            assert_eq!(comp_space_kind(4.0,frame,true),Ok(false));
+            for invalid in [-1.0,0.5,5.0,f64::NAN,f64::INFINITY] {
                 assert!(comp_space_kind(invalid,frame,true).is_err());
             }
         }
+    }
+    #[test] fn first_owned_upgrade_and_upgrade_undo_are_distinct(){
+        let old=previous_expressions();let legacy=legacy_expressions();let new=expressions();
+        let states:Vec<_>=old.iter().map(|e|Snapshot {expression:e.clone(),enabled:true,keys:0}).collect();
+        assert!(exact_binding(&states,&old));assert!(!exact_binding(&states,&new));
+        assert!(!undo_preserved(1,&states,&old,&legacy)); // old saved instance upgrades once
+        assert!(undo_preserved(2,&states,&old,&legacy)); // Undo of upgrade stays undone
+        let blank=vec![Snapshot {expression:String::new(),enabled:false,keys:0};5];
+        assert!(!undo_preserved(0,&blank,&old,&legacy));
+        assert!(undo_preserved(1,&blank,&old,&legacy));
+        assert!(undo_preserved(2,&blank,&old,&legacy));
+        let foreign=vec![Snapshot {expression:"foreign".into(),enabled:true,keys:0};5];
+        assert!(!exact_binding(&foreign,&old));assert!(!undo_preserved(2,&foreign,&old,&legacy));
     }
     use std::sync::{OnceLock,atomic::{AtomicUsize,Ordering}};
     static RELEASES:AtomicUsize=AtomicUsize::new(0);
