@@ -111,6 +111,7 @@ pub(crate) enum Params {
     ControlLayout,
     VersionRow,
     ShowGrid,
+    ModeSelector,
 }
 
 #[derive(Default)]
@@ -963,10 +964,15 @@ impl AdobePluginGlobal for Plugin {
         #[cfg(any(target_os = "macos", target_os = "windows"))]
         in_data.effect().set_options_button_name("License...")?;
         // UI order is independent of persistent IDs (derived from unchanged Params names).
-        params.add_with_flags(Params::PlaneMode, "Deformation Plane", ae::PopupDef::setup(|f| {
+        params.add_with_flags(Params::PlaneMode, "__FSTR Mode Value", ae::PopupDef::setup(|f| {
             f.set_options(&plane::MODE_OPTIONS);
             f.set_default(1); f.set_value(1);
-        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::empty())?;
+        }), ae::ParamFlag::SUPERVISE | ae::ParamFlag::CANNOT_TIME_VARY, ae::ParamUIFlags::INVISIBLE)?;
+        // Presentation only: old PlaneMode IDs/ordinals/keys remain canonical.
+        params.add_with_flags(Params::ModeSelector,"Deformation Plane",ae::PopupDef::setup(|f|{
+            f.set_options(&plane::DISPLAY_MODE_OPTIONS);f.set_default(1);f.set_value(1);
+        }),ae::ParamFlag::SUPERVISE|ae::ParamFlag::CANNOT_TIME_VARY|ae::ParamFlag::CANNOT_INTERP,
+            ae::ParamUIFlags::CONTROL_ONLY)?;
         for (id, name, point) in [
             (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
             (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
@@ -1156,6 +1162,14 @@ impl AdobePluginGlobal for Plugin {
                 if params.index(Params::TensionRadius)==Some(param_index) {
                     // Radius is now a render dependency of existing deformation.
                     // Never rewrite Grid Positions or any scalar animation keys.
+                    out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
+                }
+                if params.index(Params::ModeSelector)==Some(param_index) {
+                    let selected=params.get(Params::ModeSelector)?.as_popup()?.value();
+                    let legacy=plane::display_mode_value(selected)?;
+                    {let mut stored=params.get_mut(Params::PlaneMode)?;
+                    stored.as_popup_mut()?.set_value(legacy);stored.set_value_changed();}
+                    plane::update_ui(&in_data,params)?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::PlaneMode)==Some(param_index) {

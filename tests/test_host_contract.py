@@ -27,11 +27,11 @@ class HostContract(unittest.TestCase):
         variants = SOURCE.split('pub(crate) enum Params {', 1)[1].split('}', 1)[0]
         self.assertEqual(re.findall(r'\b(\w+)\s*,', variants),
                          LEGACY + STAGE9_APPEND + NATIVE_PLANE_APPEND +
-                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
+                         ['ResetGridPositions', 'WaveGroupStart', 'WaveGroupEnd', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector'])
 
         # Disk IDs derive from unchanged enum Debug names, not UI registration order.
         direct = re.findall(r'params\.add\w*\(Params::(\w+),', SETUP)
-        self.assertEqual(direct, ['PlaneMode', 'ResetPlane'] + LEGACY[:3] +
+        self.assertEqual(direct, ['PlaneMode', 'ModeSelector', 'ResetPlane'] + LEGACY[:3] +
                          ['ResetGridPositions'] + LEGACY[3:10] + ['WaveGroupStart'] +
                          LEGACY[10:] + ['AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid'])
         self.assertIn('Params::WaveGroupStart, Params::WaveGroupEnd, "Wave Animation", true', SETUP)
@@ -51,6 +51,9 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('params.checkout(', smart)
 
     def test_popup_ordinals_describe_current_core_behavior(self):
+        self.assertIn('CONTROL_ONLY', block('ModeSelector'))
+        self.assertIn('plane::DISPLAY_MODE_OPTIONS', block('ModeSelector'))
+        self.assertIn('ParamUIFlags::INVISIBLE', block('PlaneMode'))
         self.assertIn('f.set_options(&plane::MODE_OPTIONS)', block('PlaneMode'))
         self.assertIn('ae::ParamFlag::SUPERVISE', block('PlaneMode'))
         self.assertIn('["Smooth", "Soft", "Even", "Old Smooth"]', block('Falloff'))
@@ -101,7 +104,7 @@ class HostContract(unittest.TestCase):
                 self.assertNotIn('CONTROL_ONLY', definition)
 
     def test_static_choices_and_animated_grid_waves_keep_approved_policy(self):
-        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid')
+        static = ('Columns', 'Rows', 'PlaneMode', 'Falloff', 'EdgeMode', 'Quality', 'AutomaticSpacing', 'ControlLayout', 'VersionRow', 'ShowGrid', 'ModeSelector')
         for name in static:
             self.assertIn('CANNOT_TIME_VARY', block(name))
         self.assertEqual(SETUP.count('ae::ParamFlag::CANNOT_TIME_VARY'), len(static))
@@ -143,7 +146,11 @@ class HostContract(unittest.TestCase):
         self.assertIn('ae::ParamUIFlags::DISABLED,mode_disabled', update)
         self.assertIn('ae::ParamUIFlags::DISABLED,corners_disabled', update)
         self.assertIn('definition.update_param_ui()', update)
-        self.assertNotIn('set_value(', update)
+        # SDK CONTROL_ONLY copy is cosmetic; no saved parameter mutation.
+        self.assertIn('(*params.get(Params::ModeSelector)?).clone()', update)
+        self.assertNotIn('params.get_mut(', update)
+        self.assertNotIn('set_value_changed(', update)
+        self.assertNotIn('AEGP_SetStreamValue', update)
         self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params)?', SOURCE)
 
     def test_smartfx_uses_sparse_logical_canvas_and_handles_empty_input(self):

@@ -114,3 +114,14 @@ https://helpx.adobe.com/after-effects/desktop/work-with-expressions/expression-l
 V3 regression and V4 transformed 640x480 Comp/smaller-layer expression tests
 PASS; native grid/render alignment still pending. Menu order is still unchanged
 until a saved-mode-safe selector migration is implemented.
+
+Dev88 display order implemented with appended ModeSelector standard native
+CONTROL_ONLY popup (no saved data stream), following SDK25.6 Supervisor.
+Existing PlaneMode retains ID, type, ordinals1=Comp/2=Flat/3=Layer/4=Perspective
+and all old keys; hidden as __FSTR Mode Value, still first binding index1.
+Display maps1/2/3/4 to stored1/3/2/4. UserChangedParam updates the existing
+canonical popup with CHANGED_VALUE inside the host's undoable user edit;
+UpdateParamsUI changes only a cloned UI-control popup via UpdateParamUI.
+No saved values or keys are changed to reorder the menu. Reset/Undo/reopen
+must re-synchronize display from the canonical stream. Native acceptance pending.
+95 Rust tests, Clippy and 15 host contracts PASS; old failing runs retained.

@@ -3,6 +3,11 @@ use super::*;
 use std::ptr::NonNull;
 
 // Existing ordinals are serialized. Append new modes, never reorder old ones.
+pub(crate) const DISPLAY_MODE_OPTIONS:[&str;4]=["Comp mode","Layer mode","Flat mode","Perspective"];
+// This permutation is its own inverse. Stored ordinals never change.
+pub(crate) fn display_mode_value(value:i32)->Result<i32,ae::Error>{
+    match value{1|4=>Ok(value),2=>Ok(3),3=>Ok(2),_=>Err(ae::Error::BadCallbackParameter)}
+}
 pub(crate) const MODE_OPTIONS: [&str;4]=["Comp mode","Flat mode","Layer mode","Perspective"];
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
 pub(crate) enum Mode {Comp,Flat,Layer,Perspective}
@@ -43,9 +48,9 @@ pub(crate) fn sync_event_ui(input:&ae::InData,params:&ae::Parameters<Params>)->R
         Ok(v)=>v,Err(ae::Error::BadCallbackParameter)=>return Ok(()),Err(e)=>return Err(e),
     };
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
-    for id in [Params::PlaneMode].into_iter().chain(CORNERS).chain([Params::ResetPlane]) {
+    for id in [Params::ModeSelector].into_iter().chain(CORNERS).chain([Params::ResetPlane]) {
         let current=params.get(id)?;
-        let disabled=if id==Params::PlaneMode {mode_disabled}else{corners_disabled};
+        let disabled=if id==Params::ModeSelector {mode_disabled}else{corners_disabled};
         if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=disabled {
             let mut definition=(*current).clone();
             definition.set_ui_flag(ae::ParamUIFlags::DISABLED,disabled);
@@ -64,11 +69,12 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
         Err(error)=>return Err(error),
     };
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
-    let mut mode=(*params.get(Params::PlaneMode)?).clone();
+    let mut mode=(*params.get(Params::ModeSelector)?).clone();
     mode.set_ui_flag(ae::ParamUIFlags::DISABLED,mode_disabled);
-    // Static storage survives UpdateParamUI; keep old saved ordinals intact.
-    mode.as_mut().u.pd.u.namesptr=c"Comp mode|Flat mode|Layer mode|Perspective".as_ptr();
-    mode.as_mut().u.pd.num_choices=4;
+    // SDK25.6 Supervisor: change only a CONTROL_ONLY popup copy through
+    // UpdateParamUI. No data stream or CHANGED_VALUE on this UI-only control.
+    let stored=params.get(Params::PlaneMode)?.as_popup()?.value();
+    mode.as_popup_mut()?.set_value(display_mode_value(stored)?);
     mode.update_param_ui()?;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let current=params.get(id)?;
@@ -81,6 +87,12 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
 
 #[cfg(test)] mod ui_state_tests {
     use super::ui_disabled;
+    #[test] fn display_order_roundtrips_every_saved_mode_without_reinterpretation(){
+        for value in 1..=4 {assert_eq!(super::display_mode_value(super::display_mode_value(value).unwrap()),Ok(value));}
+        assert_eq!(super::DISPLAY_MODE_OPTIONS[super::display_mode_value(2).unwrap() as usize-1],"Flat mode");
+        assert_eq!(super::DISPLAY_MODE_OPTIONS[super::display_mode_value(3).unwrap() as usize-1],"Layer mode");
+        assert!(super::display_mode_value(0).is_err());
+    }
     #[test] fn four_mode_corner_editing_respects_2d_and_3d() {
         for mode in 1..=4 {
             assert_eq!(ui_disabled(true,mode),(false,mode!=4));
