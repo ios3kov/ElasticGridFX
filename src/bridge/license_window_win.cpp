@@ -91,7 +91,7 @@ extern "C" bool eg_loupe_button_down() {
 
 // No ShowCursor counter: transparent image applies only to this UI cursor.
 extern "C" bool eg_set_loupe_cursor(bool hidden) {
-    if (!hidden) { SetCursor(LoadCursorW(nullptr, IDC_ARROW)); return true; }
+    if (!hidden) { SetCursor(LoadCursorW(nullptr, MAKEINTRESOURCEW(32512))); return true; }
     DWORD owner = 0;
     const HWND foreground = GetForegroundWindow();
     if (!foreground || GetWindowThreadProcessId(foreground, &owner) != GetCurrentThreadId() ||

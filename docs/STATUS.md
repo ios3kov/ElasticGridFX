@@ -18,30 +18,34 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Probe78**, diagnostic loupe candidate, source
-8831b2a77aa49c0eee8fc7ba8aeff93e127d8037, Build ID
-EGFX-8d3772b6e6492719146cd85c. Atomic replacement/package/signature PASS;
-Probe74 backup retained. Exact loaded-image UUID/path PASS in AE25.6 (PID23997).
-95 scoped Rust tests and all-target Clippy PASS.
-Native visual acceptance is PENDING; this is not a release candidate.
+Installed now: **0.9.4 Dev80**, ordinary build, source
+2c2c93136fed207503e2c2f525588c12eadd6584, Build ID
+EGFX-00df8c501ff29181fc542031. Atomic replacement/package/signature and
+exact loaded-image UUID/path PASS in AE25.6. Probe78 backup retained.
+93 scoped Rust tests and all-target Clippy PASS. No diagnostic CSV in this build.
+Native hand-cursor suppression acceptance is pending.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.
 Probe74 stable AE stream identity restored the loupe, but native visual FAIL:
 incorrect/fallback image and AE internal verification failure from
-PF_GetContextAsyncManager in the Composition UI context. User screenshots and
-bounded diagnostic traces are retained, not relabeled PASS.
-Probe78 requests frames only from the Effect Controls custom UI context and
-copies owned pixels; viewer drawing makes no async-manager request. No fallback
-checker is presented as a successfully acquired frame. Test scene reopened and
-Effect Controls visible without an error at initial inspection. Drag/image/release
-acceptance and hidden-Effect-Controls coverage remain pending.
+PF_GetContextAsyncManager in the Composition UI context. Original failures remain
+recorded. Probe78 requests frames only from the Effect Controls custom UI context
+and copies owned pixels; viewer drawing makes no async-manager request.
+Probe78 Perspective USER-REPORTED PASS: correct image, disappears on release,
+no error. Dev80 additionally hides the local hand cursor only while a lens is
+successfully drawn, for Mac and Windows. User's edited test scene preserved
+and reopened. Flat and hidden-Effect-Controls coverage remain pending.
 Evidence: outputs/corner-loupe-probe70, corner-loupe-probe70b,
-corner-loupe-probe74, corner-loupe-probe78; see corner-loupe-plan.md.
+corner-loupe-probe74, corner-loupe-probe78, corner-loupe-dev80.
+
+Dev80 source published only to authorized feat/next-update for CI.
+Windows37300965301 and Mac37300965421 IN PROGRESS at source2c2c931;
+new Windows artifact download/identity/native acceptance pending.
 
 Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
 Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old
-artifacts do not include the latest loupe fixes. New Windows CI/package is pending.
+artifacts do not include the latest loupe fixes. New Windows package is pending.
 Dev60 scoped mode/pixel/migration evidence remains artifact-specific.
 Installer payloads still pin separately accepted Dev52/Dev56. Demo remains OFF.
 Native activation waits for marketplace SDK access. No release/merge.

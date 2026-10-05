@@ -104,3 +104,9 @@ transparent local cursor images on Mac/Windows without global visibility
 counters; restore on release/cancel/deactivate/context close and failed lens.
 Rendering and saved parameters remain unchanged. Native cursor acceptance
 and Flat/hidden-panel coverage remain pending.
+
+Dev80 Windows CI37300965301 FAIL at portable native fixture compilation:
+explicit LoadCursorW received the ANSI IDC_ARROW macro without UNICODE.
+Fix uses MAKEINTRESOURCEW(32512), independent of project character-set
+flags. Mac installed artifact remains bound to source2c2c931; Windows
+replacement CI is separately verified.
