@@ -111,59 +111,81 @@ fn raster(mut sample:impl FnMut(f32,f32)->Option<[u8;4]>)->Vec<u8>{
 pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::drawbot::Supplier,
     surface:&ae::drawbot::Surface,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
     source(event,center.x,center.y)?;
-    let pixels=frame_pixels(input,event,center,id).unwrap_or_else(|_|raster(|_,_|None));
+    let pixels=frame_pixels(input,event,center,id)?;
     let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,ae::drawbot::PixelLayout::Argb32Straight,&pixels)?;
     surface.draw_image(&image,&ae::drawbot::PointF32{x:center.x-RADIUS,y:center.y-RADIUS},1.0)
 }
-fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<Vec<u8>,ae::Error>{
-    let id=id.ok_or(ae::Error::BadCallbackParameter)?;
+#[derive(Clone,Copy,PartialEq,Eq)]
+struct FrameKey{owner:i32,window:i32,time:i32,scale:u32,stamp:[i8;4]}
+struct Frame{key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
+thread_local!{
+    static FRAME:std::cell::RefCell<Option<Frame>>=const{std::cell::RefCell::new(None)};
+    static VIEW:std::cell::Cell<Option<(i32,i32)>>=const{std::cell::Cell::new(None)};
+}
+pub(crate) fn close(){clear();FRAME.with_borrow_mut(|f|*f=None);VIEW.set(None);}
+// SDK25.6 AE_EffectUI.h:419 explicitly limits reserved_job_manageP to
+// Effect pane custom UI. Never ask a Comp/Layer context for an AsyncManager.
+pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
+    if event.window_type()!=ae::WindowType::Effect{return Ok(());}
+    let owner=owner(input,id)?;let id=id.ok_or(ae::Error::BadCallbackParameter)?;
+    let window=VIEW.get().filter(|v|v.0==owner).map(|v|v.1).unwrap_or(ae::sys::PF_Window_COMP);
+    let render=ae::aegp::suites::Render::new()?;
+    let key=FrameKey{owner,window,time:input.current_time(),scale:input.time_scale(),stamp:render.current_timestamp()?.a};
+    if FRAME.with_borrow(|f|f.as_ref().is_some_and(|f|f.key==key)){return Ok(());}
     let interface=ae::aegp::suites::PFInterface::new()?;
     let layers=ae::aegp::suites::Layer::new()?;
     let layer=interface.effect_layer(input.effect_ref())?;
     let time=interface.convert_effect_to_comp_time(input.effect_ref(),input.current_time(),input.time_scale())?;
     let manager=ae::pf::suites::EffectCustomUI::new()?.context_async_manager(input.as_ptr(),*event)?;
-    let render=ae::aegp::suites::Render::new()?;
-    let receipt=if event.window_type()==ae::WindowType::Comp {
+    let receipt=if window==ae::sys::PF_Window_COMP{
         let comp=layers.layer_parent_comp(layer)?;
         let item=ae::aegp::suites::Comp::new()?.item_from_comp(comp)?;
         let options=ae::aegp::RenderOptions::from_item(item,id)?;
         options.set_time(time)?;options.set_world_type(ae::aegp::WorldType::U8)?;
-        // Full item coordinates match frame_to_source and include other layers
-        // beneath the corner. AE's cache supplies the current composited frame.
         manager.checkout_or_render_item_frame_async_manager(PURPOSE,options.handle())?
     }else{
         let options=ae::aegp::LayerRenderOptions::from_layer(layer,id)?;
         options.set_time(time)?;options.set_world_type(ae::aegp::WorldType::U8)?;
         manager.checkout_or_render_layer_frame_async_manager(PURPOSE,options.handle())?
     };
-    if receipt.is_null(){return Err(ae::Error::BadCallbackParameter);}
+    if receipt.is_null(){return Ok(());}
     let result=(||{
-        // Viewer frame->source is affine (pan/zoom/pixel aspect). Obtain its
-        // two basis vectors once, rather than thousands of SDK calls per lens.
-        let c=source(event,center.x,center.y)?;
-        let xp=source(event,center.x+1.0,center.y)?;
-        let yp=source(event,center.x,center.y+1.0)?;
-        let world=render.receipt_world(receipt)?;
-        let worlds=ae::aegp::suites::World::new()?;
+        let world=render.receipt_world(receipt)?;let worlds=ae::aegp::suites::World::new()?;
         let (w,h)=worlds.size(world)?;let stride=worlds.row_bytes(world)?;
-        if w<=0||h<=0||stride<(w as usize)*4||stride.checked_mul(h as usize).is_none_or(|size|size>isize::MAX as usize){return Err(ae::Error::BadCallbackParameter);}
-        let ptr=worlds.base_addr8(world)?.cast::<u8>();
-        if ptr.is_null(){return Err(ae::Error::BadCallbackParameter);}
-        let region=render.rendered_region(receipt)?;
-        Ok(raster(|dx,dy|{
-            let x=c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0);
-            let y=c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1);
-            let x=x.round() as i32;let y=y.round() as i32;
-            if x<0||y<0||x>=w||y>=h||x<region.left||y<region.top||x>=region.right||y>=region.bottom{return None;}
-            let offset=y as usize*stride+x as usize*4;
-            // Host owns the receipt; validated bounds and row stride constrain
-            // each four-byte read. Nothing survives the paired frame check-in.
-            let p=unsafe{std::slice::from_raw_parts(ptr.add(offset),4)};
-            Some([p[0],p[1],p[2],p[3]])
-        }))
+        if w<=0||h<=0{return Err(ae::Error::BadCallbackParameter);}
+        let (w,h)=(w as usize,h as usize);
+        let size=w.checked_mul(h).and_then(|v|v.checked_mul(4)).filter(|v|*v<=64*1024*1024).ok_or(ae::Error::BadCallbackParameter)?;
+        if stride<w*4||stride.checked_mul(h).is_none_or(|v|v>isize::MAX as usize){return Err(ae::Error::BadCallbackParameter);}
+        let ptr=worlds.base_addr8(world)?.cast::<u8>();if ptr.is_null(){return Err(ae::Error::BadCallbackParameter);}
+        let region=render.rendered_region(receipt)?;let mut pixels=vec![0;size];
+        for y in 0..h{
+            // Bounded row copy while receipt is checked out; no host pointer survives.
+            let row=unsafe{std::slice::from_raw_parts(ptr.add(y*stride),w*4)};
+            pixels[y*w*4..(y+1)*w*4].copy_from_slice(row);
+        }
+        Ok(Frame{key,width:w,height:h,region,pixels})
     })();
     let checked=render.checkin_frame(receipt);
-    match (result,checked){(Ok(p),Ok(()))=>Ok(p),(Err(e),_)|(_,Err(e))=>Err(e)}
+    match (result,checked){(Ok(frame),Ok(()))=>{
+        FRAME.with_borrow_mut(|f|*f=Some(frame));
+        // Only a new cached timestamp requests repaint; avoids a DRAW feedback loop.
+        ae::pf::suites::AdvApp::new()?.refresh_all_windows()
+    },(Err(e),_)|(_,Err(e))=>Err(e)}
+}
+fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<Vec<u8>,ae::Error>{
+    let owner=owner(input,id)?;let window=ui::event_window_code(event);VIEW.set(Some((owner,window)));
+    let c=source(event,center.x,center.y)?;
+    let xp=source(event,center.x+1.0,center.y)?;let yp=source(event,center.x,center.y+1.0)?;
+    FRAME.with_borrow(|frame|{
+        let f=frame.as_ref().filter(|f|f.key.owner==owner&&f.key.window==window&&f.key.time==input.current_time()&&f.key.scale==input.time_scale()).ok_or(ae::Error::BadCallbackParameter)?;
+        Ok(raster(|dx,dy|{
+            let x=(c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0)).round() as i32;
+            let y=(c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1)).round() as i32;
+            if x<0||y<0||x>=f.width as i32||y>=f.height as i32||x<f.region.left||y<f.region.top||x>=f.region.right||y>=f.region.bottom{return None;}
+            let i=(y as usize*f.width+x as usize)*4;
+            Some([f.pixels[i],f.pixels[i+1],f.pixels[i+2],f.pixels[i+3]])
+        }))
+    })
 }
 #[cfg(test)] mod tests{
     use super::*;

@@ -447,10 +447,17 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
 }
 
 fn draw_effect_control(
-    _in_data: &ae::InData,
+    in_data: &ae::InData,
     params: &ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
+    if matches!(params.get(Params::PlaneMode)?.as_popup()?.value(),2|4){
+        let result=corner_loupe::prepare_frame(in_data,event,plugin_id);
+        #[cfg(feature="preview-overlay-probe")]
+        super::preview_overlay_probe::loupe(in_data,event,5,0,result.is_err());
+        let _=result;
+    }
     if params.index(Params::GridState) == Some(event.param_index()) {
         grid_row::draw(event)?;
     }
@@ -465,7 +472,7 @@ pub fn draw(
 ) -> Result<(), ae::Error> {
     match event.window_type() {
         ae::WindowType::Comp | ae::WindowType::Layer => draw_viewer(in_data, params, event, plugin_id),
-        ae::WindowType::Effect => draw_effect_control(in_data, params, event),
+        ae::WindowType::Effect => draw_effect_control(in_data, params, event,plugin_id),
     }
 }
 

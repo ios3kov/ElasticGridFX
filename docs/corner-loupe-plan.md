@@ -75,3 +75,15 @@ owner blocks observation from restarting a gesture. Dev72 fix uses the unique
 ID of an existing effect parameter stream via AEGP_GetUniqueStreamID; dispose
 stream/effect refs in each callback, retain only the ID. Probe output is bounded
 and now excludes idle/cursor polling. Ordinary render math remains untouched.
+
+Probe74 USER-REPORTED FAIL: lens appeared, showed no useful pixels, then AE
+reported PF_GetContextAsyncManager: no active async manager in PF_Context.
+SDK25.6 AE_EffectUI.h:419 explicitly describes reserved_job_manageP as Effect
+pane custom UI. Dev76 removes manager acquisition from Comp/Layer DRAW.
+Effect Controls DRAW obtains a current composited/processed frame asynchronously,
+checks it in immediately and retains only an owned U8 pixel copy (max64MiB),
+keyed by stable stream ID, viewer, time and project timestamp. Viewer DRAW
+samples that copy; pending pixels do not masquerade as a successful checker lens.
+Only Flat/Perspective prefetch; renderer unchanged. Closed contexts release cache.
+Hidden Effect Controls before any prefetch remains an unresolved coverage case;
+do not claim full loupe acceptance or silently drop it.
