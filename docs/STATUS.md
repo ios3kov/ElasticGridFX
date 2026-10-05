@@ -1496,3 +1496,34 @@ NOT RUN because rollout OFF. Source diff reviewed against D1/D2; no cleanup
 needed, evidence/backups preserved. Installed Dev112 unchanged.
 Existing installer, new Windows native acceptance and
 marketplace activation obligations retained; no main/merge/release.
+
+### Dev116 native continuation — 2026-10-05
+
+Current installed ordinary Mac **0.9.4 Dev116**, source0a5b712bfe95e0d29d54b94f23e3a4920df3794d,
+Build ID **EGFX-f0e50f471f52dd30b6fdb7cf**. Clean rebuild/package/signature,
+atomic replacement retaining Dev112 and actual loaded-image UUID/path PASS.
+Source differs from CI1c97b7d only in STATUS/SHA256SUMS (verified); do not
+present the different binaries as one artifact. Mac37319481143 and
+Windows37319481240 source1c97b7d PASS. Windows artifact11349771011 downloaded,
+ZIP CRC/path/size and AEX manifest/SHA/marker/source identity PASS:
+EGFX-e220e261736792f3b3608874, SHA256
+ dd024117ca8303b36cfec56ce2c3d95dc523c1749bc284e48c6a94ae0e9cc928.
+
+Native AE25.6 fresh owned scene: OFF-demo vs effect-disabled frames exactly
+match decoded RGBA at8/16/32bpc;32bpc Perspective alpha bbox161,30–518,360,
+15535 visible pixels above measured original source top119. Actual bounded
+Comp-line drag changes178265 components; Cmd+Z returns exactly original pixels.
+Initial helper foreground refusal emitted no input; authorized activation retry
+succeeded. No expanded helper permissions, new OS access or arbitrary UI input.
+Current scene separately preserved as gesture-check.aep. No private user media
+used or published. Initial download filename assumptions rejected safely before
+payload use; exact artifact identity corrected and verified.
+
+Demo stays OFF, no public toggle/provider verification. Enabled-demo AE runtime
+NOT RUN by policy. Latest Windows native acceptance and Mac hidden-Effect-Controls
+loupe acceptance remain pending human checks requested in this conversation.
+Do not mark whole plugin complete or advance privileged installer acceptance until
+plugin checks close. Native installer/payload promotion and marketplace SDK
+obligations retained; no main/merge/release. Evidence outputs/demo-procedural-dev116
+(native-pixels.json, gesture-pixels.json, loaded-identity, package-verification.log,
+CI records, windows-identity.json, WINDOWS-CHECK-RU.txt, backups).
