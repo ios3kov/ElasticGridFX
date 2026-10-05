@@ -1812,3 +1812,14 @@ subsequent DRAW clearing the newly armed corner. Tests cover repeated timestamps
 terminal/error completion and release/repress of the same corner. Native click/
 repeated-gesture/slowness acceptance remains NOT RUN; Dev132 kept installed
 until candidate package validation. No main/merge/release authorization implied.
+
+Dev140 source91a6872, BID EGFX-c835dacf0bb762dcc5ac460d:114 Rust tests,
+strict all-target Clippy and24 focused Python contract checks PASS. Native Mac
+bundle and branded bundle verifier PASS, signature/ZIP/manifest PASS. Installer
+reported Installed; system file hashes/executable permissions match exactly.
+Native AE registry count=1, matchName com.elasticgrid.fx.warp PASS; live loaded
+UUID/path matches this installed build PASS. Preserved scene reopened. Repeated
+stationary press/drag/Undo and absence of slowdown requested, still NOT RUN.
+Windows CI37358711191 and Mac CI37358711209 PENDING at checkpoint. Local
+evidence outputs/corner-repeat-dev140/verification.json. No RAM Preview launched,
+original whole-Mac incident remains OPEN/UNCONFIRMED, no promotion.
