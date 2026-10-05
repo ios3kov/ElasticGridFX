@@ -781,16 +781,27 @@ fn rendered_canvas(in_data: ae::InData) -> (i32, i32) {
     (w, h)
 }
 
-fn clamp_request_to_canvas(mut rect: ae::Rect, canvas_width: i32, canvas_height: i32) -> ae::Rect {
-    let cw = canvas_width.max(0);
-    let ch = canvas_height.max(0);
-    rect.left = rect.left.clamp(0, cw);
-    rect.right = rect.right.clamp(0, cw);
-    rect.top = rect.top.clamp(0, ch);
-    rect.bottom = rect.bottom.clamp(0, ch);
-    if rect.right < rect.left { rect.right = rect.left; }
-    if rect.bottom < rect.top { rect.bottom = rect.top; }
-    rect
+// Immutable checked-out geometry, no AEGP calls or project mutations.
+fn plane_output_bounds(state: &plane::State, width:i32, height:i32) -> Result<ae::Rect,ae::Error> {
+    let canvas=ae::Rect {left:0,top:0,right:width,bottom:height};
+    if state.render_kind!=plane::RenderKind::Comp || state.geometry().is_none() {return Ok(canvas);}
+    let Some(corners)=state.corners else {return Ok(canvas);};
+    let xs=[corners[0],corners[2],corners[4],corners[6]];
+    let ys=[corners[1],corners[3],corners[5],corners[7]];
+    let values=[xs.into_iter().fold(f64::INFINITY,f64::min).floor(),
+        ys.into_iter().fold(f64::INFINITY,f64::min).floor(),
+        xs.into_iter().fold(f64::NEG_INFINITY,f64::max).ceil(),
+        ys.into_iter().fold(f64::NEG_INFINITY,f64::max).ceil()];
+    if values.iter().any(|v|!v.is_finite() || *v<f64::from(i32::MIN)+1.0 || *v>f64::from(i32::MAX)) ||
+        values[2]-values[0]>f64::from(i32::MAX) || values[3]-values[1]>f64::from(i32::MAX) {
+        return Err(ae::Error::BadCallbackParameter);
+    }
+    Ok(ae::Rect{left:values[0] as i32,top:values[1] as i32,right:values[2] as i32,bottom:values[3] as i32})
+}
+fn intersect_rect(rect:ae::Rect,bounds:ae::Rect)->ae::Rect {
+    let left=rect.left.clamp(bounds.left,bounds.right);
+    let top=rect.top.clamp(bounds.top,bounds.bottom);
+    ae::Rect{left,top,right:rect.right.clamp(left,bounds.right),bottom:rect.bottom.clamp(top,bounds.bottom)}
 }
 
 fn apply_spatial_context(
@@ -1143,6 +1154,7 @@ impl AdobePluginGlobal for Plugin {
                 #[cfg(any(target_os = "macos", target_os = "windows"))]
                 out_data.set_out_flag(ae::OutFlags::IDoDialog, true);
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
+                out_data.set_out_flag(ae::OutFlags::IExpandBuffer, true);
                 out_data.set_out_flag2(ae::OutFlags2::CustomUiAsyncManager,true);
                 // One noninteractive diagnostic per host setup, never per frame.
                 eprintln!("{}", build_identity::DIAGNOSTIC.replace('\r', " | "));
@@ -1243,6 +1255,20 @@ impl AdobePluginGlobal for Plugin {
                     _ => {}
                 }
             }
+            ae::Command::FrameSetup { .. } => {
+                let state=plane::State::read(params,&in_data,false,true)?;
+                if state.render_kind==plane::RenderKind::Comp {
+                    let (w,h)=rendered_canvas(in_data);
+                    let bounds=plane_output_bounds(&state,w,h)?;
+                    // Legacy PF_OutData origin is a 16-bit PF_Point.
+                    if !(-32767..=32768).contains(&bounds.left) || !(-32767..=32768).contains(&bounds.top) {
+                        return Err(ae::Error::BadCallbackParameter);
+                    }
+                    out_data.set_width((bounds.right-bounds.left) as u32);
+                    out_data.set_height((bounds.bottom-bounds.top) as u32);
+                    out_data.set_origin(ae::Point{h:-bounds.left,v:-bounds.top});
+                }
+            }
             ae::Command::Render { in_layer, mut out_layer } => {
                 #[cfg(feature="render-diagnostics")]
                 let mut trace=render_diagnostics::Trace::new("render",in_data.current_time(),in_data.time_scale());
@@ -1250,6 +1276,10 @@ impl AdobePluginGlobal for Plugin {
                 let mut p = evaluated_params(params, in_data, &grid)?;
                 apply_spatial_context(in_data, &in_layer, &out_layer, &mut p);
                 let plane = plane::State::read(params, &in_data, false, true)?;
+                // Legacy world origin fields are SmartFX-only (SDK AE_Effect.h).
+                // FRAME_SETUP origin is input's location in output: invert it.
+                let origin=in_data.output_origin();
+                p.output_origin_x = -origin.h; p.output_origin_y = -origin.v;
                 #[cfg(feature="render-diagnostics")]
                 {
                     trace.configure(p.canvas_width,p.canvas_height,out_layer.bit_depth(),diagnostic_path(&plane));
@@ -1290,15 +1320,14 @@ impl AdobePluginGlobal for Plugin {
                 // Store the exact checked-out parameter state used for this
                 // SmartFX request. SmartRender must not read the ordinary
                 // params array because AE does not provide valid values there.
+                let destination = plane_output_bounds(&snapshot.plane, cw, ch)?;
                 extra.set_pre_render_data(snapshot);
 
-                // A grid warp does not create pixels outside its logical layer
-                // canvas. Downstream effects may request a subset; advertise only
-                // that intersection and keep max bounds invariant across requests.
-                let canvas_rect = ae::Rect { left: 0, top: 0, right: cw, bottom: ch };
+                // Comp owns the whole projected composition destination. Input
+                // checkout and source sampling still use the original layer extent.
                 let requested: ae::Rect = output_request.rect.into();
-                extra.set_result_rect(clamp_request_to_canvas(requested, cw, ch));
-                extra.set_max_result_rect(canvas_rect);
+                extra.set_result_rect(intersect_rect(requested, destination));
+                extra.set_max_result_rect(destination);
                 let _ = input; // checkout establishes dependency even if AE returns compact storage
                 #[cfg(target_os = "macos")]
                 extra.set_gpu_render_possible(false);
@@ -1640,16 +1669,33 @@ mod tests {
 
     #[test]
     fn smart_result_rect_is_clamped_to_logical_canvas() {
-        let r = clamp_request_to_canvas(
+        let r = intersect_rect(
             ae::Rect { left: -50, top: 20, right: 900, bottom: 500 },
-            640, 360
+            ae::Rect{left:0,top:0,right:640,bottom:360}
         );
         assert_eq!((r.left, r.top, r.right, r.bottom), (0, 20, 640, 360));
-        let empty = clamp_request_to_canvas(
+        let empty = intersect_rect(
             ae::Rect { left: 700, top: 500, right: 650, bottom: 400 },
-            640, 360
+            ae::Rect{left:0,top:0,right:640,bottom:360}
         );
         assert_eq!((empty.left, empty.top, empty.right, empty.bottom), (640, 360, 640, 360));
+    }
+
+    #[test]
+    fn comp_output_bounds_include_negative_origins_but_layer_stays_bounded(){
+        let mut state=plane::State{corners:Some([-170.2,-116.5,470.2,-116.5,470.2,364.2,-170.2,364.2]),
+            render_kind:plane::RenderKind::Comp,..plane::State::default()};
+        let b=plane_output_bounds(&state,319,241).unwrap();
+        assert_eq!((b.left,b.top,b.right,b.bottom),(-171,-117,471,365));
+        let r=intersect_rect(ae::Rect{left:-200,top:-140,right:20,bottom:30},b);
+        assert_eq!((r.left,r.top,r.right,r.bottom),(-171,-117,20,30));
+        state.render_kind=plane::RenderKind::Layer;
+        let b=plane_output_bounds(&state,319,241).unwrap();
+        assert_eq!((b.left,b.top,b.right,b.bottom),(0,0,319,241));
+        state.render_kind=plane::RenderKind::Comp;
+        state.corners=Some([0.;8]);
+        let b=plane_output_bounds(&state,319,241).unwrap();
+        assert_eq!((b.left,b.top,b.right,b.bottom),(0,0,319,241));
     }
 
     #[test]

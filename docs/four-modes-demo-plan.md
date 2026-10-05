@@ -125,3 +125,23 @@ UpdateParamsUI changes only a cloned UI-control popup via UpdateParamUI.
 No saved values or keys are changed to reorder the menu. Reset/Undo/reopen
 must re-synchronize display from the canonical stream. Native acceptance pending.
 95 Rust tests, Clippy and 15 host contracts PASS; old failing runs retained.
+
+
+### Comp output correction (user feedback after Dev88, 2026-10-05)
+
+User reports grid dragging works but distortion clips at source layer bounds.
+Confirmed interpretation: Comp owns the whole composition destination; Layer
+retains the layer destination. Dev84 grid-domain evidence does not accept this
+output contract. Dev92 work: immutable PF point dependency bounding rectangle,
+SmartFX request intersection/max output and legacy FRAME_SETUP expansion;
+IExpandBuffer in PiPL/runtime; separate Comp C ABI entry dispatch permitting
+expanded destination while retaining original source extent and scalar/cache
+samplers. No new serialized field/parameter/ID, no double sampling. Core regression
+covers 8/16/32bpc, both qualities, all edge modes, source guard, neutral exactness,
+Layer clipping and row padding. Native output/origin/Undo/save/reopen checks pending.
+Primary SDK25.6 AE_Effect.h:1625 (SmartFX world origins), 2908 (FRAME_SETUP origin),
+3055 (legacy input location in output), 2512–2527 (result/max rectangle).
+
+Dev92 pre-host checks: 96 Rust tests, 28 CTest targets and 15 host contract checks PASS.
+Clippy first failed assignment-formatting lint; corrected rerun PASS. Numerical
+samplers unchanged. Native output and legacy expansion remain NOT RUN.

@@ -56,7 +56,7 @@ int eg_render_plane_sampled(const EgPlaneImage* source,const EgPlaneImage* outpu
 static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge,double source_extent_x,double source_extent_y,
-    const double* source_corners,bool regional=false,bool layer=false) noexcept {
+    const double* source_corners,bool regional=false,bool layer=false,bool expanded=false) noexcept {
     if(!report) return 1;
     *report={};
     if(!source || !output || !f || quality<0 || quality>1 || edge<0 || edge>2 ||
@@ -94,9 +94,10 @@ static int renderPlane(const EgPlaneImage* source,const EgPlaneImage* output,
                 {f->rows,f->rows+f->row_count},f->easing,f->easing_distance);
             if(!warp) return 1;
         }
-        const eg::PlaneCanvasRegion region{f->canvas_width,f->canvas_height,
+        eg::PlaneCanvasRegion region{f->canvas_width,f->canvas_height,
             f->source_x,f->source_y,f->output_x,f->output_y,f->surface_units_x,f->surface_units_y,
             static_cast<eg::EdgeMode>(edge),static_cast<eg::SampleQuality>(quality)};
+        region.expanded_destination=expanded;
         const auto* mapping=warp?&*warp:nullptr;
         const auto ss=source->row_bytes/bytes,ds=output->row_bytes/bytes;
         eg::PlaneRenderReport result;
@@ -139,4 +140,11 @@ int eg_render_plane_layer(const EgPlaneImage* source,const EgPlaneImage* output,
     std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
     std::int32_t quality,std::int32_t edge) noexcept {
     return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true,true);
+}
+
+// Separate destination policy: never changes serialized frame ABI or Layer mode.
+int eg_render_plane_comp(const EgPlaneImage* source,const EgPlaneImage* output,
+    std::int32_t depth,const EgPlaneFrame* f,EgPlaneReport* report,
+    std::int32_t quality,std::int32_t edge) noexcept {
+    return renderPlane(source,output,depth,f,report,quality,edge,0,0,nullptr,true,true,true);
 }

@@ -76,3 +76,7 @@ extern "C" int eg_render_plane_region(const EgPlaneImage* source, const EgPlaneI
 extern "C" int eg_render_plane_layer(const EgPlaneImage* source, const EgPlaneImage* output,
     std::int32_t bit_depth, const EgPlaneFrame* frame, EgPlaneReport* report,
     std::int32_t quality, std::int32_t edge) noexcept;
+
+extern "C" int eg_render_plane_comp(const EgPlaneImage* source, const EgPlaneImage* output,
+    std::int32_t depth, const EgPlaneFrame* frame, EgPlaneReport* report,
+    std::int32_t quality, std::int32_t edge) noexcept;

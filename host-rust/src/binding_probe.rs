@@ -54,7 +54,7 @@ pub fn sampled_comp_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,che
         corners[2*i]=p.x-f64::from(origin.h);corners[2*i+1]=p.y-f64::from(origin.v);
     }
     Ok(Some(plane::State{corners:Some(corners),comp_space:kind==7.0,
-        render_kind:plane::RenderKind::Layer,..plane::State::default()}))
+        render_kind:plane::RenderKind::Comp,..plane::State::default()}))
 }
 
 pub fn sampled_layer_plane(in_data:&ae::InData,params:&ae::Parameters<Params>,checkout:bool,frame_context:bool)

@@ -1,4 +1,5 @@
 #include "core/PlaneRenderer.h"
+#include "bridge/plane_ffi.h"
 #include <array>
 #include <cassert>
 #include <cstring>
@@ -61,4 +62,36 @@ template<typename T> void verify() {
     catch(const RenderCancelled&) {cancelled=true;}
     assert(cancelled); // even a wholly transparent expanded world is cancellable
 }
-int main() { verify<std::uint8_t>();verify<std::uint16_t>();verify<float>(); }
+// Comp can move real image pixels beyond source bounds, with unchanged sampling.
+// Layer retains its clipping. Neutral Comp must not invent edge pixels.
+template<typename T> void compDestination(int depth) {
+    constexpr int n=9,w=25,h=25,stride=w*4+8;
+    std::vector<T> input(n*n*4,T(17)),comp(h*stride,T(231)),layer(h*stride,T(231));
+    float cols[]={0,.8f,1},rows[]={0,.5f,1};
+    EgPlaneFrame frame{{-8,-8,17,-8,17,17,-8,17},cols,rows,3,3,1,1,n,n,0,0,-8,-8,0,.25f,nullptr,nullptr};
+    EgPlaneImage src{input.data(),n*4*std::ptrdiff_t(sizeof(T)),n,n};
+    EgPlaneImage dst{comp.data(),stride*std::ptrdiff_t(sizeof(T)),w,h};
+    EgPlaneReport report{};
+    for(int edge=0;edge<3;edge++)for(int quality=0;quality<2;quality++){
+        assert(eg_render_plane_comp(&src,&dst,depth,&frame,&report,quality,edge)==0);
+        dst.pixels=layer.data();
+        assert(eg_render_plane_layer(&src,&dst,depth,&frame,&report,quality,edge)==0);
+        bool outside=false;
+        for(int y=0;y<h;y++)for(int x=0;x<w;x++){
+            const bool inside=x>=8 && y>=8 && x<17 && y<17;
+            for(int c=0;c<4;c++){
+                if(inside)assert(comp[y*stride+x*4+c]==layer[y*stride+x*4+c]);
+                else {assert(layer[y*stride+x*4+c]==0);outside|=comp[y*stride+x*4+c]!=0;}
+            }
+        }
+        assert(outside);
+        dst.pixels=comp.data();
+        for(int y=0;y<h;y++)for(int x=w*4;x<stride;x++)assert(comp[y*stride+x]==T(231));
+    }
+    cols[1]=.5f;
+    assert(eg_render_plane_comp(&src,&dst,depth,&frame,&report,1,0)==0);
+    for(int y=0;y<h;y++)for(int x=0;x<w;x++)for(int c=0;c<4;c++)
+        assert(comp[y*stride+x*4+c]==(x>=8 && y>=8 && x<17 && y<17?T(17):T(0)));
+}
+int main() { verify<std::uint8_t>();verify<std::uint16_t>();verify<float>();
+compDestination<std::uint8_t>(8);compDestination<std::uint16_t>(16);compDestination<float>(32); }

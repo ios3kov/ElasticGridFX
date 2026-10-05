@@ -18,13 +18,15 @@ allowed. No main, PR, merge or release action is authorized by this continuation
 The earlier local-only and Windows-deferred decisions were superseded by the
 user's later Windows implementation and specific branch/CI authorization.
 
-Installed now: **0.9.4 Dev80**, ordinary build, source
-2c2c93136fed207503e2c2f525588c12eadd6584, Build ID
-EGFX-00df8c501ff29181fc542031. Atomic replacement/package/signature and
-exact loaded-image UUID/path PASS in AE25.6. Probe78 backup retained.
-93 scoped Rust tests and all-target Clippy PASS. No diagnostic CSV in this build.
-Native loupe/hand-cursor check USER-REPORTED PASS; user answered all okay
-when asked to check Flat/Perspective and cursor restoration.
+Installed now: **0.9.4 Dev88**, ordinary source6e9426e, atomic package/signature
+replacement PASS. Loaded-image identity pending; native panel screenshot shows
+Comp mode and the aligned UI-only selector. Dev80 loupe/cursor acceptance remains
+bound to its tested artifact. Dev84 full-composition domain/pixel checks PASS,
+but user then identified FAIL: deformed output still clipped by the source layer.
+Active correction Dev92: advertise the composition destination bounds and use a
+Comp-specific expanded destination sampler without changing source extents,
+quality, axes, saved mode ordinals or Layer/Flat/Perspective behavior. Native
+expanded-output acceptance NOT RUN. Evidence: outputs/comp-output-dev92.
 
 Dev68 native loupe FAIL: user saw no loupe. Probe70/70b observations established
 that transient PF effect references cannot identify the same native Point drag.
@@ -46,11 +48,10 @@ LoadCursorW); fixed in d62e9cf and new CI queued. Mac37300965421 result
 remains separately bound to source2c2c931. New Windows artifact identity/native
 acceptance pending.
 
-New active native feedback: Comp and Layer domains appear identical on 2D.
-Comp currently retains the old layer canvas; requested whole-composition domain
-needs confirmation and UI/render correction. User also requested display order
-Comp / Layer / Flat / Perspective. Preserve old serialized mode selection during
-any reorder; see four-modes-demo-plan.md. No geometry/order fix claimed yet.
+Comp mode full-frame behavior explicitly confirmed by user. Dev84 grid-domain
+fix is partial, not complete native acceptance: source-layer clipping remains.
+Sorted Comp / Layer / Flat / Perspective uses a UI-only native popup while
+retaining old serialized ordinals. Menu interaction/Undo/reopen acceptance pending.
 
 Prior Dev68 CI remains bound to source8d98424: Windows37293880927 and
 Mac37293880981 PASS. Windows Dev68 native acceptance NOT RUN, and these old

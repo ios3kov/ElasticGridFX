@@ -100,7 +100,7 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
     if(!empty && reinterpret_cast<std::uintptr_t>(src.data)<de && reinterpret_cast<std::uintptr_t>(dst.data)<se)
         throw std::invalid_argument("overlapping plane image views");
     const T zero[4]{};
-    auto sourcePixel=[&](int x,int y)->const T* {
+    auto sourcePixel=[&](std::int64_t x,std::int64_t y)->const T* {
         const auto sx=static_cast<std::int64_t>(x)-region.source_x;
         const auto sy=static_cast<std::int64_t>(y)-region.source_y;
         if(empty || x<0 || y<0 || x>=region.canvas_width || y>=region.canvas_height ||
@@ -177,7 +177,8 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
             auto pixel=out+static_cast<std::ptrdiff_t>(x)*4;
             // Expanded host worlds are storage, not a larger deformation canvas.
             // Never stretch a logical edge into these pixels, even for bad planes.
-            if(qx<0 || qy<0 || qx>=region.canvas_width || qy>=region.canvas_height) {
+            if(!region.expanded_destination &&
+               (qx<0 || qy<0 || qx>=region.canvas_width || qy>=region.canvas_height)) {
                 std::memcpy(pixel,zero,4*sizeof(T));
                 continue;
             }
@@ -218,7 +219,7 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                 }
             }
             if(p.x==q.x && p.y==q.y) {
-                std::memcpy(pixel,sourcePixel(static_cast<int>(qx),static_cast<int>(qy)),4*sizeof(T));
+                std::memcpy(pixel,sourcePixel(qx,qy),4*sizeof(T));
                 continue;
             }
             const auto xs=anchor?x_samples[static_cast<std::size_t>(x)].taps:

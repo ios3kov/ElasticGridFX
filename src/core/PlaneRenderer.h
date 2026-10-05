@@ -18,12 +18,15 @@ struct PlaneCanvasRegion {
     SampleQuality quality = SampleQuality::Bicubic;
     // Internal reference/benchmark control; no saved parameter or C ABI field.
     bool cache_axis_mapping = true;
+    // Comp mode owns a larger destination domain; source extents stay unchanged.
+    bool expanded_destination = false;
 };
 // Stored rectangles may extend beyond the logical canvas, including negative
 // origins. Output outside the canvas and missing source pixels are transparent
 // black, never stretched checkout edges. Source storage outside the canvas is
 // ignored. A 0x0 source is valid; strides are positive and views must not overlap.
-// Report pixel counters refer only to output pixels inside the logical canvas.
+// Comp callers may explicitly enable expanded_destination. Source storage
+// still uses the same logical extent; neutral expanded pixels stay transparent.
 PlaneRenderReport renderPlaneRGBAfRegion(const ConstImageRGBAf& src, const ImageRGBAf& dst,
     const PlaneCanvasRegion& region, const PlaneWarp* warp,
     AbortFn abort = nullptr, void* abort_refcon = nullptr);

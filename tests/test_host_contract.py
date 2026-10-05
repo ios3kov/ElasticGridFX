@@ -165,7 +165,10 @@ class HostContract(unittest.TestCase):
         pre = SOURCE.split('ae::Command::SmartPreRender { mut extra } => {', 1)[1].split(
             'ae::Command::SmartRender { extra } => {', 1
         )[0]
-        self.assertIn('extra.set_max_result_rect(canvas_rect);', pre)
+        self.assertIn('extra.set_max_result_rect(destination);', pre)
+        self.assertIn('plane_output_bounds(&snapshot.plane, cw, ch)?', pre)
+        self.assertIn('request.rect.right = cw;', pre)
+        self.assertIn('request.rect.bottom = ch;', pre)
         self.assertNotIn('max_rect.union(&input_max)', pre)
 
     def test_grid_animation_control_visible_without_diagnostic_text(self):

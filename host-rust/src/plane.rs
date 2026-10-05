@@ -18,7 +18,7 @@ impl Mode {
     }
 }
 #[derive(Clone,Copy,Debug,Default,PartialEq,Eq)]
-pub(crate) enum RenderKind {#[default] Region,Layer,Perspective}
+pub(crate) enum RenderKind {#[default] Region,Layer,Perspective,Comp}
 
 pub(crate) const CORNERS: [Params; 4] = [Params::PlaneTopLeft, Params::PlaneTopRight,
     Params::PlaneBottomRight, Params::PlaneBottomLeft];
@@ -271,6 +271,8 @@ unsafe extern "C" {
                        source_extent_x: f64, source_extent_y: f64) -> i32;
     pub(crate) fn eg_render_plane_region(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
+    pub(crate) fn eg_render_plane_comp(src: *const Image, dst: *const Image, depth: i32,
+                       frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     pub(crate) fn eg_render_plane_layer(src: *const Image, dst: *const Image, depth: i32,
                        frame: *const Frame, report: *mut Report, quality: i32, edge: i32) -> i32;
     pub(crate) fn eg_render_plane_between(src: *const Image, dst: *const Image, depth: i32,
@@ -330,7 +332,9 @@ pub(crate) fn dispatch_render(src:&Image,dst:&Image,depth:i32,frame:&Frame,repor
     // SAFETY: callers own the typed layer/frame/axis allocations for this
     // synchronous call. The C ABI validates all dimensions, strides and modes.
     unsafe {
-        if state.render_kind==RenderKind::Perspective && state.geometry().is_some() {
+        if state.render_kind==RenderKind::Comp {
+            eg_render_plane_comp(src,dst,depth,frame,report,quality,edge)
+        } else if state.render_kind==RenderKind::Perspective && state.geometry().is_some() {
             let Some(source)=state.source_corners else {return 1;};
             eg_render_plane_between(src,dst,depth,frame,report,quality,edge,source.as_ptr())
         } else if state.render_kind==RenderKind::Layer || (state.comp_space && !state.editable_corners) {
