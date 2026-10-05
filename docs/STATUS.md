@@ -1667,3 +1667,25 @@ UNCONFIRMED; no speculative fix accepted. Release/installer promotion blocked
 on incident resolution; previous green tests do not certify RAM Preview safety.
 Next: identify exact incident scene/time/settings, inspect request lifecycle,
 then bounded isolated verification before any user full-preview acceptance.
+
+### RAM Preview request mitigation candidate — Dev124
+
+Read-only SDK inspection confirms the open showTime-session.aep copy: active
+1920x1080/25fps/8s composition,32bpc, Surface canonical2, Final2, ShowGrid0,
+eight Grid Positions keys. Current UI Project tab is visible; incident-time pane
+state remains unknown. No time/parameter/key/project mutation or playback.
+Dev124 limits inactive loupe preparation to one initial owner/time warm request
+and polling at that same time. Advancing playback times cannot enqueue replacement
+loupe frames; cached owners require an active mouse-down corner gesture. Global
+window refresh after a completed copy is now gesture-only. Shared Mac/Windows
+policy; renderer, key formats, output quality and Demo OFF unchanged.
+103 Rust tests and strict all-target Clippy PASS. Policy regression simulates
+10000 advancing times with pending warm request and10000 with cached frame; these
+are not live AE request counts. Static review found only the prior mocked verifier
+fixture heuristic at tests/test_target_ae_acceptance.py:54; no auth endpoint.
+Root cause UNCONFIRMED. Full RAM Preview NOT RUN; no stability acceptance or
+release promotion. Candidate also needs loupe regression after changing time and
+switching Effect Controls to Project: the retained frame is time-qualified, so
+a hidden pane may no longer refresh it. Preserve this requirement as pending,
+not silently accepted or removed. Build/package identity and bounded host checks
+remain to be recorded separately.

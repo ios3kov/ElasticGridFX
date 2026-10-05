@@ -119,3 +119,13 @@ not loupe acceptance failure. Hidden-panel coverage still not established.
 
 2026-10-05 caption update: Surface mode is the former Flat mode. Internal ordinal2
 and loupe behavior unchanged; historical Flat evidence remains artifact-specific.
+
+## Dev124 incident mitigation candidate
+
+A user-reported whole-Mac RAM Preview hang blocks promotion. Inactive Effect-pane
+DRAW must no longer request a fresh loupe frame for each playback time or globally
+refresh windows on warm completion. The candidate permits one initial owner/time
+warm request and active corner gestures. Unit policy coverage PASS; native request
+lifecycle, playback stability and after-scrub hidden-pane loupe coverage NOT RUN.
+One initial warm request still exists; do not claim zero background host work or
+a proven root cause. Earlier hidden-pane acceptance does not cover this policy.

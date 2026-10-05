@@ -121,13 +121,31 @@ struct Frame{key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8
 thread_local!{
     static FRAME:std::cell::RefCell<Option<Frame>>=const{std::cell::RefCell::new(None)};
     static VIEW:std::cell::Cell<Option<(i32,i32)>>=const{std::cell::Cell::new(None)};
+    static WARM:std::cell::Cell<Option<(i32,i32,u32)>>=const{std::cell::Cell::new(None)};
 }
-pub(crate) fn close(){clear();FRAME.with_borrow_mut(|f|*f=None);VIEW.set(None);}
+pub(crate) fn close(){clear();FRAME.with_borrow_mut(|f|*f=None);VIEW.set(None);WARM.set(None);}
+// Permit one initial preview frame per owner, then require a corner gesture.
+// An unfinished warm request can be polled at that same time; advancing the
+// timeline must not replace it with requests for every playback frame.
+fn request_allowed(warm:&mut Option<(i32,i32,u32)>,owner:i32,time:i32,scale:u32,
+                   gesture:bool,cached_owner:bool)->bool {
+    if gesture { return true; }
+    if cached_owner { return false; }
+    if warm.is_none_or(|key|key.0!=owner) { *warm=Some((owner,time,scale)); }
+    *warm==Some((owner,time,scale))
+}
 // SDK25.6 AE_EffectUI.h:419 explicitly limits reserved_job_manageP to
 // Effect pane custom UI. Never ask a Comp/Layer context for an AsyncManager.
 pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
     if event.window_type()!=ae::WindowType::Effect{return Ok(());}
-    let owner=owner(input,id)?;let id=id.ok_or(ae::Error::BadCallbackParameter)?;
+    let owner=owner(input,id)?;
+    let gesture=ACTIVE.get().is_some_and(|g|g.owner==owner)&&native_button_down();
+    let cached_owner=FRAME.with_borrow(|frame|frame.as_ref().is_some_and(|f|f.key.owner==owner));
+    let mut warm=WARM.get();
+    let allowed=request_allowed(&mut warm,owner,input.current_time(),input.time_scale(),gesture,cached_owner);
+    WARM.set(warm);
+    if !allowed { return Ok(()); }
+    let id=id.ok_or(ae::Error::BadCallbackParameter)?;
     let window=VIEW.get().filter(|v|v.0==owner).map(|v|v.1).unwrap_or(ae::sys::PF_Window_COMP);
     let render=ae::aegp::suites::Render::new()?;
     let key=FrameKey{owner,window,time:input.current_time(),scale:input.time_scale(),stamp:render.current_timestamp()?.a};
@@ -168,8 +186,9 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
     let checked=render.checkin_frame(receipt);
     match (result,checked){(Ok(frame),Ok(()))=>{
         FRAME.with_borrow_mut(|f|*f=Some(frame));
-        // Only a new cached timestamp requests repaint; avoids a DRAW feedback loop.
-        ae::pf::suites::AdvApp::new()?.refresh_all_windows()
+        // Background warm completion must not trigger a global redraw/render loop.
+        if gesture { ae::pf::suites::AdvApp::new()?.refresh_all_windows()?; }
+        Ok(())
     },(Err(e),_)|(_,Err(e))=>Err(e)}
 }
 fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<Vec<u8>,ae::Error>{
@@ -189,6 +208,17 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 }
 #[cfg(test)] mod tests{
     use super::*;
+    #[test]fn playback_does_not_queue_loupe_frames_after_initial_warm(){
+        let mut warm=None;
+        assert!(request_allowed(&mut warm,7,0,25,false,false));
+        assert!(request_allowed(&mut warm,7,0,25,false,false));
+        for time in 1..10000 {assert!(!request_allowed(&mut warm,7,time,25,false,false));}
+        for time in 0..10000 {assert!(!request_allowed(&mut warm,7,time,25,false,true));}
+        assert!(request_allowed(&mut warm,7,91,25,true,true));
+        assert!(!request_allowed(&mut warm,7,92,25,false,true));
+        assert!(request_allowed(&mut warm,8,92,25,false,false));
+        assert!(!request_allowed(&mut warm,8,93,25,false,false));
+    }
     #[test]fn circle_center_and_target_preserve_precise_sampling(){
         let p=raster(|x,y|Some([255,(100.+x) as u8,(100.+y) as u8,20]));
         let at=|x:usize,y:usize|&p[(y*SIZE+x)*4..(y*SIZE+x+1)*4];
