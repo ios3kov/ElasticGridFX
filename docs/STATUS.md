@@ -1845,3 +1845,13 @@ repeated-press/slowness acceptance NOT RUN, original Mac-hang incident OPEN.
 Contract count correction: the combined first-application/host unittest run
 records20 tests, not24; earlier Dev140 checkpoint overcounted this suite. Logs
 remain retained; Rust test totals unaffected.
+
+Dev144 sourcea4720c5, BID EGFX-27b9340f03d6e79f2fd1ec21:116 Rust tests,
+strict Clippy and20 combined Python contract tests PASS. Regression FAIL before
+fix, PASS after. Bundle/PiPL/entrypoints/signature/ZIP/manifest PASS. Native
+installer reported Installed; system hashes/executable permissions PASS.
+AE registry count=1 com.elasticgrid.fx.warp and loaded UUID/path PASS. Preserved
+scene reopened. User requested three stationary presses and separate slowness
+feedback, both still NOT RUN. Mac CI37359801465 and Windows37359801528 PENDING.
+Local evidence outputs/corner-repress-dev144/verification.json. Original Mac
+RAM Preview incident OPEN/UNCONFIRMED; no playback, promotion, merge or release.
