@@ -1605,3 +1605,10 @@ interrupted/lock fixtures PASS, output /private/tmp/egfx-native-frontend-1FHLig.
 Evidence outputs/mac-installer-host-continuation/native-fixtures.log.
 9 Python payload/decision checks PASS. Windows compilation and native GUI
 Continue/cancel/real administrator flows pending. Plugin bytes unchanged, Demo OFF.
+
+Host-continuation Mac package fe8a902 strict build/signature PASS, exact6-file
+embedding and complete ZIP/manifest verification PASS. Delivery:
+outputs/mac-installer-dev116-continue/FSTR-Stretch-Installer-Mac.zip
+SHA256 931470f17ab10fa606039c8051a3af62026967623239086e6ba6ba08554eec65.
+GUI Continue/Cancel after live AE refusal and real Install/Restore NOT RUN.
+Windows code/fixtures updated locally, compilation still pending.
