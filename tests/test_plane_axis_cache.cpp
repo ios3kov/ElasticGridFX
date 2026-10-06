@@ -11,6 +11,13 @@
 #include <vector>
 using namespace elasticgrid;
 
+// Focused builds can isolate address factoring from the older separable cache.
+#if defined(ELASTICGRID_TEST_ADDRESSES_ONLY)
+constexpr bool test_axis_cache=false;
+#else
+constexpr bool test_axis_cache=true;
+#endif
+
 template<typename T>
 PlaneRenderReport render(const T* input,int sw,int sh,int ss,T* output,int dw,int dh,int ds,
                          PlaneCanvasRegion region,const PlaneWarp* warp,
@@ -39,9 +46,11 @@ void compare(const PlaneWarp* warp,PlaneCanvasRegion region,int sw,int sh,int dw
         if(!input.empty()) input[0]=std::bit_cast<float>(0x80000000u); // negative zero
         if(input.size()>17) {input[9]=INFINITY;input[17]=std::bit_cast<float>(0x7fc00123u);}
     }
-    region.cache_axis_mapping=true;
+    region.cache_axis_mapping=test_axis_cache;
+    region.cache_sample_addresses=true;
     const auto a=render(input.data(),sw,sh,ss,cached.data(),dw,dh,ds,region,warp);
     region.cache_axis_mapping=false;
+    region.cache_sample_addresses=false;
     const auto b=render(input.data(),sw,sh,ss,scalar.data(),dw,dh,ds,region,warp);
     assert(a.invalid_plane==b.invalid_plane && a.outside_pixels==b.outside_pixels &&
            a.invalid_projection_pixels==b.invalid_projection_pixels);
@@ -60,6 +69,14 @@ void compare(const PlaneWarp* warp,PlaneCanvasRegion region,int sw,int sh,int dw
         }
         assert(false && "cached/general plane pixels must match exactly");
     }
+    // Independently verify the general-path footprint factoring against the
+    // historical per-tap lookup, even when axis caching is ineligible.
+    std::fill(cached.begin(),cached.end(),T(17));
+    region.cache_sample_addresses=true;
+    const auto factored=render(input.data(),sw,sh,ss,cached.data(),dw,dh,ds,region,warp);
+    assert(factored.invalid_plane==b.invalid_plane && factored.outside_pixels==b.outside_pixels &&
+           factored.invalid_projection_pixels==b.invalid_projection_pixels);
+    assert(!std::memcmp(cached.data(),scalar.data(),cached.size()*sizeof(T)));
     // Cancellation remains on the calling thread, before any mapping/output.
     struct Abort {std::thread::id owner;int calls=0;int limit;};
     auto callback=[](void* raw)->std::int32_t {
@@ -69,7 +86,7 @@ void compare(const PlaneWarp* warp,PlaneCanvasRegion region,int sw,int sh,int dw
     for(int limit:{1,3}) {
         std::fill(cached.begin(),cached.end(),T(17));
         Abort state{std::this_thread::get_id(),0,limit};
-        region.cache_axis_mapping=true;
+        region.cache_axis_mapping=test_axis_cache;
         bool cancelled=false;
         try {render(input.data(),sw,sh,ss,cached.data(),dw,dh,ds,region,warp,callback,&state);}
         catch(const RenderCancelled&) {cancelled=true;}
@@ -109,6 +126,9 @@ void matrix() {
                 compare<T>(&*warp,region,41,31,41,31);
                 region.source_x=7;region.source_y=5;region.output_x=-3;region.output_y=-4;
                 compare<T>(&*warp,region,19,13,47,39);
+                region.expanded_destination=true;
+                compare<T>(&*warp,region,19,13,47,39);
+                region.expanded_destination=false;
                 region.surface_units_x=2.4;region.surface_units_y=.75;
                 compare<T>(&*warp,region,19,13,17,11); // explicit general-path fallback
                 region.surface_units_x=region.surface_units_y=1;

@@ -88,11 +88,29 @@ later result file and Cua confirm completed opening. Point.value script reads
 still return AE invalid numeric result; scalar/key-count scope checks PASS.
 First automated gesture refused before input (not foreground); second moved the
 layer rather than a corner and was immediately undone, visually restored. Neither
-is accepted as corner census evidence. One short human corner gesture requested;
-no RAM Preview/long drag. Private checkpoint:
+is accepted as corner census evidence. Later user corner gesture records
+SmartPreRender11 HI/full and SmartRender11 HI/full over1067ms; no LO/reduced
+requests observed. These are stage counts, not22 frames or a speed benchmark.
+Screenshot confirms Top Right changed; Undo restoration NOT CONFIRMED for this
+gesture. No RAM Preview/long drag. Private checkpoint:
 outputs/interactive-quality-dev162/verification.json. This diagnostic is not the
 automatic Preview implementation or a normal delivery. New source not pushed;
 prior green CI belongs to b585977. See throughput plan for sources and remaining checks.
+
+Local next candidate Dev164: general sampler resolves four source-row bases and
+four X offsets once per footprint, replacing repeated16-tap bounds checks. Map,
+weights, summation, NaN fallback, quality and loupe unchanged; common Mac/Windows
+code, no host API or frame request. Exact old/new-address full-image matrix PASS
+in production O3/fast and isolated O1/fast ASan/UBSan;28 CTest,120 ordinary Rust,
+strict Clippy and16 host contracts PASS. Separate review PASS for sparse/empty
+checkout, int64 offsets, pointer bounds, immutable source and local worker data.
+Skill scanner omits C++: NOT ASSESSED, no empty-finding pass claim. Prepared-axis
+experiment rejected because O1/fast differs by one ULP; original math restored.
+An all-cache O1/fast parity difference also reproduces on unchanged HEAD renderer
+and tests; standard preflight O1 and production O3/fast matrices PASS. This is
+recorded as an existing configuration-specific parity limit, not hidden by the
+new isolated-address check. Build/install/native response pending. No push,
+release or incident closure. Private evidence: outputs/prepared-axis-dev164.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.

@@ -20,6 +20,8 @@ struct PlaneCanvasRegion {
     bool cache_axis_mapping = true;
     // Comp mode owns a larger destination domain; source extents stay unchanged.
     bool expanded_destination = false;
+    // Internal exact-reference control, not exposed/saved by the AE host.
+    bool cache_sample_addresses = true;
 };
 // Stored rectangles may extend beyond the logical canvas, including negative
 // origins. Output outside the canvas and missing source pixels are transparent

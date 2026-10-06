@@ -234,6 +234,25 @@ static PlaneRenderReport renderRegion(const Src& src,const Dst& dst,
                     for(int j=0;j<ys.count;++j) cached_rows[j]=horizontalRow(ys.index[j],ys);
                     rows_ready=true;
                 }
+            } else if(region.cache_sample_addresses) {
+                // The 4x4 footprint shares four X offsets and four source rows.
+                // Validate each axis once, preserving the exact zero-sample
+                // rules for logical edges and sparse/empty checked-out worlds.
+                std::ptrdiff_t offsets[4]{};
+                for(int i=0;i<xs.count;++i) {
+                    const auto x=xs.index[i];
+                    const auto sx=static_cast<std::int64_t>(x)-region.source_x;
+                    offsets[i]=empty || x<0 || x>=region.canvas_width || sx<0 || sx>=src.width
+                        ? -1 : static_cast<std::ptrdiff_t>(sx)*4;
+                }
+                for(int j=0;j<ys.count;++j) {
+                    const auto y=ys.index[j];
+                    const auto sy=static_cast<std::int64_t>(y)-region.source_y;
+                    const T* row=empty || y<0 || y>=region.canvas_height || sy<0 || sy>=src.height
+                        ? nullptr : src.data+static_cast<std::ptrdiff_t>(sy)*source_stride;
+                    for(int i=0;i<xs.count;++i)
+                        samples[j][i]=row && offsets[i]>=0 ? row+offsets[i] : zero;
+                }
             } else for(int j=0;j<ys.count;++j) for(int i=0;i<xs.count;++i)
                 samples[j][i]=sourcePixel(xs.index[i],ys.index[j]);
             // Interleave independent channels so the compiler can vectorize

@@ -118,3 +118,46 @@ Cua getAXState on the closed binding launched PID51890. Source success path exit
 No installation repeated in the probe. Read-only process checks now replace all
 closed-installer UI queries. Evidence retained privately at
 outputs/interactive-plane-dev160/installer-relaunch-probe.jsonl.
+
+## Dev162 census result / next exact optimization
+
+User completed the bounded corner gesture. Private record binds PID54753 and
+BID EGFX-59ae18a6c89d2e8e727b577d, corner1, release1067ms: Legacy0,
+SmartPreRender11 HI/full and SmartRender11 HI/full; all LO/reduced/unknown bins0.
+These are overlapping stage callbacks, not22 frames or a speed benchmark. Native
+screenshot shows Top Right changed to1308,447 and no error dialog, Final/Full
+retained. Undo restoration is NOT CONFIRMED by this observation. Host LO is not
+an automatic drag signal in this scene; do not use it as an export classifier.
+
+Next scoped optimization: prepare immutable inverse-axis segment invariants once
+per PlaneWarp snapshot instead of recomputing source endpoints, spans and Hermite
+tangents for every pixel. Retain the original per-sample operation order, float
+rounding, upper_bound segment choice, endpoint handling and Hermite blend. No
+approximate LUT, quality switch, new host API, shared mutable cache or extra frame.
+Both platforms share this C++ path. Verify exact bits against the retained
+uncached inverseMapNormalized across valid/near-degenerate axes, boundary and
+random coordinates, easing/range cases, then existing full-image/sanitizer and
+Rust/host contracts. Native smoothness remains pending, both incidents OPEN.
+
+Prepared-axis experiment REJECTED before integration: release O3 fast and O2
+fast each match6,483,600 values, but ASan/O1 fast finds a one-ULP difference;
+endpoint-expression and constrained-contraction repair attempts also fail exact
+parity. No such code is installed or retained in product source. Private patches
+and failing logs retained. Replacement scope: factor repeated source row/column
+address validation out of the16-tap lookup; no change to map/weights/color math.
+Verify old-address/new-address exact whole-image equality, both samplers, all
+three depths, edges, sparse/empty checkouts, origins, HDR/NaN/padding and MFR.
+
+Dev164 address factoring implemented without map/filter arithmetic change.
+The internal cache_sample_addresses switch retains the old per-tap lookup as a
+reference, never an AE/saved parameter. Existing matrix now compares both address
+paths separately, expanded destinations included. Production O3/fast full matrix
+and isolated address O1/fast ASan/UBSan PASS; standard preflight O1 all-cache
+ASan/UBSan PASS;28 CTest,120 ordinary Rust, strict Clippy and16 host contracts PASS.
+First address harness missed CpuRenderer.cpp's RenderCancelled definition; linker
+failure retained, dependencies corrected before test execution. All-cache O1/fast
+shows one-ULP axis-cache/general difference, reproduced independently on unchanged
+HEAD renderer +HEAD test. This older config-specific parity limit remains open;
+no false claim that this nonstandard sanitizer configuration passes all caches.
+C++ scanner scope unsupported/empty, NOT ASSESSED; separate manual pointer/lifetime
+review PASS. Build/installed smoothness pending; no quantitative speed claim.
