@@ -18,6 +18,9 @@ render-diagnostics = []
 preview-overlay-probe = []
 # Same bounded gesture log, without requesting PREVIEW callbacks.
 gesture-probe = ["preview-overlay-probe"]
+# Isolated hang diagnosis: no loupe frame requests or diagnostic file logging.
+# Not a product workaround; the lens has no source pixels in this build.
+loupe-source-disabled-probe = []
 
 [dependencies]
 after-effects = "=0.4.0"

@@ -1,5 +1,20 @@
 # Corner loupe — 2026-10-05
 
+2026-10-06 incident: ordinary Dev152 stationary-press repair does not close drag
+acceptance. User reports jerky dragging and then an AE-only hang. Exact native
+sample/incident remain local in outputs/corner-clean-dev152/drag-profile;
+[current hold](STATUS.md) records evidence and unknown attribution. Diagnostic
+Dev156 is a nondefault source-disabled probe: no warm/gesture frame request,
+no file logger, unchanged ordinary rendering/keys/UI state machine. The lens
+intentionally has no pixels in this probe; it is not the requested product or
+a workaround to ship. Planned comparison is one short corner gesture with Undo,
+no RAM Preview, immediate stop/owned-process shutdown if responsiveness fails.
+Do not repeat the15-second drag. First compile of the isolated C++ sanitizer
+matrix omitted CpuRenderer.cpp (RenderCancelled definitions) and failed to link;
+corrected source list compiled and existing depth/stride/edge/ROI/cancellation/
+concurrency matrix passed under ASan/UBSan.116 probe Rust tests, strict probe
+Clippy and16 host source contracts PASS; native hypothesis test NOT RUN.
+
 Scoped addition to the four-mode update under rules8.0.0. Preserve prior mode,
 Demo, licensing and installer obligations. User confirmed: the loupe itself is
 centered on the corner, with a target at its center. Applies to Mac and Windows.

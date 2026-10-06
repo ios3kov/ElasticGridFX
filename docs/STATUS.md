@@ -1,10 +1,36 @@
 # Current status
 
-Updated: 2026-10-05. This is the concise entry point for the current product and
+Updated: 2026-10-06. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
+
+**HOLD — native interactive hang.** Ordinary Dev152 source39616fa / Build ID
+EGFX-c3c62a10f10d4026fcab974d: user reports slightly faster but jerky corner drag,
+then AE hangs during a15-second diagnostic gesture. User confirms only AE hung;
+this is distinct from the earlier whole-Mac RAM Preview incident, still OPEN.
+Exact-process Apple sample retained privately in
+outputs/corner-clean-dev152/drag-profile/sample.txt. All1340 samples of one AE
+render executor stop at BEEp_AbortProc / objc_retainAutoreleasedReturnValue,
+called through the32bpc plane renderer's AE abort callback. This localizes the
+captured worker; it does not prove callback misuse, duplicate-render attribution
+or the original RAM incident's cause. SDK25.6 AE_Effect.h:2678–2700,2727 and2784
+permit periodic abort calls with the current effect_ref; reviewed synchronous
+bridge uses the callback's current PF_InData and polling stays on its caller.
+Do not remove cancellation or reduce output quality as a speculative repair.
+Main thread sampled in AppKit event wait; captured footprint11.0GiB peak11.3GiB.
+After shutdown, a16GiB Mac reports18.15GiB swap used and61% memory free; these
+post-incident values do not establish memory pressure during the gesture.
+Verified PID44395 did not exit after SIGTERM; exact-path-checked SIGKILL completed.
+Owned pre-test project copy retained; no other application closed, no RAM Preview.
+No promotion, release or further long native drag. Next discriminating candidate:
+Dev156 loupe-source-disabled-probe, a nondefault/local-only feature suppressing
+all secondary loupe frame requests, including warm requests. No diagnostic log,
+render algorithm, keys, parameter values, quality, async-manager flag or ordinary
+Dev152 behavior change. Lens pixels are intentionally unavailable only in this
+probe. Build/package checks and a separately bounded native comparison are
+pending; this is diagnosis, not a product fix or acceptance.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.
@@ -1927,3 +1953,20 @@ latency cause. First discriminating step: ordinary Dev152, same source behavior
 and invalidation fix, without gesture-probe/file logging. No speculative render
 or pointer behavior change. Native drag/no-slowdown acceptance pending; original
 whole-Mac RAM Preview incident OPEN/UNCONFIRMED.
+
+Ordinary Dev152 source39616fa, BID EGFX-c3c62a10f10d4026fcab974d:
+116 default-feature Rust tests/strict Clippy/release build PASS; no build warnings
+(process-local toolchain LLVM lookup corrected, previous warnings retained).
+Canonical bundle/PiPL/exports/signature/archive/manifest/native installer PASS.
+Native Installed message, canonical installed files/executable permissions and
+signature PASS. AE registry count1, loaded UUID/path PASS. Cargo compiler record
+has only default/native-plane; diagnostic log prefix absent in binary. Separate
+current scene copy saved before quit; reopened with selected Surface grid/grips.
+Human drag/Undo/no-slowdown and stationary press recheck requested, NOT RUN.
+User asked why installer appears twice: source InstallerApp.mm exits after
+successful outcome OK; another start panel appeared after agent re-queried the
+completed app through Cua. Do not query/reopen the installer after outcome/exit;
+use disk manifest checks instead. No second installation was invoked. Native
+frontend visual startup claim remains observation-specific. Windows runner retry
+37362662281 attempt2 PASS on70f8cee; current39616fa differs only STATUS.md, so CI
+evidence remains bound to70f8cee. Original RAM Preview incident OPEN/UNCONFIRMED.

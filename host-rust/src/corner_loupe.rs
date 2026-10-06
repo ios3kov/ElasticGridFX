@@ -246,6 +246,9 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
     result
 }
 fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
+    // Diagnostic156 isolates all secondary loupe renders (including warm work)
+    // from the unchanged effect renderer. Never enabled in ordinary candidates.
+    if cfg!(feature="loupe-source-disabled-probe"){return Ok(());}
     if event.window_type()!=ae::WindowType::Effect{return Ok(());}
     let owner=owner(input,id)?;
     let gesture=ACTIVE.get().is_some_and(|g|g.owner==owner)&&native_button_down();
