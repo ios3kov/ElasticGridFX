@@ -24,7 +24,7 @@ After shutdown, a16GiB Mac reports18.15GiB swap used and61% memory free; these
 post-incident values do not establish memory pressure during the gesture.
 Verified PID44395 did not exit after SIGTERM; exact-path-checked SIGKILL completed.
 Owned pre-test project copy retained; no other application closed, no RAM Preview.
-No promotion, release or further long native drag. Next discriminating candidate:
+No promotion, release or further long native drag. Previous discriminating candidate:
 Dev156 loupe-source-disabled-probe, a nondefault/local-only feature suppressing
 all secondary loupe frame requests, including warm requests. No diagnostic log,
 render algorithm, keys, parameter values, quality, async-manager flag or ordinary
@@ -32,7 +32,7 @@ Dev152 behavior change. Lens pixels are intentionally unavailable only in this
 probe. Build/package checks and a separately bounded native comparison are
 pending; this is diagnosis, not a product fix or acceptance.
 
-Current installed diagnostic: **0.9.4 Dev156**, source6a2d9cdf3a8e1a457d445e6d967a79403c5af08e,
+Previous installed diagnostic: **0.9.4 Dev156**, source6a2d9cdf3a8e1a457d445e6d967a79403c5af08e,
 BID EGFX-0408ee6c01d9e195b8c242e9.116 probe +116 ordinary Rust regression
 tests, strict probe Clippy,16 host contracts and existing plane ASan/UBSan matrix
 PASS. Release build has no warnings; bundle/PiPL/exports/signature/archive/
@@ -51,16 +51,34 @@ resolution and Preview quality visibly improve drag smoothness versus Full/Final
 No numerical benchmark or hang recurrence acceptance; Undo not separately confirmed. This
 diagnostic intentionally has no lens pixels and is not for normal product use.
 No further long drag, RAM Preview, publication, promotion or release. Local
-checkpoint: outputs/interactive-hang-dev156/verification.json. Current branch
-changes remain local; normal Dev152 and original RAM incidents remain OPEN.
+checkpoint: outputs/interactive-hang-dev156/verification.json. Dev156 changes
+were local at that checkpoint; normal Dev152 and original RAM incidents remain OPEN.
 
 Active follow-up: [interactive plane throughput plan](interactive-plane-throughput-plan.md).
 Optimize the large general sampler through AE scheduling, preserving exact pixels,
 selected quality and cancellation. Dev160 implemented:120 ordinary +120 source-disabled
 regressions, strict ordinary Clippy,16 source contracts and existing plane
-ASan/UBSan matrix PASS. Native scheduler/drag acceptance and Windows exact-source
-CI pending. Ordinary build restores the loupe; no quality substitution enabled.
-Both hang incidents remain OPEN, no promotion.
+ASan/UBSan matrix PASS. **Current installed ordinary:0.9.4 Dev160**, source
+b585977f90bb7ea1ce15086aaea811dafa9c9c1a / EGFX-44e5125b553fe875bb72e116.
+Canonical files/permissions/signature and loaded UUID/path PASS. Loupe press /
+repress and Undo USER PASS; Full/Final corner drag still jerky, responsiveness
+FAIL. Both exact-source Mac37485816445 and Windows37485816125 CI PASS; Windows
+native interaction NOT RUN on this source. No quality substitution enabled.
+User-authorized61bdfe5 and b585977 pushed for CI, no main/merge/release action.
+Both hang incidents remain OPEN, no promotion. Private current checkpoint:
+outputs/interactive-plane-dev160/verification.json.
+
+Installer reopening root cause reproduced without reinstallation: reading the
+closed app through Cua starts a new process. After Close, verify process exit
+without querying the installer binding. Evidence: private
+outputs/interactive-plane-dev160/installer-relaunch-probe.jsonl. Installer source
+already exits after success; no speculative installer code patch required.
+
+Temporary Preview while dragging remains research, not implemented. SDK quality
+is HI/LO, not an export discriminator. Local-only/nondefault Dev162 census observes
+existing callbacks without changing pixels/keys or requesting frames.122 probe /
+120 ordinary tests, strict probe Clippy and16 host contracts PASS; build and native
+census pending. See the throughput plan for API sources and remaining checks.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.

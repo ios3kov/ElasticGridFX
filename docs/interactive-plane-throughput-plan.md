@@ -56,9 +56,51 @@ not actual AE scheduling, drag-speed or incident closure evidence.
 
 Ordinary Dev160 restores the existing loupe, with no diagnostics. The optional
 source-disabled build is Dev161; no diagnostic workaround is enabled by default.
-Native and Windows checks: pending on committed candidate.
+Installed ordinary Dev160: source b585977f90bb7ea1ce15086aaea811dafa9c9c1a,
+Build ID EGFX-44e5125b553fe875bb72e116. Exact canonical installed files,
+permissions/signature and loaded UUID/path PASS. User confirms repeated press
+loupe and Undo work, but drag remains jerky at Full/Final: responsiveness FAIL.
+This does not close either hang incident. Mac CI37485816445 and Windows
+CI37485816125 both PASS on this exact source; not native Windows acceptance.
+Private checkpoint: outputs/interactive-plane-dev160/verification.json.
 
 User also proposed temporary Preview while dragging, restoring Final on release.
 This is useful as an additional interaction design. It needs reliable release /
 final-frame invalidation and cache/export isolation; currently investigation only.
 The Dev160 candidate preserves selected quality throughout the gesture.
+
+## Host quality research / isolated census
+
+SDK25.6 AE_Effect.h:2970–2977 /3120 documents PF_InData.quality as the current
+HI/LO render quality, not a drag/export discriminator. Downsample fields are
+render resolution, not proof of preview purpose. PF_RenderRequest, SmartPreRender
+and SmartRender inputs do not expose an interactive-purpose switch. Artisan
+PR_RenderContext APIs cannot be presumed available to an ordinary effect.
+AE_Effect.h:748–765 warns that FORCE_RERENDER is a last resort with Undo/cache
+limitations; it does not classify requests. AEGP_SetStreamValue changes project
+state; temporarily changing Render Quality therefore needs separate Undo,
+save/recovery and background-export proof. Do not implement a global mouse bit
+that changes output or call UI-only AEGP suites from a render worker.
+
+Dev162 interactive-quality-probe is local-only/nondefault. It only counts the
+existing Legacy, SmartPreRender and SmartRender callback quality/resolution in
+18 atomic bins. UI gesture start/end take snapshots and write at most eight
+small private temporary records. No extra frame request, parameter setter,
+sampler change, retained host pointer or worker file I/O. Loupe remains restored.
+Bins for each stage: HI full/reduced/unknown, LO full/reduced/unknown. This is a
+process-wide overlapping-callback census; use an owned one-effect scene. Counts
+are not unique frames and do not prove a generic export classifier.122 probe
+and120 ordinary Rust checks, strict probe Clippy and16 host contracts PASS.
+The initial probe compile failed because generated BUILD_ID is feature-gated;
+the probe now reads the always-present diagnostic marker on the UI thread.
+Separate review confirms render workers perform atomic counts only, no UI API,
+pointer retention or file access. Skill scanner excludes Rust: its empty finding
+list is NOT ASSESSED for this implementation. Pending: exact probe build identity
+and a short native gesture census, no long drag or RAM Preview.
+Automatic Preview substitution remains NOT IMPLEMENTED pending safe separation.
+
+Installer relaunch is separately reproduced: Close terminated PID51830, then one
+Cua getAXState on the closed binding launched PID51890. Source success path exits.
+No installation repeated in the probe. Read-only process checks now replace all
+closed-installer UI queries. Evidence retained privately at
+outputs/interactive-plane-dev160/installer-relaunch-probe.jsonl.

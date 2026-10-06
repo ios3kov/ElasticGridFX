@@ -15,6 +15,7 @@ thread_local! {static HOVER:std::cell::Cell<Option<Hover>>=const{std::cell::Cell
 thread_local! {static PREVIOUS:std::cell::Cell<Option<Observation>>=const{std::cell::Cell::new(None)};}
 thread_local! {static ACTIVE:std::cell::Cell<Option<Gesture>>=const{std::cell::Cell::new(None)};}
 pub(crate) fn clear(){
+    #[cfg(feature="interactive-quality-probe")]super::interactive_quality_probe::end("clear");
     #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(0,probe_state());
     ACTIVE.set(None);PREVIOUS.set(None);HOVER.set(None);GESTURE_FRAME.set(None);
 }
@@ -26,6 +27,7 @@ pub(crate) fn probe_state()->isize{
 }
 fn finish_native(button_down:bool){
     if !button_down&&ACTIVE.get().is_some_and(|g|g.native){
+        #[cfg(feature="interactive-quality-probe")]super::interactive_quality_probe::end("release");
         #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(1,probe_state());
         // A stationary release does not imply leaving the hit-tested corner.
         // Preserve its scoped pointer anchor so a second press needs no motion.
@@ -33,6 +35,7 @@ fn finish_native(button_down:bool){
     }
 }
 fn start_native(g:Gesture){
+    #[cfg(feature="interactive-quality-probe")]super::interactive_quality_probe::begin(g.owner,g.window,g.index);
     #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(2,probe_state()|((g.index as isize)<<8));
     if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){GESTURE_FRAME.set(None);}
     ACTIVE.set(Some(g));
@@ -105,6 +108,8 @@ fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>
 pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Option<ae::aegp::PluginId>){
     if let Ok(owner)=owner(input,id){if index<4 {GESTURE_FRAME.set(None);ACTIVE.set(Some(Gesture{owner,
         window:ui::event_window_code(event),index,native:false}));}}
+    #[cfg(feature="interactive-quality-probe")]
+    if let Some(g)=ACTIVE.get(){super::interactive_quality_probe::begin(g.owner,g.window,g.index);}
 }
 pub(crate) fn native_button_down()->bool{
     #[cfg(any(target_os="macos",target_os="windows"))]{

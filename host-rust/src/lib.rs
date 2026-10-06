@@ -20,6 +20,8 @@ mod plane;
 mod edge;
 mod demo;
 mod corner_loupe;
+#[cfg(feature="interactive-quality-probe")]
+mod interactive_quality_probe;
 mod fit_layer;
 mod reset_grid;
 mod spacing;
@@ -1328,6 +1330,8 @@ impl AdobePluginGlobal for Plugin {
                 }
             }
             ae::Command::Render { in_layer, mut out_layer } => {
+                #[cfg(feature="interactive-quality-probe")]
+                interactive_quality_probe::observe(&in_data,0);
                 #[cfg(feature="render-diagnostics")]
                 let mut trace=render_diagnostics::Trace::new("render",in_data.current_time(),in_data.time_scale());
                 let grid = grid_snapshot(params)?;
@@ -1352,6 +1356,8 @@ impl AdobePluginGlobal for Plugin {
                 {trace.mark(render_diagnostics::Phase::Sampling);trace.complete();}
             }
             ae::Command::SmartPreRender { mut extra } => {
+                #[cfg(feature="interactive-quality-probe")]
+                interactive_quality_probe::observe(&in_data,1);
                 #[cfg(feature="render-diagnostics")]
                 let mut trace=render_diagnostics::Trace::new("smart_pre",in_data.current_time(),in_data.time_scale());
                 let snapshot = smart_render_snapshot(params, in_data)?;
@@ -1394,6 +1400,8 @@ impl AdobePluginGlobal for Plugin {
                 trace.complete();
             }
             ae::Command::SmartRender { extra } => {
+                #[cfg(feature="interactive-quality-probe")]
+                interactive_quality_probe::observe(&in_data,2);
                 #[cfg(feature="render-diagnostics")]
                 let mut trace=render_diagnostics::Trace::new("smart",in_data.current_time(),in_data.time_scale());
                 let snapshot = extra

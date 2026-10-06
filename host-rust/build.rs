@@ -45,7 +45,8 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_LOUPE_SOURCE_DISABLED_PROBE").is_some() {161}
+    let development_build=if std::env::var_os("CARGO_FEATURE_INTERACTIVE_QUALITY_PROBE").is_some() {162}
+        else if std::env::var_os("CARGO_FEATURE_LOUPE_SOURCE_DISABLED_PROBE").is_some() {161}
         else if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {155}
         else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {154}
         else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153} else {160};
