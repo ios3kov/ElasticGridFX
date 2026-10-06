@@ -78,7 +78,7 @@ Temporary Preview while dragging remains research, not implemented. SDK quality
 is HI/LO, not an export discriminator. Local-only/nondefault Dev162 census observes
 existing callbacks without changing pixels/keys or requesting frames.122 probe /
 120 ordinary tests, strict probe Clippy and16 host contracts PASS.
-**Current installed diagnostic:0.9.4 Dev162**, local source
+**Previous installed diagnostic:0.9.4 Dev162**, local source
 1f90454666f0327b5f495d0dc216af362fc139a9 / EGFX-59ae18a6c89d2e8e727b577d.
 Release build, bundle/PiPL/exports/signature/archive, canonical installed payload
 and loaded UUID/path PASS. Features exactly default/native-plane/interactive-quality-probe.
@@ -109,8 +109,22 @@ experiment rejected because O1/fast differs by one ULP; original math restored.
 An all-cache O1/fast parity difference also reproduces on unchanged HEAD renderer
 and tests; standard preflight O1 and production O3/fast matrices PASS. This is
 recorded as an existing configuration-specific parity limit, not hidden by the
-new isolated-address check. Build/install/native response pending. No push,
+new isolated-address check. Build/install/loaded identity PASS; native response pending. No push,
 release or incident closure. Private evidence: outputs/prepared-axis-dev164.
+
+**Current installed ordinary:0.9.4 Dev164**, source
+99f6e2b8f2fc5ba3f031bb5a4eda5d1de29474e8 / EGFX-26e3006115f77318033d8d3a.
+Warning-free release build, package/exports/PiPL/signature/archive/manifest/native
+installer and exact installed bytes/permissions/signature PASS. Features only
+default/native-plane; no diagnostic logging, quality census or source-disabled
+probe. Installer reports Installed/Previous saved, exits; no closed UI query.
+AE PID58561 loaded canonical binary UUID72BF227D-5DB5-3DA6-B5B0-0B6F39138683,
+path/UUID PASS. Cold UI/AppleEvent opening times out; later completed registration
+file and responsive Cua confirm the saved owned copy is open, not a new hang.
+One FSTR render graph,32bpc Full/Final Surface, selected Grid Positions and visible
+grips. Current Top Right1308,447 retained from prior user gesture; do not claim
+that gesture's Undo restored1192,551. Short new-candidate responsiveness/Undo/loupe
+acceptance PENDING. No RAM Preview, release, incident closure or new-source CI.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.

@@ -161,3 +161,12 @@ HEAD renderer +HEAD test. This older config-specific parity limit remains open;
 no false claim that this nonstandard sanitizer configuration passes all caches.
 C++ scanner scope unsupported/empty, NOT ASSESSED; separate manual pointer/lifetime
 review PASS. Build/installed smoothness pending; no quantitative speed claim.
+
+Dev164 built/installed/loaded PASS: source99f6e2b8f2fc5ba3f031bb5a4eda5d1de29474e8,
+BID EGFX-26e3006115f77318033d8d3a; ordinary features default/native-plane only.
+Native installer completed and exited, exact canonical files and signature PASS.
+PID58561 loaded matching path/UUID72BF227D-5DB5-3DA6-B5B0-0B6F39138683.
+Cold opening transport timeout retained; later registration/Cua confirms completed
+owned scene opening, Final/Full32bpc and selected visible grid. No repeated
+installer launch. User short drag/Undo/loupe response still PENDING. This addresses
+redundant sample lookup checks only; automatic Preview substitution NOT IMPLEMENTED.
