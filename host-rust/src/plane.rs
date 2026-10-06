@@ -247,6 +247,7 @@ impl Drop for Geometry {
 }
 
 #[repr(C)]
+#[derive(Clone,Copy)]
 pub(crate) struct Frame {
     pub corners: [f64; 8], pub columns: *const f32, pub rows: *const f32,
     pub column_count: i32, pub row_count: i32,
@@ -257,6 +258,7 @@ pub(crate) struct Frame {
     pub abort_fn: Option<unsafe extern "C" fn(*mut c_void) -> i32>, pub abort_refcon: *mut c_void,
 }
 #[repr(C)]
+#[derive(Clone,Copy)]
 pub(crate) struct Image { pub pixels: *mut c_void, pub row_bytes: isize, pub width: i32, pub height: i32 }
 #[repr(C)]
 #[derive(Default)]
@@ -300,7 +302,7 @@ pub(crate) fn evaluated_axes(p: &EgRenderParams) -> Result<(Vec<f32>, Vec<f32>),
     Ok((columns, rows))
 }
 
-pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
+pub(crate) fn render(in_data: &ae::InData, input: Option<&ae::Layer>, output: &mut ae::Layer,
                      p: &EgRenderParams, state: &State) -> Result<(), ae::Error> {
     let corners = state.corners.ok_or(ae::Error::BadCallbackParameter)?;
     if input.is_some_and(|layer| layer.bit_depth() != output.bit_depth()) {
@@ -321,16 +323,34 @@ pub(crate) fn render(input: Option<&ae::Layer>, output: &mut ae::Layer,
     } else {Image {pixels: std::ptr::null_mut(), row_bytes: 0, width: 0, height: 0}};
     let dst = Image {pixels: unsafe {output.data_ptr_mut()}.cast(), row_bytes: output.row_bytes(),
                      width: output.width() as i32, height: output.height() as i32};
+    if row_tiles::eligible(&src,&dst,output.bit_depth() as i32,&frame,state) {
+        // SAFETY: eligible checked layout/separation; worlds and evaluated axes
+        // are retained until the synchronous AE iterator has joined all tasks.
+        let job=unsafe {row_tiles::Job::new(src,dst,output.bit_depth() as i32,frame,
+            (p.quality-1,p.edge_mode-1),state)};
+        return job.run(|| {
+            if p.abort_fn.is_some_and(|abort| unsafe {abort(p.abort_refcon)}!=0) {
+                Err(ae::Error::InterruptCancel)
+            } else {Ok(())}
+        }, |count,callback| in_data.utils().iterate_generic(count,|_,i,_| callback(i)));
+    }
     let mut report = Report::default();
     let rc=dispatch_render(&src,&dst,output.bit_depth() as i32,&frame,&mut report,
         (p.quality-1,p.edge_mode-1),state);
     // Invalid geometry is exact pass-through. UI diagnoses it, never render.
+    render_result(rc)
+}
+
+fn render_result(rc:i32)->Result<(),ae::Error> {
     match rc {
         0 => Ok(()), 5 => Err(ae::Error::InterruptCancel),
         1 | 2 | 4 => Err(ae::Error::BadCallbackParameter),
         _ => Err(ae::Error::InternalStructDamaged),
     }
 }
+
+#[path="plane_row_tiles.rs"]
+mod row_tiles;
 
 // One shared dispatch for legacy/SmartFX and both platforms. Geometry invalidity
 // retains the existing original-image fallback, including Perspective.

@@ -1344,7 +1344,7 @@ impl AdobePluginGlobal for Plugin {
                     trace.mark(render_diagnostics::Phase::Parameters);trace.output_present();
                 }
                 if plane.corners.is_some() {
-                    plane::render(Some(&in_layer), &mut out_layer, &p, &plane)?;
+                    plane::render(&in_data, Some(&in_layer), &mut out_layer, &p, &plane)?;
                 } else { render(&in_layer, &mut out_layer, &p)?; }
                 show_grid::State::read_demo(params, false)?.render_demo(&mut out_layer, &p, &grid, &plane)?;
                 show_grid::State::read(params, false)?.render(&mut out_layer, &p, &grid, &plane)?;
@@ -1427,7 +1427,7 @@ impl AdobePluginGlobal for Plugin {
                         p.output_origin_x = output_origin.h;
                         p.output_origin_y = output_origin.v;
                         if snapshot.plane.corners.is_some() {
-                            plane::render(input.as_ref(), &mut output, &p, &snapshot.plane)?;
+                            plane::render(&in_data, input.as_ref(), &mut output, &p, &snapshot.plane)?;
                         } else { render_sparse(input.as_ref(), &mut output, &p)?; }
                         snapshot.demo_watermark.render_demo(&mut output, &p, &snapshot.grid, &snapshot.plane)?;
                         snapshot.show_grid.render(&mut output, &p, &snapshot.grid, &snapshot.plane)?;

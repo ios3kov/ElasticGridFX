@@ -46,11 +46,21 @@ but exceeded15-second transport timeout. Cua subsequently confirms completed
 opening and responsiveness; separate1-second sample has idle render executors,
 so this timeout is not classified as another hang. Guarded effect selection PASS;
 Surface mode,32bpc,100%/Full/Final, Show Grid OFF and native corner grips visible.
-One short (at most1s) user gesture +Undo requested, comparison NOT RUN. This
+User comparison: slowness persists without loupe source requests; adaptive
+resolution and Preview quality visibly improve drag smoothness versus Full/Final.
+No numerical benchmark or hang recurrence acceptance; Undo not separately confirmed. This
 diagnostic intentionally has no lens pixels and is not for normal product use.
 No further long drag, RAM Preview, publication, promotion or release. Local
 checkpoint: outputs/interactive-hang-dev156/verification.json. Current branch
 changes remain local; normal Dev152 and original RAM incidents remain OPEN.
+
+Active follow-up: [interactive plane throughput plan](interactive-plane-throughput-plan.md).
+Optimize the large general sampler through AE scheduling, preserving exact pixels,
+selected quality and cancellation. Dev160 implemented:120 ordinary +120 source-disabled
+regressions, strict ordinary Clippy,16 source contracts and existing plane
+ASan/UBSan matrix PASS. Native scheduler/drag acceptance and Windows exact-source
+CI pending. Ordinary build restores the loupe; no quality substitution enabled.
+Both hang incidents remain OPEN, no promotion.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.
