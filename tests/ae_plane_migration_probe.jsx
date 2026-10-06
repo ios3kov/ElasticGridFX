@@ -24,7 +24,7 @@ function elasticGridPlaneMigrationProbe(config) {
         check(fx!==null,"Historical effect missing");
         check(fx.property("Deformation Plane").value===2,"Plane mode changed");
         check(Math.abs(egfxWaveParam(fx, "Wave Amplitude").value-8)<0.001,"Wave changed");
-        var names=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+        var names=["Top Left","Top Right","Bottom Right","Bottom Left"];
         var expected=[[10,5],[120,0],[127,85],[0,95]];
         for(var n=0;n<4;n++) {
             var p=fx.property(names[n]);check(p!==null,"Missing corner");

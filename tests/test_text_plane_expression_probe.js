@@ -2,7 +2,7 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const code=fs.readFileSync(__dirname+'/ae_text_plane_expression_probe.jsx','utf8');
 function setup(fail=false) {
-  const names=['Plane Top Left','Plane Top Right','Plane Bottom Right','Plane Bottom Left'];
+  const names=['Top Left','Top Right','Bottom Right','Bottom Left'];
   const props=names.map((_,i)=>({canSetExpression:true,expression:'',numKeys:0,value:[i,i+1],
     get expressionError(){return fail?'simulated evaluation failure':'';},setValue(v){this.value=v;}}));
   const rotation={value:11,setValue(v){this.value=v;}};

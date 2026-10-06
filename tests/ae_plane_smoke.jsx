@@ -69,7 +69,7 @@ function elasticGridPlaneSmoke(config) {
         var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         check(fx!==null,"Effect unavailable");
         function corners(points) {
-            var names=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+            var names=["Top Left","Top Right","Bottom Right","Bottom Left"];
             for(var i=0;i<4;++i) {
                 var property=fx.property(names[i]);check(property!==null,"Missing "+names[i]);
                 property.setValue(points[i]);

@@ -26,7 +26,7 @@ function elasticGridPlaneUIProbe(config) {
         var layer=comp.layers.addSolid([0.2,0.4,0.6],"__EGFX_TEST_PLANE",640,480,1);
         var fx=layer.property("ADBE Effect Parade").addProperty("com.elasticgrid.fx.warp");
         check(fx!==null,"Effect missing");
-        var names=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+        var names=["Top Left","Top Right","Bottom Right","Bottom Left"];
         var values=[[0,0],[639,0],[639,479],[0,479]];
         for(var i=0;i<4;i++)fx.property(names[i]).setValue(values[i]);
         fx.property("Deformation Plane").setValue(1);

@@ -1019,10 +1019,10 @@ impl AdobePluginGlobal for Plugin {
         }),ae::ParamFlag::SUPERVISE|ae::ParamFlag::CANNOT_TIME_VARY|ae::ParamFlag::CANNOT_INTERP,
             ae::ParamUIFlags::CONTROL_ONLY)?;
         for (id, name, point) in [
-            (Params::PlaneTopLeft, "Plane Top Left", (0.0, 0.0)),
-            (Params::PlaneTopRight, "Plane Top Right", (100.0, 0.0)),
-            (Params::PlaneBottomRight, "Plane Bottom Right", (100.0, 100.0)),
-            (Params::PlaneBottomLeft, "Plane Bottom Left", (0.0, 100.0)),
+            (Params::PlaneTopLeft, "Top Left", (0.0, 0.0)),
+            (Params::PlaneTopRight, "Top Right", (100.0, 0.0)),
+            (Params::PlaneBottomRight, "Bottom Right", (100.0, 100.0)),
+            (Params::PlaneBottomLeft, "Bottom Left", (0.0, 100.0)),
         ] {
             params.add_with_flags(id, name, ae::PointDef::setup(|f| {
                 f.set_default(point); f.set_restrict_bounds(false);

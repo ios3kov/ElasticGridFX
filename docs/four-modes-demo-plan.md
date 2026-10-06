@@ -279,3 +279,7 @@ Regression after-fix ASan/UBSan PASS;98 Rust/15 host contracts PASS. Native AE25
 copy left open for manual review. Exact source45350b2 pushed to authorized branch,
 CI/native Windows pending. No main/merge/release. Dev108 Surface caption observed
 in AE previously; new caption acceptance no longer blocked on hidden panel.
+
+2026-10-06 user caption change: corner rows are Top Left / Top Right /
+Bottom Right / Bottom Left. Persistent Params names/disk IDs and key streams
+are unchanged. Current native fixture captions follow the new UI.

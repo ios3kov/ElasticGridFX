@@ -25,7 +25,7 @@ function fstrLockCapture(root) {
     var l=c.layer(1),e=l.property('ADBE Effect Parade').property(1);
     if(e.property('__FSTR Plane Kind').expression.indexOf('native plane v2')<0)throw Error('Old binding not migrated');
     var keys=e.property('Grid Positions').numKeys;
-    var corners=['Plane Top Left','Plane Top Right','Plane Bottom Right','Plane Bottom Left'];
+    var corners=['Top Left','Top Right','Bottom Right','Bottom Left'];
     var values=[[80,60],[560,35],[590,410],[65,430]];
     for(var i=0;i<4;i++)e.property(corners[i]).setValue(values[i]);
     egfxWaveParam(e, 'Wave Amplitude').setValue(15);

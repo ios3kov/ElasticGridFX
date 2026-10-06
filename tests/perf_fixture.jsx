@@ -128,7 +128,7 @@ function elasticGridPerfFixture(config) {
         if (param(fx,"Deformation Plane").value!==planeOrdinal) throw new Error("Plane mode was not applied");
         var planeCorners=[];
         if (planeOrdinal===2) {
-            var cornerNames=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+            var cornerNames=["Top Left","Top Right","Bottom Right","Bottom Left"];
             var cornerValues=[[0,0],[config.width-1,0],[config.width-1,config.height-1],[0,config.height-1]];
             for (var cornerIndex=0;cornerIndex<4;cornerIndex++) {
                 var cornerProperty=param(fx,cornerNames[cornerIndex]);cornerProperty.setValue(cornerValues[cornerIndex]);

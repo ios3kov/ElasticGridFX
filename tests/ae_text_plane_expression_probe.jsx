@@ -4,7 +4,7 @@ function elasticGridTextPlaneExpressionProbe(config) {
     elasticGridTextPlaneToggle(config); // ownership/type checks before mutation
     var layer=app.project.activeItem.layer("__EGFX_TEST_TEXT");
     var fx=layer.property("ADBE Effect Parade").property("com.elasticgrid.fx.warp");
-    var names=["Plane Top Left","Plane Top Right","Plane Bottom Right","Plane Bottom Left"];
+    var names=["Top Left","Top Right","Bottom Right","Bottom Left"];
     var points=["[r.left,r.top,0]","[r.left+r.width,r.top,0]",
                 "[r.left+r.width,r.top+r.height,0]","[r.left,r.top+r.height,0]"];
     var saved=[],samples=[],rotation=layer.transform.yRotation.value,threeD=layer.threeDLayer;
