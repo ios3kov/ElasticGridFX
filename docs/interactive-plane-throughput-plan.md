@@ -99,6 +99,20 @@ list is NOT ASSESSED for this implementation. Pending: exact probe build identit
 and a short native gesture census, no long drag or RAM Preview.
 Automatic Preview substitution remains NOT IMPLEMENTED pending safe separation.
 
+Dev162 installed from clean local1f90454666f0327b5f495d0dc216af362fc139a9,
+BID EGFX-59ae18a6c89d2e8e727b577d. Release/package/installed/loaded-image checks
+PASS; ordinary loupe retained. One-effect graph confirmed on a separate saved
+project copy,32bpc Full/Final. No new-source CI/publication. Initial AE opening
+transport timeout is followed by completed script result and responsive Cua.
+Point.value script read fails with AE invalid numeric result even after opening;
+cause UNCONFIRMED. Metadata/scalar/key-count guards pass without that getter.
+The first helper gesture refused before input (foreground guard); the second
+moved the layer rather than a corner and was immediately undone, visually restored.
+No census file or valid corner observation yet. Requested one <=1-second human
+corner drag/Undo because the bounded helper did not reliably target the grip.
+No smoothness, release or hang-closure claim. Detailed private verification:
+outputs/interactive-quality-dev162/verification.json.
+
 Installer relaunch is separately reproduced: Close terminated PID51830, then one
 Cua getAXState on the closed binding launched PID51890. Source success path exits.
 No installation repeated in the probe. Read-only process checks now replace all

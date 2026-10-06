@@ -58,7 +58,7 @@ Active follow-up: [interactive plane throughput plan](interactive-plane-throughp
 Optimize the large general sampler through AE scheduling, preserving exact pixels,
 selected quality and cancellation. Dev160 implemented:120 ordinary +120 source-disabled
 regressions, strict ordinary Clippy,16 source contracts and existing plane
-ASan/UBSan matrix PASS. **Current installed ordinary:0.9.4 Dev160**, source
+ASan/UBSan matrix PASS. **Last installed ordinary:0.9.4 Dev160**, source
 b585977f90bb7ea1ce15086aaea811dafa9c9c1a / EGFX-44e5125b553fe875bb72e116.
 Canonical files/permissions/signature and loaded UUID/path PASS. Loupe press /
 repress and Undo USER PASS; Full/Final corner drag still jerky, responsiveness
@@ -77,8 +77,22 @@ already exits after success; no speculative installer code patch required.
 Temporary Preview while dragging remains research, not implemented. SDK quality
 is HI/LO, not an export discriminator. Local-only/nondefault Dev162 census observes
 existing callbacks without changing pixels/keys or requesting frames.122 probe /
-120 ordinary tests, strict probe Clippy and16 host contracts PASS; build and native
-census pending. See the throughput plan for API sources and remaining checks.
+120 ordinary tests, strict probe Clippy and16 host contracts PASS.
+**Current installed diagnostic:0.9.4 Dev162**, local source
+1f90454666f0327b5f495d0dc216af362fc139a9 / EGFX-59ae18a6c89d2e8e727b577d.
+Release build, bundle/PiPL/exports/signature/archive, canonical installed payload
+and loaded UUID/path PASS. Features exactly default/native-plane/interactive-quality-probe.
+Owned one-effect scene open at32bpc Full/Final, loupe retained. Installer exited;
+no closed binding query or repeated launch. Initial AppleEvent opening timed out;
+later result file and Cua confirm completed opening. Point.value script reads
+still return AE invalid numeric result; scalar/key-count scope checks PASS.
+First automated gesture refused before input (not foreground); second moved the
+layer rather than a corner and was immediately undone, visually restored. Neither
+is accepted as corner census evidence. One short human corner gesture requested;
+no RAM Preview/long drag. Private checkpoint:
+outputs/interactive-quality-dev162/verification.json. This diagnostic is not the
+automatic Preview implementation or a normal delivery. New source not pushed;
+prior green CI belongs to b585977. See throughput plan for sources and remaining checks.
 
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.
