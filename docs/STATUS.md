@@ -32,6 +32,26 @@ Dev152 behavior change. Lens pixels are intentionally unavailable only in this
 probe. Build/package checks and a separately bounded native comparison are
 pending; this is diagnosis, not a product fix or acceptance.
 
+Current installed diagnostic: **0.9.4 Dev156**, source6a2d9cdf3a8e1a457d445e6d967a79403c5af08e,
+BID EGFX-0408ee6c01d9e195b8c242e9.116 probe +116 ordinary Rust regression
+tests, strict probe Clippy,16 host contracts and existing plane ASan/UBSan matrix
+PASS. Release build has no warnings; bundle/PiPL/exports/signature/archive/
+manifest and native Install/Restore package PASS. Installer reports Installed,
+previous saved; exact canonical installed files/permissions/signature and loaded
+UUID/path PASS. No installer re-query after outcome exit. Feature record contains
+only default/native-plane/loupe-source-disabled-probe, no logger or PREVIEW probe.
+First opening transport used an incorrect application identifier and failed
+before script execution; corrected Info.plist identifier opened the owned copy
+but exceeded15-second transport timeout. Cua subsequently confirms completed
+opening and responsiveness; separate1-second sample has idle render executors,
+so this timeout is not classified as another hang. Guarded effect selection PASS;
+Surface mode,32bpc,100%/Full/Final, Show Grid OFF and native corner grips visible.
+One short (at most1s) user gesture +Undo requested, comparison NOT RUN. This
+diagnostic intentionally has no lens pixels and is not for normal product use.
+No further long drag, RAM Preview, publication, promotion or release. Local
+checkpoint: outputs/interactive-hang-dev156/verification.json. Current branch
+changes remain local; normal Dev152 and original RAM incidents remain OPEN.
+
 Current mode display order: Comp mode / Layer mode / Surface mode / Perspective.
 Surface is the former Flat caption; saved ordinal2 and internal enum stay unchanged.
 
