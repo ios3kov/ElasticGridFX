@@ -1889,3 +1889,41 @@ at the accepted new-press transition; repeated active cursor callbacks do none.
 Diagnostic155 records success without PREVIEW callbacks. Source guard FAIL
 before repair retained. Native fix/slowdown acceptance NOT RUN; original RAM
 Preview incident OPEN/UNCONFIRMED. No rendering/key/idle-request policy change.
+
+Dev152/diagnostic155 source70f8cee, BID EGFX-302271519bf02304b962c5ac:
+118 diagnostic Rust tests, strict Clippy and21 focused Python contracts PASS.
+SDK call-placement guard FAIL before/PASS after. Canonical bundle/PiPL/export/
+signature/archive/manifest and native installer package PASS. Release compile
+completed with Rust objcopy debug-strip warnings (missing toolchain LLVM shared
+library), retained build.log; no warning-free-build claim. Initial installer
+builder argument used a directory instead of ZIP and failed before any install;
+fresh installer-archive packaging from verified ZIP PASS. Candidate not installed:
+Mac locked; unlock requested. Native repeated-press/slowdown NOT RUN, original
+whole-Mac hang OPEN/UNCONFIRMED. Probe151 loaded UUID/path now PASS and134-record
+private capture retained. Authorized branch push succeeded; Mac CI37362662279
+in progress, Windows37362662281 queued on70f8cee. No main/merge/release.
+
+2026-10-06 continuation: user unlocked Mac. Current different AE session saved
+to a separate owned copy before quit; original files untouched. Diagnostic155
+installed through native Install/Restore: Installed message PASS, canonical
+FSTR FX/FSTR Stretch.plugin file hashes/executable permissions/signature PASS.
+Initial inspection guessed the wrong MediaCore path without FSTR FX subfolder;
+canonical-path check corrected and exact manifest verified. AE registry count1,
+matchName and loaded UUID/path PASS; owned Surface validation scene open with
+visible grips/Effect Controls. Three stationary presses plus drag/Undo/no-slowdown
+requested; journal-ready4 records, native fix acceptance still NOT RUN.
+Mac CI37362662279 PASS on70f8cee. Windows37362662281 initial failure is runner
+allocation, annotation "The job was not acquired by Runner of type hosted even
+after multiple attempts"; zero steps executed. One bounded job retry requested
+through GitHub connector successfully; result pending. Original RAM Preview
+whole-Mac incident remains OPEN/UNCONFIRMED. No playback or release action.
+
+2026-10-06 diagnostic155 native stationary press USER-REPORTED PASS, drag
+USER-REPORTED FAIL sluggish. Private613-record trace captured:6 native releases,
+500 repeated start/supervision records; no repeated Effect-context gesture frame
+preparation transition during drags. Diagnostic logger flushes every recorded
+line synchronously. This is concrete diagnostic overhead, not proof of the user
+latency cause. First discriminating step: ordinary Dev152, same source behavior
+and invalidation fix, without gesture-probe/file logging. No speculative render
+or pointer behavior change. Native drag/no-slowdown acceptance pending; original
+whole-Mac RAM Preview incident OPEN/UNCONFIRMED.
