@@ -140,3 +140,14 @@ is unsuitable for that acceptance claim. Batch/stream/effect/table remain local
 within the final UI callback; no staging during drag or host pointer retention.
 130 tests cover one-operation mock Undo, neighbouring keys and failed preparation.
 Native new-key removal after one Undo is pending and cannot be inferred from them.
+
+### Hypothesis corrected by measured stationary baseline
+
+Dev175/PID42388 reads the Top Left stream immediately after setup-only stationary
+press: third key12.480072/8.320053 ALREADY exists before moving. After moving24/8,
+one Undo returns exactly the stationary baseline. Therefore separate insert/set
+undo grouping was not established as the cause. Remove the raw batch experiment;
+Dev177 keeps199054a's simpler current-key-only SDK commit. Discriminating next test
+sets native cursor state on another UNANIMATED corner, verifies animated Top Left
+still has two original keys, then moves it once and checks one Undo removes only
+that gesture's key. Earlier FAIL observation is retained, not hidden or promoted.

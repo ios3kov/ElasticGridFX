@@ -43,7 +43,8 @@ Default native-plane + owned-corner-drag includes no diagnostic journal/census.
 Mac Surface/PID39293 current-key edit and one Undo PASS: Point keys0/24->12/24->0/24;
 Affected Lines3/6 retained. Perspective/PID40064 between-key insertion preserves
 both old keys and creates only the current key. However one Undo reverts its value
-but leaves the inserted key: key removal acceptance FAIL. No held-image/live-loupe
+but leaves a third key: initial key-removal observation FAIL; a later stationary
+baseline below shows this key predates the moving gesture. No held-image/live-loupe
 visual acceptance follows from these readbacks. Both45second guarded trials ended
 with AE absent, unchanged idle-cache key and all9 excluded components restored.
 Private evidence: outputs/owned-corner-dev173/native-surface/ and native-perspective/.
@@ -52,15 +53,21 @@ Mac CI37648115557 and Windows CI37648115646 on199054a are IN_PROGRESS at this
 checkpoint. They do not prove runtime acceptance. Original drag/RAM hang root
 cause remains UNKNOWN; no user project or RAM Preview was opened in these trials.
 
-Local Dev175 corrective hypothesis: Keyframe Suite5 StartAddKeyframes/AddKeyframes/
-SetAddKeyframe/EndAddKeyframes stages current time/value and commits ONE undoable
-stream operation, replacing separate InsertKeyframe/SetKeyframeValue. Failed
-preparation ends with add=false; explicit End/Release errors are returned. Exact
-SDK table is used because pinned wrapper Drop ignores EndAddKeyframes errors.
-No saved schema/ID/type, quality, renderer-worker state or new frame request change.
-130 default tests PASS; exact candidate build/native Undo regression pending.
-Release WITH frozen-image corner drag remains mandatory. Visual held image/live
-grid/live loupe and latest Windows native behavior remain OPEN.
+Dev175/PID42388 discriminating baseline read after the stationary setup gesture
+shows the third Point key already present BEFORE the moving gesture. One Undo
+restores exactly that baseline. Thus the Dev173 observation does NOT establish a
+separate Insert/Set undo-group defect; the atomic-batch hypothesis is unproven and
+its raw-SDK experiment is removed from the product. Keep199054a's simpler validated
+Keyframe Suite path and current-key-only behavior. A first175 trial stopped before
+DoScript because a private harness module was omitted; cleanup PASS, gesture NOT_RUN.
+
+Prepared Dev177 retains the ordinary173 functional code; fresh test will establish
+hit state on an UNANIMATED different corner, verify Top Left still has ONLY the
+original two keys, then move Top Left and Undo once. This isolates the intended
+single gesture without a prior native key insertion.130 tests/Clippy/contracts,
+exact build/install/native trial are rechecked for this candidate. Visual held
+image/live grid/live loupe and latest Windows native behavior remain OPEN.
+Release WITH frozen-image corner drag remains mandatory. Main/release unauthorized.
 
 ### Earlier checkpoints — preserved evidence
 
