@@ -22,6 +22,8 @@ mod demo;
 mod corner_loupe;
 #[cfg(feature="resource-census-probe")]
 mod resource_census;
+#[cfg(feature="corner-ui-ownership-probe")]
+mod corner_input_probe;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
 #[cfg(feature="deferred-corner-probe")]
@@ -1034,9 +1036,14 @@ impl AdobePluginGlobal for Plugin {
             (Params::PlaneBottomRight, "Bottom Right", (100.0, 100.0)),
             (Params::PlaneBottomLeft, "Bottom Left", (0.0, 100.0)),
         ] {
+            let point_ui=ae::ParamUIFlags::DISABLED;
+            // SDK25.6 AE_Effect.h: NO_ECW_UI preserves Timeline keys. This
+            // diagnostic tests native Point hit priority, not an accepted UI.
+            #[cfg(feature="corner-ui-ownership-probe")]
+            let point_ui=point_ui | ae::ParamUIFlags::NO_ECW_UI;
             params.add_with_flags(id, name, ae::PointDef::setup(|f| {
                 f.set_default(point); f.set_restrict_bounds(false);
-            }), ae::ParamFlag::SUPERVISE, ae::ParamUIFlags::DISABLED)?;
+            }), ae::ParamFlag::SUPERVISE, point_ui)?;
         }
         params.add_with_flags(Params::ResetPlane, "Reset Plane", ae::ButtonDef::setup(|f| {
             f.set_label("Fit Layer");
@@ -1218,6 +1225,8 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::UserChangedParam { param_index } => {
                 if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
+                    #[cfg(feature="corner-ui-ownership-probe")]
+                    corner_input_probe::record(corner_input_probe::Route::NativeSupervision,false);
                     // Native Point controls may consume the viewer gesture before
                     // our custom CLICK. Observe the change; never rewrite the point.
                     corner_loupe::native_change(&in_data,index,self.lifecycle_probe.plugin_id());

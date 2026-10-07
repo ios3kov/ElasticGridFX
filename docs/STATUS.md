@@ -75,20 +75,45 @@ mouse or playback, PID6028 reproduced growth at8.996seconds:1081471792bytes idle
 to1703626704bytes, expected guard stop/exit PASS. Thus Cua is not necessary for
 this idle growth. With only the runtime idle-cache setting disabled, PID6756
 completed20seconds without a limit; maximum1088548432bytes, ending989884872bytes.
-Preference readback false during the test; original enabled01 on disk afterward
-PASS. The off run recorded only a113x64 thumbnail; its full viewer image may have
+Preference readback false during the test. The initial on-disk restore/hash claim
+is INVALID: it checked the25.0 preference file rather than the running25.6 file.
+The off preference had persisted in25.6 despite suppressing save-on-quit. A later
+fresh-frame preflight rejected this changed baseline before opening the scene.
+With AE absent, restored only the actual25.6 key00 to its original01 (original
+true confirmed by PID6028 runtime readback); every other byte/mode preserved.
+The off run recorded only a113x64 thumbnail; its full viewer image may have
 reused a warm host cache. This is not a fresh full-frame rendering/stability PASS
 or proof that caching caused the original drag/RAM Preview incident. No product
 setting, MFR, quality, render source or memory cap was changed.
 
+**Fresh full-frame observation PASS (scoped):** PID9346 / AE25.6x101,
+same installed Dev169, background idle cache temporarily disabled. A0.125px
+corner change in the disposable in-memory copy forces a fresh render; largest
+borrowed world33177600bytes confirms1920x1080/32bpc, two successful pixel
+checkins, all delivered snapshot/world scopes balanced.20seconds, maximum
+1148727056bytes, no limit. No native gesture or RAM Preview; freeze and original
+hang repair remain OPEN. Earlier fresh-frame attempts stopped before project
+opening (changed preference baseline, then incorrect host-version suffix check),
+not renderer failures. Runtime host version is25.6x101, not25.6.*.
+
 **Current cleanup PASS:** AE absent, all9 authorized Hot Loader test bundles
-returned byte/mode-exact, original idle-cache preference enabled. Dev169 remains
-installed. No native gesture or RAM Preview in these experiments; freeze repair
-OPEN. Next: a discriminating single-frame/corner ownership test with background
-caching controlled, preserving old keys, Undo and selected-quality output. A fresh
-full-frame miss must be observed before interpreting a warm-cache comparison as
-renderer evidence. Private records: outputs/resource-census-dev169/{baseline-result.json,
-loaded-idle/phase2,armed-idle,idle-cache-on-no-ax,idle-cache-off-no-ax}.
+returned byte/mode-exact, actual25.6 idle-cache key01 restored explicitly;
+full captured preference-file hash unchanged after the successful test. Dev169
+remains installed. Private fresh-frame evidence:
+outputs/resource-census-dev169/fresh-frame-idle-off-r3/result.json.
+Incorrect25.0 restoration claims are superseded by
+outputs/resource-census-dev169/actual-preference-restored.json.
+
+**Next diagnostic: Dev170 corner input ownership**, nondefault
+corner-ui-ownership-probe. It hides only the four canonical Point ECW rows using
+NO_ECW_UI while preserving types/IDs/Timeline keys. This is a discriminating
+native-hit-priority experiment, not accepted product UI or frozen output. A
+bounded private UI journal separates custom CLICK/DRAG from native point
+supervision; ordinary behavior and renderer unchanged. One guarded<=1second
+gesture only after loaded identity/ARMED/current screenshot. Do not promote
+hidden corner rows; production must retain their coordinate controls/animation.
+See [diagnostic contract](resource-census-plan.md). New-source Windows CI/push,
+main, release and original-project writes remain unauthorized.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during

@@ -514,6 +514,8 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
+        #[cfg(feature="corner-ui-ownership-probe")]
+        if axis==DRAG_CORNER {super::corner_input_probe::record(super::corner_input_probe::Route::CustomClick,false);}
         corner_loupe::clear();
         if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index,plugin_id); }
         if axis==DRAG_COLUMNS || axis==DRAG_ROWS {
@@ -576,6 +578,8 @@ fn drag_inner(
         event.set_send_drag(false);return Ok(());
     };
     if axis == DRAG_CORNER {
+        #[cfg(feature="corner-ui-ownership-probe")]
+        super::corner_input_probe::record(super::corner_input_probe::Route::CustomDrag,event.last_time());
         if index>=4 || plane.state.corner_controls().is_none() {event.set_send_drag(false);return Ok(());}
         let (layer_x,layer_y)=if let Some(basis)=plane.state.parameter_basis {
             let Some((x,y))=plane::parameter_point(&basis,layer_x as f64,layer_y as f64,

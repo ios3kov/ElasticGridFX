@@ -163,13 +163,19 @@ crossed FSTR); do not promote this comparison to fresh full-frame/MFR stability,
 leak elimination or the original hang's root cause. UI-only logs may lag workers.
 Stopped-process stack repetitions do not measure a stall duration.
 
-The off setting was confined to the disposable AE process using the documented
+The off experiment changed the preference using the documented
 [Preferences API](https://ae-scripting.docsforadobe.dev/other/preferences/)
 with machine-independent storage;
 [saving preferences on quit](https://ae-scripting.docsforadobe.dev/general/application/#appsetsavepreferencesonquit) was
-disabled. Original Cache Frames When Idle=01 and the entire original preference
-file SHA256 verified unchanged on disk after exact-process exit. No disk
-preference file overwrite, cache deletion or permanent disable.
+disabled. **Correction:** suppressing save-on-quit did not prevent this setting
+from persisting. The initial01/hash verification used the25.0 file, not the
+actual25.6 preferences, so that restoration claim is INVALID. The next preflight
+detected false and stopped before scene opening; no fresh-frame result exists for
+that attempt. With AE absent, the actual25.6 key was restored00 to01 using the
+original runtime true value from PID6028. Only the two-byte key value changed;
+all other bytes/mode retained and private before/after evidence preserved.
+Future runs must capture and restore the actual host-version preference key
+explicitly after owned process exit. No cache deletion or permanent workaround.
 All9 excluded bundles returned, AE absent, no other-app signals. Raw logs and
 saved projects stay private under outputs/resource-census-dev169/idle-cache-*-no-ax.
 
@@ -181,3 +187,66 @@ renderer-side output reuse under changed parameters. The approved freeze contrac
 requires transient corner state outside canonical streams until release. Native
 Point hit priority and old-key/UI compatibility remain unresolved; no gesture or
 product fix is accepted by this diagnostic result.
+
+
+## Fresh full-frame discrimination —2026-10-07
+
+PID9346, AE25.6x101, source2b53747 / installed Dev169 exact loaded UUID/path
+PASS. In-memory saved disposable fixture received a0.125px Top Left change at
+current time before opening its viewer; disk project and original keys unchanged.
+Largest borrowed input/output world33177600bytes confirms1920x1080/32bpc;
+the separate113x64 callback is a thumbnail. Last delivered census snapshots3/3,
+input/output2/2, live0; two successful pixel checkins, no loupe copies/polls.
+20second observation completed without a cap; maximum1148727056bytes. Scoped
+fresh-frame evidence PASS; gesture/RAM Preview/hang repair NOT RUN.
+
+Preflight attempts PID8860 and9165 stopped before project opening: changed
+persisted cache baseline and an overly strict version-string check respectively.
+Correct version predicate accepts25.6x101. Actual25.6 preference file captured
+before launch, explicit key restoration after owned exit PASS with full original
+hash unchanged; all9 foreign bundles returned. Private result:
+outputs/resource-census-dev169/fresh-frame-idle-off-r3/result.json.
+
+## Dev170 input ownership experiment
+
+Question: does NO_ECW_UI on the existing Point parameters allow custom viewer
+CLICK/DRAG to own corner interaction? SDK25.6 AE_Effect.h guarantees retention
+of Timeline keys for this flag; it does not guarantee input priority. This must
+be observed, not inferred. Default ordinary Dev168 remains unchanged.
+
+Nondefault corner-ui-ownership-probe includes the Dev169 passive census and adds
+only NO_ECW_UI to the four Point UI flags (same IDs/types/defaults/param flags).
+No STD_CONTROL_ONLY/INVISIBLE, stream migration, render suppression, quality
+change, extra frame request or new saved state. Four ECW rows are intentionally
+absent in this diagnostic only: unacceptable as final product UI.
+
+UI-only private journal records first custom corner click, first custom corner
+drag, last custom corner drag and first native point supervision. At most16
+writes per UI thread, exclusive0600 temp file, no coordinates/host pointers,
+no flush per callback or worker logging. Counts distinguish routes; setup
+scripting itself can cause supervision and must be separated by timestamps.
+
+Before installation: current default/probe Rust tests, strict Clippy,16 host
+contracts, exact clean commit/build identity, Mac bundle/PiPL/exports/signature/
+archive/manifest/installer. Then one saved disposable Surface/Full/Final scene,
+actual25.6 preference transaction, exact9-bundle isolation/return, loaded identity,
+current screenshot-bound coordinates and same guard caps/maximum45seconds.
+No blind coordinate retries. No corner gesture before ARMED. If custom CLICK
+never arrives, preserve the negative result and reject this route; do not repeat
+or implement renderer-side output reuse. If it arrives, only then implement
+transient UI coordinates/one canonical release commit and solve required ECW UI.
+Native freeze/loupe/Undo acceptance stays NOT RUN until that implementation.
+
+
+Dev170 offline review: canonical enum/IDs/types/defaults and render source are
+unchanged. Ordinary120/probe122 Rust tests and16 host contracts PASS. Initial
+local test launch used Homebrew Cargo1.80.1 (edition2024 unsupported); next launch
+selected an incompatible stable LLVM library. Neither compiled the candidate;
+logs retained. Repaired by explicit current1.98.1 toolchain/library selection
+and disabling Cargo's cached rustc-info failure, without system toolchain changes.
+General skill audit exit1 is a false-positive authentication heuristic on
+unittest mock verify_installed, not a web route. Rust/C++ coverage remains NOT
+ASSESSED by that scanner. No production readiness claim from these checks.
+
+Strict default/probe Clippy PASS; source diff whitespace review PASS. Native
+input ownership NOT RUN; no frozen-render behavior has been implemented.
