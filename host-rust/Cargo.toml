@@ -14,6 +14,8 @@ default = ["native-plane", "owned-corner-drag"]
 native-plane = []
 # UI ownership keeps canonical Point streams and native editing intact.
 corner-ownership = []
+# Isolated ECW disabled-topic DRAW delivery experiment; never default.
+corner-topic-probe = []
 # Surface/Perspective overlay-only drag with one saved commit on release.
 owned-corner-drag = ["corner-ownership"]
 # Test-only callback observation; never enabled by default.

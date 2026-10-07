@@ -494,6 +494,16 @@ fn draw_effect_control(
     if params.index(Params::GridState) == Some(event.param_index()) {
         grid_row::draw(event)?;
     }
+    #[cfg(feature="corner-topic-probe")]
+    if params.index(Params::PlaneTopLeft)==Some(event.param_index()) && event.effect_area()==ae::EffectArea::Title {
+        let drawbot=event.context_handle().drawing_reference()?;
+        let supplier=drawbot.supplier()?;let surface=drawbot.surface()?;
+        let font=supplier.new_default_font(supplier.default_font_size()?)?;
+        let brush=supplier.new_brush(&ae::drawbot::ColorRgba{red:0.1,green:0.7,blue:1.0,alpha:1.0})?;
+        let frame=event.param_title_frame();let width=(frame.right-frame.left) as f32;
+        surface.draw_string(&brush,&font,"TOPIC DRAW",&ae::drawbot::PointF32{x:frame.left as f32+width*0.5+16.0,y:frame.top as f32+13.0},ae::drawbot::TextAlignment::Left,ae::drawbot::TextTruncation::None,width*0.5-20.0)?;
+        event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
+    }
     Ok(())
 }
 

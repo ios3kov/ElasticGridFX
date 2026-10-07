@@ -1043,6 +1043,8 @@ impl AdobePluginGlobal for Plugin {
             (Params::PlaneBottomLeft, "Bottom Left", (0.0, 100.0)),
         ] {
             let point_ui=ae::ParamUIFlags::DISABLED;
+            #[cfg(feature="corner-topic-probe")]
+            let point_ui=if id==Params::PlaneTopLeft {point_ui|ae::ParamUIFlags::TOPIC}else{point_ui};
             // SDK25.6 AE_Effect.h: NO_ECW_UI preserves Timeline keys. This
             // diagnostic tests native Point hit priority, not an accepted UI.
             #[cfg(feature="corner-ui-ownership-probe")]

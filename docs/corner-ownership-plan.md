@@ -158,3 +158,63 @@ creates third24/8; one Undo restores original two keys, exact sampled midpoint,
 and radius3/6. Exact loaded UUID615266E8-3099-32E8-AD83-F91C65A1D509/BID4d300dce
 and guard/restoration match STATUS. The intermediate raw-batch experiment is not
 in product code. Held-image/live-loupe visual acceptance remains NOT_RUN.
+
+## Hover appearance research —2026-10-07
+
+User confirms ordinary Dev177 Surface held picture/live grid/live loupe works,
+but all four coordinate rows turn gray while the hand cursor is over a corner.
+New requirement: keep the coordinates visually normal while viewer ownership is
+claimed. This is research, not authorization to change saved Point types/IDs,
+replace key tracks, or silently change the direct-corner interaction.
+
+Code trace: ui::adjust_cursor calls corner_ownership::hover, then
+plane::sync_event_ui. The matching claim disables all four canonical Point
+controls; plane::update_ui preserves that claim through ECW refresh. Our viewer
+handles and CLICK/DRAG are ALREADY custom. Adding another custom viewer handle
+alone does not remove the competing native Point handle.
+
+Exact SDK25.6 headers: AE_Effect.h:2352 defines PF_PUI_DISABLED as gray-out.
+AE_Effect.h:2259–2277 permits custom topic/control UI with standard parameter
+types; these flags describe ECW drawing, not a documented native Point hit
+priority override. AE_Effect.h:2279–2305 CONTROL_ONLY has no data stream or keys.
+AE_Effect.h:2313–2321 NO_ECW_UI removes ECW UI but preserves AE Timeline keys.
+AE_EffectSuites.h:205–219 restricts dynamic cosmetic changes; changing TOPIC,
+CONTROL or NO_ECW_UI at hover is not a supported UpdateParamUI operation.
+No independent native-point-handle visibility/picking switch was found in
+AE_Effect.h, AE_EffectUI.h or AE_EffectSuites.h. Absence in inspected APIs is not
+a proof about undocumented host internals.
+
+First-hand corroboration (2018, 3D Point, not certification of our 2D AE25.6
+case): https://community.adobe.com/questions-529/hide-the-point-of-a-3d-point-parameter-in-the-comp-layer-window-68985
+The answering plug-in developer reports dynamically disabling Points to give
+custom composition UI click priority. Our exact native ownership evidence is
+more relevant than this historical report.
+
+Options reviewed:
+- Delay DISABLED until custom CLICK: circular prerequisite; the native Point
+  may consume that click first. Not a demonstrated fix; do not replace the
+  accepted ordinary interaction with this unvalidated change.
+- Same persistent Point plus custom ECW TOPIC presentation: best next isolated
+  hypothesis. The plugin could draw normal text while the native Point is
+  disabled for picking, then restore normal editing on returning to ECW. It
+  keeps IDs/types/keys, but disabled custom-topic DRAW delivery, host stopwatch
+  styling, row geometry and normal coordinate editing are UNKNOWN. A prototype
+  must measure these before promising that all gray appearance disappears.
+- Hidden canonical Point plus separate UI proxy: NO_ECW_UI preserves Timeline
+  data, but CONTROL_ONLY proxy has no stopwatch/key stream; forwarding numeric
+  edits, expressions, time/key state and Undo needs additional implementation.
+  Hiding ECW UI alone was the Dev170 unproven priority experiment, not a solution.
+- Separate ring/offset hit target: could avoid overlap with native picking, but
+  changes the user gesture and leaves central native picking available. Needs
+  product approval and an exact native hit test; not selected.
+- OS input interception or undocumented AE hooks: not selected; incompatible
+  with the shared Mac/Windows documented SDK interaction and permission scope.
+
+Next discriminating prototype, isolated/nondefault, one corner only: add custom
+TOPIC drawing to the SAME Point, preserve all IDs and data, and retain the
+accepted ownership/transaction code. In a guarded generated320x240 scene verify
+DRAW arrives when DISABLED, name/value/stopwatch appearance, normal numeric edit
+when cursor returns to ECW, existing-key edit and one Undo. If DRAW is suppressed
+or the host stopwatch still grays, reject the masking hypothesis rather than
+claiming an invisible disable. No native experiment was run in this research
+block; installed Dev177 and renderer remain unchanged.

@@ -50,6 +50,8 @@ pub(crate) fn sync_event_ui(input:&ae::InData,params:&ae::Parameters<Params>,cla
     let (mode_disabled,corners_disabled)=ui_disabled(three_d,params.get(Params::PlaneMode)?.as_popup()?.value());
     for id in [Params::ModeSelector].into_iter().chain(CORNERS).chain([Params::ResetPlane]) {
         let current=params.get(id)?;
+        #[cfg(feature="corner-topic-probe")]
+        let claim_corners=claim_corners || id==Params::PlaneTopLeft;
         let disabled=if id==Params::ModeSelector {mode_disabled}
             else {corners_disabled || (claim_corners && CORNERS.contains(&id))};
         if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=disabled {
@@ -89,6 +91,8 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>,plug
     let claim=false;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
         let corners_disabled=corners_disabled || (claim && CORNERS.contains(&id));
+        #[cfg(feature="corner-topic-probe")]
+        let corners_disabled=corners_disabled || id==Params::PlaneTopLeft;
         let current=params.get(id)?;
         if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=corners_disabled {
             let mut definition=(*current).clone();
