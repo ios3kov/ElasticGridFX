@@ -4,7 +4,7 @@ use super::*;
 use std::cell::Cell;
 
 #[derive(Clone,Copy,PartialEq,Eq,Debug)]
-struct Scope{owner:i32,window:i32,time:i32,scale:u32,mode:i32}
+pub(super) struct Scope{owner:i32,window:i32,time:i32,scale:u32,mode:i32}
 #[derive(Clone,Copy,Default)]
 struct Claim{scope:Option<Scope>}
 impl Claim{
@@ -16,7 +16,7 @@ impl Claim{
     fn matches(self,scope:Option<Scope>)->bool{scope.is_some()&&self.scope==scope}
 }
 thread_local!{static CLAIM:Cell<Claim>=const{Cell::new(Claim{scope:None})};}
-fn scope(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae::EventExtra,
+pub(super) fn scope(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae::EventExtra,
     id:Option<ae::aegp::PluginId>)->Option<Scope>{
     let window=ui::event_window_code(event);
     if window!=ae::sys::PF_Window_COMP&&window!=ae::sys::PF_Window_LAYER{return None;}
@@ -34,6 +34,11 @@ pub(crate) fn claimed(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae
     CLAIM.get().matches(scope(input,params,event,id))
 }
 pub(crate) fn clear(){CLAIM.set(Claim::default());}
+
+#[cfg(all(test,feature="frozen-corner-probe"))]
+pub(super) fn test_scope(owner:i32,time:i32,mode:i32)->Scope {
+    Scope{owner,window:ae::sys::PF_Window_COMP,time,scale:25,mode}
+}
 
 #[cfg(test)]mod tests{
     use super::*;

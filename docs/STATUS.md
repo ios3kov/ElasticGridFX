@@ -14,25 +14,38 @@ render on release, old keys/Undo/coordinate controls retained. Implementation an
 native acceptance remain OPEN. Dev170 is a diagnostic, NOT a release candidate.
 No new-source push, main change or publication authorized. No deadline is proven.
 
-Latest bounded observations supersede the earlier current-process/next-test
-statements below. PID19082 startup UI barrier/preflight and exact loaded Dev170
-identity PASS; +256MiB armed growth stopped the test at9.1835seconds BEFORE any
-gesture. Last delivered FSTR census balanced; host background frame-range/output
-allocation appears in sample. Cause of original hangs remains UNKNOWN, not a
-proven FSTR leak or third-party attribution. Cold-idle-off PID19500 failed the UI
-readiness wait before any DoScript, fixture or gesture: experiment NOT RUN.
+Latest checkpoint2026-10-07: installed0.9.4 Dev171 / sourceb827ecf,
+BID EGFX-f24cc51dc84b07819d263910. Exact owned AE25.6x101/PID28554 loaded
+identity PASS. One stationary0.4s press then12px/0.4s gesture in a NEW320x240
+32bpc Surface scene delivered custom CLICK, first/final DRAG; Top Left moved
+0->12, remaining corners/layer position unchanged. This proves that custom
+corner input is available. Coordinate-row/hover-exit visual acceptance NOT RUN;
+full prerequisite acceptance PARTIAL. No freeze or hang-fix claim follows.
+Guard before scene: peak959245880bytes, no limit event;45s deadline cleanup
+completed, AE absent, full25.6 preference hash unchanged,9 excluded bundles
+restored. No user project, RAM Preview, quality or cache-setting change.
+Private evidence: outputs/corner-hit-dev171/native-hit-launchservices/result.json.
 
-Test-runner defect confirmed separately: SIGTERM during owned startup disposal
-enters AE SignalHandler/CrashReporterSentry::OnForceQuit/Abort. The private future
-controller removes that dispatch; syntax PASS, native execution NOT RUN. Historical
-controllers remain evidence and must not be rerun. Exact owned reporter targeting
-PID19500 was disposed; original25.6 preference full hash and all9 temporarily
-excluded bundles restored. Current process inventory: AE main/report dialog absent;
-old detached crashpad and other Adobe apps untouched. Dev170 remains installed.
-No additional live experiment or release claim follows this checkpoint.
-Private evidence: outputs/corner-ownership-dev170/native-priority-ui-first/result.json,
-native-priority-cold-idle-off/owned-crash-cleanup.json and preference-restored.json;
-startup-alert-20261007/prepared-next/cleanup-review.json.
+Harness corrections are separate: r1 JSX global write collision, r2 missed UI
+barrier, r3 absent detached controller (cause UNKNOWN; exact owned orphan disposed),
+then foreground supervision and exact vendor-path AppleEvents. Direct helper
+execution reported no AX access; unchanged helper through previously authorized
+LaunchServices passed AX and rejected an absent/foreground-mismatched AE without
+input. No security permission was changed. Latest supervised helper used this
+existing route, never a bypass. Earlier170/current-process statements below are
+historical. Dev171 remains diagnostic, not a release candidate.
+
+Prepared nondefault Dev172 `frozen-corner-probe`: transient UI-only raw16.16 corner
+transaction; canonical points unchanged during movement; one CHANGED_VALUE write
+on final DRAG. Viewer grid/loupe use tentative coordinates; renderer/cache/frame
+requests and saved parameter IDs/types are unchanged. Scope/data changes cancel.
+CLICK/DRAG use documented UI-only invalidation/NEVER_UPDATE; final changed point
+uses normal selected-quality rendering. Internal guide dragging remains live.
+128 feature tests,120 default tests,16 host source contracts and strict Clippy PASS.
+Exact native freeze/loupe/Undo/old-key/row-policy acceptance still NOT RUN; build,
+installation, Windows verification and ordinary promotion remain pending. The
+original drag/RAM hang cause remains UNKNOWN. Release WITH this function stays
+mandatory; no new-source push, main change or publication authorized.
 
 ### Earlier checkpoints — preserved evidence
 

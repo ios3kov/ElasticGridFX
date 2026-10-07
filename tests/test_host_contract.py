@@ -198,7 +198,9 @@ class HostContract(unittest.TestCase):
         started = adjust.split('if corner_loupe::hover(', 1)[1].split('return Ok(());', 1)[0]
         self.assertIn('invalidate_rect(event.context_handle(),None)', started)
         self.assertLess(started.index('invalidate_rect('), started.index('ae::EventOutFlags::UPDATE_NOW'))
-        self.assertEqual(ui.count('invalidate_rect('), 1)
+        # Native press invalidation stays once per transition. The owned
+        # transaction also invalidates overlays in CLICK/DRAG, intentionally.
+        self.assertEqual(adjust.count('invalidate_rect('), 1)
         self.assertNotIn('refresh_all_windows', adjust)
 
     def test_branding_preserves_effect_match_name(self):

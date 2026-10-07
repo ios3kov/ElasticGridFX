@@ -4,9 +4,11 @@ use std::cell::RefCell;
 use std::io::Write;
 use std::time::{SystemTime,UNIX_EPOCH};
 
-pub(crate) enum Route {CustomClick,CustomDrag,NativeSupervision}
+pub(crate) enum Route {CustomClick,CustomDrag,NativeSupervision,
+    #[cfg(feature="frozen-corner-probe")]Tentative,
+    #[cfg(feature="frozen-corner-probe")]FinalCommit}
 #[derive(Default)]
-struct Journal {file:Option<std::fs::File>,counts:[u64;3],records:usize,failed:bool}
+struct Journal {file:Option<std::fs::File>,counts:[u64;5],records:usize,failed:bool}
 thread_local!{static UI:RefCell<Journal>=RefCell::new(Journal::default());}
 pub(crate) fn record(route:Route,last:bool) {
     UI.with(|journal|{

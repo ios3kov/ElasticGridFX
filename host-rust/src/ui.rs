@@ -21,8 +21,24 @@ impl ViewPlane {
     fn needs_layer_conversion(&self, window: ae::WindowType) -> bool {
         !self.comp_space && self.projection.is_none() && window==ae::WindowType::Comp
     }
-    fn read(in_data: &ae::InData, params: &ae::Parameters<Params>, event: &ae::EventExtra) -> Result<Self, ae::Error> {
+    fn read(in_data: &ae::InData, params: &ae::Parameters<Params>, event: &ae::EventExtra,
+        plugin_id:Option<ae::aegp::PluginId>) -> Result<Self, ae::Error> {
         let state = plane::State::read(params, in_data, false, false)?;
+        let _=plugin_id;
+        #[cfg(feature="frozen-corner-probe")]
+        let state={
+            let mut state=state;
+            if let Some((index,(x,y)))=super::frozen_corner::preview(in_data,params,event,plugin_id)? {
+                if let Some(mut corners)=state.corner_controls(){
+                    let point=if let Some(basis)=state.parameter_basis {
+                        plane::Geometry::new(&basis).and_then(|geometry|geometry.map(false,
+                            x/f64::from(in_data.width().max(1)),y/f64::from(in_data.height().max(1))))
+                    }else{Some((x,y))};
+                    if let Some((x,y))=point {corners[2*index]=x;corners[2*index+1]=y;state.corners=Some(corners);}
+                }
+            }
+            state
+        };
         let comp_space=state.comp_space;
         let geometry = state.geometry();
         let (projection,projection_unavailable)=if comp_space {
@@ -97,6 +113,7 @@ fn set_drag_cursor(dragging: bool) {
 }
 
 pub fn release_cursor() {
+    #[cfg(feature="frozen-corner-probe")]super::frozen_corner::clear();
     loupe_cursor(false);
     corner_loupe::clear();
     GUIDE_DRAGGING.set(false);
@@ -352,7 +369,7 @@ fn draw_viewer(
     if event.in_flags().contains(ae::EventInFlags::DONT_DRAW) {
         return Ok(());
     }
-    let plane = ViewPlane::read(in_data, params, event)?;
+    let plane = ViewPlane::read(in_data, params, event,plugin_id)?;
     if plane.projection_unavailable {
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
         return Ok(());
@@ -506,7 +523,7 @@ pub fn click(
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
         return Ok(());
     }
-    let plane=ViewPlane::read(in_data,params,event)?;
+    let plane=ViewPlane::read(in_data,params,event,plugin_id)?;
     let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
     let hit=hit_test(in_data, grid, &plane, event, event.screen_point())?;
@@ -514,6 +531,10 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
+        #[cfg(feature="frozen-corner-probe")]
+        if axis==DRAG_CORNER&&!super::frozen_corner::begin(in_data,params,event,plugin_id,index)? {
+            return Ok(());
+        }
         #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
         if axis==DRAG_CORNER {super::corner_input_probe::record(super::corner_input_probe::Route::CustomClick,false);}
         corner_loupe::clear();
@@ -532,6 +553,13 @@ pub fn click(
         event.set_send_drag(true);
         set_drag_cursor(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
+        #[cfg(feature="frozen-corner-probe")]
+        if axis==DRAG_CORNER {
+            if let Err(error)=ae::pf::suites::App::new().and_then(|app|app.invalidate_rect(event.context_handle(),None)) {
+                release_cursor();super::corner_ownership::clear();event.set_send_drag(false);return Err(error);
+            }
+            event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::NEVER_UPDATE|ae::EventOutFlags::UPDATE_NOW);
+        }
     }
     Ok(())
 }
@@ -540,11 +568,12 @@ pub fn drag(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.window_type() == ae::WindowType::Effect {
         return grid_row::drag(params, event);
     }
-    let result = drag_inner(in_data, params, event);
+    let result = drag_inner(in_data, params, event,plugin_id);
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::interaction(in_data,event,
         (event.continue_refcon(0),event.continue_refcon(1)),result.is_err());
@@ -552,10 +581,15 @@ pub fn drag(
         event.set_continue_refcon(0, DRAG_NONE as _);
         event.set_send_drag(false);
         release_cursor();
+        #[cfg(feature="frozen-corner-probe")]{
+            super::corner_ownership::clear();
+            plane::sync_event_ui(in_data,params,false)?;
+        }
     }
     result
 }
 
+#[cfg(any(test,not(feature="frozen-corner-probe")))]
 fn corner_position_changed(current:(i32,i32),target:(f32,f32))->bool {
     current!=(ae::Fixed::from(target.0).as_fixed(),ae::Fixed::from(target.1).as_fixed())
 }
@@ -564,6 +598,7 @@ fn drag_inner(
     in_data: &ae::InData,
     params: &mut ae::Parameters<Params>,
     event: &mut ae::EventExtra,
+    plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     let axis = event.continue_refcon(0);
     let index = event.continue_refcon(1) as usize;
@@ -573,7 +608,7 @@ fn drag_inner(
     }
     set_drag_cursor(true);
 
-    let plane=ViewPlane::read(in_data,params,event)?;
+    let plane=ViewPlane::read(in_data,params,event,plugin_id)?;
     let Ok((layer_x, layer_y)) = frame_to_layer(in_data, event, &plane, event.screen_point()) else {
         event.set_send_drag(false);return Ok(());
     };
@@ -586,6 +621,34 @@ fn drag_inner(
                 plane.width as f64,plane.height as f64) else {event.set_send_drag(false);return Ok(());};
             (x as f32,y as f32)
         } else {(layer_x,layer_y)};
+        #[cfg(feature="frozen-corner-probe")]{
+            let action=super::frozen_corner::step(in_data,params,event,plugin_id,index,(layer_x,layer_y))?;
+            event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
+            match action {
+                super::frozen_corner::Step::Cancelled=>{event.set_send_drag(false);return Ok(());},
+                super::frozen_corner::Step::Preview=>{
+                    // Only the overlay/loupe see tentative coordinates. All
+                    // canonical streams remain identical to mouse-down values.
+                    super::corner_input_probe::record(super::corner_input_probe::Route::Tentative,false);
+                    ae::pf::suites::App::new()?.invalidate_rect(event.context_handle(),None)?;
+                    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::NEVER_UPDATE|ae::EventOutFlags::UPDATE_NOW);
+                },
+                super::frozen_corner::Step::Unchanged=>{
+                    ae::pf::suites::App::new()?.invalidate_rect(event.context_handle(),None)?;
+                    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::UPDATE_NOW);
+                },
+                super::frozen_corner::Step::Commit{index,target}=>{
+                    let mut param=params.get_mut(plane::CORNERS[index])?;param.as_point()?;
+                    let raw=param.as_mut();raw.u.td.x_value=target.0;raw.u.td.y_value=target.1;
+                    param.set_value_changed();
+                    super::corner_input_probe::record(super::corner_input_probe::Route::FinalCommit,true);
+                    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::ALWAYS_UPDATE|ae::EventOutFlags::UPDATE_NOW);
+                },
+            }
+            event.set_send_drag(!event.last_time());
+            return Ok(());
+        }
+        #[cfg(not(feature="frozen-corner-probe"))]{
         let mut param=params.get_mut(plane::CORNERS[index])?;
         // Validate the union tag before reading exact SDK 16.16 values. The
         // wrapper's f32 getter can lose low bits on large layer coordinates.
@@ -601,6 +664,7 @@ fn drag_inner(
         }
         event.set_send_drag(!event.last_time());
         return Ok(());
+        }
     }
     let Some((local_x,local_y))=plane.local(layer_x,layer_y) else {
         event.set_send_drag(false);return Ok(());
@@ -672,7 +736,7 @@ pub fn adjust_cursor(
     }
     let dragging = GUIDE_DRAGGING.get();
     if !dragging {
-        let plane=ViewPlane::read(in_data,params,event)?;
+        let plane=ViewPlane::read(in_data,params,event,plugin_id)?;
         let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
         let hit=hit_test(in_data,grid,&plane,event,event.screen_point())?;

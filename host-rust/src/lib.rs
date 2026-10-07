@@ -26,6 +26,8 @@ mod resource_census;
 mod corner_input_probe;
 #[cfg(feature="corner-hit-probe")]
 mod corner_ownership;
+#[cfg(feature="frozen-corner-probe")]
+mod frozen_corner;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
 #[cfg(feature="deferred-corner-probe")]
@@ -1226,6 +1228,9 @@ impl AdobePluginGlobal for Plugin {
                     build_identity::DIAGNOSTIC, self.lifecycle_probe.report()));
             }
             ae::Command::UserChangedParam { param_index } => {
+                // An external parameter edit cancels a tentative gesture. Our
+                // final commit already consumes its transaction before writing.
+                #[cfg(feature="frozen-corner-probe")]frozen_corner::clear();
                 if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
                     #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
                     corner_input_probe::record(corner_input_probe::Route::NativeSupervision,false);
@@ -1327,7 +1332,7 @@ impl AdobePluginGlobal for Plugin {
                     // send_drag is an output request, not an input event tag.
                     // Native AE25.6 observations confirm separate CLICK/DRAG.
                     ae::Event::Click(_) => ui::click(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
-                    ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
+                    ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::Draw(_) => {
                         #[cfg(feature="corner-hit-probe")]
                         let claim=corner_ownership::claimed(&in_data,params,&extra,self.lifecycle_probe.plugin_id());
@@ -1340,6 +1345,7 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::NewContext => {
                         range_feedback::clear(&extra);
                         #[cfg(feature="corner-hit-probe")] corner_ownership::clear();
+                        #[cfg(feature="frozen-corner-probe")]frozen_corner::clear();
                     },
                     ae::Event::CloseContext => {range_feedback::clear(&extra);corner_loupe::close();ui::release_cursor();},
                     ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),

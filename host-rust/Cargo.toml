@@ -34,6 +34,8 @@ corner-ui-ownership-probe = ["resource-census-probe"]
 # One-variable native hit-priority probe: temporarily disable standard Point
 # controls only while our viewer corner is hovered. Keep coordinate rows/keys.
 corner-hit-probe = ["resource-census-probe"]
+# Validation of an owned corner transaction; no canonical writes until release.
+frozen-corner-probe = ["corner-hit-probe"]
 
 [dependencies]
 after-effects = "=0.4.0"

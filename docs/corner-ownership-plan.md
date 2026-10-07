@@ -28,7 +28,8 @@ the same UI policy as Dev168; this remains a disposable prerequisite probe.
 ## Bounded native procedure
 
 Use a NEW320x240/32bpc one-effect generated Surface scene, Full/Final, selected
-layer/effect, at most one12px/<=1second gesture. This answers input ownership only,
+layer/effect, one stationary0.4second press/release to establish cursor hit state, then one
+12px/0.4second moving gesture (unchanged signed helper starts at mouse-down). This answers input ownership only,
 not rendering performance or original-scene stability. Unlike prior1920x1080
 observations, it reduces irrelevant background-frame allocation without changing
 AE settings, quality, memory caps or the renderer. Leave idle-cache preference
@@ -61,3 +62,34 @@ selected-quality update. Context/time/owner/mode changes cancel, not commit.
 Renderer workers never consult transient UI state or reuse changed-state outputs.
 Review no-motion/repress/cancel/error/invalid-quad/text-projection paths and verify
 both modes, old keys and Undo in a clean ordinary exact candidate on both OSes.
+
+## Native prerequisite result and owned transaction
+
+2026-10-07 Dev171 sourceb827ecf / BID EGFX-f24cc51dc84b07819d263910:
+AE25.6x101/PID28554 exact loaded UUID A3907BDF-C196-3EC4-AC21-076FE07EE556.
+Custom CLICK/first/final DRAG and expected12px Point change with unchanged layer
+position PASS. This establishes the custom interaction needed for implementation;
+full UI acceptance remains PARTIAL because coordinate rows/hover-exit were not
+visually inspected.45second guarded NEW320x240/32bpc Surface test peaked959245880
+bytes; no cap event. Full preferences/all9 exclusions restored; no live AE remains.
+Private result: outputs/corner-hit-dev171/native-hit-launchservices/result.json.
+
+Dev172 nondefault frozen-corner-probe keeps tentative raw16.16 coordinates on the
+UI thread, scoped by owner/window/time/scale/mode and all4 mouse-down Point values.
+Only ViewPlane geometry reads the preview; no render selector reads transaction
+state. Original text basis maps tentative coordinates once. Every nonfinal DRAG
+invalidates the overlay with HANDLED/NEVER_UPDATE/UPDATE_NOW; canonical parameters
+remain unchanged. Final DRAG consumes the transaction before writing one exact
+Point/CHANGED_VALUE and ALWAYS_UPDATE. A no-motion/return-to-original release writes
+nothing. Context/time/mode/owner/index/value changes or errors cancel. Existing
+Point types/IDs/keys, native Undo and normal coordinate entry stay in place.
+SDK25.6 AE_EffectUI.h:505-510 defines NEVER_UPDATE and view invalidation; this is
+an owned CLICK/DRAG transaction, not a rerun of rejected167 DRAW flag suppression.
+
+Offline128 feature tests,120 default tests,16 source contracts, strict Clippy PASS.
+Native Dev172 freeze still NOT RUN. Required remaining checks: both modes, first
+and repeat/no-motion press, live grid/loupe with held image, one final Point write,
+release/no-op/cancel, native Undo/old keys, enabled rows after leaving the corner,
+short guarded memory observation. Then remove diagnostics and verify an exact
+ordinary candidate on Mac and Windows. No original-scene RAM retry or release
+readiness follows from source tests or the successful input prerequisite.
