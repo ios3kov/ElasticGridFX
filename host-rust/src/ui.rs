@@ -25,7 +25,7 @@ impl ViewPlane {
         plugin_id:Option<ae::aegp::PluginId>) -> Result<Self, ae::Error> {
         let state = plane::State::read(params, in_data, false, false)?;
         let _=plugin_id;
-        #[cfg(feature="frozen-corner-probe")]
+        #[cfg(feature="owned-corner-drag")]
         let state={
             let mut state=state;
             if let Some((index,(x,y)))=super::frozen_corner::preview(in_data,params,event,plugin_id)? {
@@ -113,7 +113,8 @@ fn set_drag_cursor(dragging: bool) {
 }
 
 pub fn release_cursor() {
-    #[cfg(feature="frozen-corner-probe")]super::frozen_corner::clear();
+    #[cfg(feature="corner-ownership")]super::corner_ownership::clear();
+    #[cfg(feature="owned-corner-drag")]super::frozen_corner::clear();
     loupe_cursor(false);
     corner_loupe::clear();
     GUIDE_DRAGGING.set(false);
@@ -531,7 +532,7 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
-        #[cfg(feature="frozen-corner-probe")]
+        #[cfg(feature="owned-corner-drag")]
         if axis==DRAG_CORNER&&!super::frozen_corner::begin(in_data,params,event,plugin_id,index)? {
             return Ok(());
         }
@@ -553,7 +554,7 @@ pub fn click(
         event.set_send_drag(true);
         set_drag_cursor(true);
         event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT | ae::EventOutFlags::UPDATE_NOW);
-        #[cfg(feature="frozen-corner-probe")]
+        #[cfg(feature="owned-corner-drag")]
         if axis==DRAG_CORNER {
             if let Err(error)=ae::pf::suites::App::new().and_then(|app|app.invalidate_rect(event.context_handle(),None)) {
                 release_cursor();super::corner_ownership::clear();event.set_send_drag(false);return Err(error);
@@ -581,7 +582,7 @@ pub fn drag(
         event.set_continue_refcon(0, DRAG_NONE as _);
         event.set_send_drag(false);
         release_cursor();
-        #[cfg(feature="frozen-corner-probe")]{
+        #[cfg(feature="owned-corner-drag")]{
             super::corner_ownership::clear();
             plane::sync_event_ui(in_data,params,false)?;
         }
@@ -589,7 +590,7 @@ pub fn drag(
     result
 }
 
-#[cfg(any(test,not(feature="frozen-corner-probe")))]
+#[cfg(any(test,not(feature="owned-corner-drag")))]
 fn corner_position_changed(current:(i32,i32),target:(f32,f32))->bool {
     current!=(ae::Fixed::from(target.0).as_fixed(),ae::Fixed::from(target.1).as_fixed())
 }
@@ -621,7 +622,7 @@ fn drag_inner(
                 plane.width as f64,plane.height as f64) else {event.set_send_drag(false);return Ok(());};
             (x as f32,y as f32)
         } else {(layer_x,layer_y)};
-        #[cfg(feature="frozen-corner-probe")]{
+        #[cfg(feature="owned-corner-drag")]{
             let action=super::frozen_corner::step(in_data,params,event,plugin_id,index,(layer_x,layer_y))?;
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
             match action {
@@ -629,6 +630,7 @@ fn drag_inner(
                 super::frozen_corner::Step::Preview=>{
                     // Only the overlay/loupe see tentative coordinates. All
                     // canonical streams remain identical to mouse-down values.
+                    #[cfg(feature="frozen-corner-probe")]
                     super::corner_input_probe::record(super::corner_input_probe::Route::Tentative,false);
                     ae::pf::suites::App::new()?.invalidate_rect(event.context_handle(),None)?;
                     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::NEVER_UPDATE|ae::EventOutFlags::UPDATE_NOW);
@@ -638,9 +640,12 @@ fn drag_inner(
                     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::UPDATE_NOW);
                 },
                 super::frozen_corner::Step::Commit{index,target}=>{
-                    let mut param=params.get_mut(plane::CORNERS[index])?;param.as_point()?;
-                    let raw=param.as_mut();raw.u.td.x_value=target.0;raw.u.td.y_value=target.1;
-                    param.set_value_changed();
+                    if !super::corner_commit::animated(in_data,params,plugin_id,index,target)? {
+                        let mut param=params.get_mut(plane::CORNERS[index])?;param.as_point()?;
+                        let raw=param.as_mut();raw.u.td.x_value=target.0;raw.u.td.y_value=target.1;
+                        param.set_value_changed();
+                    }
+                    #[cfg(feature="frozen-corner-probe")]
                     super::corner_input_probe::record(super::corner_input_probe::Route::FinalCommit,true);
                     event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::ALWAYS_UPDATE|ae::EventOutFlags::UPDATE_NOW);
                 },
@@ -648,7 +653,7 @@ fn drag_inner(
             event.set_send_drag(!event.last_time());
             return Ok(());
         }
-        #[cfg(not(feature="frozen-corner-probe"))]{
+        #[cfg(not(feature="owned-corner-drag"))]{
         let mut param=params.get_mut(plane::CORNERS[index])?;
         // Validate the union tag before reading exact SDK 16.16 values. The
         // wrapper's f32 getter can lose low bits on large layer coordinates.
@@ -721,7 +726,7 @@ pub fn adjust_cursor(
     plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
-        #[cfg(feature="corner-hit-probe")]{
+        #[cfg(feature="corner-ownership")]{
             super::corner_ownership::clear();
             plane::sync_event_ui(in_data,params,false)?;
         }
@@ -740,7 +745,7 @@ pub fn adjust_cursor(
         let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
         let hit=hit_test(in_data,grid,&plane,event,event.screen_point())?;
-        #[cfg(feature="corner-hit-probe")]{
+        #[cfg(feature="corner-ownership")]{
             super::corner_ownership::hover(in_data,params,event,
                 hit.is_some_and(|(axis,_)|axis==DRAG_CORNER),plugin_id);
             plane::sync_event_ui(in_data,params,

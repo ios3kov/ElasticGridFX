@@ -86,10 +86,40 @@ Point types/IDs/keys, native Undo and normal coordinate entry stay in place.
 SDK25.6 AE_EffectUI.h:505-510 defines NEVER_UPDATE and view invalidation; this is
 an owned CLICK/DRAG transaction, not a rerun of rejected167 DRAW flag suppression.
 
-Offline128 feature tests,120 default tests,16 source contracts, strict Clippy PASS.
-Native Dev172 freeze still NOT RUN. Required remaining checks: both modes, first
-and repeat/no-motion press, live grid/loupe with held image, one final Point write,
-release/no-op/cancel, native Undo/old keys, enabled rows after leaving the corner,
-short guarded memory observation. Then remove diagnostics and verify an exact
-ordinary candidate on Mac and Windows. No original-scene RAM retry or release
-readiness follows from source tests or the successful input prerequisite.
+Dev172 native routing subset PASS in Surface/PID32252 and Perspective/PID33221:
+12 tentative updates, one final commit, no native Point updates during movement.
+Surface numeric-row restoration PASS; Perspective Undo PASS. However existing
+Point keys were both offset by PF CHANGED_VALUE (0/24->12/36), unlike an independent
+native Corner Pin/PID33953 control (12/24). Dev172 animated commit FAIL; no visual
+held-image/loupe acceptance follows from the route log. All cases used the same
+45second/memory guards and verified restoration. See current STATUS for identities
+and private evidence. Original hang cause stays UNKNOWN.
+
+## Ordinary candidate and current-key fix
+
+Default `owned-corner-drag` depends on scoped `corner-ownership`; no diagnostic
+logging/resource census is enabled by those features. `frozen-corner-probe` now
+adds diagnostics around the same functional code. Ordinary counter173, diagnostic
+counter174; no release publication. Parameter-panel UI updates respect a matching
+claim without changing any Point values. Errors and external edits clear transient
+state. Old parameter IDs/types and streams are unchanged.
+
+New final-only host API inventory / authority:
+SDK25.6 AE_GeneralPlug.h Keyframe Suite5: GetStreamNumKFs, InsertKeyframe (leaves an
+existing-time key unchanged), SetKeyframeValue (UNDOABLE), DeleteKeyframe for a
+failed new insertion. PFInterface ConvertEffectToCompTime provides the exact
+current COMP time, including nonzero layer offsets/stretch. Utility StartUndoGroup/
+EndUndoGroup are balanced even on insert/write failure. Stream type is validated
+TwoDSpatial; handles are callback-local, the effect ref is explicitly disposed.
+No calls occur during tentative movement or in render selectors. No existing key
+values/times/interpolation/tangents/expressions are enumerated or rewritten.
+Count0 uses existing PF commit; count>0 inserts/reuses just the current-time key.
+An insertion followed by a failed value write removes only its new key. A host
+cleanup/Undo-close error is returned rather than reported successful.
+
+Four fault-injection/regression tests cover existing/current-key preservation,
+new-key insertion without altering neighbours, failure rollback and Undo closure.
+130 ordinary tests, strict Clippy and16 source contracts PASS. Remaining required
+acceptance: exact ordinary Surface/Perspective current keys and Undo, first/repeated
+press, held image/live grid/live loupe, no-motion/cancel and restored rows; Windows
+build/native confirmation. These remain OPEN until verified on their exact artifact.

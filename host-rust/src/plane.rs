@@ -61,7 +61,7 @@ pub(crate) fn sync_event_ui(input:&ae::InData,params:&ae::Parameters<Params>,cla
     Ok(())
 }
 
-pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> Result<(), ae::Error> {
+pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>,plugin_id:Option<ae::aegp::PluginId>) -> Result<(), ae::Error> {
     // During effect construction AE may not yet have an owning layer for the
     // UI instance. Leave the setup defaults until the next host UI callback.
     let three_d=match ui_layer_is_3d(input) {
@@ -82,7 +82,13 @@ pub(crate) fn update_ui(input: &ae::InData, params: &ae::Parameters<Params>) -> 
         mode.update_param_ui()?;
     }
     edge::update_ui(params)?;
+    let _=plugin_id;
+    #[cfg(feature="corner-ownership")]
+    let claim=corner_ownership::claimed_ui(input,params,plugin_id);
+    #[cfg(not(feature="corner-ownership"))]
+    let claim=false;
     for id in CORNERS.into_iter().chain([Params::ResetPlane]) {
+        let corners_disabled=corners_disabled || (claim && CORNERS.contains(&id));
         let current=params.get(id)?;
         if current.ui_flags().contains(ae::ParamUIFlags::DISABLED)!=corners_disabled {
             let mut definition=(*current).clone();

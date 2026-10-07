@@ -24,10 +24,12 @@ mod corner_loupe;
 mod resource_census;
 #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
 mod corner_input_probe;
-#[cfg(feature="corner-hit-probe")]
+#[cfg(feature="corner-ownership")]
 mod corner_ownership;
-#[cfg(feature="frozen-corner-probe")]
+#[cfg(feature="owned-corner-drag")]
 mod frozen_corner;
+#[cfg(feature="owned-corner-drag")]
+mod corner_commit;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
 #[cfg(feature="deferred-corner-probe")]
@@ -1230,7 +1232,7 @@ impl AdobePluginGlobal for Plugin {
             ae::Command::UserChangedParam { param_index } => {
                 // An external parameter edit cancels a tentative gesture. Our
                 // final commit already consumes its transaction before writing.
-                #[cfg(feature="frozen-corner-probe")]frozen_corner::clear();
+                #[cfg(feature="owned-corner-drag")]ui::release_cursor();
                 if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
                     #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
                     corner_input_probe::record(corner_input_probe::Route::NativeSupervision,false);
@@ -1263,11 +1265,11 @@ impl AdobePluginGlobal for Plugin {
                     let legacy=plane::display_mode_value(selected)?;
                     {let mut stored=params.get_mut(Params::PlaneMode)?;
                     stored.as_popup_mut()?.set_value(legacy);stored.set_value_changed();}
-                    plane::update_ui(&in_data,params)?;
+                    plane::update_ui(&in_data,params,self.lifecycle_probe.plugin_id())?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::PlaneMode)==Some(param_index) {
-                    plane::update_ui(&in_data,params)?;
+                    plane::update_ui(&in_data,params,self.lifecycle_probe.plugin_id())?;
                     out_data.set_out_flag(ae::OutFlags::ForceRerender,true);
                 }
                 if params.index(Params::ResetPlane) == Some(param_index) {
@@ -1295,7 +1297,7 @@ impl AdobePluginGlobal for Plugin {
 
                 }
             }
-            ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params)?,
+            ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params,self.lifecycle_probe.plugin_id())?,
             ae::Command::QueryDynamicFlags => {
                 // Wave animation uses current_time even when no parameter has a
                 // keyframe. Tell AE only when that time dependency is active,
@@ -1323,7 +1325,7 @@ impl AdobePluginGlobal for Plugin {
                 // build reject unknown/null/PREVIEW contexts before conversion.
                 if !ui::known_window(ui::event_window_code(&extra)) {
                     ui::release_cursor();
-                    #[cfg(feature="corner-hit-probe")] corner_ownership::clear();
+                    #[cfg(feature="corner-ownership")] corner_ownership::clear();
                     return Ok(());
                 }
                 #[cfg(feature = "render-diagnostics")]
@@ -1331,12 +1333,16 @@ impl AdobePluginGlobal for Plugin {
                 match extra.event() {
                     // send_drag is an output request, not an input event tag.
                     // Native AE25.6 observations confirm separate CLICK/DRAG.
-                    ae::Event::Click(_) => ui::click(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
+                    ae::Event::Click(_) => {
+                        let result=ui::click(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id());
+                        if result.is_err(){ui::release_cursor();}
+                        result?;
+                    },
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::Draw(_) => {
-                        #[cfg(feature="corner-hit-probe")]
+                        #[cfg(feature="corner-ownership")]
                         let claim=corner_ownership::claimed(&in_data,params,&extra,self.lifecycle_probe.plugin_id());
-                        #[cfg(not(feature="corner-hit-probe"))]
+                        #[cfg(not(feature="corner-ownership"))]
                         let claim=false;
                         plane::sync_event_ui(&in_data,params,claim)?;
                         ui::draw(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?;
@@ -1344,14 +1350,14 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::NewContext => {
                         range_feedback::clear(&extra);
-                        #[cfg(feature="corner-hit-probe")] corner_ownership::clear();
-                        #[cfg(feature="frozen-corner-probe")]frozen_corner::clear();
+                        #[cfg(feature="corner-ownership")] corner_ownership::clear();
+                        #[cfg(feature="owned-corner-drag")]frozen_corner::clear();
                     },
                     ae::Event::CloseContext => {range_feedback::clear(&extra);corner_loupe::close();ui::release_cursor();},
                     ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}
                 }
-                #[cfg(feature="corner-hit-probe")]
+                #[cfg(feature="corner-ownership")]
                 if matches!(extra.event(),ae::Event::CloseContext|ae::Event::Deactivate|ae::Event::MouseExited){corner_ownership::clear();}
                 #[cfg(feature="deferred-corner-probe")]
                 deferred_corner::event(&in_data,&mut extra,self.lifecycle_probe.plugin_id());

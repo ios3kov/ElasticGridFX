@@ -1,4 +1,4 @@
-//! Nondefault native hit-priority probe. Only documented DISABLED UI flags
+//! Scoped custom corner ownership. Only documented DISABLED UI flags
 //! change; persistent Point type/ID/value, keyframes and renderers are untouched.
 use super::*;
 use std::cell::Cell;
@@ -33,9 +33,20 @@ pub(crate) fn claimed(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae
     id:Option<ae::aegp::PluginId>)->bool{
     CLAIM.get().matches(scope(input,params,event,id))
 }
+// UPDATE_PARAMS_UI has no viewer context. Retain only this same effect/time/mode
+// claim so a parameter-panel refresh cannot re-enable native picking mid-drag.
+pub(crate) fn claimed_ui(input:&ae::InData,params:&ae::Parameters<Params>,
+    id:Option<ae::aegp::PluginId>)->bool {
+    let Some(claim)=CLAIM.get().scope else{return false;};
+    let Ok(owner)=corner_loupe::owner(input,id) else{return false;};
+    let Ok(param)=params.get(Params::PlaneMode) else{return false;};
+    let Ok(mode)=param.as_popup() else{return false;};
+    claim.owner==owner&&claim.time==input.current_time()&&claim.scale==input.time_scale()
+        &&claim.mode==mode.value()
+}
 pub(crate) fn clear(){CLAIM.set(Claim::default());}
 
-#[cfg(all(test,feature="frozen-corner-probe"))]
+#[cfg(all(test,feature="owned-corner-drag"))]
 pub(super) fn test_scope(owner:i32,time:i32,mode:i32)->Scope {
     Scope{owner,window:ae::sys::PF_Window_COMP,time,scale:25,mode}
 }

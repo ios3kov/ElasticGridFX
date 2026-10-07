@@ -157,7 +157,7 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('params.get_mut(', update)
         self.assertNotIn('set_value_changed(', update)
         self.assertNotIn('AEGP_SetStreamValue', update)
-        self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params)?', SOURCE)
+        self.assertIn('ae::Command::UpdateParamsUi => plane::update_ui(&in_data,params,self.lifecycle_probe.plugin_id())?', SOURCE)
 
     def test_smartfx_uses_sparse_logical_canvas_and_handles_empty_input(self):
         smart = SOURCE.split('ae::Command::SmartRender { extra } => {', 1)[1].split(

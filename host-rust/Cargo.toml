@@ -10,8 +10,12 @@ build = "build.rs"
 crate-type = ["cdylib"]
 
 [features]
-default = ["native-plane"]
+default = ["native-plane", "owned-corner-drag"]
 native-plane = []
+# UI ownership keeps canonical Point streams and native editing intact.
+corner-ownership = []
+# Surface/Perspective overlay-only drag with one saved commit on release.
+owned-corner-drag = ["corner-ownership"]
 # Test-only callback observation; never enabled by default.
 render-diagnostics = []
 # Isolated public PREVIEW callback experiment; no overlay implementation.
@@ -33,9 +37,9 @@ resource-census-probe = []
 corner-ui-ownership-probe = ["resource-census-probe"]
 # One-variable native hit-priority probe: temporarily disable standard Point
 # controls only while our viewer corner is hovered. Keep coordinate rows/keys.
-corner-hit-probe = ["resource-census-probe"]
+corner-hit-probe = ["resource-census-probe", "corner-ownership"]
 # Validation of an owned corner transaction; no canonical writes until release.
-frozen-corner-probe = ["corner-hit-probe"]
+frozen-corner-probe = ["corner-hit-probe", "owned-corner-drag"]
 
 [dependencies]
 after-effects = "=0.4.0"
