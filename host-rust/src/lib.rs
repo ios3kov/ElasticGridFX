@@ -22,6 +22,8 @@ mod demo;
 mod corner_loupe;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
+#[cfg(feature="deferred-corner-probe")]
+mod deferred_corner;
 mod fit_layer;
 mod reset_grid;
 mod spacing;
@@ -1314,6 +1316,8 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}
                 }
+                #[cfg(feature="deferred-corner-probe")]
+                deferred_corner::event(&in_data,&mut extra,self.lifecycle_probe.plugin_id());
             }
             ae::Command::FrameSetup { .. } => {
                 let state=plane::State::read(params,&in_data,false,true)?;

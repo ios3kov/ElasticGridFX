@@ -167,6 +167,15 @@ pub(crate) fn active(input:&ae::InData,event:&ae::EventExtra,id:Option<ae::aegp:
     if g.native&&!native_button_down(){finish_native(false);return None;}
     (g.owner==owner(input,id).ok()?&&(g.window==0||g.window==ui::event_window_code(event))).then_some(g.index)
 }
+#[cfg(feature="deferred-corner-probe")]
+pub(crate) fn policy_context(input:&ae::InData,event:&ae::EventExtra,id:Option<ae::aegp::PluginId>)
+    ->Option<(i32,bool)> {
+    // UI only, scoped by the same stable stream ID as the existing loupe.
+    let scoped_owner=owner(input,id).ok()?;
+    let active=ACTIVE.get().is_some_and(|g|g.owner==scoped_owner&&
+        (g.window==0||g.window==ui::event_window_code(event)))&&native_button_down();
+    Some((scoped_owner,active))
+}
 fn source(event:&ae::EventExtra,x:f32,y:f32)->Result<(f32,f32),ae::Error>{
     if !x.is_finite()||!y.is_finite()||x.abs()>32767.0||y.abs()>32767.0{return Err(ae::Error::BadCallbackParameter);}
     let mut p=ae::sys::PF_FixedPoint{x:ae::Fixed::from(x).as_fixed(),y:ae::Fixed::from(y).as_fixed()};

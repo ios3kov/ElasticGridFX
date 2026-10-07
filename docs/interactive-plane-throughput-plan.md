@@ -170,3 +170,27 @@ Cold opening transport timeout retained; later registration/Cua confirms complet
 owned scene opening, Final/Full32bpc and selected visible grid. No repeated
 installer launch. User short drag/Undo/loupe response still PENDING. This addresses
 redundant sample lookup checks only; automatic Preview substitution NOT IMPLEMENTED.
+
+## Deferred corner contract — user decision2026-10-07
+
+User reports Dev164 only slightly smoother, still jerky: responsiveness FAIL.
+Approved replacement: while moving a Surface/Perspective corner, keep the last
+image, move grid/loupe, recalculate selected-quality image on release; internal
+line manipulation remains live. No change to animation keys or render sampling.
+SDK25.6 AE_EffectUI.h:505-510 and official guide PF_EventExtra document
+NEVER_UPDATE to defer comp render while clicking/dragging, ALWAYS_UPDATE to
+request comp render, UPDATE_NOW after invalidation. Native Point grips consume
+CLICK/DRAG before custom UI, so whether DRAW/AdjustCursor responses affect that
+native loop is UNKNOWN. Validate this narrowly before promotion.
+
+Local nondefault deferred-corner-probe (Dev167) uses existing scoped loupe gesture
+owner/window/time to set UI-only NEVER_UPDATE during the held corner; release
+consumes one transition before invalidating/requesting update. No renderer branch,
+quality setter, saved stream, OS input hook, extra frame or worker UI API. Native
+Point edits and Undo remain owned by existing handlers. Keep the bounded quality
+census for host observation. Other owners/times/windows do not receive release
+updates; close/new/deactivated contexts clear local state. Internal guide drags
+are not corner gestures. Default remains ordinary Dev164 until native validation.
+Verify lifecycle/flag state tests, Rust/Clippy/host contracts, exact artifact and
+short native drag/release/Undo/loupe; no long drag/RAM Preview. Both hang incidents
+remain OPEN. Source/publish/Windows CI scope unchanged, local work only.

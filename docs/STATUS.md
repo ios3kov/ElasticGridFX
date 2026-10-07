@@ -1,10 +1,29 @@
 # Current status
 
-Updated: 2026-10-06. This is the concise entry point for the current product and
+Updated: 2026-10-07. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
+
+Current user acceptance: ordinary Dev164 is only slightly smoother and still
+jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
+Surface/Perspective corner movement; grid/loupe remain live, selected-quality
+render resumes on release. Internal line deformation remains live.
+Local nondefault Dev167 deferred-corner-probe tests125, ordinary tests120,
+strict probe Clippy and16 host contracts PASS. UI-only NEVER_UPDATE / release
+ALWAYS_UPDATE|UPDATE_NOW experiment; no saved data, quality setter, extra source
+frame or render-worker UI calls. Native Point loop honoring these response flags
+is UNKNOWN; default remains Dev164 until native acceptance. Both earlier hang
+incidents remain OPEN. Separate review covers per-owner/window/time state,
+context clearing, once-only release and no repeated DRAW invalidation.
+Build/package pending; native validation BLOCKED in current AE session: PID86040
+reports a crash in foreign AEHLCalibrationb5d43fa0a03e and a read-only sample
+captures its idle frame-copy/GetRenderedRegion path. Dev167 not installed at
+that observation. This is not attributed to FSTR or either earlier hang; parallel
+AE Hot Loader work is being clarified before host modification.
+Private evidence: outputs/deferred-corner-dev167. No new-source Windows CI,
+push, promotion, main change or release.
 
 **HOLD — native interactive hang.** Ordinary Dev152 source39616fa / Build ID
 EGFX-c3c62a10f10d4026fcab974d: user reports slightly faster but jerky corner drag,

@@ -23,6 +23,9 @@ gesture-probe = ["preview-overlay-probe"]
 loupe-source-disabled-probe = []
 # Read-only host quality census during short loupe gestures; no pixel override.
 interactive-quality-probe = []
+# Validation only: request UI-only render deferral during scoped corner gestures.
+# Retain the bounded census to verify whether the native Point loop honors it.
+deferred-corner-probe = ["interactive-quality-probe"]
 
 [dependencies]
 after-effects = "=0.4.0"
