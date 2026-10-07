@@ -21,13 +21,20 @@ Build/package PASS: clean sourcef3943d51a6ccd3d712f99b9d440ee9603d47cdc9,
 BID EGFX-412cf851b1695fc8cfc7c32c. Warning-free release, bundle/PiPL/exports/
 signature/archive/manifest and native installer verified. Features exactly
 default/native-plane/interactive-quality-probe/deferred-corner-probe.
-Native validation BLOCKED: user confirms parallel AE Hot Loader validation;
-current host PID86040 reports a crash in AEHLCalibrationb5d43fa0a03e and read-only
-sample captures its idle frame-copy/GetRenderedRegion path. Dev167 NOT INSTALLED;
-existing FSTR and host left unchanged. This is not attributed to FSTR or either
-earlier hang. Resume only after the other host validation ends and a clean owned
-FSTR scene is available. Private evidence: outputs/deferred-corner-dev167.
-No new-source Windows CI, push, promotion, main change or release.
+Current installed diagnostic: **0.9.4 Dev167**, sourcef3943d5 /
+EGFX-412cf851b1695fc8cfc7c32c. After user confirms AE available, closed empty
+Developer session and copied saved owned Dev164 scene; no foreign plugin edits.
+Native installer reports Installed/Previous saved; exact canonical payload,
+executable bits/signature and installer process exit PASS. No closed UI query.
+Normal AE PID91860 loads UUID0475D29A-CB43-374F-8AB1-D2F905E4C59D from canonical
+FSTR path, exact identity PASS. Opening transport times out; later registration
+file and responsive UI confirm completed opening. One registered FSTR, owned
+32bpc Full/Final Surface scene, selected visible grid/grips PASS. Short user
+corner/release/Undo freeze and retained-loupe observation PENDING; no long drag
+or RAM Preview. Earlier foreign Calibration component absent from loaded sample;
+other AEHL components remain loaded and unchanged, not an isolated-host claim.
+Private evidence: outputs/deferred-corner-dev167. No native behavior promotion,
+new-source Windows CI, push, main change or release.
 
 **HOLD — native interactive hang.** Ordinary Dev152 source39616fa / Build ID
 EGFX-c3c62a10f10d4026fcab974d: user reports slightly faster but jerky corner drag,
