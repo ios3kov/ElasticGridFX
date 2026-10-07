@@ -21,6 +21,14 @@ New gestures discard prior loupe pixels and queue one ECW refresh; no per-move
 frame requests are added. Cancelled gestures clear the claim. Rust132 and
 source contracts17 PASS; native loupe content/held-image acceptance NOT_RUN.
 These code-path corrections do not certify the original heavy-scene hang.
+Dev180 source2f1aae7 / BID EGFX-6befdfecb8c7b1ba6c4cf2d7 is packaged and
+installed; all installed files and strict signature PASS. AE25.6/PID56614 loaded
+UUID9BABC9E5-9462-3F72-9CCA-77C8A206A9A2 from the canonical path. First
+trial missed the corner (unchanged readback): gesture/Undo NOT_RUN. Second
+Surface trial stopped before scripting after two UI-read timeouts. Both trials
+ended with AE absent, idle-cache key unchanged, all9 components restored.
+Loupe pixels and held-image before/after internal-grid edits remain NOT_RUN;
+release BLOCKED. Private checkpoint: outputs/owned-corner-dev180/checkpoint.json.
 
 
 Latest2026-10-07 user acceptance: ordinary Dev177 Surface picture holds during
