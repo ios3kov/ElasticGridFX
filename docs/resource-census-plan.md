@@ -250,3 +250,12 @@ ASSESSED by that scanner. No production readiness claim from these checks.
 
 Strict default/probe Clippy PASS; source diff whitespace review PASS. Native
 input ownership NOT RUN; no frozen-render behavior has been implemented.
+
+
+Dev170 exact clean source908bcc8, BID EGFX-6eaeae9fbb8a77354cf5cc58: warning-free
+release compile, expected four features, bundle/PiPL/exports/signature, sealed
+archive/manifest, native installer and410 repository checksums PASS. Installer
+opened only; Install has not been invoked. Current action-time confirmation is
+pending under Cua software-install policy. Existing Dev169 remains installed;
+input ownership/freeze/native acceptance NOT RUN. Private verification record:
+outputs/corner-ownership-dev170/verification.json. No publication or host trial.

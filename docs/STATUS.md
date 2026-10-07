@@ -112,6 +112,14 @@ bounded private UI journal separates custom CLICK/DRAG from native point
 supervision; ordinary behavior and renderer unchanged. One guarded<=1second
 gesture only after loaded identity/ARMED/current screenshot. Do not promote
 hidden corner rows; production must retain their coordinate controls/animation.
+Source908bcc8 / BID EGFX-6eaeae9fbb8a77354cf5cc58: default120/probe122
+Rust, strict default/probe Clippy,16 host contracts,410 checksums, warning-free
+release, bundle/PiPL/exports/signature/archive/manifest/native installer PASS.
+Exact features default/native-plane/resource-census-probe/corner-ui-ownership-probe.
+Installer launched; Install awaits action-time confirmation required by Cua for
+locally built software. Dev169 remains installed; Dev170 native routing NOT RUN.
+No new AE process, preference or foreign-plugin modification in this block.
+Private package/check results: outputs/corner-ownership-dev170/verification.json.
 See [diagnostic contract](resource-census-plan.md). New-source Windows CI/push,
 main, release and original-project writes remain unauthorized.
 
