@@ -31,6 +31,9 @@ resource-census-probe = []
 # Native routing experiment only. Hide canonical point ECW controls while
 # retaining their data streams/Timeline keys; never a product UI replacement.
 corner-ui-ownership-probe = ["resource-census-probe"]
+# One-variable native hit-priority probe: temporarily disable standard Point
+# controls only while our viewer corner is hovered. Keep coordinate rows/keys.
+corner-hit-probe = ["resource-census-probe"]
 
 [dependencies]
 after-effects = "=0.4.0"

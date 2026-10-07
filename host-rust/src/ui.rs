@@ -514,7 +514,7 @@ pub fn click(
     super::preview_overlay_probe::interaction(in_data,event,
         hit.map(|(axis,index)|(axis,index as isize)).unwrap_or((-1,-1)),false);
     if let Some((axis, index)) = hit {
-        #[cfg(feature="corner-ui-ownership-probe")]
+        #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
         if axis==DRAG_CORNER {super::corner_input_probe::record(super::corner_input_probe::Route::CustomClick,false);}
         corner_loupe::clear();
         if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index,plugin_id); }
@@ -578,7 +578,7 @@ fn drag_inner(
         event.set_send_drag(false);return Ok(());
     };
     if axis == DRAG_CORNER {
-        #[cfg(feature="corner-ui-ownership-probe")]
+        #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
         super::corner_input_probe::record(super::corner_input_probe::Route::CustomDrag,event.last_time());
         if index>=4 || plane.state.corner_controls().is_none() {event.set_send_drag(false);return Ok(());}
         let (layer_x,layer_y)=if let Some(basis)=plane.state.parameter_basis {
@@ -657,6 +657,10 @@ pub fn adjust_cursor(
     plugin_id:Option<ae::aegp::PluginId>,
 ) -> Result<(), ae::Error> {
     if event.window_type() != ae::WindowType::Comp && event.window_type() != ae::WindowType::Layer {
+        #[cfg(feature="corner-hit-probe")]{
+            super::corner_ownership::clear();
+            plane::sync_event_ui(in_data,params,false)?;
+        }
         return Ok(());
     }
     #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(6,
@@ -672,6 +676,12 @@ pub fn adjust_cursor(
         let controls=control_grid::read(in_data,params)?;
     let grid=&controls.grid;
         let hit=hit_test(in_data,grid,&plane,event,event.screen_point())?;
+        #[cfg(feature="corner-hit-probe")]{
+            super::corner_ownership::hover(in_data,params,event,
+                hit.is_some_and(|(axis,_)|axis==DRAG_CORNER),plugin_id);
+            plane::sync_event_ui(in_data,params,
+                super::corner_ownership::claimed(in_data,params,event,plugin_id))?;
+        }
         if corner_loupe::hover(in_data,event,hit.and_then(|(axis,index)|(axis==DRAG_CORNER).then_some(index)),plugin_id){
             // SDK25.6 AE_EffectSuites.h:590-595 / AE_EffectUI.h:510:
             // UPDATE_NOW needs a queued invalidation. Only the new-press

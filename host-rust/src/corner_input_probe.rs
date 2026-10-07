@@ -13,7 +13,10 @@ pub(crate) fn record(route:Route,last:bool) {
         let mut journal=journal.borrow_mut();
         let index=route as usize;
         journal.counts[index]=journal.counts[index].saturating_add(1);
-        if journal.failed || journal.records>=16 || (journal.counts[index]>1 && !last){return;}
+        // Retain the first native edit after scripted fixture initialization;
+        // the old first-only policy could hide precisely that second change.
+        let early_native=index==2&&journal.counts[index]<=3;
+        if journal.failed || journal.records>=16 || (journal.counts[index]>1 && !last&&!early_native){return;}
         if journal.file.is_none(){
             let nonce=SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_nanos();
             let path=std::env::temp_dir().join(format!("FSTR-corner-route-{}-{nonce}.jsonl",std::process::id()));

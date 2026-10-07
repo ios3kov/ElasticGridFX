@@ -22,8 +22,10 @@ mod demo;
 mod corner_loupe;
 #[cfg(feature="resource-census-probe")]
 mod resource_census;
-#[cfg(feature="corner-ui-ownership-probe")]
+#[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
 mod corner_input_probe;
+#[cfg(feature="corner-hit-probe")]
+mod corner_ownership;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
 #[cfg(feature="deferred-corner-probe")]
@@ -1225,7 +1227,7 @@ impl AdobePluginGlobal for Plugin {
             }
             ae::Command::UserChangedParam { param_index } => {
                 if let Some(index)=plane::CORNERS.iter().position(|&p|params.index(p)==Some(param_index)) {
-                    #[cfg(feature="corner-ui-ownership-probe")]
+                    #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
                     corner_input_probe::record(corner_input_probe::Route::NativeSupervision,false);
                     // Native Point controls may consume the viewer gesture before
                     // our custom CLICK. Observe the change; never rewrite the point.
@@ -1316,6 +1318,7 @@ impl AdobePluginGlobal for Plugin {
                 // build reject unknown/null/PREVIEW contexts before conversion.
                 if !ui::known_window(ui::event_window_code(&extra)) {
                     ui::release_cursor();
+                    #[cfg(feature="corner-hit-probe")] corner_ownership::clear();
                     return Ok(());
                 }
                 #[cfg(feature = "render-diagnostics")]
@@ -1326,15 +1329,24 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::Click(_) => ui::click(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra)?,
                     ae::Event::Draw(_) => {
-                        plane::sync_event_ui(&in_data,params)?;
+                        #[cfg(feature="corner-hit-probe")]
+                        let claim=corner_ownership::claimed(&in_data,params,&extra,self.lifecycle_probe.plugin_id());
+                        #[cfg(not(feature="corner-hit-probe"))]
+                        let claim=false;
+                        plane::sync_event_ui(&in_data,params,claim)?;
                         ui::draw(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?;
                     }
                     ae::Event::AdjustCursor(_) => ui::adjust_cursor(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
-                    ae::Event::NewContext => range_feedback::clear(&extra),
+                    ae::Event::NewContext => {
+                        range_feedback::clear(&extra);
+                        #[cfg(feature="corner-hit-probe")] corner_ownership::clear();
+                    },
                     ae::Event::CloseContext => {range_feedback::clear(&extra);corner_loupe::close();ui::release_cursor();},
                     ae::Event::Deactivate | ae::Event::MouseExited => ui::release_cursor(),
                     _ => {}
                 }
+                #[cfg(feature="corner-hit-probe")]
+                if matches!(extra.event(),ae::Event::CloseContext|ae::Event::Deactivate|ae::Event::MouseExited){corner_ownership::clear();}
                 #[cfg(feature="deferred-corner-probe")]
                 deferred_corner::event(&in_data,&mut extra,self.lifecycle_probe.plugin_id());
             }

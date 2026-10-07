@@ -92,7 +92,7 @@ fn pressed_hover(h:Hover,now:Observation,pointer:(f64,f64))->Option<usize>{
 }
 // PF effect_ref changes across AE native Point preview callbacks. Retain only
 // the documented stream ID, disposing every acquired handle in this callback.
-fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>{
+pub(crate) fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32,ae::Error>{
     let id=id.ok_or(ae::Error::BadCallbackParameter)?;
     let interface=ae::aegp::suites::PFInterface::new()?;
     let effects=ae::aegp::suites::Effect::new()?;
