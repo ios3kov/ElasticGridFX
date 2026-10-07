@@ -38,6 +38,16 @@ Dev183 nondefault probe adds bounded raster-interior range and SDK supplier
 layout capability/preference checks to separate compositing from image upload.
 No ordinary runtime behavior or additional frame requests changed.
 
+Dev183 exact sourcee60d49b/BID EGFX-956e1f13872853f2042f5fc2 native probe:
+lens raster interior range0..255 over1764 pixels; supplier supportsARGB/BGRA,
+prefersBGRA. Thus neither uniform receipt nor uniform prepared raster explains
+white output in this color fixture. Image upload remains a hypothesis, not a
+confirmed cause. Dev184 now selects the supplier-supported preferred pixel
+layout per SDK DrawbotSuite.h:178-180 and losslessly converts only the UI bitmap.
+No new render/frame request. Regression checks preserve all RGBA channels and
+transparent exterior for both layouts; original visual symptom pending native.
+Evidence: outputs/loupe-image-dev183/native-ecw/loupe-image.jsonl.
+
 Dev180 local correction: successful corner release preserves only scoped hover
 ownership for a repeated press without cursor motion. Effect-panel DRAW now uses
 the same effect/time/mode claim instead of re-enabling native Point picking.

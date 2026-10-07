@@ -215,7 +215,7 @@ fn raster(mut sample:impl FnMut(f32,f32)->Option<[u8;4]>)->Vec<u8>{
 pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::drawbot::Supplier,
     surface:&ae::drawbot::Surface,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
     source(event,center.x,center.y)?;
-    let pixels=frame_pixels(input,event,center,id)?;
+    let mut pixels=frame_pixels(input,event,center,id)?;
     #[cfg(feature="loupe-image-probe")]{
         let mut lo=255u8;let mut hi=0u8;let mut count=0usize;
         for y in 40..89 {for x in 40..89 {
@@ -231,8 +231,19 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
             supplier.supports_pixel_layout_bgra()? as u8 as f64,
             supplier.prefers_pixel_layout_bgra()? as u8 as f64]);
     }
-    let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,ae::drawbot::PixelLayout::Argb32Straight,&pixels)?;
+    // SDK DrawbotSuite.h requires consulting the supplier preference. Source
+    // pixels remain ARGB; convert only the small UI bitmap, never a host world.
+    let bgra=supplier.supports_pixel_layout_bgra()?&&
+        (supplier.prefers_pixel_layout_bgra()?||!supplier.supports_pixel_layout_argb()?);
+    let layout=image_layout(&mut pixels,bgra);
+    let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,layout,&pixels)?;
     surface.draw_image(&image,&ae::drawbot::PointF32{x:center.x-RADIUS,y:center.y-RADIUS},1.0)
+}
+fn image_layout(pixels:&mut [u8],bgra:bool)->ae::drawbot::PixelLayout{
+    if bgra {
+        for pixel in pixels.chunks_exact_mut(4){pixel.reverse();}
+        ae::drawbot::PixelLayout::Bgra32Straight
+    }else{ae::drawbot::PixelLayout::Argb32Straight}
 }
 #[derive(Clone,Copy,PartialEq,Eq)]
 struct FrameKey{owner:i32,window:i32,time:i32,scale:u32,stamp:[i8;4]}
@@ -462,6 +473,17 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         assert!(!request_allowed(&mut warm,7,92,25,false,true));
         assert!(request_allowed(&mut warm,8,92,25,false,false));
         assert!(!request_allowed(&mut warm,8,93,25,false,false));
+    }
+    #[test]fn supplier_bgra_conversion_preserves_rgb_alpha_and_transparent_exterior(){
+        let argb=raster(|_,_|Some([255,17,93,201]));
+        let mut bgra=argb.clone();
+        assert!(matches!(image_layout(&mut bgra,true),ae::drawbot::PixelLayout::Bgra32Straight));
+        for (a,b) in argb.chunks_exact(4).zip(bgra.chunks_exact(4)){
+            assert_eq!([a[0],a[1],a[2],a[3]],[b[3],b[2],b[1],b[0]]);
+        }
+        let mut unchanged=argb.clone();
+        assert!(matches!(image_layout(&mut unchanged,false),ae::drawbot::PixelLayout::Argb32Straight));
+        assert_eq!(argb,unchanged);
     }
     #[test]fn circle_center_and_target_preserve_precise_sampling(){
         let p=raster(|x,y|Some([255,(100.+x) as u8,(100.+y) as u8,20]));

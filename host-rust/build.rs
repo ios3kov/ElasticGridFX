@@ -45,7 +45,7 @@ fn generate_macos_bundle_metadata(out_dir: &std::path::Path) {
 }
 
 fn main() {
-    let development_build=if std::env::var_os("CARGO_FEATURE_LOUPE_IMAGE_PROBE").is_some() {183}
+    let development_build=if std::env::var_os("CARGO_FEATURE_LOUPE_IMAGE_PROBE").is_some() {185}
         else if std::env::var_os("CARGO_FEATURE_CORNER_TOPIC_PROBE").is_some() {179}
         else if std::env::var_os("CARGO_FEATURE_FROZEN_CORNER_PROBE").is_some() {181}
         else if std::env::var_os("CARGO_FEATURE_CORNER_HIT_PROBE").is_some() {171}
@@ -57,7 +57,7 @@ fn main() {
         else if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {155}
         else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {154}
         else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153}
-        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {180} else {168};
+        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {184} else {168};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");
