@@ -48,6 +48,21 @@ No new render/frame request. Regression checks preserve all RGBA channels and
 transparent exterior for both layouts; original visual symptom pending native.
 Evidence: outputs/loupe-image-dev183/native-ecw/loupe-image.jsonl.
 
+Dev184 ordinary source8319751 / BID EGFX-364f96a71fa962fb92433677 installed:
+all file hashes/strict signature PASS; exact AE25.6 loaded canonical path/UUID
+DDE88B0B-E8DB-3EBA-8853-7F43BD6B4BDF PASS. Default Rust133/source17/Clippy PASS.
+Guarded Surface fixture: only TopRight changed640,0->560,80; Cua CmdZ restored
+previous gesture592,48. Other corners/layer position and existing TopLeft /
+Affected Lines keys unchanged. Native point commit/one-step Undo PASS for this
+fixture; held-image/loupe visual contents NOT_RUN, Windows184 NOT_RUN. No RAM
+Preview. Cleanup PASS: AE absent, idle-cache key unchanged,9 components returned.
+Normal184 remains installed, diagnostics removed. No push/main/release action.
+Evidence: outputs/loupe-dev184/checkpoint.json and native-surface readbacks.
+Remaining causal limitation: short permitted helper cannot reliably capture a
+held lens image; original white-lens report remains FAIL/OPEN until direct visual
+comparison on ordinary184. Supplier preference correction is not proof that
+ARGB support is defective. No release promotion from these scoped results.
+
 Dev180 local correction: successful corner release preserves only scoped hover
 ownership for a repeated press without cursor motion. Effect-panel DRAW now uses
 the same effect/time/mode claim instead of re-enabling native Point picking.
