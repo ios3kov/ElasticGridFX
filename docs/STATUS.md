@@ -49,6 +49,14 @@ guard tests PASS. Native diagnosis NOT RUN; allocation cause and freeze repair
 remain OPEN. [Diagnostic contract and stop conditions](resource-census-plan.md).
 Read-only inventory finds9 foreign AE Hot Loader test plug-ins; none changed.
 No AE processes at the latest preflight, no launch or interaction performed.
+Dev169 exact source2b53747 / EGFX-376c92a761bbecece5122c43 release build, bundle,
+signature, archive/manifest/native installer and409 repository hashes PASS.
+Features exactly default/native-plane/resource-census-probe. User authorizes the
+prepared temporary Hot Loader exclusion;9 bundles atomically moved and verified,
+then all9 returned byte/mode-exact after installer launch was AUTO_REVIEW_REJECTED
+for missing immediate local-software confirmation. No AE launch, no install;
+Dev168 remains installed. Explicit Dev169 launch confirmation is pending.
+Private record: outputs/resource-census-dev169/launch-hold.json.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
