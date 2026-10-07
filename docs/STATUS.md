@@ -45,43 +45,50 @@ resource-lifetime and stability diagnostics are still required after this failur
 No further live gesture until an offline review and a bounded diagnostic plan
 identify a discriminating signal, memory stop condition and owned-host baseline.
 
-Local Dev169 resource-census candidate: passive atomic counts for snapshots,
-loupe copies, borrowed worlds and checkin results; no new frame requests or quality
-changes. External exact-PID/path/birth guard limits footprint/growth and the test
-deadline. Ordinary120/probe122 Rust, strict probe Clippy,16 host contracts and6
-guard tests PASS. Native diagnosis NOT RUN; allocation cause and freeze repair
-remain OPEN. [Diagnostic contract and stop conditions](resource-census-plan.md).
-Read-only inventory finds9 foreign AE Hot Loader test plug-ins; none changed.
-No AE processes at the latest preflight, no launch or interaction performed.
-Dev169 exact source2b53747 / EGFX-376c92a761bbecece5122c43 release build, bundle,
-signature, archive/manifest/native installer and409 repository hashes PASS.
-Features exactly default/native-plane/resource-census-probe. User authorizes the
-prepared temporary Hot Loader exclusion;9 bundles atomically moved and verified,
-then all9 returned byte/mode-exact after installer launch was AUTO_REVIEW_REJECTED
-for missing immediate local-software confirmation. No AE launch, no install;
-Dev168 remains installed. Explicit Dev169 launch confirmation is pending.
-Private record: outputs/resource-census-dev169/launch-hold.json.
-Later explicit user confirmation permits Dev169 launch; installed canonical
-bundle/permissions/signature PASS, installer exited without re-query. Normal AE
-PID1992 loads exact UUID3826B5EF-8479-3D2B-A9E4-ADF619F5F8A2; no AEHL components
-in loaded image table. First passive observer stopped during fixture opening at
-944123304bytes versus602331256byte idle, exceeding+256MiB growth; expected guarded
-SIGSTOP/sample/SIGKILL and host exit PASS. DoScript connection loss follows guard
-termination, not a new unexplained crash. No gesture, no completed registration,
-only one zero GlobalSetup census record: attribution INCONCLUSIVE. All9 foreign
-bundles restored exactly. Dev169 remains installed; AE closed. Next discrimination
-separates startup from loaded idle under a tighter1GiB startup cap, omits full
-effect-catalog traversal, then preserves the original gesture limits. Loading
-guard10 tests PASS; no graphics-source or selected-quality change. Private result:
-outputs/resource-census-dev169/baseline-result.json. Freeze repair remains OPEN.
-Follow-up PID2529 setup and loaded UUID/path PASS; initial1GiB loading cap stopped
-at1124494760bytes, host exit and9-bundle restoration PASS. Last idle UI record has
-snapshot3created/3dropped/live0; world2created/2dropped/live0, peak33177600bytes
-1920x1080x32bpc; two successful checkins, no loupe copy/request. Gesture NOT RUN,
-allocation attribution still INCONCLUSIVE. Revised idle/loading bound1.25GiB
-accounts for this completed initial frame; total1.5GiB, growth256MiB and45-second
-deadline unchanged. External guard10 tests PASS; installed graphics stays exact
-2b53747. Private follow-up: outputs/resource-census-dev169/loaded-idle/phase2.
+Dev169 passive census: snapshots, loupe copies, borrowed worlds and checkins;
+no additional frame requests or quality changes. Ordinary120/probe122 Rust,
+strict probe Clippy,16 host contracts and10 external guard tests PASS. Exact
+source2b53747 / EGFX-376c92a761bbecece5122c43 release build, bundle/PiPL/exports/
+signature/archive/manifest/native installer PASS. Features exactly
+default/native-plane/resource-census-probe. The initial installer launch rejection
+was resolved by the user's later explicit confirmation; Dev169 is installed.
+Native loaded UUID3826B5EF-8479-3D2B-A9E4-ADF619F5F8A2/path PASS. Diagnostic
+resource results and limitations: [contract](resource-census-plan.md).
+
+Startup observations PID1992/PID2529 stopped before a gesture. The first growth
+bound mixed cold loading with idle; the second completed setup but exceeded its
+initial1GiB cap. The evidence-based loading/idle cap is now1.25GiB, with unchanged
+total1.5GiB/growth256MiB/maximum45seconds. No further cap increase. All runs are
+saved disposable copies; exact PID/path/birth guards verify each signal.
+
+PID3572 armed at1070084744bytes then exceeded the absolute cap at1740308152bytes
+after8.989seconds, with no mouse gesture. Last delivered UI census has snapshots
+9/9/live0, worlds8/8/live0, eight successful pixel checkins, no loupe copy/poll.
+The stopped sample contains active FSTR rendering; a last UI record cannot
+exclude subsequent work. Cua getApp timed out in that interval; no screenshot
+ran. A later empty AE PID3656 was separately proven unsaved/zero-items and closed
+with exact identity checks. This lookup is excluded from follow-up experiments.
+
+**Idle-render confound localized; original hang cause still UNKNOWN.** Local
+AE preference has Cache Frames When Idle enabled with8000ms delay. With no Cua/AX,
+mouse or playback, PID6028 reproduced growth at8.996seconds:1081471792bytes idle
+to1703626704bytes, expected guard stop/exit PASS. Thus Cua is not necessary for
+this idle growth. With only the runtime idle-cache setting disabled, PID6756
+completed20seconds without a limit; maximum1088548432bytes, ending989884872bytes.
+Preference readback false during the test; original enabled01 on disk afterward
+PASS. The off run recorded only a113x64 thumbnail; its full viewer image may have
+reused a warm host cache. This is not a fresh full-frame rendering/stability PASS
+or proof that caching caused the original drag/RAM Preview incident. No product
+setting, MFR, quality, render source or memory cap was changed.
+
+**Current cleanup PASS:** AE absent, all9 authorized Hot Loader test bundles
+returned byte/mode-exact, original idle-cache preference enabled. Dev169 remains
+installed. No native gesture or RAM Preview in these experiments; freeze repair
+OPEN. Next: a discriminating single-frame/corner ownership test with background
+caching controlled, preserving old keys, Undo and selected-quality output. A fresh
+full-frame miss must be observed before interpreting a warm-cache comparison as
+renderer evidence. Private records: outputs/resource-census-dev169/{baseline-result.json,
+loaded-idle/phase2,armed-idle,idle-cache-on-no-ax,idle-cache-off-no-ax}.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during

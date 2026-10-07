@@ -76,7 +76,29 @@ AE owns pre_render_data and its deletion callback; the census cannot delete it.
    Evidence-based plan revision: loading/idle cap1.25GiB accommodates the observed
    initial frame; total limit stays1.5GiB, growth stays256MiB, duration stays45sec.
    No quality reduction or new graphics build. Stop again if this cap fails.
-5. Arm the guard before any action. One<=1-second corner gesture only after READY;
+   PID3572 subsequently armed at1070084744bytes, then reached1740308152bytes
+   at8.989seconds without any mouse gesture. Expected exact-PID stop/sample/kill
+   PASS. Last delivered UI census: snapshots9/9/live0, worlds8/8/live0,
+   eight successful pixel checkins, no loupe copy/poll/receipt. The stopped
+   process sample includes active FSTR rendering; zero last-UI scopes do not
+   exclude subsequent worker activity or untracked/host allocations.
+   A Cua getApp lookup timed out in that interval; its screenshot never ran.
+   A separate empty AE PID3656 appeared afterward, was proven unsaved with zero
+   items and closed by exact PID/path/birth. All9 foreign bundles restored.
+   Read-only preference inspection finds Cache Frames When Idle enabled with
+   an8000ms delay. Adobe documents automatic idle rendering after that delay:
+   [Multi-Frame Rendering / Speculative Preview](https://helpx.adobe.com/after-effects/desktop/render-and-export/multi-frame-rendering/multi-frame-rendering.html).
+   This is a new testable confound, not proof of the original hang's cause.
+   Next bounded comparison: same saved fixture and exact Dev169, no Cua/AX or
+   mouse input in either run, first leave idle caching on, then temporarily
+   disable only that preference in the second disposable process. Each run
+   lasts20seconds under the unchanged guard bounds. Read back the runtime
+   setting, suppress preference saving in the off process, verify the original
+   on value on disk after exit, and return the9 bundles after each run. Never
+   persist the off setting as a product fix or change MFR/quality/memory caps.
+   No native gesture until this distinction and current ownership are resolved.
+5. Arm the guard before any action. One<=1-second corner gesture only after READY
+   (ARMED when using the loading phase) and exact post-open identity;
    maximum observation45seconds. On a limit the owned AE is stopped, sampled for
    one second and killed; it is also killed at the deadline. The saved fixture
    makes this authorized disposal safe. Recheck process identity before each
@@ -109,3 +131,53 @@ AE-only disposal verified; all9 Hot Loader bundles restored byte/mode-exact.
 
 Private local evidence: outputs/resource-census-*.log,
 outputs/resource-guard-tests.log, outputs/resource-census-foreign-inventory.json.
+
+## Idle-cache discrimination result — 2026-10-07
+
+Same source2b53747 / BID EGFX-376c92a761bbecece5122c43 / installed UUID and saved
+32bpc Full/Final Surface fixture. No mouse, Cua/AX, RAM playback or quality change.
+The UI Deformation Plane value3 denotes Surface; hidden saved mode2 is preserved
+through the display permutation. The loupe preparation's saved-mode2|4 check is
+correct, not a stale menu-order defect.
+
+| Observation | Enabled / PID6028 | Runtime disabled / PID6756 |
+|---|---|---|
+| Setup / post-open exact loaded identity | PASS | PASS |
+| External bound | Absolute limit at8.996seconds | No limit for20seconds |
+| Memory | Stable1081471792bytes then1703626704bytes | Peak1088548432bytes, end989884872bytes |
+| Last delivered census | Snapshot4/3/live607; input/output3/2/live33177600 each | Snapshot2/2/live0; input/output1/1/live0 |
+| Pixel checkins | 2success/0error; render active at last UI row | 1success/0error;113x64 thumbnail |
+| Loupe copies/polls/receipts | 0 | 0 |
+| Exact-PID exit /9-bundle return | PASS / PASS | PASS / PASS |
+
+Cold-start empty-project preflight timed out before AE UI initialization. A
+sample then showed startup complete; one bounded read-only retry proved the same
+PID empty before opening the fixture. The off run waited for cold initialization
+before its empty-project check. Neither observation began on an unproved project.
+
+Conclusion: AX lookup is unnecessary for the observed approximately9-second
+idle burst. Enabled8000ms speculative caching is a supported explanation for this
+burst; disabling it removes that burst in the bounded follow-up. The off run's
+full viewer frame may be served by the now-warm host cache (only a thumbnail
+crossed FSTR); do not promote this comparison to fresh full-frame/MFR stability,
+leak elimination or the original hang's root cause. UI-only logs may lag workers.
+Stopped-process stack repetitions do not measure a stall duration.
+
+The off setting was confined to the disposable AE process using the documented
+[Preferences API](https://ae-scripting.docsforadobe.dev/other/preferences/)
+with machine-independent storage;
+[saving preferences on quit](https://ae-scripting.docsforadobe.dev/general/application/#appsetsavepreferencesonquit) was
+disabled. Original Cache Frames When Idle=01 and the entire original preference
+file SHA256 verified unchanged on disk after exact-process exit. No disk
+preference file overwrite, cache deletion or permanent disable.
+All9 excluded bundles returned, AE absent, no other-app signals. Raw logs and
+saved projects stay private under outputs/resource-census-dev169/idle-cache-*-no-ax.
+
+Next gate: keep background caching controlled for a single-frame/owned-corner
+experiment, independently prove a fresh full-size render miss, and observe the
+gesture without startup/idle/AX confounds under the existing bounds. Do not change
+the plugin's quality, remove AE abort checks, retry failed DRAW flags, or implement
+renderer-side output reuse under changed parameters. The approved freeze contract
+requires transient corner state outside canonical streams until release. Native
+Point hit priority and old-key/UI compatibility remain unresolved; no gesture or
+product fix is accepted by this diagnostic result.
