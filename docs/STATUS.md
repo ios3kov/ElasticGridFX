@@ -6,6 +6,19 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+Latest2026-10-07 user acceptance: ordinary Dev177 Surface picture holds during
+corner movement, grid/loupe move, release updates picture; USER_REPORTED PASS.
+User accepts transient gray coordinate rows on corner hover for this release.
+Dev179 disabled-topic research confirms DRAW delivery but native caption and
+stopwatch remain gray; prototype is not promoted. Ordinary Dev177 restored with
+all file hashes and strict signature PASS. No product UI/key format rewrite.
+
+Exact pushed c48385c CI: Mac37651811024 and Windows37651811038 both PASS.
+Windows native AE acceptance of this corner-drag change remains NOT_RUN;
+Perspective visual hold/loupe check remains open. Original heavy-scene hang
+regression is not certified by small guarded fixtures. Main/release not published.
+
+
 **Current release contract2026-10-07:** user explicitly requires finishing the
 release WITH frozen-image Surface/Perspective corner dragging. Do not split
 this requirement into a later release or substitute ordinary recovery. During
@@ -78,7 +91,8 @@ identified from CI173; equivalent functional source is not exact-artifact proof.
 The user authorized publication of this update branch for CI; main/merge/release
 remain unauthorized. No original heavy project or RAM Preview repeated.
 
-Remaining: held image/live grid/live loupe first/repeated press and final update,
+Earlier checkpoint remaining (Surface visual now USER_REPORTED PASS above):
+held image/live grid/live loupe first/repeated press and final update,
 cancellation/restored coordinate UI in a bounded ordinary manual check; latest
 Windows native confirmation. Visual check readiness requested. Original hang root
 UNKNOWN; release WITH the corner-drag function remains mandatory and OPEN.

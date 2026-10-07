@@ -237,3 +237,12 @@ Replacing all native ECW chrome, including the animation control, is a larger
 UI project, with accessibility, typing/scrubbing, key state, expressions and Undo
 contracts. Do not promote the marker-only prototype or claim that custom handles
 alone solve the appearance. Private evidence: outputs/corner-topic-dev179.
+
+### Product decision after research
+
+2026-10-07 user accepts retaining temporary gray native corner rows to finish
+the release with the working drag function. This supersedes the requested
+cosmetic masking for this update, not the frozen-image/grid/loupe/Undo contract.
+The nondefault TOPIC prototype is not promoted; no replacement numeric/key UI
+is required for this release. Installed ordinary Dev177 restored and verified
+against every packaged file SHA256 and strict signature. Guard cleanup PASS.
