@@ -27,6 +27,17 @@ numeric records covering receipt size/region/channel range and first lens
 sampling coordinates/range per gesture. No raw image, project name, extra frame
 request or ordinary-build logging. Probe Rust132/source17 PASS; native NOT_RUN.
 
+Dev182 guarded native color fixture: exact installed/loaded identity PASS;
+Surface Top Right640,0->560,80 only, layer position unchanged. Receipt and lens
+sample channel ranges0..255, so a uniform-white source is not demonstrated.
+First sample center640,0, one frame-coordinate unit maps to4 source pixels.
+No held visual capture or Undo acceptance; original report remains FAIL/OPEN.
+45s trial cleanup PASS, all9 foreign components returned, idle-cache key unchanged.
+Evidence: outputs/loupe-image-dev182/native-ecw-r2/loupe-image.jsonl.
+Dev183 nondefault probe adds bounded raster-interior range and SDK supplier
+layout capability/preference checks to separate compositing from image upload.
+No ordinary runtime behavior or additional frame requests changed.
+
 Dev180 local correction: successful corner release preserves only scoped hover
 ownership for a repeated press without cursor motion. Effect-panel DRAW now uses
 the same effect/time/mode claim instead of re-enabling native Point picking.

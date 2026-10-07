@@ -216,6 +216,21 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
     surface:&ae::drawbot::Surface,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
     source(event,center.x,center.y)?;
     let pixels=frame_pixels(input,event,center,id)?;
+    #[cfg(feature="loupe-image-probe")]{
+        let mut lo=255u8;let mut hi=0u8;let mut count=0usize;
+        for y in 40..89 {for x in 40..89 {
+            let dx=x as i32-64;let dy=y as i32-64;
+            if dx.abs()<=3||dy.abs()<=3 {continue;}
+            let i=(y*SIZE+x)*4;
+            for value in &pixels[i+1..i+4]{lo=lo.min(*value);hi=hi.max(*value);}
+            count+=1;
+        }}
+        super::loupe_image_probe::record(3,&[lo as f64,hi as f64,count as f64,
+            supplier.supports_pixel_layout_argb()? as u8 as f64,
+            supplier.prefers_pixel_layout_argb()? as u8 as f64,
+            supplier.supports_pixel_layout_bgra()? as u8 as f64,
+            supplier.prefers_pixel_layout_bgra()? as u8 as f64]);
+    }
     let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,ae::drawbot::PixelLayout::Argb32Straight,&pixels)?;
     surface.draw_image(&image,&ae::drawbot::PointF32{x:center.x-RADIUS,y:center.y-RADIUS},1.0)
 }
