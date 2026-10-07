@@ -25,7 +25,11 @@ on release, while preserving loupe, Undo and old keys. Native Point hit priority
 UI compatibility and memory growth must be resolved before another host trial.
 Private incident evidence: outputs/deferred-corner-dev167/incident.
 
-**Current installed ordinary recovery:0.9.4 Dev168**, source57151ca /
+**Current installed diagnostic:0.9.4 Dev169**, source2b53747 /
+EGFX-376c92a761bbecece5122c43. Ordinary recovery checkpoint below is historical;
+new rendering acceptance is not claimed. Current host/diagnostic details follow.
+
+**Previous installed ordinary recovery:0.9.4 Dev168**, source57151ca /
 EGFX-09791ccfe60cf0457f6663e0. Exact release features default/native-plane only;
 no deferred-corner or quality census. Warning-free build, package/bundle/PiPL/
 exports/signature/archive/manifest/native installer PASS; native Installed/
@@ -61,7 +65,7 @@ Later explicit user confirmation permits Dev169 launch; installed canonical
 bundle/permissions/signature PASS, installer exited without re-query. Normal AE
 PID1992 loads exact UUID3826B5EF-8479-3D2B-A9E4-ADF619F5F8A2; no AEHL components
 in loaded image table. First passive observer stopped during fixture opening at
-944123304bytes versus602MiB-scale idle, exceeding+256MiB growth; expected guarded
+944123304bytes versus602331256byte idle, exceeding+256MiB growth; expected guarded
 SIGSTOP/sample/SIGKILL and host exit PASS. DoScript connection loss follows guard
 termination, not a new unexplained crash. No gesture, no completed registration,
 only one zero GlobalSetup census record: attribution INCONCLUSIVE. All9 foreign
@@ -70,6 +74,14 @@ separates startup from loaded idle under a tighter1GiB startup cap, omits full
 effect-catalog traversal, then preserves the original gesture limits. Loading
 guard10 tests PASS; no graphics-source or selected-quality change. Private result:
 outputs/resource-census-dev169/baseline-result.json. Freeze repair remains OPEN.
+Follow-up PID2529 setup and loaded UUID/path PASS; initial1GiB loading cap stopped
+at1124494760bytes, host exit and9-bundle restoration PASS. Last idle UI record has
+snapshot3created/3dropped/live0; world2created/2dropped/live0, peak33177600bytes
+1920x1080x32bpc; two successful checkins, no loupe copy/request. Gesture NOT RUN,
+allocation attribution still INCONCLUSIVE. Revised idle/loading bound1.25GiB
+accounts for this completed initial frame; total1.5GiB, growth256MiB and45-second
+deadline unchanged. External guard10 tests PASS; installed graphics stays exact
+2b53747. Private follow-up: outputs/resource-census-dev169/loaded-idle/phase2.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during

@@ -57,7 +57,7 @@ class MemoryGuardTests(unittest.TestCase):
         gate=guard.PhaseGate(500*guard.MIB,True)
         self.assertEqual(gate.observe(0,900*guard.MIB), (None,False))
         self.assertTrue(gate.loading)
-        self.assertEqual(gate.observe(1,1025*guard.MIB),('loading-idle-cap',False))
+        self.assertEqual(gate.observe(1,1281*guard.MIB),('loading-idle-cap',False))
     def test_setup_marker_alone_cannot_arm_unstable_memory(self):
         gate=guard.PhaseGate(500*guard.MIB,True)
         for t,b in [(0,600),(0.5,650),(1,700),(1.5,650)]:

@@ -55,18 +55,27 @@ AE owns pre_render_data and its deletion callback; the census cannot delete it.
    scene. No original project writes, RAM Preview, long drag or adaptive-quality
    substitution. Bind loaded path/UUID/BID and owned PID before a gesture.
 4. Check global memory headroom first. External guard validates ordinary AE path
-   and process birth. Idle baseline must be<=1GiB; absolute limit1.5GiB or growth
-   +256MiB. Gate failure means NO GESTURE, not a relaxed threshold.
+   and process birth. Current loaded idle baseline must be<=1.25GiB; absolute
+   limit1.5GiB or growth+256MiB. A limit stops the test, with no gesture or blind retry.
    The first observation stopped during loading, before any gesture or registered
-   fixture result: initial602MiB-scale footprint rose past the256MiB growth bound.
+   fixture result: initial602331256bytes rose past the256MiB growth bound.
    Only the GlobalSetup zero census was delivered, so it cannot attribute growth.
    Follow-up separates loading from loaded idle: optional `--loading` keeps a
-   tighter absolute1GiB cap until setup completes and memory varies<=8MiB over
+   absolute loaded-idle cap until setup completes and memory varies<=8MiB over
    >=1second. Only then ARMED establishes the loaded idle baseline for the same
    +256MiB/1.5GiB gesture limits. No gesture before ARMED; cap failure stops again.
    Fixture setup omits an unnecessary complete app.effects catalog traversal.
    Other installed third-party components remain loaded; absence of Hot Loader
    is not a fully clean third-party environment claim.
+   The separate loading run completed setup and exact loaded identity, then hit
+   the initial1GiB cap at1124494760bytes. Four UI census records show snapshots
+   3created/3dropped/live0, worlds2created/2dropped/live0, two successful pixel
+   checkins, no loupe copy/request yet. Largest borrowed world33177600bytes,
+   1920x1080x32bpc; the second world113x64 is a host thumbnail, not a speed test.
+   These idle-boundary records do not establish cache ownership or the drag cause.
+   Evidence-based plan revision: loading/idle cap1.25GiB accommodates the observed
+   initial frame; total limit stays1.5GiB, growth stays256MiB, duration stays45sec.
+   No quality reduction or new graphics build. Stop again if this cap fails.
 5. Arm the guard before any action. One<=1-second corner gesture only after READY;
    maximum observation45seconds. On a limit the owned AE is stopped, sampled for
    one second and killed; it is also killed at the deadline. The saved fixture

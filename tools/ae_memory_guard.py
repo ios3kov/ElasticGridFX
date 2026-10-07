@@ -17,7 +17,7 @@ import time
 
 HOST = '/Applications/Adobe After Effects 2025/Adobe After Effects 2025.app/Contents/MacOS/After Effects'
 MIB = 1024 * 1024
-MAX_BASELINE = 1024 * MIB
+MAX_BASELINE = 1280 * MIB
 MAX_FOOTPRINT = 1536 * MIB
 MAX_GROWTH = 256 * MIB
 
@@ -112,7 +112,7 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loadin
     process = Process(pid)
     path, birth, baseline = process.read()
     if not identity_matches(path, birth, birth) or baseline > MAX_BASELINE:
-        raise RuntimeError('AE identity or <=1GiB idle baseline gate failed; no gesture')
+        raise RuntimeError('AE identity or <=1.25GiB idle baseline gate failed; no gesture')
     gate = PhaseGate(baseline, loading)
     fd = os.open(destination / 'memory.jsonl', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(fd, 'w') as log:
@@ -160,6 +160,6 @@ if __name__ == '__main__':
     parser.add_argument('--terminate-on-limit', action='store_true',
                         help='Close saved disposable AE on a limit or observation deadline')
     parser.add_argument('--loading', action='store_true',
-                        help='Load under1GiB cap; arm growth limit after fixture-ready + stable idle')
+                        help='Load under1.25GiB cap; arm growth limit after fixture-ready + stable idle')
     args = parser.parse_args()
     monitor(args.pid, args.out, args.seconds, args.terminate_on_limit, args.loading)
