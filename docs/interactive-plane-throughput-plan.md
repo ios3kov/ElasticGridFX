@@ -173,6 +173,13 @@ redundant sample lookup checks only; automatic Preview substitution NOT IMPLEMEN
 
 ## Deferred corner contract — user decision2026-10-07
 
+**Release scope reaffirmed2026-10-07:** user explicitly rejects preparing the
+release separately from frozen-image corner dragging. This function remains a
+required acceptance criterion for0.9.4 on Mac and Windows; ordinary recovery
+artifacts are preserved for recovery only. Urgency is not a waiver of native
+freeze, release rendering, animation/Undo or incident stability checks. Do not
+promote Dev170 (hidden coordinate rows/input diagnostic) as a release candidate.
+
 User reports Dev164 only slightly smoother, still jerky: responsiveness FAIL.
 Approved replacement: while moving a Surface/Perspective corner, keep the last
 image, move grid/loupe, recalculate selected-quality image on release; internal

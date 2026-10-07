@@ -6,6 +6,36 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+**Current release contract2026-10-07:** user explicitly requires finishing the
+release WITH frozen-image Surface/Perspective corner dragging. Do not split
+this requirement into a later release or substitute ordinary recovery. During
+movement only grid/loupe change; one canonical corner commit and selected-quality
+render on release, old keys/Undo/coordinate controls retained. Implementation and
+native acceptance remain OPEN. Dev170 is a diagnostic, NOT a release candidate.
+No new-source push, main change or publication authorized. No deadline is proven.
+
+Latest bounded observations supersede the earlier current-process/next-test
+statements below. PID19082 startup UI barrier/preflight and exact loaded Dev170
+identity PASS; +256MiB armed growth stopped the test at9.1835seconds BEFORE any
+gesture. Last delivered FSTR census balanced; host background frame-range/output
+allocation appears in sample. Cause of original hangs remains UNKNOWN, not a
+proven FSTR leak or third-party attribution. Cold-idle-off PID19500 failed the UI
+readiness wait before any DoScript, fixture or gesture: experiment NOT RUN.
+
+Test-runner defect confirmed separately: SIGTERM during owned startup disposal
+enters AE SignalHandler/CrashReporterSentry::OnForceQuit/Abort. The private future
+controller removes that dispatch; syntax PASS, native execution NOT RUN. Historical
+controllers remain evidence and must not be rerun. Exact owned reporter targeting
+PID19500 was disposed; original25.6 preference full hash and all9 temporarily
+excluded bundles restored. Current process inventory: AE main/report dialog absent;
+old detached crashpad and other Adobe apps untouched. Dev170 remains installed.
+No additional live experiment or release claim follows this checkpoint.
+Private evidence: outputs/corner-ownership-dev170/native-priority-ui-first/result.json,
+native-priority-cold-idle-off/owned-crash-cleanup.json and preference-restored.json;
+startup-alert-20261007/prepared-next/cleanup-review.json.
+
+### Earlier checkpoints — preserved evidence
+
 **ACTIVE after user continuation2026-10-07.** Installed Dev170 exact canonical
 files/modes/signature PASS, source908bcc8 / BID EGFX-6eaeae9fbb8a77354cf5cc58.
 The paused PID13780 startup stopped before project opening; no gesture. On resume,
