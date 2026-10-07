@@ -1,5 +1,14 @@
 # Corner loupe — 2026-10-05
 
+2026-10-07 current user acceptance on ordinary Dev184: colored lens, held picture
+and Undo PASS for the owned color fixture. New accepted source requirement:
+exclude FSTR rendering in the lens while moving corners. Whole composition versus
+upstream affected-layer scope is pending user clarification; do not silently
+replace existing composited L3 with layer-only pixels. New cursor acceptance:
+no hand may flash inside the lens throughout any corner gesture. Source correction
+preserves the active transparent cursor instead of setting hand on every DRAG;
+Mac/Windows use the same shared UI route, native recheck pending.
+
 2026-10-06 incident: ordinary Dev152 stationary-press repair does not close drag
 acceptance. User reports jerky dragging and then an AE-only hang. Exact native
 sample/incident remain local in outputs/corner-clean-dev152/drag-profile;

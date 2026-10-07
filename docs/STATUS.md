@@ -48,6 +48,18 @@ No new render/frame request. Regression checks preserve all RGBA channels and
 transparent exterior for both layouts; original visual symptom pending native.
 Evidence: outputs/loupe-image-dev183/native-ecw/loupe-image.jsonl.
 
+2026-10-07 Dev184 native manual USER_REPORTED PASS: lens is colored,
+Surface picture freezes during corner drag, CmdZ restores previous view.
+This confirms the white-content regression is no longer observed in this fixture;
+not certification of all coordinates/modes or the original heavy-scene hang.
+New user contract: loupe must exclude FSTR rendering during corner movement.
+Pending material clarification: whole composition including other layers versus
+upstream image of the affected layer. Existing L3 composited-output contract
+cannot be silently interpreted as upstream-only. Independent cursor defect:
+set_drag_cursor(true) ran on every DRAG and overwrote the transparent lens cursor
+with a hand. It now preserves active lens hiding; release/cancellation cleanup
+unchanged. Corrected ordinary candidate/native cursor verification pending.
+
 Dev184 ordinary source8319751 / BID EGFX-364f96a71fa962fb92433677 installed:
 all file hashes/strict signature PASS; exact AE25.6 loaded canonical path/UUID
 DDE88B0B-E8DB-3EBA-8853-7F43BD6B4BDF PASS. Default Rust133/source17/Clippy PASS.

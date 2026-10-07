@@ -101,6 +101,10 @@ fn hand_cursor(dragging: bool) -> ae::CursorType {
 
 fn set_drag_cursor(dragging: bool) {
     GUIDE_DRAGGING.set(dragging);
+    // Each DRAG used to replace the lens's transparent cursor with a hand.
+    // Preserve the active lens cursor through movement; release_cursor_state
+    // restores visibility on release, cancellation and context teardown.
+    if LOUPE_CURSOR.get() && loupe_cursor(true) { return; }
     let cursor = hand_cursor(dragging);
     // AppKit already set the custom cursor. CUSTOM belongs in AdjustCursor's
     // response; do not pass sentinel values to the host's PF_SetCursor suite.
