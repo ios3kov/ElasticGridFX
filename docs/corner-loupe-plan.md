@@ -1,5 +1,28 @@
 # Corner loupe — 2026-10-05
 
+2026-10-07 source-scope follow-up: user says "everything visible below".
+Background/lower visible layers are in scope. Own-layer visibility is not yet
+resolved: keep its upstream image without FSTR, or omit the affected layer
+entirely? The single-layer color fixture distinguishes those outcomes; a material
+question is pending. No change to L3 sampling source until that answer.
+
+SDK25.6 source audit: RenderOptionsSuite4 (AE_GeneralPlug.h:5128-5240)
+provides time, ROI, resolution, matte/channel order, guide layers and quality;
+no documented lower-layer range/excluded-layer selector found there.
+LayerRenderOptionsSuite2 NewFromUpstreamOfEffect (:5260-5264) excludes this
+and later effects but requests that layer, not the composited lower stack.
+CanvasSuite RenderLayerPlus uses an Artisan render context; ordinary effect UI
+has no such context. Guide authority:
+https://ae-plugins.docsforadobe.dev/aegps/overview/
+https://ae-plugins.docsforadobe.dev/aegps/aegp-suites/
+Do not substitute an upstream-only frame for accepted composition/background
+scope. Do not temporarily toggle user effect/layer flags during an async request:
+that mutates the displayed project and has unresolved request snapshot lifetime.
+Next research must preserve project state, native composition blending/mattes,
+frame-request bounds and Mac/Windows parity. No new host experiment dispatched
+for this unresolved source design. Cursor source fix e5eec9e is independently
+verified by Rust133/Clippy/source17, not yet installed/native accepted.
+
 2026-10-07 current user acceptance on ordinary Dev184: colored lens, held picture
 and Undo PASS for the owned color fixture. New accepted source requirement:
 exclude FSTR rendering in the lens while moving corners. Whole composition versus

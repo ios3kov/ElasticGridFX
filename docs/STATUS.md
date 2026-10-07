@@ -48,6 +48,12 @@ No new render/frame request. Regression checks preserve all RGBA channels and
 transparent exterior for both layouts; original visual symptom pending native.
 Evidence: outputs/loupe-image-dev183/native-ecw/loupe-image.jsonl.
 
+2026-10-07 loupe source clarification: "everything visible below" includes
+background/lower layers. Own layer retained upstream versus omitted entirely
+remains material/pending: one-layer fixture would show original cells versus
+empty background. SDK source routes are recorded in corner-loupe-plan.md.
+No guessed sampling change or live flag toggles; cursor fix e5eec9e remains local.
+
 2026-10-07 Dev184 native manual USER_REPORTED PASS: lens is colored,
 Surface picture freezes during corner drag, CmdZ restores previous view.
 This confirms the white-content regression is no longer observed in this fixture;
