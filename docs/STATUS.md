@@ -17,13 +17,17 @@ frame or render-worker UI calls. Native Point loop honoring these response flags
 is UNKNOWN; default remains Dev164 until native acceptance. Both earlier hang
 incidents remain OPEN. Separate review covers per-owner/window/time state,
 context clearing, once-only release and no repeated DRAW invalidation.
-Build/package pending; native validation BLOCKED in current AE session: PID86040
-reports a crash in foreign AEHLCalibrationb5d43fa0a03e and a read-only sample
-captures its idle frame-copy/GetRenderedRegion path. Dev167 not installed at
-that observation. This is not attributed to FSTR or either earlier hang; parallel
-AE Hot Loader work is being clarified before host modification.
-Private evidence: outputs/deferred-corner-dev167. No new-source Windows CI,
-push, promotion, main change or release.
+Build/package PASS: clean sourcef3943d51a6ccd3d712f99b9d440ee9603d47cdc9,
+BID EGFX-412cf851b1695fc8cfc7c32c. Warning-free release, bundle/PiPL/exports/
+signature/archive/manifest and native installer verified. Features exactly
+default/native-plane/interactive-quality-probe/deferred-corner-probe.
+Native validation BLOCKED: user confirms parallel AE Hot Loader validation;
+current host PID86040 reports a crash in AEHLCalibrationb5d43fa0a03e and read-only
+sample captures its idle frame-copy/GetRenderedRegion path. Dev167 NOT INSTALLED;
+existing FSTR and host left unchanged. This is not attributed to FSTR or either
+earlier hang. Resume only after the other host validation ends and a clean owned
+FSTR scene is available. Private evidence: outputs/deferred-corner-dev167.
+No new-source Windows CI, push, promotion, main change or release.
 
 **HOLD — native interactive hang.** Ordinary Dev152 source39616fa / Build ID
 EGFX-c3c62a10f10d4026fcab974d: user reports slightly faster but jerky corner drag,

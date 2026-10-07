@@ -194,3 +194,12 @@ are not corner gestures. Default remains ordinary Dev164 until native validation
 Verify lifecycle/flag state tests, Rust/Clippy/host contracts, exact artifact and
 short native drag/release/Undo/loupe; no long drag/RAM Preview. Both hang incidents
 remain OPEN. Source/publish/Windows CI scope unchanged, local work only.
+
+
+Dev167 candidate checks PASS:125 probe +120 ordinary Rust tests, strict probe
+Clippy,16 host contracts, warning-free release and bundle/PiPL/exports/signature/
+archive/manifest/native installer. Exact sourcef3943d5,
+BID EGFX-412cf851b1695fc8cfc7c32c; probe stays nondefault and uninstalled.
+User confirms concurrent AE Hot Loader validation2026-10-07; native session not
+modified or closed. Frozen image/grid/loupe/release behavior UNKNOWN, native test
+BLOCKED until that validation ends. No product promotion or incident closure.
