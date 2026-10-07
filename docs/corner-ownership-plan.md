@@ -218,3 +218,22 @@ when cursor returns to ECW, existing-key edit and one Undo. If DRAW is suppresse
 or the host stopwatch still grays, reject the masking hypothesis rather than
 claiming an invisible disable. No native experiment was run in this research
 block; installed Dev177 and renderer remain unchanged.
+
+### Disabled-topic native result
+
+2026-10-07 isolated nondefault `corner-topic-probe` Dev179 source8f6cbe3 /
+BID EGFX-750c65621b994db61257cae0. Release compile, Cargo check and two scoped
+ownership tests PASS. One existing TopLeft Point received TOPIC drawing and
+was forced DISABLED in UI synchronization; no Point data/IDs/types were changed.
+AE25.6 owned generated320x240/32bpc Surface fixture PID48918, birth4067524204060:
+exact loaded path/UUID verification PASS. Fresh Cua screenshot showed bright blue
+custom `TOPIC DRAW` text while the same row's native Top Left caption and animated
+stopwatch remained gray. Disabled custom-topic DRAW delivery PASS; full visual
+masking by drawing only the value FAIL. No corner movement or numeric input was
+performed; gesture/Undo acceptance of this custom ECW prototype NOT RUN. It is
+not product implementation and is excluded from default features.
+
+Replacing all native ECW chrome, including the animation control, is a larger
+UI project, with accessibility, typing/scrubbing, key state, expressions and Undo
+contracts. Do not promote the marker-only prototype or claim that custom handles
+alone solve the appearance. Private evidence: outputs/corner-topic-dev179.
