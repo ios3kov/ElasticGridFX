@@ -49,7 +49,7 @@ visual acceptance follows from these readbacks. Both45second guarded trials ende
 with AE absent, unchanged idle-cache key and all9 excluded components restored.
 Private evidence: outputs/owned-corner-dev173/native-surface/ and native-perspective/.
 
-Mac CI37648115557 and Windows CI37648115646 on199054a are IN_PROGRESS at this
+Mac CI37648115557 and Windows CI37648115646 on199054a were IN_PROGRESS at that
 checkpoint. They do not prove runtime acceptance. Original drag/RAM hang root
 cause remains UNKNOWN; no user project or RAM Preview was opened in these trials.
 
@@ -61,13 +61,27 @@ its raw-SDK experiment is removed from the product. Keep199054a's simpler valida
 Keyframe Suite path and current-key-only behavior. A first175 trial stopped before
 DoScript because a private harness module was omitted; cleanup PASS, gesture NOT_RUN.
 
-Prepared Dev177 retains the ordinary173 functional code; fresh test will establish
-hit state on an UNANIMATED different corner, verify Top Left still has ONLY the
-original two keys, then move Top Left and Undo once. This isolates the intended
-single gesture without a prior native key insertion.130 tests/Clippy/contracts,
-exact build/install/native trial are rechecked for this candidate. Visual held
-image/live grid/live loupe and latest Windows native behavior remain OPEN.
-Release WITH frozen-image corner drag remains mandatory. Main/release unauthorized.
+Installed ordinary Dev177 sourceaf3138e / BID EGFX-4d300dce5296aab8446a758d /
+UUID615266E8-3099-32E8-AD83-F91C65A1D509 retains199054a's functional code; only
+build counters and documentation differ. Exact build/package/install/load PASS.
+130 Rust tests and16 source contracts PASS. Corrected native Perspective/PID43428
+sets hit state on unanimated Top Right; readback proves Top Left still has only
+two keys before movement. Moving Top Left creates a third key24/8; one Cmd+Z
+restores the exact original two-key track, midpoint and Affected Lines3/6. PASS.
+Peak1004191512bytes, no cap event;45s cleanup PASS, cache key unchanged, all9
+components returned. Private outputs/owned-corner-dev177/native-perspective/result.json.
+
+CI199054a Mac37648115557 and Windows37648115646 PASS. Both downloaded CI ZIP
+SHA256 and manifest source identities verified. Windows PE/AEX checks/tests PASS;
+Windows AE runtime NOT_RUN on this function. The local177 bytes are separately
+identified from CI173; equivalent functional source is not exact-artifact proof.
+The user authorized publication of this update branch for CI; main/merge/release
+remain unauthorized. No original heavy project or RAM Preview repeated.
+
+Remaining: held image/live grid/live loupe first/repeated press and final update,
+cancellation/restored coordinate UI in a bounded ordinary manual check; latest
+Windows native confirmation. Visual check readiness requested. Original hang root
+UNKNOWN; release WITH the corner-drag function remains mandatory and OPEN.
 
 ### Earlier checkpoints — preserved evidence
 

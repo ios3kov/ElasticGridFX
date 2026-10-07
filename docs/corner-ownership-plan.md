@@ -151,3 +151,10 @@ Dev177 keeps199054a's simpler current-key-only SDK commit. Discriminating next t
 sets native cursor state on another UNANIMATED corner, verifies animated Top Left
 still has two original keys, then moves it once and checks one Undo removes only
 that gesture's key. Earlier FAIL observation is retained, not hidden or promoted.
+
+Dev177/PID43428 corrected single-gesture native acceptance PASS: stationary input
+on unanimated Top Right leaves animated Top Left at two keys; one moved Top Left
+creates third24/8; one Undo restores original two keys, exact sampled midpoint,
+and radius3/6. Exact loaded UUID615266E8-3099-32E8-AD83-F91C65A1D509/BID4d300dce
+and guard/restoration match STATUS. The intermediate raw-batch experiment is not
+in product code. Held-image/live-loupe visual acceptance remains NOT_RUN.
