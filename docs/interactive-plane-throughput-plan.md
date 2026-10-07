@@ -214,3 +214,16 @@ Dev168 recovery excludes probe and census, not a fix for baseline hang. Approved
 freeze contract remains OPEN; research owned transient corner geometry / single
 release commit offline before any next native test. Preserve stream IDs/keys,
 selected quality, internal-line interactivity and loupe.
+
+
+Ordinary Dev168 recovery installed PASS, source57151ca /
+EGFX-09791ccfe60cf0457f6663e0, features default/native-plane only. Exact canonical
+payload/signature and installer exit verified; AE left closed, no trial. Renderer
+and loupe unchanged, no root-cause repair claim. Next diagnostic plan must establish
+baseline memory before activation, distinguish host-owned frame retention from
+plugin-owned copies/snapshots, record source/output dimensions and checkout/checkin
+outcomes, and define an early stop before another user interaction. Offline source
+review finds a single <=64MiB loupe copy per UI thread, bounded gesture work,
+SmartRender pixel checkin outside result closure and per-call renderer row caches;
+these observations are not live leak/cleanup proof. Do not repeat the failed flag
+approach or change AE preferences/caches/foreign plugins to mask the failure.

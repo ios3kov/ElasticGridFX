@@ -18,12 +18,28 @@ performed in incident response, no Photoshop/Telegram control, no further live r
 The DRAW/AdjustCursor flag route does not meet the native corner contract in this
 fixture; do not retry/promote it. Dev168 ordinary recovery removes both experimental
 features by building default/native-plane only; renderer, loupe, keys, selected
-quality remain unchanged. Build/install pending; this is quarantine, not a hang fix.
+quality remain unchanged. Build/install PASS; this is quarantine, not a hang fix.
 Freeze contract remains OPEN. Next offline research: an owned corner interaction
 that keeps tentative coordinates outside saved parameter streams and commits once
 on release, while preserving loupe, Undo and old keys. Native Point hit priority,
 UI compatibility and memory growth must be resolved before another host trial.
 Private incident evidence: outputs/deferred-corner-dev167/incident.
+
+**Current installed ordinary recovery:0.9.4 Dev168**, source57151ca /
+EGFX-09791ccfe60cf0457f6663e0. Exact release features default/native-plane only;
+no deferred-corner or quality census. Warning-free build, package/bundle/PiPL/
+exports/signature/archive/manifest/native installer PASS; native Installed/
+Previous saved, exact canonical files/executable bits/signature and installer
+process exit PASS. AE absent before/after; no relaunch and no new native trial.
+Ordinary source identical to Dev164 except About/PiPL development counter; prior
+ordinary tests are reused only for unchanged code, not Dev168 native acceptance.
+Private recovery record: outputs/corner-recovery-dev168/verification.json.
+Rules reread2026-10-07: AI_ENTRYPOINT, Process§2–3, Engineering Debugging Protocol,
+§17–19/38, Native§23, Workflow§8. Freeze FAILED, memory-pressure incident CONFIRMED,
+allocation root cause UNKNOWN. No numerical speed benchmark is requested; memory,
+resource-lifetime and stability diagnostics are still required after this failure.
+No further live gesture until an offline review and a bounded diagnostic plan
+identify a discriminating signal, memory stop condition and owned-host baseline.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
