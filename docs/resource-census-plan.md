@@ -231,9 +231,13 @@ contracts, exact clean commit/build identity, Mac bundle/PiPL/exports/signature/
 archive/manifest/installer. Then one saved disposable Surface/Full/Final scene,
 actual25.6 preference transaction, exact9-bundle isolation/return, loaded identity,
 current screenshot-bound coordinates and same guard caps/maximum45seconds.
-No blind coordinate retries. No corner gesture before ARMED. If custom CLICK
-never arrives, preserve the negative result and reject this route; do not repeat
-or implement renderer-side output reuse. If it arrives, only then implement
+No blind coordinate retries. No corner gesture before ARMED. A routing failure
+requires confirmed delivery to the corner (native corner-coordinate delta and
+unchanged layer position, or equivalent positive hit evidence). Unsupported input,
+a missed target or failed/deadline-expired readback leaves routing UNKNOWN. If a
+confirmed corner hit never reaches custom CLICK, preserve that negative result
+and reject the route; do not repeat or implement renderer-side output reuse.
+If it arrives, only then implement
 transient UI coordinates/one canonical release commit and solve required ECW UI.
 Native freeze/loupe/Undo acceptance stays NOT RUN until that implementation.
 
@@ -252,10 +256,26 @@ Strict default/probe Clippy PASS; source diff whitespace review PASS. Native
 input ownership NOT RUN; no frozen-render behavior has been implemented.
 
 
-Dev170 exact clean source908bcc8, BID EGFX-6eaeae9fbb8a77354cf5cc58: warning-free
+Historical Dev170 packaging checkpoint (superseded below): exact clean
+source908bcc8, BID EGFX-6eaeae9fbb8a77354cf5cc58: warning-free
 release compile, expected four features, bundle/PiPL/exports/signature, sealed
 archive/manifest, native installer and410 repository checksums PASS. Installer
 opened only; Install has not been invoked. Current action-time confirmation is
 pending under Cua software-install policy. Existing Dev169 remains installed;
 input ownership/freeze/native acceptance NOT RUN. Private verification record:
 outputs/corner-ownership-dev170/verification.json. No publication or host trial.
+
+
+2026-10-07 resumed native checkpoint: Dev170 is installed by user, exact files/
+modes/signature and loaded UUID/path PASS. PID13039 physical-coordinate Cua
+attempt has no established hit/readback; routing UNKNOWN. PID15386 corrected
+logical-coordinate Cua attempt returns AXError.notImplemented: gesture NOT RUN.
+Both45second observers completed without a limit; scoped absence of limit is
+not freeze/stability acceptance. Preferences and9 components restored. Existing
+approved CGEvent helper has a prepared metadata/screenshot Retina conversion and
+immediate readback transaction. Its next startup PID16099 remained at BirthPrefs
+modal initialization before fixture open (SDK/Cua timeout); dialog text/desktop
+state UNKNOWN. Exact startup exited, no test gesture, all temporary changes
+restored. Pending desktop-ready response; do not infer native priority failure.
+Private reports are under outputs/corner-ownership-dev170/native-priority*;
+no raw samples, projects or frames are included in repository documentation.

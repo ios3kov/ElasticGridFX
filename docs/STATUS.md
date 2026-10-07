@@ -6,6 +6,38 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+**ACTIVE after user continuation2026-10-07.** Installed Dev170 exact canonical
+files/modes/signature PASS, source908bcc8 / BID EGFX-6eaeae9fbb8a77354cf5cc58.
+The paused PID13780 startup stopped before project opening; no gesture. On resume,
+PID13833 held a nonempty project and~10.5GB footprint; no experiment was run in it.
+Closed that exact AE without saving under existing user authorization. Cause of
+that footprint UNKNOWN. PID13039 input delivery remained UNKNOWN (deadline
+missed after Cua). PID15386 exact loaded identity PASS; logical-coordinate Cua
+corner drag throws AXError.notImplemented, so gesture NOT RUN, not native routing
+FAIL.45second guard completed with no memory limit; preference restore full hash
+PASS, all9 excluded components restored. AE absent at checkpoint. Next: existing
+authorized CGEvent helper, screenshot plus exact owned-window Retina geometry,
+one<=1second gesture and automatic point/layer-position readback. No new
+permission, renderer changes, freeze acceptance, push or release. Dev170 hides
+four ECW rows only as an isolated diagnostic; retain production coordinate UI.
+Private evidence: outputs/corner-ownership-dev170/native-priority/result.json,
+native-priority-logical/pause-cleanup.json, resume-host and
+native-priority-logical-r2/result.json. Historical installed Dev169 statements
+below are superseded by this installed Dev170 checkpoint.
+
+**Native gesture currently BLOCKED by host readiness.** Next owned startup
+PID16099 stopped before fixture opening: empty-project DoScript and Cua lookup
+timed out. Exact-PID CoreGraphics metadata has no visible main window;1second
+process sample places the main thread in BirthPrefs -> UI_MessageBox::RunModal.
+Dialog text and desktop lock state UNKNOWN; this is not a FSTR render-hang proof.
+No gesture, render acceptance or route conclusion. Closed exact PID/path/birth,
+restored actual25.6 preference full hash and all9 components; AE absent. User
+asked whether the desktop is unlocked; no blind startup retry. Prepared private
+helper transaction gates Retina/window geometry, ARMED/current identity/caps,
+>=10seconds remaining and automatic point/layer readback; execution NOT RUN.
+Private startup evidence: outputs/corner-ownership-dev170/native-priority-cgevent/
+startup-result.json. Freeze implementation/native acceptance remain OPEN.
+
 **Dev167 REJECTED — native freeze FAIL and new memory-pressure incident.**
 User reports continued effect updates during corner drag, then AE/Photoshop/
 Telegram stalls. Private census exact BID EGFX-412cf851b1695fc8cfc7c32c/PID91860
@@ -25,7 +57,7 @@ on release, while preserving loupe, Undo and old keys. Native Point hit priority
 UI compatibility and memory growth must be resolved before another host trial.
 Private incident evidence: outputs/deferred-corner-dev167/incident.
 
-**Current installed diagnostic:0.9.4 Dev169**, source2b53747 /
+**Historical installed diagnostic:0.9.4 Dev169**, source2b53747 /
 EGFX-376c92a761bbecece5122c43. Ordinary recovery checkpoint below is historical;
 new rendering acceptance is not claimed. Current host/diagnostic details follow.
 
@@ -116,9 +148,9 @@ Source908bcc8 / BID EGFX-6eaeae9fbb8a77354cf5cc58: default120/probe122
 Rust, strict default/probe Clippy,16 host contracts,410 checksums, warning-free
 release, bundle/PiPL/exports/signature/archive/manifest/native installer PASS.
 Exact features default/native-plane/resource-census-probe/corner-ui-ownership-probe.
-Installer launched; Install awaits action-time confirmation required by Cua for
-locally built software. Dev169 remains installed; Dev170 native routing NOT RUN.
-No new AE process, preference or foreign-plugin modification in this block.
+Historical packaging checkpoint: Installer awaited action-time confirmation;
+the user subsequently installed Dev170. Exact disk verification PASS in the
+current checkpoint above; actual delivered native corner routing still NOT RUN.
 Private package/check results: outputs/corner-ownership-dev170/verification.json.
 See [diagnostic contract](resource-census-plan.md). New-source Windows CI/push,
 main, release and original-project writes remain unauthorized.
