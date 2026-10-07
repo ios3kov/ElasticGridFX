@@ -101,6 +101,8 @@ fn exact_initial_pixels<T:Pixel>(easing:f32) {
     let grid=GridArb::default();
     assert!(eligible(&grid));
     let snapshot=SmartRenderSnapshot {
+        #[cfg(feature="resource-census-probe")]
+        census: None,
         show_grid: show_grid::State::default(),
         demo_watermark: show_grid::State::default(),
         grid, plane:plane::State::default(), tension_radius:3.0,falloff:2,

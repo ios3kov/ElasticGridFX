@@ -45,6 +45,7 @@ File names are kept explicit so developers can locate the original record.
 
 ## Performance records
 
+- [resource-census-plan.md](resource-census-plan.md)
 - [mfr-stability-isolation-2026-10-02.json](mfr-stability-isolation-2026-10-02.json)
 - [perf-compare-v1.0.json](perf-compare-v1.0.json)
 - [performance-audit-v0.6.md](performance-audit-v0.6.md)

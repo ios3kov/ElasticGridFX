@@ -41,22 +41,32 @@ resource-lifetime and stability diagnostics are still required after this failur
 No further live gesture until an offline review and a bounded diagnostic plan
 identify a discriminating signal, memory stop condition and owned-host baseline.
 
+Local Dev169 resource-census candidate: passive atomic counts for snapshots,
+loupe copies, borrowed worlds and checkin results; no new frame requests or quality
+changes. External exact-PID/path/birth guard limits footprint/growth and the test
+deadline. Ordinary120/probe122 Rust, strict probe Clippy,16 host contracts and6
+guard tests PASS. Native diagnosis NOT RUN; allocation cause and freeze repair
+remain OPEN. [Diagnostic contract and stop conditions](resource-census-plan.md).
+Read-only inventory finds9 foreign AE Hot Loader test plug-ins; none changed.
+No AE processes at the latest preflight, no launch or interaction performed.
+
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
 Surface/Perspective corner movement; grid/loupe remain live, selected-quality
 render resumes on release. Internal line deformation remains live.
-Local nondefault Dev167 deferred-corner-probe tests125, ordinary tests120,
+Historical Dev167 preparation (superseded by rejection above):
+local nondefault deferred-corner-probe tests125, ordinary tests120,
 strict probe Clippy and16 host contracts PASS. UI-only NEVER_UPDATE / release
 ALWAYS_UPDATE|UPDATE_NOW experiment; no saved data, quality setter, extra source
 frame or render-worker UI calls. Native Point loop honoring these response flags
-is UNKNOWN; default remains Dev164 until native acceptance. Both earlier hang
+was UNKNOWN before the failed trial; ordinary recovery is now Dev168. Both earlier hang
 incidents remain OPEN. Separate review covers per-owner/window/time state,
 context clearing, once-only release and no repeated DRAW invalidation.
 Build/package PASS: clean sourcef3943d51a6ccd3d712f99b9d440ee9603d47cdc9,
 BID EGFX-412cf851b1695fc8cfc7c32c. Warning-free release, bundle/PiPL/exports/
 signature/archive/manifest and native installer verified. Features exactly
 default/native-plane/interactive-quality-probe/deferred-corner-probe.
-Current installed diagnostic: **0.9.4 Dev167**, sourcef3943d5 /
+Previous installed diagnostic: **0.9.4 Dev167**, sourcef3943d5 /
 EGFX-412cf851b1695fc8cfc7c32c. After user confirms AE available, closed empty
 Developer session and copied saved owned Dev164 scene; no foreign plugin edits.
 Native installer reports Installed/Previous saved; exact canonical payload,
@@ -65,7 +75,7 @@ Normal AE PID91860 loads UUID0475D29A-CB43-374F-8AB1-D2F905E4C59D from canonical
 FSTR path, exact identity PASS. Opening transport times out; later registration
 file and responsive UI confirm completed opening. One registered FSTR, owned
 32bpc Full/Final Surface scene, selected visible grid/grips PASS. Short user
-corner/release/Undo freeze and retained-loupe observation PENDING; no long drag
+corner/release freeze result FAIL, with memory-pressure incident recorded above; no long drag
 or RAM Preview. Earlier foreign Calibration component absent from loaded sample;
 other AEHL components remain loaded and unchanged, not an isolated-host claim.
 Private evidence: outputs/deferred-corner-dev167. No native behavior promotion,

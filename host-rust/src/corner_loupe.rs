@@ -220,7 +220,10 @@ fn gesture_request(state:&mut Option<GestureFrame>,proposed:FrameKey)->Option<Fr
     (!r.finished).then_some(r.key)
 }
 fn gesture_finished(){GESTURE_FRAME.set(GESTURE_FRAME.get().map(|r|GestureFrame{finished:true,..r}));}
-struct Frame{key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
+struct Frame{
+    #[cfg(feature="resource-census-probe")]
+    _census:Option<super::resource_census::Token>,
+    key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
 // Bounded owner history; switching between multiple effect rows must not
 // rearm a warm request at every playback time. Full history fails closed for
 // idle preparation while active corner gestures remain available.
@@ -300,6 +303,8 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
         options.set_time(time)?;options.set_world_type(ae::aegp::WorldType::U8)?;
         manager.checkout_or_render_layer_frame_async_manager(PURPOSE,options.handle())?
     };
+    #[cfg(feature="resource-census-probe")]
+    super::resource_census::receipt(!receipt.is_null());
     if receipt.is_null(){return Ok(());}
     let result=(||{
         let world=render.receipt_world(receipt)?;let worlds=ae::aegp::suites::World::new()?;
@@ -315,9 +320,14 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
             let row=unsafe{std::slice::from_raw_parts(ptr.add(y*stride),w*4)};
             pixels[y*w*4..(y+1)*w*4].copy_from_slice(row);
         }
-        Ok(Frame{key,width:w,height:h,region,pixels})
+        Ok(Frame{
+            #[cfg(feature="resource-census-probe")]
+            _census:Some(super::resource_census::Token::new(super::resource_census::Kind::Loupe,size as u64)),
+            key,width:w,height:h,region,pixels})
     })();
     let checked=render.checkin_frame(receipt);
+    #[cfg(feature="resource-census-probe")]
+    super::resource_census::checkin(true,checked.is_ok());
     // A terminal receipt finishes both warm and gesture work, including errors.
     if gesture{gesture_finished();}
     let mut warm=WARM.get();warm_completed(&mut warm,owner);WARM.set(warm);

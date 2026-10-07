@@ -20,6 +20,8 @@ mod plane;
 mod edge;
 mod demo;
 mod corner_loupe;
+#[cfg(feature="resource-census-probe")]
+mod resource_census;
 #[cfg(feature="interactive-quality-probe")]
 mod interactive_quality_probe;
 #[cfg(feature="deferred-corner-probe")]
@@ -490,6 +492,8 @@ struct EgRenderParams {
 
 #[derive(Clone, Debug)]
 struct SmartRenderSnapshot {
+    #[cfg(feature="resource-census-probe")]
+    census: Option<resource_census::Token>,
     grid: GridArb,
     plane: plane::State,
     show_grid: show_grid::State,
@@ -592,6 +596,8 @@ fn smart_render_snapshot(
     let reads=param_reads::Reads::new(params,true,Some(&grid));
     let plane=plane::State::read_values(&reads,&in_data,true)?;
     Ok(SmartRenderSnapshot {
+        #[cfg(feature="resource-census-probe")]
+        census: None,
         show_grid: show_grid::State::read(params, true)?,
         demo_watermark: show_grid::State::read_demo(params, true)?,
         plane,
@@ -1194,6 +1200,8 @@ impl AdobePluginGlobal for Plugin {
         self.lifecycle_probe.observe(&cmd, &in_data);
         match cmd {
             ae::Command::GlobalSetup => {
+                #[cfg(feature="resource-census-probe")]
+                resource_census::record(true);
                 #[cfg(any(target_os = "macos", target_os = "windows"))]
                 out_data.set_out_flag(ae::OutFlags::IDoDialog, true);
                 out_data.set_out_flag(ae::OutFlags::SendUpdateParamsUi, true);
@@ -1291,6 +1299,8 @@ impl AdobePluginGlobal for Plugin {
                 extra.dispatch::<version_row::Data, Params>(Params::VersionRow)?;
             }
             ae::Command::Event { mut extra } => {
+                #[cfg(feature="resource-census-probe")]
+                resource_census::record(false);
                 #[cfg(feature="preview-overlay-probe")]
                 let _=preview_overlay_probe::observe(&in_data, &extra);
                 // Wrapper WindowType covers only COMP/LAYER/EFFECT. In every
@@ -1365,6 +1375,16 @@ impl AdobePluginGlobal for Plugin {
                 #[cfg(feature="render-diagnostics")]
                 let mut trace=render_diagnostics::Trace::new("smart_pre",in_data.current_time(),in_data.time_scale());
                 let snapshot = smart_render_snapshot(params, in_data)?;
+                #[cfg(feature="resource-census-probe")]
+                let snapshot = {
+                    let mut snapshot=snapshot;
+                    let g=&snapshot.grid;
+                    let bytes=std::mem::size_of::<SmartRenderSnapshot>()+
+                        (g.column_lines.capacity()+g.row_lines.capacity())*std::mem::size_of::<f32>()+
+                        g.column_pins.capacity()+g.row_pins.capacity();
+                    snapshot.census=Some(resource_census::Token::new(resource_census::Kind::Snapshot,bytes as u64));
+                    snapshot
+                };
                 let output_request = extra.output_request();
                 let (cw, ch) = (snapshot.canvas_width, snapshot.canvas_height);
                 #[cfg(feature="render-diagnostics")]
@@ -1415,6 +1435,8 @@ impl AdobePluginGlobal for Plugin {
                 {trace.configure(snapshot.canvas_width,snapshot.canvas_height,0,diagnostic_path(&snapshot.plane));trace.mark(render_diagnostics::Phase::Parameters);}
                 let cb = extra.callbacks();
                 let input = cb.checkout_layer_pixels(0)?;
+                #[cfg(feature="resource-census-probe")]
+                let _input_census=input.as_ref().map(|p|resource_census::world(resource_census::Kind::Input,p));
                 #[cfg(feature="render-diagnostics")]
                 trace.mark(render_diagnostics::Phase::Input);
                 // checkout_layer_pixels may legitimately return None for an empty
@@ -1422,6 +1444,8 @@ impl AdobePluginGlobal for Plugin {
                 // to leave AE's output buffer untouched.
                 let result = (|| -> Result<(), ae::Error> {
                     if let Some(mut output) = cb.checkout_output()? {
+                        #[cfg(feature="resource-census-probe")]
+                        let _output_census=resource_census::world(resource_census::Kind::Output,&output);
                         #[cfg(feature="render-diagnostics")]
                         {
                             trace.configure(snapshot.canvas_width,snapshot.canvas_height,output.bit_depth(),diagnostic_path(&snapshot.plane));
@@ -1449,6 +1473,8 @@ impl AdobePluginGlobal for Plugin {
                     Ok(())
                 })();
                 let checkin = cb.checkin_layer_pixels(0);
+                #[cfg(feature="resource-census-probe")]
+                resource_census::checkin(false,checkin.is_ok());
                 #[cfg(feature="render-diagnostics")]
                 trace.mark(render_diagnostics::Phase::Checkin);
                 match (result, checkin) {
@@ -1504,6 +1530,8 @@ impl AdobePluginGlobal for Plugin {
                     Ok(())
                 })();
                 let checkin = cb.checkin_layer_pixels(0);
+                #[cfg(feature="resource-census-probe")]
+                resource_census::checkin(false,checkin.is_ok());
                 match (result, checkin) {
                     (Err(e), _) => return Err(e),
                     (Ok(_), Err(e)) => return Err(e),
@@ -1589,6 +1617,8 @@ mod tests {
         assert!(grid.is_valid());
 
         let snapshot = SmartRenderSnapshot {
+            #[cfg(feature="resource-census-probe")]
+            census: None,
             grid: grid.clone(),
             plane: plane::State::default(),
             show_grid: show_grid::State::default(),
@@ -1739,6 +1769,8 @@ mod tests {
     fn smart_render_snapshot_carries_logical_canvas() {
         let grid = GridArb::uniform(4, 4);
         let snapshot = SmartRenderSnapshot {
+            #[cfg(feature="resource-census-probe")]
+            census: None,
             grid,
             plane: plane::State::default(),
             show_grid: show_grid::State::default(),
