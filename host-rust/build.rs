@@ -50,7 +50,7 @@ fn main() {
         else if std::env::var_os("CARGO_FEATURE_LOUPE_SOURCE_DISABLED_PROBE").is_some() {165}
         else if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {155}
         else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {154}
-        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153} else {164};
+        else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153} else {168};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");

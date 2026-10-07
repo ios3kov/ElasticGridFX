@@ -203,3 +203,14 @@ BID EGFX-412cf851b1695fc8cfc7c32c; probe stays nondefault and uninstalled.
 User confirms concurrent AE Hot Loader validation2026-10-07; native session not
 modified or closed. Frozen image/grid/loupe/release behavior UNKNOWN, native test
 BLOCKED until that validation ends. No product promotion or incident closure.
+
+
+Dev167 native experiment REJECTED2026-10-07: image continues rerendering; user
+reports multi-application stall. Exact census124 HI/full SmartRender plus124
+SmartPreRender across3 releases. JetsamEvent lists PID91860 AE largestProcess;
+system memory-pressure event confirmed, allocation/cache cause UNKNOWN. AE absent
+when collection starts, no current hang sample. No repeat, no promotion. Ordinary
+Dev168 recovery excludes probe and census, not a fix for baseline hang. Approved
+freeze contract remains OPEN; research owned transient corner geometry / single
+release commit offline before any next native test. Preserve stream IDs/keys,
+selected quality, internal-line interactivity and loupe.

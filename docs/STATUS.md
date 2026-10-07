@@ -6,6 +6,25 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+**Dev167 REJECTED — native freeze FAIL and new memory-pressure incident.**
+User reports continued effect updates during corner drag, then AE/Photoshop/
+Telegram stalls. Private census exact BID EGFX-412cf851b1695fc8cfc7c32c/PID91860
+records3 gestures (5204/6112/1998ms), SmartPreRender HI/full68/32/24 and identical
+SmartRender counts;124 per stage, not248 frames or a timing benchmark. At collection
+AE no longer running, so current hang sample NOT RUN. macOS JetsamEvent dated
+2026-10-07 11:13:10+0200 lists AE PID91860 largestProcess; memory-pressure event
+confirmed, exact FSTR/host/cache allocation cause UNCONFIRMED. No AE termination
+performed in incident response, no Photoshop/Telegram control, no further live run.
+The DRAW/AdjustCursor flag route does not meet the native corner contract in this
+fixture; do not retry/promote it. Dev168 ordinary recovery removes both experimental
+features by building default/native-plane only; renderer, loupe, keys, selected
+quality remain unchanged. Build/install pending; this is quarantine, not a hang fix.
+Freeze contract remains OPEN. Next offline research: an owned corner interaction
+that keeps tentative coordinates outside saved parameter streams and commits once
+on release, while preserving loupe, Undo and old keys. Native Point hit priority,
+UI compatibility and memory growth must be resolved before another host trial.
+Private incident evidence: outputs/deferred-corner-dev167/incident.
+
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
 Surface/Perspective corner movement; grid/loupe remain live, selected-quality
