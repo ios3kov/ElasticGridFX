@@ -123,3 +123,20 @@ new-key insertion without altering neighbours, failure rollback and Undo closure
 acceptance: exact ordinary Surface/Perspective current keys and Undo, first/repeated
 press, held image/live grid/live loupe, no-motion/cancel and restored rows; Windows
 build/native confirmation. These remain OPEN until verified on their exact artifact.
+
+## Dev173 native outcome and atomic-key correction
+
+Ordinary199054a Surface/PID39293 current-key preservation and one Undo PASS.
+Perspective/PID40064 between-key insertion preserves both neighbours, but one
+Undo leaves a third key containing its previous interpolated value: FAIL for
+new-key removal. Exact artifact/guards/restoration are recorded in STATUS.
+
+Corrective hypothesis for Dev175: use SDK25.6 Keyframe Suite5
+StartAddKeyframes/AddKeyframes/SetAddKeyframe/EndAddKeyframes. Only End is marked
+UNDOABLE in the SDK header; staging time+value should produce one saved operation.
+Prepare failure explicitly ends with add=false. End/Release status is checked
+using the SDK table; pinned Rust wrapper Drop silently discards the End error and
+is unsuitable for that acceptance claim. Batch/stream/effect/table remain local
+within the final UI callback; no staging during drag or host pointer retention.
+130 tests cover one-operation mock Undo, neighbouring keys and failed preparation.
+Native new-key removal after one Undo is pending and cannot be inferred from them.

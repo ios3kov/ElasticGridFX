@@ -12,7 +12,8 @@ this requirement into a later release or substitute ordinary recovery. During
 movement only grid/loupe change; one canonical corner commit and selected-quality
 render on release, old keys/Undo/coordinate controls retained. Implementation and
 native acceptance remain OPEN. Dev170 is a diagnostic, NOT a release candidate.
-No new-source push, main change or publication authorized. No deadline is proven.
+Source199054a pushed with explicit user authorization for Mac/Windows CI.
+Main/merge/release publication remains unauthorized. No deadline is proven.
 
 Latest native evidence: Dev172 sourcea20d235 / BID EGFX-54de45fa482b59bcd7382511
 was built, installed and loaded from the canonical Mac path; UUID
@@ -36,20 +37,30 @@ native-perspective-r2/ and native-point-control-r2/. Deadline misses and one ref
 non-foreground helper trial remain NOT RUN, not plugin failures. No security grant
 or user preference was changed; no user project/RAM Preview opened.
 
-Prepared ordinary Dev173: default native-plane + owned-corner-drag uses the same
-UI-only transaction on Mac and Windows; diagnostic journals/census stay nondefault.
-The parameter-panel refresh now respects the same-effect/time/mode corner claim;
-error/external-edit release clears transient cursor/loupe/claim state. For animated
-Points, final release uses the SDK Keyframe Suite at converted COMP time to replace/
-insert ONLY the current key. Unanimated Points keep normal PF change/Undo. No key
-enumeration, schema/ID/type change, renderer-worker state, quality change or new
-frame request. Failed new-key value writes remove only the just-inserted key;
-explicit Undo group is balanced, and acquired effect/stream references are released.
-130 default Rust tests and strict default Clippy,16 source contracts PASS. Exact
-ordinary native key/Undo/held-image/loupe acceptance and Windows build remain OPEN;
-build/installation pending. Original drag/RAM hang cause remains UNKNOWN. Release
-WITH this function stays mandatory; no new-source push, main change or publication
-authorized. The previous installed diagnostic must not be called the release build.
+Ordinary Dev173 source199054a / BID EGFX-1aaa6971d1fe3ced9c2fc0ed / UUID
+A90B7554-027B-346A-ABAB-C18BE7A0AA76 built, packaged, installed and exactly loaded.
+Default native-plane + owned-corner-drag includes no diagnostic journal/census.
+Mac Surface/PID39293 current-key edit and one Undo PASS: Point keys0/24->12/24->0/24;
+Affected Lines3/6 retained. Perspective/PID40064 between-key insertion preserves
+both old keys and creates only the current key. However one Undo reverts its value
+but leaves the inserted key: key removal acceptance FAIL. No held-image/live-loupe
+visual acceptance follows from these readbacks. Both45second guarded trials ended
+with AE absent, unchanged idle-cache key and all9 excluded components restored.
+Private evidence: outputs/owned-corner-dev173/native-surface/ and native-perspective/.
+
+Mac CI37648115557 and Windows CI37648115646 on199054a are IN_PROGRESS at this
+checkpoint. They do not prove runtime acceptance. Original drag/RAM hang root
+cause remains UNKNOWN; no user project or RAM Preview was opened in these trials.
+
+Local Dev175 corrective hypothesis: Keyframe Suite5 StartAddKeyframes/AddKeyframes/
+SetAddKeyframe/EndAddKeyframes stages current time/value and commits ONE undoable
+stream operation, replacing separate InsertKeyframe/SetKeyframeValue. Failed
+preparation ends with add=false; explicit End/Release errors are returned. Exact
+SDK table is used because pinned wrapper Drop ignores EndAddKeyframes errors.
+No saved schema/ID/type, quality, renderer-worker state or new frame request change.
+130 default tests PASS; exact candidate build/native Undo regression pending.
+Release WITH frozen-image corner drag remains mandatory. Visual held image/live
+grid/live loupe and latest Windows native behavior remain OPEN.
 
 ### Earlier checkpoints — preserved evidence
 
