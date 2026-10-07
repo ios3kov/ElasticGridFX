@@ -1,5 +1,19 @@
 # Current status
 
+2026-10-07 source prerequisite prepared locally: nondefault
+`loupe-upstream-probe` Dev186 requests the affected layer before FSTR through
+SDK LayerRenderOptionsSuite2; layer-space sampling uses the same native/view
+projection as corner placement. No project flag mutation, no additional request
+per mouse movement, unchanged ordinary composition source. This experiment
+intentionally omits lower-layer composition and is NOT the accepted product fix.
+Probe/default Rust133 each, probe strict Clippy and host source17 PASS.
+First compile used incorrect Fixed conversion names and failed; corrected against
+the installed wrapper before successful checks. Native source/coordinate coverage
+Surface + Perspective (2D/3D, nonidentity layer transform) NOT_RUN. No installation
+or publication. Next: bounded single-layer upstream pixel proof, then a separate
+full-composition exclusion route and multilayer acceptance; no inferred PASS.
+Evidence: outputs/loupe-upstream-{tests,default-tests,clippy,contracts}.log.
+
 Updated: 2026-10-07. This is the concise entry point for the current product and
 continuation. [Dated checkpoints](current-status.md) retain historical detail;
 their older holds and release-policy statements do not override the state below.
@@ -48,20 +62,20 @@ No new render/frame request. Regression checks preserve all RGBA channels and
 transparent exterior for both layouts; original visual symptom pending native.
 Evidence: outputs/loupe-image-dev183/native-ecw/loupe-image.jsonl.
 
-2026-10-07 loupe source clarification: "everything visible below" includes
-background/lower layers. Own layer retained upstream versus omitted entirely
-remains material/pending: one-layer fixture would show original cells versus
-empty background. SDK source routes are recorded in corner-loupe-plan.md.
-No guessed sampling change or live flag toggles; cursor fix e5eec9e remains local.
+2026-10-07 loupe source scope CONFIRMED: original affected-layer cells without
+FSTR distortion remain visible, with background/lower layers. Latest user answer
+explicitly retains original cells. No outstanding own-layer visibility question.
+Full-composition exclusion is implementation OPEN; upstream-only rendering cannot
+satisfy the multilayer contract. SDK routes are in corner-loupe-plan.md. Cursor
+fix e5eec9e remains local, not installed/native accepted.
 
 2026-10-07 Dev184 native manual USER_REPORTED PASS: lens is colored,
 Surface picture freezes during corner drag, CmdZ restores previous view.
 This confirms the white-content regression is no longer observed in this fixture;
 not certification of all coordinates/modes or the original heavy-scene hang.
 New user contract: loupe must exclude FSTR rendering during corner movement.
-Pending material clarification: whole composition including other layers versus
-upstream image of the affected layer. Existing L3 composited-output contract
-cannot be silently interpreted as upstream-only. Independent cursor defect:
+Confirmed source scope retains original affected-layer pixels and visible lower
+layers. Existing L3 cannot be silently interpreted as upstream-only. Independent cursor defect:
 set_drag_cursor(true) ran on every DRAG and overwrote the transparent lens cursor
 with a hand. It now preserves active lens hiding; release/cancellation cleanup
 unchanged. Corrected ordinary candidate/native cursor verification pending.

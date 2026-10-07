@@ -1,10 +1,24 @@
 # Corner loupe — 2026-10-05
 
-2026-10-07 source-scope follow-up: user says "everything visible below".
-Background/lower visible layers are in scope. Own-layer visibility is not yet
-resolved: keep its upstream image without FSTR, or omit the affected layer
-entirely? The single-layer color fixture distinguishes those outcomes; a material
-question is pending. No change to L3 sampling source until that answer.
+2026-10-07 source prerequisite prepared locally: nondefault
+`loupe-upstream-probe` Dev186 requests the affected layer before FSTR through
+SDK LayerRenderOptionsSuite2; layer-space sampling uses the same native/view
+projection as corner placement. No project flag mutation, no additional request
+per mouse movement, unchanged ordinary composition source. This experiment
+intentionally omits lower-layer composition and is NOT the accepted product fix.
+Probe/default Rust133 each, probe strict Clippy and host source17 PASS.
+First compile used incorrect Fixed conversion names and failed; corrected against
+the installed wrapper before successful checks. Native source/coordinate coverage
+Surface + Perspective (2D/3D, nonidentity layer transform) NOT_RUN. No installation
+or publication. Next: bounded single-layer upstream pixel proof, then a separate
+full-composition exclusion route and multilayer acceptance; no inferred PASS.
+Evidence: outputs/loupe-upstream-{tests,default-tests,clippy,contracts}.log.
+
+2026-10-07 confirmed source scope: retain the affected layer's original cells
+without FSTR distortion, together with visible background/lower layers. User
+explicitly chose retaining original cells in the single-layer fixture. Do not
+omit the affected layer or reduce the accepted composition to layer-only pixels.
+Full-composition exclusion remains implementation OPEN, not a pending question.
 
 SDK25.6 source audit: RenderOptionsSuite4 (AE_GeneralPlug.h:5128-5240)
 provides time, ROI, resolution, matte/channel order, guide layers and quality;
@@ -25,9 +39,9 @@ verified by Rust133/Clippy/source17, not yet installed/native accepted.
 
 2026-10-07 current user acceptance on ordinary Dev184: colored lens, held picture
 and Undo PASS for the owned color fixture. New accepted source requirement:
-exclude FSTR rendering in the lens while moving corners. Whole composition versus
-upstream affected-layer scope is pending user clarification; do not silently
-replace existing composited L3 with layer-only pixels. New cursor acceptance:
+exclude FSTR rendering in the lens while moving corners; retain the original
+affected-layer image and visible lower/background layers. Do not replace this
+composited scope with layer-only pixels. New cursor acceptance:
 no hand may flash inside the lens throughout any corner gesture. Source correction
 preserves the active transparent cursor instead of setting hand on every DRAG;
 Mac/Windows use the same shared UI route, native recheck pending.
@@ -56,8 +70,10 @@ centered on the corner, with a target at its center. Applies to Mac and Windows.
 - L2: Circular 129 UI-unit lens, 3x current viewer scale, center follows the
   evaluated corner. Black/white target arms leave the exact center unobscured.
   Lens remains centered even beside a viewer edge; viewport clipping is accepted.
-- L3: Magnify the composited frame in Comp viewer, processed layer in Layer
-  viewer, including content below the corner for alignment. Transparent pixels
+- L3: Magnify the original affected-layer image without FSTR distortion. In Comp
+  viewer, include visible background/lower layers for alignment; in Layer viewer,
+  use the affected layer before FSTR. Preserve native transforms and compositing.
+  Transparent pixels
   use a checkerboard. No screen capture, OS permissions or native floating window.
 - L4: UI-only DRAWBOT image; no effect pixels, saved values, extra keyframes,
   watermark, Preview/export or renderer branch. Release, failed drag,

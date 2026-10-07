@@ -249,6 +249,30 @@ fn frame_to_layer(
     ))
 }
 
+#[cfg(feature="loupe-upstream-probe")]
+fn frame_to_layer_float(in_data:&ae::InData,event:&ae::EventExtra,plane:&ViewPlane,
+                        x:f32,y:f32)->Result<(f32,f32),ae::Error> {
+    if plane.projection_unavailable||!x.is_finite()||!y.is_finite()||
+        x.abs()>32767.0||y.abs()>32767.0 {return Err(ae::Error::BadCallbackParameter);}
+    let mut fixed = ae::sys::PF_FixedPoint {
+        x: (x * 65536.0).round() as i32,
+        y: (y * 65536.0).round() as i32,
+    };
+    event.callbacks().frame_to_source(&mut fixed)?;
+    if let Some(projection)=&plane.projection {
+        return projection.backward(ae::Fixed::from_fixed(fixed.x).as_f32() as f64,
+                                   ae::Fixed::from_fixed(fixed.y).as_f32() as f64)
+            .map(|(x,y)|(x as f32,y as f32)).ok_or(ae::Error::BadCallbackParameter);
+    }
+    if plane.needs_layer_conversion(event.window_type()) {
+        event.callbacks().comp_to_layer(in_data.current_time(), in_data.time_scale(), &mut fixed)?;
+    }
+    Ok((
+        ae::Fixed::from_fixed(fixed.x).as_f32(),
+        ae::Fixed::from_fixed(fixed.y).as_f32(),
+    ))
+}
+
 fn point_segment_distance(px: f32, py: f32, a: ae::drawbot::PointF32, b: ae::drawbot::PointF32) -> f32 {
     let vx = b.x - a.x;
     let vy = b.y - a.y;
@@ -477,7 +501,14 @@ fn draw_loupe(in_data:&ae::InData,event:&mut ae::EventExtra,plane:&ViewPlane,
     let Some(index)=active else{loupe_cursor(false);return;};
     if let Ok(center)=layer_to_frame(in_data,event,plane,corners[2*index] as f32,corners[2*index+1] as f32) {
         // UI enhancement must never abort a valid drag if its async frame is pending.
-        let result=corner_loupe::draw(in_data,event,supplier,surface,center,id);
+        let result=corner_loupe::draw(in_data,event,supplier,surface,center,id,
+            #[cfg(feature="loupe-upstream-probe")]
+            (|| Ok([
+                frame_to_layer_float(in_data,event,plane,center.x,center.y)?,
+                frame_to_layer_float(in_data,event,plane,center.x+1.0,center.y)?,
+                frame_to_layer_float(in_data,event,plane,center.x,center.y+1.0)?,
+            ]))(),
+        );
         #[cfg(feature="preview-overlay-probe")]
         super::preview_overlay_probe::loupe(in_data,event,2,index as isize,result.is_err());
         #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(8,corner_loupe::probe_state()|((result.is_ok() as isize)<<8));

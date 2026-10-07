@@ -213,9 +213,13 @@ fn raster(mut sample:impl FnMut(f32,f32)->Option<[u8;4]>)->Vec<u8>{
     }}out
 }
 pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::drawbot::Supplier,
-    surface:&ae::drawbot::Surface,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
+    surface:&ae::drawbot::Surface,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,
+    #[cfg(feature="loupe-upstream-probe")] coordinates:Result<[(f32,f32);3],ae::Error>,
+)->Result<(),ae::Error>{
     source(event,center.x,center.y)?;
-    let mut pixels=frame_pixels(input,event,center,id)?;
+    let mut pixels=frame_pixels(input,event,center,id,
+        #[cfg(feature="loupe-upstream-probe")] coordinates?,
+    )?;
     #[cfg(feature="loupe-image-probe")]{
         let mut lo=255u8;let mut hi=0u8;let mut count=0usize;
         for y in 40..89 {for x in 40..89 {
@@ -328,7 +332,26 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
     let layer=interface.effect_layer(input.effect_ref())?;
     let time=interface.convert_effect_to_comp_time(input.effect_ref(),key.time,key.scale)?;
     let manager=ae::pf::suites::EffectCustomUI::new()?.context_async_manager(input.as_ptr(),*event)?;
-    let receipt=if window==ae::sys::PF_Window_COMP{
+    let receipt=if cfg!(feature="loupe-upstream-probe") {
+        // SDK LayerRenderOptionsSuite2: own layer before this effect. This is a
+        // bounded diagnostic prerequisite, NOT the full-composition solution.
+        let effects=ae::aegp::suites::Effect::new()?;
+        let effect=interface.new_effect_for_effect(input.effect_ref(),id)?;
+        let options=(|| {
+            let suite=ae::aegp::suites::LayerRenderOptions::new()?;
+            Ok::<_,ae::Error>(ae::aegp::LayerRenderOptions::from_handle(
+                suite.new_from_upstream_of_effect(effect,id)?,false))
+        })();
+        let disposed=effects.dispose_effect(effect);
+        let options=match (options,disposed) {
+            (Ok(options),Ok(()))=>options,
+            (Err(e),_)|(_,Err(e))=>return Err(e),
+        };
+        options.set_time(time)?;options.set_world_type(ae::aegp::WorldType::U8)?;
+        options.set_downsample_factor(1,1)?;
+        options.set_matte_mode(ae::aegp::MatteMode::PremulBlack)?;
+        manager.checkout_or_render_layer_frame_async_manager(PURPOSE,options.handle())?
+    }else if window==ae::sys::PF_Window_COMP{
         let comp=layers.layer_parent_comp(layer)?;
         let item=ae::aegp::suites::Comp::new()?.item_from_comp(comp)?;
         let options=ae::aegp::RenderOptions::from_item(item,id)?;
@@ -381,10 +404,14 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
         Ok(())
     },(Err(e),_)|(_,Err(e))=>Err(e)}
 }
-fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>)->Result<Vec<u8>,ae::Error>{
+fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,
+    #[cfg(feature="loupe-upstream-probe")] coordinates:[(f32,f32);3],
+)->Result<Vec<u8>,ae::Error>{
     let owner=owner(input,id)?;let window=ui::event_window_code(event);VIEW.set(Some((owner,window)));
-    let c=source(event,center.x,center.y)?;
-    let xp=source(event,center.x+1.0,center.y)?;let yp=source(event,center.x,center.y+1.0)?;
+    #[cfg(feature="loupe-upstream-probe")]let [c,xp,yp]=coordinates;
+    #[cfg(not(feature="loupe-upstream-probe"))]
+    let (c,xp,yp)=(source(event,center.x,center.y)?,
+        source(event,center.x+1.0,center.y)?,source(event,center.x,center.y+1.0)?);
     FRAME.with_borrow(|frame|{
         let f=frame.as_ref().filter(|f|f.key.owner==owner&&f.key.window==window&&f.key.time==input.current_time()&&f.key.scale==input.time_scale()).ok_or(ae::Error::BadCallbackParameter)?;
         #[cfg(feature="loupe-image-probe")]let mut valid=0usize;

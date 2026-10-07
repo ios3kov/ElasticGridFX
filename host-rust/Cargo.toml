@@ -18,6 +18,9 @@ corner-ownership = []
 corner-topic-probe = []
 # Bounded numeric image census for owned fixtures; no extra frame requests.
 loupe-image-probe = []
+# Nondefault source experiment: own upstream layer only; does not satisfy the
+# accepted full-composition/background contract and must not ship as its fix.
+loupe-upstream-probe = ["loupe-image-probe"]
 # Surface/Perspective overlay-only drag with one saved commit on release.
 owned-corner-drag = ["corner-ownership"]
 # Test-only callback observation; never enabled by default.
