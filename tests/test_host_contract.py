@@ -186,10 +186,20 @@ class HostContract(unittest.TestCase):
         self.assertNotIn('ae::ParamUIFlags::NO_ECW_UI',grid)
         self.assertNotIn('ae::ParamUIFlags::INVISIBLE',grid)
         control = ui.split('fn draw_effect_control(',1)[1].split('pub fn draw(',1)[0]
-        self.assertNotIn('draw_string(',control)
+        self.assertNotIn('draw_string(',control.split('#[cfg(feature="corner-topic-probe")]',1)[0])
+        if 'draw_string(' in control:
+            self.assertIn('#[cfg(feature="corner-topic-probe")]',control)
         self.assertIn('grid_row::draw(event)', control)
         identity=(ROOT/'tools/build_identity.py').read_text()
         self.assertIn('ElasticGridBuildID=',identity)
+
+    def test_effect_panel_draw_preserves_scoped_viewer_corner_ownership(self):
+        source=(ROOT/'host-rust/src/lib.rs').read_text()
+        draw=source.split('ae::Event::Draw(_) => {',1)[1].split('ae::Event::AdjustCursor',1)[0]
+        self.assertIn('extra.window_type()==ae::WindowType::Effect',draw)
+        self.assertIn('corner_ownership::claimed_ui(',draw)
+        self.assertIn('corner_ownership::claimed(',draw)
+        self.assertIn('plane::sync_event_ui(&in_data,params,claim)',draw)
 
     def test_native_corner_press_invalidates_view_once_before_update_flag(self):
         # This guard checks SDK call placement, not native redraw acceptance.

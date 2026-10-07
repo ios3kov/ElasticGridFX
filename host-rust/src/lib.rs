@@ -1343,7 +1343,9 @@ impl AdobePluginGlobal for Plugin {
                     ae::Event::Drag(_) => ui::drag(&in_data, params, &mut extra, self.lifecycle_probe.plugin_id())?,
                     ae::Event::Draw(_) => {
                         #[cfg(feature="corner-ownership")]
-                        let claim=corner_ownership::claimed(&in_data,params,&extra,self.lifecycle_probe.plugin_id());
+                        let claim=if extra.window_type()==ae::WindowType::Effect {
+                            corner_ownership::claimed_ui(&in_data,params,self.lifecycle_probe.plugin_id())
+                        }else{corner_ownership::claimed(&in_data,params,&extra,self.lifecycle_probe.plugin_id())};
                         #[cfg(not(feature="corner-ownership"))]
                         let claim=false;
                         plane::sync_event_ui(&in_data,params,claim)?;

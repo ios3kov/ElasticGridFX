@@ -14,6 +14,11 @@ impl Claim{
         self.scope=scope.filter(|_|corner);
     }
     fn matches(self,scope:Option<Scope>)->bool{scope.is_some()&&self.scope==scope}
+    fn finish(&mut self,scope:Option<Scope>,corner_release:bool,success:bool)->bool{
+        let retain=corner_release&&success&&self.matches(scope);
+        if !retain {self.scope=None;}
+        retain
+    }
 }
 thread_local!{static CLAIM:Cell<Claim>=const{Cell::new(Claim{scope:None})};}
 pub(super) fn scope(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae::EventExtra,
@@ -44,6 +49,12 @@ pub(crate) fn claimed_ui(input:&ae::InData,params:&ae::Parameters<Params>,
     claim.owner==owner&&claim.time==input.current_time()&&claim.scale==input.time_scale()
         &&claim.mode==mode.value()
 }
+pub(crate) fn finish(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae::EventExtra,
+    id:Option<ae::aegp::PluginId>,corner_release:bool,success:bool)->bool {
+    let mut claim=CLAIM.get();
+    let retain=claim.finish(scope(input,params,event,id),corner_release,success);
+    CLAIM.set(claim);retain
+}
 pub(crate) fn clear(){CLAIM.set(Claim::default());}
 
 #[cfg(all(test,feature="owned-corner-drag"))]
@@ -54,6 +65,17 @@ pub(super) fn test_scope(owner:i32,time:i32,mode:i32)->Scope {
 #[cfg(test)]mod tests{
     use super::*;
     fn key()->Scope{Scope{owner:9,window:0,time:25,scale:25,mode:2}}
+    #[test]fn repeated_press_without_cursor_motion_keeps_only_same_corner_hover(){
+        let mut claim=Claim::default();claim.hover(Some(key()),true,false);
+        for _ in 0..3 {assert!(claim.finish(Some(key()),true,true));
+            // No new AdjustCursor between release and next press.
+            assert!(claim.matches(Some(key())));}
+        claim.hover(Some(key()),false,false);assert!(!claim.matches(Some(key())));
+        for (scope,corner,success) in [(Some(key()),false,true),(Some(key()),true,false),
+            (Some(Scope{owner:99,..key()}),true,true),(None,true,true)]{
+            claim.hover(Some(key()),true,false);assert!(!claim.finish(scope,corner,success));
+            assert!(claim.scope.is_none());}
+    }
     #[test]fn hover_does_not_acquire_a_gesture_from_an_already_held_button(){
         let mut claim=Claim::default();claim.hover(Some(key()),true,true);
         assert!(!claim.matches(Some(key())));

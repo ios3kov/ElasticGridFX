@@ -37,7 +37,9 @@ fn finish_native(button_down:bool){
 fn start_native(g:Gesture){
     #[cfg(feature="interactive-quality-probe")]super::interactive_quality_probe::begin(g.owner,g.window,g.index);
     #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(2,probe_state()|((g.index as isize)<<8));
-    if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){GESTURE_FRAME.set(None);}
+    if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){
+        GESTURE_FRAME.set(None);FRAME.with_borrow_mut(|frame|*frame=None);
+    }
     ACTIVE.set(Some(g));
 }
 fn native_pointer()->Option<(f64,f64)>{
@@ -106,7 +108,11 @@ pub(crate) fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32
     match (result,disposed){(Ok(v),Ok(()))=>Ok(v),(Err(e),_)|(_,Err(e))=>Err(e)}
 }
 pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Option<ae::aegp::PluginId>){
-    if let Ok(owner)=owner(input,id){if index<4 {GESTURE_FRAME.set(None);ACTIVE.set(Some(Gesture{owner,
+    if let Ok(owner)=owner(input,id){if index<4 {
+        // The previous frame can have the same time/owner but older deformation.
+        // Do not display it while this gesture's async image is pending.
+        FRAME.with_borrow_mut(|frame|*frame=None);
+        GESTURE_FRAME.set(None);ACTIVE.set(Some(Gesture{owner,
         window:ui::event_window_code(event),index,native:false}));}}
     #[cfg(feature="interactive-quality-probe")]
     if let Some(g)=ACTIVE.get(){super::interactive_quality_probe::begin(g.owner,g.window,g.index);}
@@ -356,6 +362,17 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 #[cfg(test)] mod tests{
     use super::*;
     fn request_key(stamp:i8)->FrameKey{FrameKey{owner:7,window:1,time:10,scale:25,stamp:[stamp;4]}}
+    #[test]fn same_time_new_press_drops_previous_pixels_but_held_callbacks_keep_current_frame(){
+        close();let g=Gesture{owner:7,window:1,index:0,native:true};
+        start_native(g);
+        FRAME.with_borrow_mut(|f|*f=Some(Frame{
+            #[cfg(feature="resource-census-probe")]_census:None,
+            key:request_key(0),width:1,height:1,
+            region:ae::Rect{left:0,top:0,right:1,bottom:1},pixels:vec![255,99,0,0]}));
+        start_native(g);assert!(FRAME.with_borrow(|f|f.is_some()));
+        finish_native(false);start_native(g);
+        assert!(FRAME.with_borrow(|f|f.is_none()));close();
+    }
     #[test]fn held_press_cannot_requeue_after_completion_or_host_timestamp_changes(){
         let first=request_key(0);let mut state=None;
         assert!(gesture_request(&mut state,first)==Some(first));

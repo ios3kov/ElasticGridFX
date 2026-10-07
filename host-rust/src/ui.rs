@@ -112,8 +112,10 @@ fn set_drag_cursor(dragging: bool) {
     }
 }
 
-pub fn release_cursor() {
-    #[cfg(feature="corner-ownership")]super::corner_ownership::clear();
+pub fn release_cursor() { release_cursor_state(true); }
+fn release_cursor_state(clear_claim:bool) {
+    #[cfg(feature="corner-ownership")]if clear_claim {super::corner_ownership::clear();}
+    #[cfg(not(feature="corner-ownership"))]let _=clear_claim;
     #[cfg(feature="owned-corner-drag")]super::frozen_corner::clear();
     loupe_cursor(false);
     corner_loupe::clear();
@@ -549,7 +551,12 @@ pub fn click(
         #[cfg(any(feature="corner-ui-ownership-probe",feature="corner-hit-probe"))]
         if axis==DRAG_CORNER {super::corner_input_probe::record(super::corner_input_probe::Route::CustomClick,false);}
         corner_loupe::clear();
-        if axis==DRAG_CORNER { corner_loupe::begin(in_data,event,index,plugin_id); }
+        if axis==DRAG_CORNER {
+            corner_loupe::begin(in_data,event,index,plugin_id);
+            // Queue one ECW refresh to obtain this gesture's current image.
+            // AsyncManager is only legal in an ECW callback, never here.
+            ae::pf::suites::AdvApp::new()?.refresh_all_windows()?;
+        }
         if axis==DRAG_COLUMNS || axis==DRAG_ROWS {
             let saved=grid_snapshot(params)?;
             let (refs,side)=if axis==DRAG_COLUMNS {(&controls.column_refs,saved.column_lines.len())}
@@ -584,18 +591,27 @@ pub fn drag(
     if event.window_type() == ae::WindowType::Effect {
         return grid_row::drag(params, event);
     }
+    #[cfg(feature="owned-corner-drag")]
+    let corner_release=event.last_time() && event.continue_refcon(0)==DRAG_CORNER
+        && super::corner_ownership::claimed(in_data,params,event,plugin_id);
     let result = drag_inner(in_data, params, event,plugin_id);
     #[cfg(feature="preview-overlay-probe")]
     super::preview_overlay_probe::interaction(in_data,event,
         (event.continue_refcon(0),event.continue_refcon(1)),result.is_err());
     if result.is_err() || event.last_time() || !event.send_drag() {
+        #[cfg(feature="owned-corner-drag")]
+        let completed_corner=event.continue_refcon(0)==DRAG_CORNER;
         event.set_continue_refcon(0, DRAG_NONE as _);
         event.set_send_drag(false);
-        release_cursor();
         #[cfg(feature="owned-corner-drag")]{
-            super::corner_ownership::clear();
-            plane::sync_event_ui(in_data,params,false)?;
+            // Keep native Point picking suppressed while the pointer remains on
+            // the released corner. A second press need not emit AdjustCursor.
+            // Only transient hover ownership survives; no transaction/frame does.
+            let retain=super::corner_ownership::finish(in_data,params,event,plugin_id,corner_release,result.is_ok() && completed_corner);
+            release_cursor_state(!retain);
+            plane::sync_event_ui(in_data,params,retain)?;
         }
+        #[cfg(not(feature="owned-corner-drag"))]release_cursor();
     }
     result
 }
@@ -636,7 +652,7 @@ fn drag_inner(
             let action=super::frozen_corner::step(in_data,params,event,plugin_id,index,(layer_x,layer_y))?;
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
             match action {
-                super::frozen_corner::Step::Cancelled=>{event.set_send_drag(false);return Ok(());},
+                super::frozen_corner::Step::Cancelled=>{event.set_continue_refcon(0,DRAG_NONE);event.set_send_drag(false);return Ok(());},
                 super::frozen_corner::Step::Preview=>{
                     // Only the overlay/loupe see tentative coordinates. All
                     // canonical streams remain identical to mouse-down values.

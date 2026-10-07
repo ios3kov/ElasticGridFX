@@ -6,6 +6,23 @@ their older holds and release-policy statements do not override the state below.
 
 ## Active update — Mac and Windows, rules8.0.0
 
+**Reopened2026-10-07 user report:** loupe shows incorrect enlarged content;
+Surface/Perspective do not reliably hold the picture during corner dragging,
+with a reported dependency on editing internal grid deformation. Earlier small
+fixture USER_REPORTED visual PASS is retained as historical scoped evidence,
+not current release acceptance. Release visual correctness FAIL/OPEN pending
+reproduction and correction. Exact before/after-grid workflow clarification
+requested; both before/after-grid paths remain in the native acceptance scope.
+
+Dev180 local correction: successful corner release preserves only scoped hover
+ownership for a repeated press without cursor motion. Effect-panel DRAW now uses
+the same effect/time/mode claim instead of re-enabling native Point picking.
+New gestures discard prior loupe pixels and queue one ECW refresh; no per-move
+frame requests are added. Cancelled gestures clear the claim. Rust132 and
+source contracts17 PASS; native loupe content/held-image acceptance NOT_RUN.
+These code-path corrections do not certify the original heavy-scene hang.
+
+
 Latest2026-10-07 user acceptance: ordinary Dev177 Surface picture holds during
 corner movement, grid/loupe move, release updates picture; USER_REPORTED PASS.
 User accepts transient gray coordinate rows on corner hover for this release.
@@ -15,7 +32,7 @@ all file hashes and strict signature PASS. No product UI/key format rewrite.
 
 Exact pushed c48385c CI: Mac37651811024 and Windows37651811038 both PASS.
 Windows native AE acceptance of this corner-drag change remains NOT_RUN;
-Perspective visual hold/loupe check remains open. Original heavy-scene hang
+Perspective visual hold/loupe/release/Undo is now USER_REPORTED PASS on Mac177. Original heavy-scene hang
 regression is not certified by small guarded fixtures. Main/release not published.
 
 
