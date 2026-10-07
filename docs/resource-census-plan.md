@@ -3,7 +3,9 @@
 Rules8.0.0, Critical native / Development. AI_ENTRYPOINT first; controlled state,
 documented API contracts, memory/resource lifetime and the debugging stop criterion
 apply. User authorizes the local diagnosis/fix/verification block, AE closure and
-FSTR replacement. No push, release, foreign plug-in changes or other-app closure.
+FSTR replacement. User additionally authorized the exact temporary exclusion and
+return of9 Hot Loader test bundles, and explicitly confirmed Dev169 installer
+launch. No push, release, other plug-in changes or other-app closure.
 
 ## Question and acceptance
 
@@ -55,6 +57,16 @@ AE owns pre_render_data and its deletion callback; the census cannot delete it.
 4. Check global memory headroom first. External guard validates ordinary AE path
    and process birth. Idle baseline must be<=1GiB; absolute limit1.5GiB or growth
    +256MiB. Gate failure means NO GESTURE, not a relaxed threshold.
+   The first observation stopped during loading, before any gesture or registered
+   fixture result: initial602MiB-scale footprint rose past the256MiB growth bound.
+   Only the GlobalSetup zero census was delivered, so it cannot attribute growth.
+   Follow-up separates loading from loaded idle: optional `--loading` keeps a
+   tighter absolute1GiB cap until setup completes and memory varies<=8MiB over
+   >=1second. Only then ARMED establishes the loaded idle baseline for the same
+   +256MiB/1.5GiB gesture limits. No gesture before ARMED; cap failure stops again.
+   Fixture setup omits an unnecessary complete app.effects catalog traversal.
+   Other installed third-party components remain loaded; absence of Hot Loader
+   is not a fully clean third-party environment claim.
 5. Arm the guard before any action. One<=1-second corner gesture only after READY;
    maximum observation45seconds. On a limit the owned AE is stopped, sampled for
    one second and killed; it is also killed at the deadline. The saved fixture
@@ -79,7 +91,12 @@ cleanup and armed versus observe-only deadline. Tests do not prove native memory
 growth, host frame validity or recovery. C++ renderer unchanged; no new C++ verdict.
 Rust/C++ are outside the general static scanner's supported scope: NOT ASSESSED
 by that scanner; manual ownership/worker/error-path review is recorded above.
-Native observer execution and exact Dev169 host behavior: NOT RUN.
+Follow-up loading guard10 tests PASS, including tighter loading cap, marker plus
+stable idle transition and unchanged post-load growth bound. Native first observer
+PASS for expected stop/sample/kill and exact-process exit; gesture NOT RUN and
+memory attribution INCONCLUSIVE. Source2b53747 / EGFX-376c92a761bbecece5122c43 /
+loaded UUID3826B5EF-8479-3D2B-A9E4-ADF619F5F8A2 / PID1992 exact identity PASS.
+AE-only disposal verified; all9 Hot Loader bundles restored byte/mode-exact.
 
 Private local evidence: outputs/resource-census-*.log,
 outputs/resource-guard-tests.log, outputs/resource-census-foreign-inventory.json.

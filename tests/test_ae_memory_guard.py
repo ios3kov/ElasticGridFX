@@ -53,5 +53,25 @@ class MemoryGuardTests(unittest.TestCase):
                     guard.monitor(123,Path(temporary)/'fresh',1,armed)
                 if armed: send.assert_called_once_with(send.call_args.args[0],99,signal.SIGKILL)
                 else: send.assert_not_called()
+    def test_loading_uses_tighter_idle_cap_before_gesture(self):
+        gate=guard.PhaseGate(500*guard.MIB,True)
+        self.assertEqual(gate.observe(0,900*guard.MIB), (None,False))
+        self.assertTrue(gate.loading)
+        self.assertEqual(gate.observe(1,1025*guard.MIB),('loading-idle-cap',False))
+    def test_setup_marker_alone_cannot_arm_unstable_memory(self):
+        gate=guard.PhaseGate(500*guard.MIB,True)
+        for t,b in [(0,600),(0.5,650),(1,700),(1.5,650)]:
+            self.assertEqual(gate.observe(t,b*guard.MIB,True),(None,False))
+        self.assertTrue(gate.loading)
+    def test_loaded_idle_baseline_keeps_gesture_growth_limit(self):
+        gate=guard.PhaseGate(500*guard.MIB,True)
+        self.assertEqual(gate.observe(0,900*guard.MIB,True),(None,False))
+        self.assertEqual(gate.observe(1,900*guard.MIB,True),(None,True))
+        self.assertFalse(gate.loading)
+        self.assertEqual(gate.observe(2,1157*guard.MIB),('growth-from-baseline',False))
+    def test_no_setup_marker_cannot_arm_even_stable_memory(self):
+        gate=guard.PhaseGate(500*guard.MIB,True)
+        for t in range(5):self.assertEqual(gate.observe(t,900*guard.MIB),(None,False))
+        self.assertTrue(gate.loading)
 
 if __name__ == '__main__': unittest.main()

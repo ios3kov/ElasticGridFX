@@ -56,6 +56,33 @@ def limit_reason(baseline: int, footprint: int):
         return 'growth-from-baseline'
     return None
 
+class PhaseGate:
+    """Loading stays below the idle cap; growth is relative to loaded idle AE.
+
+    A setup marker and >=1 second with <=8MiB variation are required to arm.
+    No gesture is allowed before the ARMED record. Absolute bounds never rise.
+    """
+    def __init__(self, baseline, loading=False):
+        self.baseline = baseline
+        self.loading = loading
+        self.steady = []
+    def observe(self, seconds, footprint, setup_complete=False):
+        if not self.loading:
+            return limit_reason(self.baseline, footprint), False
+        if footprint > MAX_BASELINE:
+            return 'loading-idle-cap', False
+        if not setup_complete:
+            self.steady.clear()
+            return None, False
+        self.steady.append((seconds, footprint))
+        self.steady = [(t,b) for t,b in self.steady if seconds-t <= 1.5]
+        values = [b for _,b in self.steady]
+        if seconds-self.steady[0][0] >= 1 and max(values)-min(values) <= 8*MIB:
+            self.baseline = footprint
+            self.loading = False
+            return None, True
+        return None, False
+
 def identity_matches(path, birth, expected_birth):
     return path == HOST and birth == expected_birth and birth > 0
 
@@ -77,7 +104,7 @@ def stop_on_limit(process, birth, destination, record, sample=subprocess.run, se
         signal_owned(process, birth, signal.SIGKILL, send)
         record({'event': 'OWNED_AE_KILL_SENT'})
 
-def monitor(pid: int, destination: Path, seconds: float, terminate: bool):
+def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loading=False):
     assert ctypes.sizeof(Usage) == 160
     if not 1 <= seconds <= 45:
         raise ValueError('Observation limited to 1–45 seconds')
@@ -86,15 +113,16 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool):
     path, birth, baseline = process.read()
     if not identity_matches(path, birth, birth) or baseline > MAX_BASELINE:
         raise RuntimeError('AE identity or <=1GiB idle baseline gate failed; no gesture')
+    gate = PhaseGate(baseline, loading)
     fd = os.open(destination / 'memory.jsonl', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(fd, 'w') as log:
         def record(data):
             data['unix_ms'] = time.time_ns() // 1_000_000
             log.write(json.dumps(data) + '\n'); log.flush()
-        record({'event': 'READY', 'pid': pid, 'birth': birth, 'baseline': baseline,
+        record({'event': 'LOADING' if loading else 'READY', 'pid': pid, 'birth': birth, 'baseline': baseline,
                 'max_footprint': MAX_FOOTPRINT, 'max_growth': MAX_GROWTH,
                 'terminate_on_limit_or_deadline': terminate, 'deadline_seconds': seconds})
-        print('READY', flush=True)
+        print('LOADING' if loading else 'READY', flush=True)
         start = time.monotonic()
         while time.monotonic() - start < seconds:
             try:
@@ -103,8 +131,13 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool):
                 record({'event': 'UNAVAILABLE', 'type': type(error).__name__}); return
             if not identity_matches(path, observed_birth, birth):
                 record({'event': 'IDENTITY_CHANGED', 'signal': 'NONE'}); return
-            reason = limit_reason(baseline, footprint)
-            record({'seconds': time.monotonic() - start, 'footprint': footprint, 'limit': reason})
+            elapsed = time.monotonic() - start
+            reason, armed = gate.observe(elapsed, footprint, (destination/'fixture-ready').is_file())
+            record({'seconds': elapsed, 'footprint': footprint, 'limit': reason,
+                    'phase': 'loading' if gate.loading else 'armed'})
+            if armed:
+                record({'event': 'ARMED', 'baseline': gate.baseline})
+                print('ARMED', flush=True)
             if reason:
                 if not terminate:
                     record({'event': 'LIMIT', 'signal': 'NONE'}); return
@@ -126,5 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('--seconds', type=float, default=30)
     parser.add_argument('--terminate-on-limit', action='store_true',
                         help='Close saved disposable AE on a limit or observation deadline')
+    parser.add_argument('--loading', action='store_true',
+                        help='Load under1GiB cap; arm growth limit after fixture-ready + stable idle')
     args = parser.parse_args()
-    monitor(args.pid, args.out, args.seconds, args.terminate_on_limit)
+    monitor(args.pid, args.out, args.seconds, args.terminate_on_limit, args.loading)

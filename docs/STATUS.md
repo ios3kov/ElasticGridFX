@@ -57,6 +57,19 @@ then all9 returned byte/mode-exact after installer launch was AUTO_REVIEW_REJECT
 for missing immediate local-software confirmation. No AE launch, no install;
 Dev168 remains installed. Explicit Dev169 launch confirmation is pending.
 Private record: outputs/resource-census-dev169/launch-hold.json.
+Later explicit user confirmation permits Dev169 launch; installed canonical
+bundle/permissions/signature PASS, installer exited without re-query. Normal AE
+PID1992 loads exact UUID3826B5EF-8479-3D2B-A9E4-ADF619F5F8A2; no AEHL components
+in loaded image table. First passive observer stopped during fixture opening at
+944123304bytes versus602MiB-scale idle, exceeding+256MiB growth; expected guarded
+SIGSTOP/sample/SIGKILL and host exit PASS. DoScript connection loss follows guard
+termination, not a new unexplained crash. No gesture, no completed registration,
+only one zero GlobalSetup census record: attribution INCONCLUSIVE. All9 foreign
+bundles restored exactly. Dev169 remains installed; AE closed. Next discrimination
+separates startup from loaded idle under a tighter1GiB startup cap, omits full
+effect-catalog traversal, then preserves the original gesture limits. Loading
+guard10 tests PASS; no graphics-source or selected-quality change. Private result:
+outputs/resource-census-dev169/baseline-result.json. Freeze repair remains OPEN.
 
 Current user acceptance: ordinary Dev164 is only slightly smoother and still
 jerky — responsiveness FAIL. Approved2026-10-07: hold the last image during
