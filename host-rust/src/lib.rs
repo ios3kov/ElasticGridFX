@@ -19,6 +19,8 @@ mod ui_projection;
 mod plane;
 mod edge;
 mod demo;
+#[cfg(feature="loupe-image-probe")]
+mod loupe_image_probe;
 mod corner_loupe;
 #[cfg(feature="resource-census-probe")]
 mod resource_census;

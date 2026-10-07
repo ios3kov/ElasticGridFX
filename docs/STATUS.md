@@ -14,6 +14,19 @@ not current release acceptance. Release visual correctness FAIL/OPEN pending
 reproduction and correction. Exact before/after-grid workflow clarification
 requested; both before/after-grid paths remain in the native acceptance scope.
 
+Dev180 loupe acceptance FAIL (latest user report): lens remains entirely white,
+not just a white cell at one location. User photo IMG_2530.HEIC shows the white
+lens over a checkerboard in a Comp viewer at50% / Full. Source-frame selection,
+coordinate mapping and image upload remain separate unproven causes; do not
+claim cache invalidation fixed content. Current observed AE has an unrelated
+working project open; no script or gesture was dispatched into it. Next causal
+check must use a small owned asymmetric-color fixture and compare frame content,
+sampling coordinates and uploaded lens pixels without adding render requests.
+Nondefault loupe-image-probe (Dev182) prepared for that check: max16 private
+numeric records covering receipt size/region/channel range and first lens
+sampling coordinates/range per gesture. No raw image, project name, extra frame
+request or ordinary-build logging. Probe Rust132/source17 PASS; native NOT_RUN.
+
 Dev180 local correction: successful corner release preserves only scoped hover
 ownership for a repeated press without cursor motion. Effect-panel DRAW now uses
 the same effect/time/mode claim instead of re-enabling native Point picking.

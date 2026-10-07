@@ -16,6 +16,8 @@ native-plane = []
 corner-ownership = []
 # Isolated ECW disabled-topic DRAW delivery experiment; never default.
 corner-topic-probe = []
+# Bounded numeric image census for owned fixtures; no extra frame requests.
+loupe-image-probe = []
 # Surface/Perspective overlay-only drag with one saved commit on release.
 owned-corner-drag = ["corner-ownership"]
 # Test-only callback observation; never enabled by default.

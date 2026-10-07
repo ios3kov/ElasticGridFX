@@ -5,6 +5,8 @@ const SIZE:usize=129;
 const RADIUS:f32=64.0;
 const ZOOM:f32=3.0;
 const PURPOSE:u32=0x4653544c;
+#[cfg(feature="loupe-image-probe")]
+thread_local!{static IMAGE_RECORDED:std::cell::Cell<bool>=const{std::cell::Cell::new(false)};}
 #[derive(Clone,Copy)]
 struct Gesture {owner:i32,window:i32,index:usize,native:bool}
 #[derive(Clone,Copy)]
@@ -38,6 +40,7 @@ fn start_native(g:Gesture){
     #[cfg(feature="interactive-quality-probe")]super::interactive_quality_probe::begin(g.owner,g.window,g.index);
     #[cfg(feature="preview-overlay-probe")]super::preview_overlay_probe::transition(2,probe_state()|((g.index as isize)<<8));
     if !ACTIVE.get().is_some_and(|old|old.owner==g.owner&&old.index==g.index){
+        #[cfg(feature="loupe-image-probe")]IMAGE_RECORDED.set(false);
         GESTURE_FRAME.set(None);FRAME.with_borrow_mut(|frame|*frame=None);
     }
     ACTIVE.set(Some(g));
@@ -109,6 +112,7 @@ pub(crate) fn owner(input:&ae::InData,id:Option<ae::aegp::PluginId>)->Result<i32
 }
 pub(crate) fn begin(input:&ae::InData,event:&ae::EventExtra,index:usize,id:Option<ae::aegp::PluginId>){
     if let Ok(owner)=owner(input,id){if index<4 {
+        #[cfg(feature="loupe-image-probe")]IMAGE_RECORDED.set(false);
         // The previous frame can have the same time/owner but older deformation.
         // Do not display it while this gesture's async image is pending.
         FRAME.with_borrow_mut(|frame|*frame=None);
@@ -338,6 +342,13 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
     if gesture{gesture_finished();}
     let mut warm=WARM.get();warm_completed(&mut warm,owner);WARM.set(warm);
     match (result,checked){(Ok(frame),Ok(()))=>{
+        #[cfg(feature="loupe-image-probe")]{
+            let (min,max)=frame.pixels.chunks_exact(4).fold((255u8,0u8),|(lo,hi),p|
+                (lo.min(p[1]).min(p[2]).min(p[3]),hi.max(p[1]).max(p[2]).max(p[3])));
+            super::loupe_image_probe::record(1,&[frame.width as f64,frame.height as f64,
+                frame.region.left as f64,frame.region.top as f64,frame.region.right as f64,frame.region.bottom as f64,
+                min as f64,max as f64,window as f64]);
+        }
         FRAME.with_borrow_mut(|f|*f=Some(frame));
         // Background warm completion must not trigger a global redraw/render loop.
         if gesture { ae::pf::suites::AdvApp::new()?.refresh_all_windows()?; }
@@ -350,13 +361,25 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
     let xp=source(event,center.x+1.0,center.y)?;let yp=source(event,center.x,center.y+1.0)?;
     FRAME.with_borrow(|frame|{
         let f=frame.as_ref().filter(|f|f.key.owner==owner&&f.key.window==window&&f.key.time==input.current_time()&&f.key.scale==input.time_scale()).ok_or(ae::Error::BadCallbackParameter)?;
-        Ok(raster(|dx,dy|{
+        #[cfg(feature="loupe-image-probe")]let mut valid=0usize;
+        #[cfg(feature="loupe-image-probe")]let (mut sample_min,mut sample_max)=(255u8,0u8);
+        let pixels=raster(|dx,dy|{
             let x=(c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0)).round() as i32;
             let y=(c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1)).round() as i32;
             if x<0||y<0||x>=f.width as i32||y>=f.height as i32||x<f.region.left||y<f.region.top||x>=f.region.right||y>=f.region.bottom{return None;}
             let i=(y as usize*f.width+x as usize)*4;
+            #[cfg(feature="loupe-image-probe")]{valid+=1;
+                for value in &f.pixels[i+1..i+4]{sample_min=sample_min.min(*value);sample_max=sample_max.max(*value);}
+            }
             Some([f.pixels[i],f.pixels[i+1],f.pixels[i+2],f.pixels[i+3]])
-        }))
+        });
+        #[cfg(feature="loupe-image-probe")]
+        if !IMAGE_RECORDED.replace(true){
+            super::loupe_image_probe::record(2,&[center.x as f64,center.y as f64,c.0 as f64,c.1 as f64,
+                xp.0 as f64,xp.1 as f64,yp.0 as f64,yp.1 as f64,valid as f64,
+                f.width as f64,f.height as f64,sample_min as f64,sample_max as f64]);
+        }
+        Ok(pixels)
     })
 }
 #[cfg(test)] mod tests{
