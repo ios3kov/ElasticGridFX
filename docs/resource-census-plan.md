@@ -279,3 +279,14 @@ state UNKNOWN. Exact startup exited, no test gesture, all temporary changes
 restored. Pending desktop-ready response; do not infer native priority failure.
 Private reports are under outputs/corner-ownership-dev170/native-priority*;
 no raw samples, projects or frames are included in repository documentation.
+
+
+2026-10-07 startup crash alert: user screenshot thread4288156 matches PID16099
+sampled main thread (BirthPrefs modal -> DoScript error report). No FSTR module
+in that sampled loaded-image table, no fixture/gesture. Root cause UNKNOWN;
+matching last-message context does not prove the crash cause. Full dump NOT FOUND
+in inspected locations. Prepared private startup barrier requires fresh exact-
+PID/birth read-only Cua main UI readiness before the first SDK scripting command;
+8 offline barrier tests PASS, native retest NOT RUN. Old SDK-before-UI startup
+sequence is retired. Current different user-project AE is observed read-only;
+no new host trial or product behavior change. Freeze/native routing still OPEN.

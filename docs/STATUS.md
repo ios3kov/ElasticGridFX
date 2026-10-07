@@ -25,18 +25,28 @@ native-priority-logical/pause-cleanup.json, resume-host and
 native-priority-logical-r2/result.json. Historical installed Dev169 statements
 below are superseded by this installed Dev170 checkpoint.
 
-**Native gesture currently BLOCKED by host readiness.** Next owned startup
-PID16099 stopped before fixture opening: empty-project DoScript and Cua lookup
-timed out. Exact-PID CoreGraphics metadata has no visible main window;1second
-process sample places the main thread in BirthPrefs -> UI_MessageBox::RunModal.
-Dialog text and desktop lock state UNKNOWN; this is not a FSTR render-hang proof.
-No gesture, render acceptance or route conclusion. Closed exact PID/path/birth,
-restored actual25.6 preference full hash and all9 components; AE absent. User
-asked whether the desktop is unlocked; no blind startup retry. Prepared private
-helper transaction gates Retina/window geometry, ARMED/current identity/caps,
->=10seconds remaining and automatic point/layer readback; execution NOT RUN.
-Private startup evidence: outputs/corner-ownership-dev170/native-priority-cgevent/
-startup-result.json. Freeze implementation/native acceptance remain OPEN.
+**New startup incident2026-10-07 — live gesture remains on hold.** User's AE
+crash-alert screenshot reports last thread4288156/AEDoScriptCommand/result1.
+That exact thread matches private sample PID16099: main thread in BirthPrefs
+startup modal with DoScript error-report handling. FSTR/AEHL absent from sampled
+loaded-image table; no fixture or gesture had opened. Association with our early
+startup-script preflight is established; crash root cause UNKNOWN. Full native
+crash dump NOT FOUND in inspected AE/system diagnostic locations; screenshot and
+322 exact-PID unified-log records retained locally. This replaces the earlier
+ambiguous desktop-ready blocker; read-only Cua now observes a new AE PID17712 with
+user working project. No new launch/script/input/project change in this triage.
+
+Prepared private runner repair: read-only main-project UI readiness precedes the
+FIRST DoScript, tied to exact PID/birth and fresh<=15second observation; missing/
+modal/incomplete/stale/reused-PID UI cannot dispatch the command.8 offline barrier
+checks and Python syntax PASS; native retry NOT RUN. Do not repeat the old
+SDK-before-UI startup sequence or claim a product crash fix. Existing short helper
+transaction still gates Retina/window geometry, ARMED/current identity/caps,
+>=10seconds remaining and immediate point/layer readback. PID16099 cleanup had
+restored actual25.6 full preference hash/all9 components before this alert report;
+current user-session preferences are not overwritten. Dev170 remains installed;
+freeze implementation/native acceptance OPEN, no push/release. Private incident:
+outputs/corner-ownership-dev170/startup-alert-20261007/triage.json.
 
 **Dev167 REJECTED — native freeze FAIL and new memory-pressure incident.**
 User reports continued effect updates during corner drag, then AE/Photoshop/
