@@ -60,7 +60,7 @@
 - Default timed native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene /
   RAM Preview NOT_RUN; original reported heavy hang remains UNKNOWN. No cap
   increase, shipping idle-cache workaround, original-project edit or stale Cua
-  relaunch. Resource-census diagnostic is currently installed; return to ordinary188 before delivery.
+  relaunch. Ordinary188 reinstalled after census; exact installed files/archive verified PASS.
 - Surface187 diagnostic fixture historical native point/Undo/key PASS and user
   original-cell/no-hand/no-alert report are retained in evidence, not transferred
   to ordinary188 or its newly accepted composition source. Current Windows
