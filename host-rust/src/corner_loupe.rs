@@ -235,12 +235,16 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
             supplier.supports_pixel_layout_bgra()? as u8 as f64,
             supplier.prefers_pixel_layout_bgra()? as u8 as f64]);
     }
+    #[cfg(feature="resource-census-probe")]
+    let _bitmap_census=super::resource_census::Token::new(super::resource_census::Kind::UiBitmap,pixels.len() as u64);
     // SDK DrawbotSuite.h requires consulting the supplier preference. Source
     // pixels remain ARGB; convert only the small UI bitmap, never a host world.
     let bgra=supplier.supports_pixel_layout_bgra()?&&
         (supplier.prefers_pixel_layout_bgra()?||!supplier.supports_pixel_layout_argb()?);
     let layout=image_layout(&mut pixels,bgra);
     let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,layout,&pixels)?;
+    #[cfg(feature="resource-census-probe")]
+    let _image_census=super::resource_census::Token::new(super::resource_census::Kind::DrawImage,(SIZE*SIZE*4) as u64);
     surface.draw_image(&image,&ae::drawbot::PointF32{x:center.x-RADIUS,y:center.y-RADIUS},1.0)
 }
 fn image_layout(pixels:&mut [u8],bgra:bool)->ae::drawbot::PixelLayout{
@@ -300,6 +304,8 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
     let result=prepare_frame_inner(input,event,id);
     // Do not turn a failed checkout/copy/refresh into a per-DRAW retry loop.
     if result.is_err() {
+        #[cfg(feature="resource-census-probe")]
+        super::resource_census::preparation_error();
         if let Ok(owner)=owner(input,id) {
             if GESTURE_FRAME.get().is_some_and(|r|owner==r.key.owner){gesture_finished();}
             // A failed initial request is terminal too; do not repeat a host
@@ -339,6 +345,8 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
     let layer=interface.effect_layer(input.effect_ref())?;
     let time=interface.convert_effect_to_comp_time(input.effect_ref(),key.time,key.scale)?;
     let manager=ae::pf::suites::EffectCustomUI::new()?.context_async_manager(input.as_ptr(),*event)?;
+    #[cfg(feature="resource-census-probe")]
+    super::resource_census::request(gesture);
     let receipt=if cfg!(feature="loupe-upstream-probe") {
         // SDK LayerRenderOptionsSuite2: own layer before this effect. This is a
         // bounded diagnostic prerequisite, NOT the full-composition solution.

@@ -57,7 +57,59 @@
   idle-cache key/full preference hash unchanged. Earlier private restoration
   path assertion failed after copying harness; repaired and verified before this
   launch, not hidden as an initial PASS.
-- Default timed native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene /
+- Heavy showTime saved-copy trial ordinary188 / ownedPID15431 opened successfully
+  in AE25.6,1920x1080,32bpc,Full/Final,mode2,time4.16, with idle cache temporarily
+  OFF. Exact canonical loaded UUID verified. User reported corner drag followed
+  by AE closure. Guard record proves STOPPED_ON_LIMIT then OWNED_AE_KILL_SENT:
+  baseline897085800 ->1176843080 bytes (growth279757280),176.58s after observer
+  start. This is controlled termination, not evidence of a spontaneous AE crash.
+  Main-thread sample shows event-loop wait; a stopped sample cannot establish
+  normal responsiveness or allocation ownership. Heavy drag acceptance BLOCKED;
+  Undo and RAM Preview NOT_RUN. No proven plugin leak or product fix. No new
+  cap increase/relaunch. Cleanup PASS: actual preference full hash unchanged,
+  exact9 components restored. Earlier startup gate expired before opening;
+  second harness attempt hit ExtendScript JSON-unavailable reporting error and
+  loading cap. Both preserved as harness failures, not plugin acceptance.
+- User authorized budget calibration after the heavy guard closure. Added explicit
+  saved-fixture --growth-budget-mib384 option; default256MiB unchanged. Total
+ 1.5GiB/loading1.25GiB caps and exact PID/birth identity unchanged; no user-timed
+  closure. Guard17 tests PASS: observed279757280-byte growth fits the experimental
+  profile, >384MiB growth/absolute cap/loading cap still stop, unbounded profiles
+  rejected before process access. This is a test-budget adjustment, not a plugin
+  fix or acceptance.1920x1080RGBAfloat frame is33177600 bytes; experimental budget
+  leaves headroom above the recorded peak. Actual AE allocation count UNKNOWN.
+  Native-r4 saved-copy calibration pending; idle cache temporarily OFF/restored.
+- Calibration native-r4 ordinary188 ownedPID20551 with explicit384MiB growth
+  budget: heavy TopRight1242,543->1170,612 readback PASS; only that corner changed.
+  User confirms Undo returned image; all corners/layer position/mode read back
+  identical to baseline PASS. Gesture peak1163407744 bytes then fell; no guard
+  event at this checkpoint. Tiny bounded3-frame RAM Preview atFull/Final/32bpc
+  start/stop observed through overlay visibility and time4:04->4:05; AE remains
+  responsive, no alert observed. This does not certify full8s preview stability
+  or establish the original hang cause. Heavy loupe/freeze visual confirmation
+  still pending. Manual session remains open until user completion; cleanup pending.
+- Native-r4 later stopped on growth limit at669.315s:993341848->1398750112
+  bytes, growth405408264 >384MiB. ExplicitSTOPPED_ON_LIMIT/OWNED_AE_KILL_SENT;
+  no user-done marker. User said they had not finished and subsequently reported
+  AE closed. Previous gesture/Undo and bounded3-frame observation remain scoped;
+  session memory acceptance BLOCKED, heavy visual loupe/freeze NOT_CONFIRMED.
+  Do not describe this as spontaneous AE crash or complete PASS. No further
+  increase/automatic relaunch; attribute late allocations before repeating.
+  Cleanup now PASS: original idle-cache key/full preference hash restored and
+  exact9 components returned. Earlier pending-cleanup note is superseded.
+- Late-memory investigation: no new AE session or manual stress run. Ordinary188
+  has no resource counters, so prior guard data cannot attribute late allocations.
+  Source audit finds bounded replaced loupe copy, balanced frame checkin path and
+  Drawbot Image RAII release; not proof of host cache lifetime or absence of leaks.
+  Resource-census diagnostic schema2 adds warm/gesture async-call attempts and
+  preparation-error counters, transient UI bitmap/image lifetime tokens. Image
+  bytes are an estimate of supplied storage, not host texture/cache allocation;
+  token drop does not certify successful host release. Records changed scalars
+  at most once/second, cap1024; no new render/SDK requests, no worker I/O, no
+  shipping quality/state/UI changes.137 diagnostic Rust tests PASS. Host census
+  of late heavy growth NOT_RUN; allocation cause UNKNOWN. Diagnostic preparation
+  is not a product memory fix. Ordinary188 remains installed.
+- Default timed native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene acceptance BLOCKED /
   RAM Preview NOT_RUN; original reported heavy hang remains UNKNOWN. No cap
   increase, shipping idle-cache workaround, original-project edit or stale Cua
   relaunch. Ordinary188 reinstalled after census; exact installed files/archive verified PASS.
@@ -76,7 +128,9 @@ native-manual-composition-r7/acceptance.json};
 outputs/loupe-dev188-composition-*.log and audit-review.json;
 outputs/loupe-windows-packet-oct08.log;
 outputs/loupe-upstream-dev187/native-surface;
-outputs/loupe-memory-census-oct08/native-user-completion/acceptance.json.
+outputs/loupe-memory-census-oct08/native-user-completion/acceptance.json;
+outputs/heavy-dev188-oct08/native-r3/{acceptance.json,guard/memory.jsonl,
+guard/limit-sample.txt,cleanup-result.json}.
 
 Older dated notes below remain history; use this checkpoint for current holds.
 

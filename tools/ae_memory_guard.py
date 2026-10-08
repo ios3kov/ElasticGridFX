@@ -22,6 +22,7 @@ MIB = 1024 * 1024
 MAX_BASELINE = 1280 * MIB
 MAX_FOOTPRINT = 1536 * MIB
 MAX_GROWTH = 256 * MIB
+GROWTH_BUDGETS_MIB = (256, 384)
 
 class Usage(ctypes.Structure):
     # Exact RUSAGE_INFO_V2 from target macOS sys/resource.h (160 bytes).
@@ -51,10 +52,10 @@ class Process:
             raise OSError(ctypes.get_errno(), 'proc_pid_rusage')
         return path.value.decode(), usage.proc_start_abstime, usage.phys_footprint
 
-def limit_reason(baseline: int, footprint: int):
+def limit_reason(baseline: int, footprint: int, growth_budget: int = MAX_GROWTH):
     if footprint > MAX_FOOTPRINT:
         return 'absolute-footprint'
-    if footprint - baseline > MAX_GROWTH:
+    if footprint - baseline > growth_budget:
         return 'growth-from-baseline'
     return None
 
@@ -64,13 +65,16 @@ class PhaseGate:
     A setup marker and >=1 second with <=8MiB variation are required to arm.
     No gesture is allowed before the ARMED record. Absolute bounds never rise.
     """
-    def __init__(self, baseline, loading=False):
+    def __init__(self, baseline, loading=False, growth_budget=MAX_GROWTH):
+        if growth_budget not in tuple(v*MIB for v in GROWTH_BUDGETS_MIB):
+            raise ValueError("Growth budget must be an explicit bounded profile")
+        self.growth_budget = growth_budget
         self.baseline = baseline
         self.loading = loading
         self.steady = []
     def observe(self, seconds, footprint, setup_complete=False):
         if not self.loading:
-            return limit_reason(self.baseline, footprint), False
+            return limit_reason(self.baseline, footprint, self.growth_budget), False
         if footprint > MAX_BASELINE:
             return 'loading-idle-cap', False
         if not setup_complete:
@@ -107,7 +111,9 @@ def stop_on_limit(process, birth, destination, record, sample=subprocess.run, se
         record({'event': 'OWNED_AE_KILL_SENT'})
 
 def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loading=False,
-            until_done: Path | None = None):
+            until_done: Path | None = None, growth_budget_mib: int = 256):
+    if growth_budget_mib not in GROWTH_BUDGETS_MIB:
+        raise ValueError("Growth budget must be 256 or 384 MiB")
     assert ctypes.sizeof(Usage) == 160
     if not 1 <= seconds <= 45:
         raise ValueError('Observation limited to 1–45 seconds')
@@ -119,14 +125,14 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loadin
     path, birth, baseline = process.read()
     if not identity_matches(path, birth, birth) or baseline > MAX_BASELINE:
         raise RuntimeError('AE identity or <=1.25GiB idle baseline gate failed; no gesture')
-    gate = PhaseGate(baseline, loading)
+    gate = PhaseGate(baseline, loading, growth_budget_mib*MIB)
     fd = os.open(destination / 'memory.jsonl', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(fd, 'w') as log:
         def record(data):
             data['unix_ms'] = time.time_ns() // 1_000_000
             log.write(json.dumps(data) + '\n'); log.flush()
         record({'event': 'LOADING' if loading else 'READY', 'pid': pid, 'birth': birth, 'baseline': baseline,
-                'max_footprint': MAX_FOOTPRINT, 'max_growth': MAX_GROWTH,
+                'max_footprint': MAX_FOOTPRINT, 'max_growth': gate.growth_budget,
                 'terminate_on_limit_or_deadline': terminate,
                 'deadline_seconds': seconds if until_done is None else None,
                 'completion': 'user' if until_done is not None else 'deadline'})
@@ -173,6 +179,8 @@ if __name__ == '__main__':
                         help='Load under1.25GiB cap; arm growth limit after fixture-ready + stable idle')
     parser.add_argument('--until-user-done', type=Path,
                         help='Explicit manual session: keep memory limits; close on fresh user completion marker instead of timer')
+    parser.add_argument('--growth-budget-mib', type=int, choices=GROWTH_BUDGETS_MIB, default=256,
+                        help='Explicit saved-fixture growth budget; total/loading caps unchanged')
     args = parser.parse_args()
     monitor(args.pid, args.out, args.seconds, args.terminate_on_limit, args.loading,
-            args.until_user_done)
+            args.until_user_done, args.growth_budget_mib)
