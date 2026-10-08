@@ -20,7 +20,10 @@ composition, effect flag mutation, per-movement render or diagnostic logger.
 Dev187 user-reported check: colored original cells, no hand flash and no matte
 alert PASS in the small fixture. The subsequent photo demonstrates the source
 mismatch against the new current-composition decision. Dev188 multilayer /
-transparent-region / repeated-gesture native acceptance remains NOT_RUN.
+transparent-region / repeated-gesture native acceptance remains NOT_RUN awaiting
+user reply. Ordinary188 source0cba0dd installed; exact loaded AE25.6 identity,
+multilayer setup and45s guarded cleanup PASS. No manual completion/readback
+before deadline. Evidence: outputs/loupe-dev188/native-composition/acceptance.json.
 
 Historical source decisions below are retained as dated evidence; this section
 and L3 govern the current source scope.

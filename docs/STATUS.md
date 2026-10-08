@@ -20,14 +20,20 @@
 -45s native guard cleanup PASS: AE absent, exact9 foreign components restored,
   idle-cache key unchanged. Peak footprint below1.25GiB. Heavy scene/RAM Preview
   NOT_RUN; original heavy hang attribution remains UNKNOWN.
-- Ordinary Dev188 uses the existing composition-item request, explicitly full
-  resolution/U8/ARGB/straight alpha. Only the owned copy is premultiplied for
-  checkerboard compositing. Includes cursor preservation and terminal warm-error
-  handling; no diagnostic logging. New bytes/build/install/native acceptance
-  pending, including background/alpha and repeated press/release/Undo.
+- Ordinary Dev188 source0cba0dd / BID EGFX-dad3f547f71993690f57a67f installed:
+  archive/all file hashes/strict signature PASS. AE25.6 exact canonical loaded
+  UUID9B7E199F-643C-3EBF-90E4-D5EB64BCDC33 PASS. Explicit full-resolution U8
+  ARGB straight-alpha request; only owned copy premultiplied. Includes cursor
+  preservation/terminal warm-error handling; no diagnostic feature/logger.
+- Small32bpc Perspective composition with visible upper/lower patches and alpha
+  prepared and saved PASS.45s guard closed ownedPID96623, AE absent; exact9
+  restored and whole preference hash unchanged. No alert observed during setup.
+  Manual source/background/alpha/freeze/cursor and gesture/Undo NOT_RUN pending
+  user reply; no manual completion received before deadline, no readback sent.
+  Do not relaunch via stale Cua binding after cleanup.
 - Ordinary188 Rust134/strict Clippy/source17 PASS. Static scanner exit1 reviewed:
-  unchanged fixture false positive tests/test_target_ae_acceptance.py:54 is an
-  owned-window acceptance test, not a network auth route. No new finding.
+  unchanged fixture false positive tests/test_target_ae_acceptance.py:54 is a
+  mocked installed-payload verification test, not a network auth route.
 - Prior probe134/strict Clippy/source17 PASS; Windows packet Python20 PASS
   locally. Current Windows MSVC/AE NOT_RUN; only Apple target installed. No new
   GitHub source sent; previous CI is not proof for these changes. Demo OFF;
@@ -35,7 +41,9 @@
 
 Evidence: outputs/loupe-upstream-dev187/native-surface/{loupe-image.jsonl,
 after-points.json,undo-points.json,undo-keys.json,preference-after.json};
-outputs/loupe-upstream187-*.log; outputs/loupe-windows-packet-oct08.log.
+outputs/loupe-upstream187-*.log; outputs/loupe-windows-packet-oct08.log;
+outputs/loupe-dev188/{installed-verification.json,native-composition/acceptance.json};
+outputs/loupe-dev188-composition-*.log and audit-review.json.
 
 Older dated notes below remain history; use this checkpoint for current holds.
 
