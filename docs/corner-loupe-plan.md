@@ -293,3 +293,19 @@ no spontaneous crash established. Cleanup PASS. Current Undo readback NOT_RUN.
 Next discriminating check is passive resource census on the same source: counts
 of async polls/receipts/checkins and retained loupe/snapshot storage, with unchanged
 45s/1.5GiB/256MiB limits. No shipping cache-setting change or guessed leak fix.
+
+2026-10-08 redraw optimization (local validation, no native acceptance yet):
+R-LUP-REDRAW-1: identical held tentative SDK16.16 coordinates must not enqueue
+another invalidation/UPDATE_NOW. Mouse-up still takes the existing Commit or
+Unchanged path regardless of deduplication; no saved stream writes while held.
+R-LUP-REDRAW-2: each immutable Frame owns at most one129x129 UI raster. Exact
+source mapping (center and both unit-screen basis samples) plus supplier pixel
+layout selects reuse; a moved sample/zoom/layout rebuilds and replaces it. New
+frames own independent caches; frame disposal drops raster storage. Retain only
+owned Rust pixels/Rc, never host/supplier/surface/image handles across callbacks.
+No sleeps, timer, guessed refresh cap, loss of final position, additional SDK
+frame requests or renderer/quality changes. Drawbot Image remains callback-local.
+Acceptance: duplicate stationary events suppressed; moved and release/Undo
+correct; repeated DRAW raster reuse; changed basis/layout/frame invalidates;
+cache bounded and pixel-identical; default/diagnostic checks then exact-candidate
+native resource comparison. Original heavy memory/hang cause remains UNKNOWN.

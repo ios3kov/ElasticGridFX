@@ -688,6 +688,11 @@ fn drag_inner(
             event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT);
             match action {
                 super::frozen_corner::Step::Cancelled=>{event.set_continue_refcon(0,DRAG_NONE);event.set_send_drag(false);return Ok(());},
+                super::frozen_corner::Step::Idle=>{
+                    // Repeated held callbacks do not change the overlay. Keep
+                    // render deferral without queueing another viewer DRAW.
+                    event.set_event_out_flags(ae::EventOutFlags::HANDLED_EVENT|ae::EventOutFlags::NEVER_UPDATE);
+                },
                 super::frozen_corner::Step::Preview=>{
                     // Only the overlay/loupe see tentative coordinates. All
                     // canonical streams remain identical to mouse-down values.

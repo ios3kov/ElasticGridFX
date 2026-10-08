@@ -2,6 +2,31 @@
 
 ## Latest checkpoint — 2026-10-08
 
+- Local redraw fix: held identical SDK16.16 targets return Idle (no invalidation
+  or UPDATE_NOW); release preserves Commit/Unchanged and final coordinate. Each
+  immutable Frame owns one bounded129x129 raster keyed by exact source mapping
+  and supplier layout; repeated DRAW reuses owned Rc pixels without cloning the
+  buffer. Drawbot objects remain callback-local. Default137 tests/diagnostic140
+  tests and strict diagnostic Clippy PASS; new regressions cover duplicate motion,
+  release, cache replacement/drop, zoom/layout/frame separation. Initial red
+  regression was expected compile FAIL (Idle variant absent), preserved. Dev189
+  census / Dev190 ordinary identifiers assigned. Packaging/native comparison
+  PENDING; no claim to have fixed original memory/hang cause.
+
+- Current overriding checkpoint: diagnostic sourcef33452e/BID
+  EGFX-a1257392f0d14499e13b2ba7 remains installed; AE is absent after owned guard
+  termination in auto-r3. Cleanup PASS. Older ordinary-installed and AE-open
+  statements below are historical. Heavy memory acceptance BLOCKED.
+- Read-only redraw audit: unchanged held targets still return Step::Preview and
+  queue viewer invalidation/UPDATE_NOW; every loupe DRAW rasterizes129x129 and
+  creates a Drawbot Image. Final927 images created/dropped, live0; last~5s
+  ~160-171 images/sec while async request/receipt counters were stable. No
+  per-DRAW composition request loop observed. Callback-origin attribution and
+  host allocation lifetime remain UNKNOWN; no leak-fix claim. Frozen transaction
+  tests4 PASS; scanner exit1 reviewed existing mock auth-URL false positive.
+  No source edits/new native session. Findings and ordered remediation:
+  outputs/resource-census-v2-oct08/loupe-redraw-findings.json.
+
 - Current L3: magnify the evaluated composition, including FSTR, all visible
   layers/effects and alpha. One immutable frame at press; only overlays move
   during Surface/Perspective corner drag. Release commits the Point once and
@@ -109,6 +134,36 @@
   shipping quality/state/UI changes.137 diagnostic Rust tests PASS. Host census
   of late heavy growth NOT_RUN; allocation cause UNKNOWN. Diagnostic preparation
   is not a product memory fix. Ordinary188 remains installed.
+- Resource-census-v2 sourcef33452e / BID EGFX-a1257392f0d14499e13b2ba7:
+  optimized Mac diagnostic build,137 Rust tests and strict Clippy PASS. Package,
+  sealed archive/manifest, ad-hoc signature and installed exact manifest PASS.
+  Diagnostic is temporarily installed; ordinary188 is preserved in Backups and
+  outputs/loupe-dev188. Automatic saved-copy startup BLOCKED: Cua reports Mac
+  locked. No UI readiness receipt, project open or Preview dispatch; stop-requested
+  written; controller cleanup PASS, AE absent, original preference full hash
+  unchanged and exact9 components restored. No manual stress test. Unlock
+  required for dependent automated native census. Late-allocation cause UNKNOWN.
+- Census-v2 automatic-r2 ownedPID31654: heavy1920x1080 selected before3-frame
+  Preview.5 pixel checkins OK/zero errors; borrowed input/output live0. Later
+  selected Effect Controls causes3 warm async polls,1nonnull receipt/1checkinOK,
+  one8294400-byte copy, zero gesture calls/preparation errors. No unbounded loupe
+  request/copy accumulation observed. Guard killed at301.319s/1206907816 bytes.
+  Harness initial active comp was640x480, so armed baseline801435048 includes
+  neither heavy loading nor its UI; heavy memory-budget acceptance BLOCKED, not
+  product leak evidence. Controls-visible UI and host cache allocations remain
+  unmeasured. Cleanup PASS with exact original preferences/components. Corrected
+  auto-r3 chooses exact heavy comp before fixture-ready/baseline; same limits.
+- Census-v2 corrected auto-r3 ownedPID33270 chooses heavy1920x1080 from start,
+ 32bpc/Final, baseline917910200 bytes. Bounded3-frame Preview start/stop observed;
+  effect panel opened with existing layer selected. Warm3 async polls/1nonnull
+  receipt/1checkinOK/zero preparation errors, one8294400-byte loupe copy. Borrowed
+  worlds live0; no further requests observed during passive interval. Bounded
+  automatic resource-lifetime observation PASS; full RAM/gesture/visual acceptance
+  NOT_RUN, original hang cause UNKNOWN. Do not turn a negative short reproduction
+  into a leak fix or host-cache ownership claim. AE remains open awaiting user
+  completion, guards active; cleanup PENDING. Exact candidate loaded UUID
+ 3E67E99E-81B6-3871-BA3A-1ECB6E46C336 verified. Evidence:
+  outputs/resource-census-v2-oct08/native-auto-r3/acceptance-checkpoint.json.
 - Default timed native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene acceptance BLOCKED /
   RAM Preview NOT_RUN; original reported heavy hang remains UNKNOWN. No cap
   increase, shipping idle-cache workaround, original-project edit or stale Cua
@@ -2599,3 +2654,17 @@ use disk manifest checks instead. No second installation was invoked. Native
 frontend visual startup claim remains observation-specific. Windows runner retry
 37362662281 attempt2 PASS on70f8cee; current39616fa differs only STATUS.md, so CI
 evidence remains bound to70f8cee. Original RAM Preview incident OPEN/UNCONFIRMED.
+
+2026-10-08 resource census auto-r3 (source f33452e, owned PID33270):
+heavy 1920x1080 32bpc/Final baseline917910200; user drag captured Top Right
+[1153,600]. User reports Undo returned picture. Exact original coordinate
+Undo NOT_CONFIRMED: readback transport timed out and file contains intermediate
+[1466,552], versus initial[1242,543]; final counters recorded four gesture API attempts
+(not necessarily four user gestures). All four loupe checkins succeeded; one
+8,294,400-byte copy retained,927 UI bitmap/image tokens created and dropped.
+At456.335s guard growth cap exceeded: footprint1374369448, growth456459248
+bytes >384MiB. Guard explicitly killed owned AE, not a spontaneous crash.
+Preferences exact original hash and nine isolated components restored PASS.
+Evidence outputs/resource-census-v2-oct08/native-auto-r3/manual-session-result.json.
+No release readiness claim; original hang cause UNKNOWN; diagnostic remains
+installed, ordinary Dev188 retained for restoration after investigation.

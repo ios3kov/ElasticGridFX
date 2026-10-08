@@ -10,7 +10,7 @@ type PreviewPoint=(usize,(f64,f64));
 #[derive(Clone,Copy)]
 struct Pending{scope:Scope,index:usize,original:Points,target:Point}
 #[derive(Clone,Copy,Debug,PartialEq,Eq)]
-pub(crate) enum Step{Cancelled,Preview,Unchanged,Commit{index:usize,target:Point}}
+pub(crate) enum Step{Cancelled,Preview,Idle,Unchanged,Commit{index:usize,target:Point}}
 #[derive(Clone,Copy,Default)]
 struct Transaction{pending:Option<Pending>}
 impl Transaction{
@@ -24,8 +24,8 @@ impl Transaction{
     fn step(&mut self,scope:Option<Scope>,index:usize,current:Points,target:Point,last:bool)->Step {
         let Some(mut p)=self.pending.take() else{return Step::Cancelled;};
         if Some(p.scope)!=scope||p.index!=index||p.original!=current{return Step::Cancelled;}
-        p.target=target;
-        if !last {self.pending=Some(p);return Step::Preview;}
+        let changed=p.target!=target;p.target=target;
+        if !last {self.pending=Some(p);return if changed{Step::Preview}else{Step::Idle};}
         if p.original[index]==target {Step::Unchanged}else{Step::Commit{index,target}}
     }
 }
@@ -83,6 +83,17 @@ pub(crate) fn step(input:&ae::InData,params:&ae::Parameters<Params>,event:&ae::E
         tx.begin(Some(key()),0,original);tx.step(Some(key()),0,original,(500,0),false);
         assert_eq!(tx.step(Some(key()),0,original,original[0],true),Step::Unchanged);
         assert_eq!(original[0],(3,-7));
+    }
+    #[test]fn duplicate_motion_is_idle_but_release_always_uses_latest_target(){
+        let original=points();let mut tx=Transaction::default();
+        tx.begin(Some(key()),0,original);
+        for _ in 0..1000 {assert_eq!(tx.step(Some(key()),0,original,original[0],false),Step::Idle);}
+        assert_eq!(tx.step(Some(key()),0,original,(500,44),false),Step::Preview);
+        for _ in 0..1000 {assert_eq!(tx.step(Some(key()),0,original,(500,44),false),Step::Idle);}
+        assert_eq!(tx.preview(Some(key()),original),Some((0,(500,44))));
+        assert_eq!(tx.step(Some(key()),0,original,(500,44),true),Step::Commit{index:0,target:(500,44)});
+        tx.begin(Some(key()),0,original);
+        assert_eq!(tx.step(Some(key()),0,original,original[0],true),Step::Unchanged);
     }
     #[test]fn external_point_edit_and_changed_owner_time_mode_cancel_without_commit(){
         for other in [None,Some(corner_ownership::test_scope(8,10,2)),

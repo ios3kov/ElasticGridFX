@@ -1,6 +1,7 @@
 //! UI-only corner magnifier. AE owns asynchronous requests and cancels stale frames.
 //! No render callback, saved parameter, OS capture, or retained host pixel pointer.
 use super::*;
+use std::rc::Rc;
 const SIZE:usize=129;
 const RADIUS:f32=64.0;
 const ZOOM:f32=3.0;
@@ -217,16 +218,22 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
     #[cfg(feature="loupe-upstream-probe")] coordinates:Result<[(f32,f32);3],ae::Error>,
 )->Result<(),ae::Error>{
     source(event,center.x,center.y)?;
-    let mut pixels=frame_pixels(input,event,center,id,
+    // Consult this callback's supplier; never retain a Drawbot object or suite
+    // across callbacks. Only our small owned bitmap may be reused.
+    let bgra=supplier.supports_pixel_layout_bgra()?&&
+        (supplier.prefers_pixel_layout_bgra()?||!supplier.supports_pixel_layout_argb()?);
+    let bitmap=frame_pixels(input,event,center,id,bgra,
         #[cfg(feature="loupe-upstream-probe")] coordinates?,
     )?;
+    let pixels=&bitmap.pixels;
     #[cfg(feature="loupe-image-probe")]{
         let mut lo=255u8;let mut hi=0u8;let mut count=0usize;
         for y in 40..89 {for x in 40..89 {
             let dx=x as i32-64;let dy=y as i32-64;
             if dx.abs()<=3||dy.abs()<=3 {continue;}
             let i=(y*SIZE+x)*4;
-            for value in &pixels[i+1..i+4]{lo=lo.min(*value);hi=hi.max(*value);}
+            let color=if bgra{&pixels[i..i+3]}else{&pixels[i+1..i+4]};
+            for value in color{lo=lo.min(*value);hi=hi.max(*value);}
             count+=1;
         }}
         super::loupe_image_probe::record(3,&[lo as f64,hi as f64,count as f64,
@@ -235,14 +242,10 @@ pub(crate) fn draw(input:&ae::InData,event:&mut ae::EventExtra,supplier:&ae::dra
             supplier.supports_pixel_layout_bgra()? as u8 as f64,
             supplier.prefers_pixel_layout_bgra()? as u8 as f64]);
     }
-    #[cfg(feature="resource-census-probe")]
-    let _bitmap_census=super::resource_census::Token::new(super::resource_census::Kind::UiBitmap,pixels.len() as u64);
     // SDK DrawbotSuite.h requires consulting the supplier preference. Source
     // pixels remain ARGB; convert only the small UI bitmap, never a host world.
-    let bgra=supplier.supports_pixel_layout_bgra()?&&
-        (supplier.prefers_pixel_layout_bgra()?||!supplier.supports_pixel_layout_argb()?);
-    let layout=image_layout(&mut pixels,bgra);
-    let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,layout,&pixels)?;
+    let layout=if bgra{ae::drawbot::PixelLayout::Bgra32Straight}else{ae::drawbot::PixelLayout::Argb32Straight};
+    let image=supplier.new_image_from_buffer(SIZE,SIZE,SIZE*4,layout,pixels)?;
     #[cfg(feature="resource-census-probe")]
     let _image_census=super::resource_census::Token::new(super::resource_census::Kind::DrawImage,(SIZE*SIZE*4) as u64);
     surface.draw_image(&image,&ae::drawbot::PointF32{x:center.x-RADIUS,y:center.y-RADIUS},1.0)
@@ -267,7 +270,32 @@ fn gesture_finished(){GESTURE_FRAME.set(GESTURE_FRAME.get().map(|r|GestureFrame{
 struct Frame{
     #[cfg(feature="resource-census-probe")]
     _census:Option<super::resource_census::Token>,
-    key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>}
+    key:FrameKey,width:usize,height:usize,region:ae::Rect,pixels:Vec<u8>,raster:RasterCache}
+#[derive(Clone,Copy,PartialEq,Eq)]
+struct RasterKey{mapping:[u32;6],bgra:bool}
+impl RasterKey{
+    fn new(c:(f32,f32),xp:(f32,f32),yp:(f32,f32),bgra:bool)->Self{
+        Self{mapping:[c.0.to_bits(),c.1.to_bits(),xp.0.to_bits(),xp.1.to_bits(),yp.0.to_bits(),yp.1.to_bits()],bgra}
+    }
+}
+struct Bitmap{
+    pixels:Vec<u8>,
+    #[cfg(feature="resource-census-probe")]
+    _census:super::resource_census::Token,
+}
+#[derive(Default)]
+struct RasterCache{last:Option<(RasterKey,Rc<Bitmap>)>}
+impl RasterCache{
+    fn get_or_build(&mut self,key:RasterKey,build:impl FnOnce()->Vec<u8>)->Rc<Bitmap>{
+        if let Some((old,bitmap))=&self.last{if *old==key{return Rc::clone(bitmap);}}
+        let mut pixels=build();image_layout(&mut pixels,key.bgra);
+        let bitmap=Rc::new(Bitmap{
+            #[cfg(feature="resource-census-probe")]
+            _census:super::resource_census::Token::new(super::resource_census::Kind::UiBitmap,pixels.len() as u64),
+            pixels});
+        self.last=Some((key,Rc::clone(&bitmap)));bitmap
+    }
+}
 // Bounded owner history; switching between multiple effect rows must not
 // rearm a warm request at every playback time. Full history fails closed for
 // idle preparation while active corner gestures remain available.
@@ -408,7 +436,7 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
         Ok(Frame{
             #[cfg(feature="resource-census-probe")]
             _census:Some(super::resource_census::Token::new(super::resource_census::Kind::Loupe,size as u64)),
-            key,width:w,height:h,region,pixels})
+            key,width:w,height:h,region,pixels,raster:RasterCache::default()})
     })();
     let checked=render.checkin_frame(receipt);
     #[cfg(feature="resource-census-probe")]
@@ -437,28 +465,30 @@ fn premultiply_straight(pixels:&mut [u8]) {
     }
 }
 
-fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,
+fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,bgra:bool,
     #[cfg(feature="loupe-upstream-probe")] coordinates:[(f32,f32);3],
-)->Result<Vec<u8>,ae::Error>{
+)->Result<Rc<Bitmap>,ae::Error>{
     let owner=owner(input,id)?;let window=ui::event_window_code(event);VIEW.set(Some((owner,window)));
     #[cfg(feature="loupe-upstream-probe")]let [c,xp,yp]=coordinates;
     #[cfg(not(feature="loupe-upstream-probe"))]
     let (c,xp,yp)=(source(event,center.x,center.y)?,
         source(event,center.x+1.0,center.y)?,source(event,center.x,center.y+1.0)?);
-    FRAME.with_borrow(|frame|{
-        let f=frame.as_ref().filter(|f|f.key.owner==owner&&f.key.window==window&&f.key.time==input.current_time()&&f.key.scale==input.time_scale()).ok_or(ae::Error::BadCallbackParameter)?;
+    FRAME.with_borrow_mut(|frame|{
+        let f=frame.as_mut().filter(|f|f.key.owner==owner&&f.key.window==window&&f.key.time==input.current_time()&&f.key.scale==input.time_scale()).ok_or(ae::Error::BadCallbackParameter)?;
+        let (width,height,region)=(f.width,f.height,f.region);
+        let source_pixels=&f.pixels;
         #[cfg(feature="loupe-image-probe")]let mut valid=0usize;
         #[cfg(feature="loupe-image-probe")]let (mut sample_min,mut sample_max)=(255u8,0u8);
-        let pixels=raster(|dx,dy|{
+        let pixels=f.raster.get_or_build(RasterKey::new(c,xp,yp,bgra),||raster(|dx,dy|{
             let x=(c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0)).round() as i32;
             let y=(c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1)).round() as i32;
-            if x<0||y<0||x>=f.width as i32||y>=f.height as i32||x<f.region.left||y<f.region.top||x>=f.region.right||y>=f.region.bottom{return None;}
-            let i=(y as usize*f.width+x as usize)*4;
+            if x<0||y<0||x>=width as i32||y>=height as i32||x<region.left||y<region.top||x>=region.right||y>=region.bottom{return None;}
+            let i=(y as usize*width+x as usize)*4;
             #[cfg(feature="loupe-image-probe")]{valid+=1;
-                for value in &f.pixels[i+1..i+4]{sample_min=sample_min.min(*value);sample_max=sample_max.max(*value);}
+                for value in &source_pixels[i+1..i+4]{sample_min=sample_min.min(*value);sample_max=sample_max.max(*value);}
             }
-            Some([f.pixels[i],f.pixels[i+1],f.pixels[i+2],f.pixels[i+3]])
-        });
+            Some([source_pixels[i],source_pixels[i+1],source_pixels[i+2],source_pixels[i+3]])
+        }));
         #[cfg(feature="loupe-image-probe")]
         if !IMAGE_RECORDED.replace(true){
             super::loupe_image_probe::record(2,&[center.x as f64,center.y as f64,c.0 as f64,c.1 as f64,
@@ -470,6 +500,34 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 }
 #[cfg(test)] mod tests{
     use super::*;
+    #[test]fn repeated_mapping_reuses_pixels_and_changed_mapping_releases_previous_bitmap(){
+        let key=RasterKey::new((10.,20.),(11.,20.),(10.,21.),false);
+        let mut cache=RasterCache::default();let first=cache.get_or_build(key,||raster(|_,_|Some([255,17,93,201])));
+        let weak=Rc::downgrade(&first);
+        for _ in 0..1000{
+            let same=cache.get_or_build(key,||panic!("unchanged pixels must not be rebuilt"));
+            assert!(Rc::ptr_eq(&same,&first));
+        }
+        drop(first);assert!(weak.upgrade().is_some());
+        let moved=RasterKey::new((11.,20.),(12.,20.),(11.,21.),false);
+        let next=cache.get_or_build(moved,||raster(|_,_|None));
+        assert!(weak.upgrade().is_none());
+        let weak=Rc::downgrade(&next);drop(next);drop(cache);
+        assert!(weak.upgrade().is_none());
+    }
+    #[test]fn cache_mapping_zoom_layout_and_frame_replacement_never_reuse_wrong_pixels(){
+        let base=RasterKey::new((10.,20.),(11.,20.),(10.,21.),false);
+        for key in [RasterKey::new((10.,20.),(10.5,20.),(10.,21.),false),
+            RasterKey::new((10.,20.),(11.,20.),(10.,20.5),false),RasterKey{bgra:true,..base}]{
+            let mut cache=RasterCache::default();let original=cache.get_or_build(base,||vec![255,17,93,201]);
+            let next=cache.get_or_build(key,||vec![255,201,93,17]);
+            assert!(!Rc::ptr_eq(&original,&next));
+            assert_eq!(next.pixels,if key.bgra{vec![17,93,201,255]}else{vec![255,201,93,17]});
+        }
+        let mut old_frame=RasterCache::default();let old=old_frame.get_or_build(base,||vec![255,1,2,3]);
+        let mut new_frame=RasterCache::default();let new=new_frame.get_or_build(base,||vec![255,4,5,6]);
+        assert!(!Rc::ptr_eq(&old,&new));assert_eq!(new.pixels,[255,4,5,6]);
+    }
     fn request_key(stamp:i8)->FrameKey{FrameKey{owner:7,window:1,time:10,scale:25,stamp:[stamp;4]}}
     #[test]fn same_time_new_press_drops_previous_pixels_but_held_callbacks_keep_current_frame(){
         close();let g=Gesture{owner:7,window:1,index:0,native:true};
@@ -477,7 +535,7 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         FRAME.with_borrow_mut(|f|*f=Some(Frame{
             #[cfg(feature="resource-census-probe")]_census:None,
             key:request_key(0),width:1,height:1,
-            region:ae::Rect{left:0,top:0,right:1,bottom:1},pixels:vec![255,99,0,0]}));
+            region:ae::Rect{left:0,top:0,right:1,bottom:1},pixels:vec![255,99,0,0],raster:RasterCache::default()}));
         start_native(g);assert!(FRAME.with_borrow(|f|f.is_some()));
         finish_native(false);start_native(g);
         assert!(FRAME.with_borrow(|f|f.is_none()));close();
