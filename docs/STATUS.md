@@ -2,48 +2,67 @@
 
 ## Latest checkpoint — 2026-10-08
 
-- Latest user instruction/photo changes L3: the loupe magnifies the current
-  evaluated composition, including FSTR, all visible layers/effects and alpha.
-  One immutable frame at corner press, no re-render per movement. A transparent
-  area shows checkerboard, not original-layer cells. Earlier exclusion/source
-  research is retained as history and no longer blocks this source decision.
-  Comp/Layer viewer scope is explicit in corner-loupe-plan.md.
-- Installed diagnostic Dev187 source c00da98 / BID EGFX-8b24b1f5aa244f790d1e83d5:
-  exact installed bytes/signature and AE25.6 loaded UUID
-  212A2C3E-5737-3C13-A6BF-4B5D42A1DE7C PASS. Straight receipt/lens ranges0..255;
-  matte-mode alert absent. User-reported original-cell lens, no hand flash and
-  no alert PASS in that fixture. Its upstream-only source does not implement
-  the latest evaluated-composition scope; it must be replaced by ordinary188.
-- Owned Surface fixture: TopRight640,0->592,48; other corners/layer transform
-  unchanged. Cua CmdZ restored640,0; existing TopLeft/Affected Lines keys and
-  interpolation preserved. One actual saved gesture and Undo PASS.
--45s native guard cleanup PASS: AE absent, exact9 foreign components restored,
-  idle-cache key unchanged. Peak footprint below1.25GiB. Heavy scene/RAM Preview
-  NOT_RUN; original heavy hang attribution remains UNKNOWN.
-- Ordinary Dev188 source0cba0dd / BID EGFX-dad3f547f71993690f57a67f installed:
-  archive/all file hashes/strict signature PASS. AE25.6 exact canonical loaded
-  UUID9B7E199F-643C-3EBF-90E4-D5EB64BCDC33 PASS. Explicit full-resolution U8
-  ARGB straight-alpha request; only owned copy premultiplied. Includes cursor
-  preservation/terminal warm-error handling; no diagnostic feature/logger.
-- Small32bpc Perspective composition with visible upper/lower patches and alpha
-  prepared and saved PASS.45s guard closed ownedPID96623, AE absent; exact9
-  restored and whole preference hash unchanged. No alert observed during setup.
-  Manual source/background/alpha/freeze/cursor and gesture/Undo NOT_RUN pending
-  user reply; no manual completion received before deadline, no readback sent.
-  Do not relaunch via stale Cua binding after cleanup.
-- Ordinary188 Rust134/strict Clippy/source17 PASS. Static scanner exit1 reviewed:
-  unchanged fixture false positive tests/test_target_ae_acceptance.py:54 is a
-  mocked installed-payload verification test, not a network auth route.
-- Prior probe134/strict Clippy/source17 PASS; Windows packet Python20 PASS
-  locally. Current Windows MSVC/AE NOT_RUN; only Apple target installed. No new
-  GitHub source sent; previous CI is not proof for these changes. Demo OFF;
-  no release/main action or original-project modification.
+- Current L3: magnify the evaluated composition, including FSTR, all visible
+  layers/effects and alpha. One immutable frame at press; only overlays move
+  during Surface/Perspective corner drag. Release commits the Point once and
+  renders. Layer viewer retains its evaluated layer view. Earlier upstream-only
+  source experiments remain history and do not implement the current contract.
+- Ordinary Dev188 source0cba0ddff0a2c0f3ef3fff49bef6d9a036c70f1d /
+  BID EGFX-dad3f547f71993690f57a67f is installed. All archive/file hashes and
+  strict ad-hoc signature PASS. AE25.6 loaded canonical UUID
+  9B7E199F-643C-3EBF-90E4-D5EB64BCDC33 PASS in owned fixtures. Full-resolution
+  U8 ARGB Straight request; owned copy premultiplied. Includes cursor retention
+  and terminal warm-error handling. No diagnostic feature/logger enabled.
+- Source checks: Rust134, strict Clippy and host contracts17 PASS. Scanner exit1
+  reviewed unchanged mocked-payload fixture false positive at
+  tests/test_target_ae_acceptance.py:54; readiness not_assessed. Windows packet
+  Python20 PASS locally. These checks are not native pixel/loupe acceptance.
+- Native comparison-r2 with original idle cache ON stopped at256MiB growth.
+  Baseline833858768, peak1141026264 bytes. Growth started before helper input.
+  Source/readback not accepted; subsequent-609 follows owned guard closure.
+  Allocation cause UNKNOWN. Idle rendering is a diagnostic lead, not proven
+  product causality or an approved workaround.
+- Same ordinary188 tiny32bpc/Final multilayer Perspective fixture with temporary
+  idle cache OFF: r3 peak977972456 and r5 peak984575472 bytes, no45s limit hit.
+  Actual TopRight406,174->514,84; other corners/layer position unchanged.
+  Existing TopLeft/Affected Lines keys and midpoint retained PASS. r4 helper
+  refused because AE was not foreground; its launcher exit0 was not input PASS.
+- Ordinary188 manual Perspective multilayer r7: user confirmed evaluated
+  composition/alpha/background in the lens, image freeze, no hand/no alert
+  USER_REPORTED_PASS. Current native Undo readback NOT_RUN. Previous r5 short
+  helper inputs omitted unheld hover and did not establish custom-route acceptance.
+- r7 growth guard fired at44.5249s: footprint1101344216, armed baseline828485008
+  (growth272859208). OWNED_AE_KILL_SENT explicitly recorded; this closure is
+  guard termination, not an established spontaneous crash. Idle cache temporarily
+  OFF. Footprint remained about790MiB through30s, rising during the manual check.
+  Allocation cause UNKNOWN: one host composition request/cache allocation and
+  repeated/leaked work must be distinguished before a product fix. Native memory
+  acceptance NOT_PASSED; do not widen limits or suppress this result.
+- Cleanup VERIFIED: AE absent, exact9 temporary AEHL components restored with
+  unchanged tree hashes; actual25.6 preferences full original hash unchanged.
+  r3 initial cleanup FAILED because private restore command omitted BASE; repaired
+  explicitly and verified before more work. Later cleanup runs PASS and now
+  attempt component restoration even if preference restoration fails. Only the
+  known idle-cache key is restored; unrelated preference bytes never overwritten.
+- All native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene /
+  RAM Preview NOT_RUN; original reported heavy hang remains UNKNOWN. No cap
+  increase, shipping idle-cache workaround, original-project edit or stale Cua
+  relaunch. Ordinary188 remains installed.
+- Surface187 diagnostic fixture historical native point/Undo/key PASS and user
+  original-cell/no-hand/no-alert report are retained in evidence, not transferred
+  to ordinary188 or its newly accepted composition source. Current Windows
+  MSVC/AE NOT_RUN; only Apple Rust target installed. New local commits have not
+  been pushed. Demo OFF; no main/release action.
 
-Evidence: outputs/loupe-upstream-dev187/native-surface/{loupe-image.jsonl,
-after-points.json,undo-points.json,undo-keys.json,preference-after.json};
-outputs/loupe-upstream187-*.log; outputs/loupe-windows-packet-oct08.log;
-outputs/loupe-dev188/{installed-verification.json,native-composition/acceptance.json};
-outputs/loupe-dev188-composition-*.log and audit-review.json.
+Evidence: outputs/loupe-dev188/{installed-verification.json,
+native-composition/acceptance.json,native-composition-r2/acceptance.json,
+native-composition-idle-off-r3/acceptance.json,
+native-composition-idle-off-r4/acceptance.json,
+native-composition-idle-off-r5/acceptance.json,
+native-manual-composition-r7/acceptance.json};
+outputs/loupe-dev188-composition-*.log and audit-review.json;
+outputs/loupe-windows-packet-oct08.log;
+outputs/loupe-upstream-dev187/native-surface.
 
 Older dated notes below remain history; use this checkpoint for current holds.
 

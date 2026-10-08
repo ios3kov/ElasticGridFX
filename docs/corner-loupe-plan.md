@@ -17,13 +17,24 @@ immutable frame per gesture, overlay-only corner movement, target/cursor policy,
 Undo/keys and release rendering remain required on Mac and Windows. No scratch
 composition, effect flag mutation, per-movement render or diagnostic logger.
 
-Dev187 user-reported check: colored original cells, no hand flash and no matte
-alert PASS in the small fixture. The subsequent photo demonstrates the source
-mismatch against the new current-composition decision. Dev188 multilayer /
-transparent-region / repeated-gesture native acceptance remains NOT_RUN awaiting
-user reply. Ordinary188 source0cba0dd installed; exact loaded AE25.6 identity,
-multilayer setup and45s guarded cleanup PASS. No manual completion/readback
-before deadline. Evidence: outputs/loupe-dev188/native-composition/acceptance.json.
+Current acceptance boundary: ordinary188 source0cba0dd is installed; exact
+canonical loaded AE25.6 identity, source134/Clippy/host17 and artifact checks PASS.
+Tiny multilayer Perspective setup and actual native Point readback/key retention
+PASS. Evaluated-composition lens contents, alpha/background, freeze, cursor and
+current188 Undo remain NOT_RUN. Automated short inputs omit pre-press hover
+required by corner_ownership and cannot prove the custom frozen route; no lens
+was observed. Do not label launcher exit0 or native Point readback as loupe PASS.
+One timed manual gesture in a fresh owned scene remains the next acceptance step.
+
+Original-idle-cache r2 reached the fixed256MiB growth bound before input; same
+artifact tiny idle-off r3/r5 trials did not hit a limit during45s. This isolates
+an idle-render confound, not the original hang root cause. All changes to the
+single idle-cache key are temporary test conditions, restored with the full
+original25.6 preference hash and exact9 excluded component tree hashes verified.
+Heavy-scene/RAM Preview remains NOT_RUN. Current Windows MSVC/AE NOT_RUN; no new
+source pushed. Private evidence: outputs/loupe-dev188/native-composition*/ and
+STATUS.md. Earlier Dev187 original-cell/no-hand/no-alert user PASS remains scoped
+to its upstream-only diagnostic source and does not close current L3.
 
 Historical source decisions below are retained as dated evidence; this section
 and L3 govern the current source scope.
@@ -274,3 +285,11 @@ pending. Diagnostic155 adds transition509 recording invalidation success, with
 the same bounded gesture log; it does not enable PREVIEW callbacks. Private
 raw trace and project remain only under outputs/corner-press-probe151; public
 source docs contain aggregate transition findings only.
+
+2026-10-08 r7 update: ordinary188 manual Perspective composition/alpha/background,
+frozen image and no hand/no alert USER_REPORTED_PASS. Memory acceptance remains
+NOT_PASSED: guard terminated ownedPID2968 at44.5249s on272859208-byte growth;
+no spontaneous crash established. Cleanup PASS. Current Undo readback NOT_RUN.
+Next discriminating check is passive resource census on the same source: counts
+of async polls/receipts/checkins and retained loupe/snapshot storage, with unchanged
+45s/1.5GiB/256MiB limits. No shipping cache-setting change or guessed leak fix.
