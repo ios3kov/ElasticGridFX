@@ -1,5 +1,17 @@
 # Current status
 
+2026-10-08 upstream Dev186 native FAIL: exact installed/loaded source55ae84f,
+BID EGFX-5d90502ff77a1e03e35ec89e verified; AE25.6 rejects upstream input receipt
+with `BEE_CheckoutEffectInputFrame currently only supports straight matte mode`.
+This alert was observed directly through Cua and independently reported by user;
+no gesture dispatched.45s guard closed owned PID90174; all9 components restored,
+AE absent, idle-cache key unchanged. Fix: upstream request uses Straight; owned
+pixels normalize to premultiplied before the unchanged lens raster. A failed
+initial request now consumes its warm budget too, avoiding per-DRAW alert retries.
+Dev187 probe Rust134/source17 PASS; alpha0/128/255 regression verifies compositing.
+Native repeat and strict Clippy pending; no release acceptance. Evidence:
+outputs/loupe-upstream-dev186/native-surface; outputs/loupe-upstream187-*.log.
+
 2026-10-07 source prerequisite prepared locally: nondefault
 `loupe-upstream-probe` Dev186 requests the affected layer before FSTR through
 SDK LayerRenderOptionsSuite2; layer-space sampling uses the same native/view

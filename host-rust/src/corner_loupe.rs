@@ -299,7 +299,14 @@ pub(crate) fn prepare_frame(input:&ae::InData,event:&mut ae::EventExtra,id:Optio
     finish_native(native_button_down());
     let result=prepare_frame_inner(input,event,id);
     // Do not turn a failed checkout/copy/refresh into a per-DRAW retry loop.
-    if result.is_err()&&GESTURE_FRAME.get().is_some_and(|r|owner(input,id).ok()==Some(r.key.owner)){gesture_finished();}
+    if result.is_err() {
+        if let Ok(owner)=owner(input,id) {
+            if GESTURE_FRAME.get().is_some_and(|r|owner==r.key.owner){gesture_finished();}
+            // A failed initial request is terminal too; do not repeat a host
+            // alert on every Effect Controls DRAW at the same time.
+            let mut warm=WARM.get();warm_completed(&mut warm,owner);WARM.set(warm);
+        }
+    }
     result
 }
 fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae::aegp::PluginId>)->Result<(),ae::Error>{
@@ -349,7 +356,7 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
         };
         options.set_time(time)?;options.set_world_type(ae::aegp::WorldType::U8)?;
         options.set_downsample_factor(1,1)?;
-        options.set_matte_mode(ae::aegp::MatteMode::PremulBlack)?;
+        options.set_matte_mode(ae::aegp::MatteMode::Straight)?;
         manager.checkout_or_render_layer_frame_async_manager(PURPOSE,options.handle())?
     }else if window==ae::sys::PF_Window_COMP{
         let comp=layers.layer_parent_comp(layer)?;
@@ -379,6 +386,7 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
             let row=unsafe{std::slice::from_raw_parts(ptr.add(y*stride),w*4)};
             pixels[y*w*4..(y+1)*w*4].copy_from_slice(row);
         }
+        #[cfg(feature="loupe-upstream-probe")]premultiply_straight(&mut pixels);
         Ok(Frame{
             #[cfg(feature="resource-census-probe")]
             _census:Some(super::resource_census::Token::new(super::resource_census::Kind::Loupe,size as u64)),
@@ -404,6 +412,14 @@ fn prepare_frame_inner(input:&ae::InData,event:&mut ae::EventExtra,id:Option<ae:
         Ok(())
     },(Err(e),_)|(_,Err(e))=>Err(e)}
 }
+#[cfg(any(feature="loupe-upstream-probe",test))]
+fn premultiply_straight(pixels:&mut [u8]) {
+    for p in pixels.chunks_exact_mut(4) {
+        let alpha=u16::from(p[0]);
+        for c in &mut p[1..] {*c=((u16::from(*c)*alpha+127)/255) as u8;}
+    }
+}
+
 fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,
     #[cfg(feature="loupe-upstream-probe")] coordinates:[(f32,f32);3],
 )->Result<Vec<u8>,ae::Error>{
@@ -500,6 +516,16 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         assert!(!request_allowed(&mut warm,7,92,25,false,true));
         assert!(request_allowed(&mut warm,8,92,25,false,false));
         assert!(!request_allowed(&mut warm,8,93,25,false,false));
+    }
+    #[test]fn upstream_straight_alpha_is_normalized_before_lens_compositing(){
+        let mut pixels=[0,255,128,64,128,255,128,64,255,17,93,201];
+        premultiply_straight(&mut pixels);
+        assert_eq!(pixels,[0,0,0,0,128,128,64,32,255,17,93,201]);
+        let premul=[pixels[4],pixels[5],pixels[6],pixels[7]];
+        let bitmap=raster(|_,_|Some(premul));
+        let i=(70*SIZE+70)*4;
+        // Checker at (70,70) is64; alpha128 contributes31 of background.
+        assert_eq!(&bitmap[i..i+4],&[255,159,95,63]);
     }
     #[test]fn supplier_bgra_conversion_preserves_rgb_alpha_and_transparent_exterior(){
         let argb=raster(|_,_|Some([255,17,93,201]));
