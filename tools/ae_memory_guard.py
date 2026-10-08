@@ -4,6 +4,8 @@ Observe by default. Explicit --terminate-on-limit is for a saved disposable
 fixture only, under the user's AE-close authority. A PID/path/birth mismatch
 never signals any process. Does not inspect or stop other applications.
 When armed, the saved disposable AE process is also closed at the deadline.
+Explicit --until-user-done instead waits for the user's completion marker,
+while retaining identity checks and all memory limits.
 """
 from __future__ import annotations
 import argparse
@@ -104,10 +106,14 @@ def stop_on_limit(process, birth, destination, record, sample=subprocess.run, se
         signal_owned(process, birth, signal.SIGKILL, send)
         record({'event': 'OWNED_AE_KILL_SENT'})
 
-def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loading=False):
+def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loading=False,
+            until_done: Path | None = None):
     assert ctypes.sizeof(Usage) == 160
     if not 1 <= seconds <= 45:
         raise ValueError('Observation limited to 1–45 seconds')
+    if until_done is not None and (until_done.parent.resolve() != destination.parent.resolve()
+                                   or until_done.exists() or until_done.is_symlink()):
+        raise ValueError('Completion marker must be fresh and belong to this fixture')
     destination.mkdir(mode=0o700)  # fresh; never overwrite previous evidence
     process = Process(pid)
     path, birth, baseline = process.read()
@@ -121,10 +127,13 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loadin
             log.write(json.dumps(data) + '\n'); log.flush()
         record({'event': 'LOADING' if loading else 'READY', 'pid': pid, 'birth': birth, 'baseline': baseline,
                 'max_footprint': MAX_FOOTPRINT, 'max_growth': MAX_GROWTH,
-                'terminate_on_limit_or_deadline': terminate, 'deadline_seconds': seconds})
+                'terminate_on_limit_or_deadline': terminate,
+                'deadline_seconds': seconds if until_done is None else None,
+                'completion': 'user' if until_done is not None else 'deadline'})
         print('LOADING' if loading else 'READY', flush=True)
         start = time.monotonic()
-        while time.monotonic() - start < seconds:
+        while (not until_done.is_file() if until_done is not None
+               else time.monotonic() - start < seconds):
             try:
                 path, observed_birth, footprint = process.read()
             except (ProcessLookupError, OSError) as error:
@@ -148,7 +157,8 @@ def monitor(pid: int, destination: Path, seconds: float, terminate: bool, loadin
             time.sleep(0.2)
         if terminate:
             signal_owned(process, birth, signal.SIGKILL)
-            record({'event': 'DEADLINE_OWNED_AE_KILL_SENT'})
+            record({'event': 'USER_DONE_OWNED_AE_KILL_SENT' if until_done is not None
+                    else 'DEADLINE_OWNED_AE_KILL_SENT'})
         else:
             record({'event': 'TIME_LIMIT', 'signal': 'NONE'})
 
@@ -161,5 +171,8 @@ if __name__ == '__main__':
                         help='Close saved disposable AE on a limit or observation deadline')
     parser.add_argument('--loading', action='store_true',
                         help='Load under1.25GiB cap; arm growth limit after fixture-ready + stable idle')
+    parser.add_argument('--until-user-done', type=Path,
+                        help='Explicit manual session: keep memory limits; close on fresh user completion marker instead of timer')
     args = parser.parse_args()
-    monitor(args.pid, args.out, args.seconds, args.terminate_on_limit, args.loading)
+    monitor(args.pid, args.out, args.seconds, args.terminate_on_limit, args.loading,
+            args.until_user_done)

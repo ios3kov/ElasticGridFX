@@ -44,10 +44,23 @@
   explicitly and verified before more work. Later cleanup runs PASS and now
   attempt component restoration even if preference restoration fails. Only the
   known idle-cache key is restored; unrelated preference bytes never overwritten.
-- All native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene /
+- Manual completion census source9e86b2f / BID EGFX-0b93988477d2e9b604e2ba03:
+  user explicitly removed timed closure for manual sessions. New opt-in
+  --until-user-done preserves exact PID/birth and1.5GiB/256MiB memory limits,
+  closes on a fresh fixture completion marker; default45s behavior unchanged.
+  Guard tests13 PASS. OwnedPID12308 memory peak965193032 bytes, then870231392;
+  no limit hit. Two nonnull loupe receipts/two checkins OK/zero checkin errors;
+  one1228800-byte copy retained, same peak, replaced rather than accumulated.
+  Post-user-Undo points match baseline; intermediate moved points NOT_READ.
+  Original heavy hang cause UNKNOWN; tiny diagnostic PASS does not certify it.
+  Closure USER_DONE_OWNED_AE_KILL_SENT; cleanup PASS, exact9 restored and actual
+  idle-cache key/full preference hash unchanged. Earlier private restoration
+  path assertion failed after copying harness; repaired and verified before this
+  launch, not hidden as an initial PASS.
+- Default timed native trials retain45s/1.5GiB total/256MiB growth guards. Heavy scene /
   RAM Preview NOT_RUN; original reported heavy hang remains UNKNOWN. No cap
   increase, shipping idle-cache workaround, original-project edit or stale Cua
-  relaunch. Ordinary188 remains installed.
+  relaunch. Resource-census diagnostic is currently installed; return to ordinary188 before delivery.
 - Surface187 diagnostic fixture historical native point/Undo/key PASS and user
   original-cell/no-hand/no-alert report are retained in evidence, not transferred
   to ordinary188 or its newly accepted composition source. Current Windows
@@ -62,7 +75,8 @@ native-composition-idle-off-r5/acceptance.json,
 native-manual-composition-r7/acceptance.json};
 outputs/loupe-dev188-composition-*.log and audit-review.json;
 outputs/loupe-windows-packet-oct08.log;
-outputs/loupe-upstream-dev187/native-surface.
+outputs/loupe-upstream-dev187/native-surface;
+outputs/loupe-memory-census-oct08/native-user-completion/acceptance.json.
 
 Older dated notes below remain history; use this checkpoint for current holds.
 

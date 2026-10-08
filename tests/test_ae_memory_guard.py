@@ -58,6 +58,31 @@ class MemoryGuardTests(unittest.TestCase):
         self.assertEqual(gate.observe(0,900*guard.MIB), (None,False))
         self.assertTrue(gate.loading)
         self.assertEqual(gate.observe(1,1281*guard.MIB),('loading-idle-cap',False))
+    def test_manual_session_ignores_deadline_but_closes_on_user_completion(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary); done=root/'user-done'
+            with patch.object(guard,'Process',return_value=FakeProcess()), \
+                 patch.object(guard.time,'monotonic',side_effect=[0,90]), \
+                 patch.object(guard.time,'sleep',side_effect=lambda _:done.touch()), \
+                 patch.object(guard,'signal_owned') as send:
+                guard.monitor(123,root/'fresh',1,True,until_done=done)
+            send.assert_called_once()
+            self.assertIn('USER_DONE_OWNED_AE_KILL_SENT',(root/'fresh/memory.jsonl').read_text())
+    def test_manual_session_still_stops_on_memory_limit_before_completion(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary); done=root/'user-done'
+            with patch.object(guard,'Process',return_value=FakeProcess()), \
+                 patch.object(guard.time,'monotonic',side_effect=[0,90]), \
+                 patch.object(guard.PhaseGate,'observe',return_value=('growth-from-baseline',False)), \
+                 patch.object(guard,'stop_on_limit') as stop:
+                guard.monitor(123,root/'fresh',1,True,until_done=done)
+            stop.assert_called_once(); self.assertFalse(done.exists())
+    def test_manual_session_rejects_stale_or_foreign_marker(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary);done=root/'user-done';done.touch()
+            for marker in (done,root/'other'/'user-done'):
+                with self.assertRaises(ValueError):
+                    guard.monitor(123,root/'fresh',1,True,until_done=marker)
     def test_setup_marker_alone_cannot_arm_unstable_memory(self):
         gate=guard.PhaseGate(500*guard.MIB,True)
         for t,b in [(0,600),(0.5,650),(1,700),(1.5,650)]:
