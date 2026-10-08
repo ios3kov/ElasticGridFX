@@ -1,5 +1,30 @@
 # Corner loupe — 2026-10-05
 
+## Current source decision — 2026-10-08
+
+Latest explicit user instruction and supplied photo supersede the earlier L3
+exclusion of FSTR: magnify the current evaluated composition. A transparent
+area must remain transparent (shown with a checkerboard); a visible layer must
+appear. Include all evaluated visible layers and effects, including FSTR, from
+the fixed frame at press time. Do not show original-layer cells where the current
+composition is transparent. Earlier upstream-only Dev187 is a diagnostic source
+experiment, not a shipping implementation of this decision.
+
+Ordinary Dev188 uses the existing asynchronous composition-item route, with
+explicit full-resolution U8 ARGB straight-alpha request and owned premultiplied
+copy for lens compositing. Layer viewer retains its evaluated layer view. One
+immutable frame per gesture, overlay-only corner movement, target/cursor policy,
+Undo/keys and release rendering remain required on Mac and Windows. No scratch
+composition, effect flag mutation, per-movement render or diagnostic logger.
+
+Dev187 user-reported check: colored original cells, no hand flash and no matte
+alert PASS in the small fixture. The subsequent photo demonstrates the source
+mismatch against the new current-composition decision. Dev188 multilayer /
+transparent-region / repeated-gesture native acceptance remains NOT_RUN.
+
+Historical source decisions below are retained as dated evidence; this section
+and L3 govern the current source scope.
+
 2026-10-07 source prerequisite prepared locally: nondefault
 `loupe-upstream-probe` Dev186 requests the affected layer before FSTR through
 SDK LayerRenderOptionsSuite2; layer-space sampling uses the same native/view
@@ -70,11 +95,11 @@ centered on the corner, with a target at its center. Applies to Mac and Windows.
 - L2: Circular 129 UI-unit lens, 3x current viewer scale, center follows the
   evaluated corner. Black/white target arms leave the exact center unobscured.
   Lens remains centered even beside a viewer edge; viewport clipping is accepted.
-- L3: Magnify the original affected-layer image without FSTR distortion. In Comp
-  viewer, include visible background/lower layers for alignment; in Layer viewer,
-  use the affected layer before FSTR. Preserve native transforms and compositing.
-  Transparent pixels
-  use a checkerboard. No screen capture, OS permissions or native floating window.
+- L3: Magnify the current evaluated composition in Comp viewer, including FSTR,
+  visible layers and effects with native transforms/compositing. In Layer viewer,
+  magnify its current evaluated layer view. Freeze that source at press time;
+  transparent pixels use a checkerboard rather than original-layer cells. No
+  screen capture, OS permissions or native floating window.
 - L4: UI-only DRAWBOT image; no effect pixels, saved values, extra keyframes,
   watermark, Preview/export or renderer branch. Release, failed drag,
   deactivation and context closure clear the active gesture.

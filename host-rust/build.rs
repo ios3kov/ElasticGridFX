@@ -58,7 +58,7 @@ fn main() {
         else if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {155}
         else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {154}
         else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153}
-        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {184} else {168};
+        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {188} else {168};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");

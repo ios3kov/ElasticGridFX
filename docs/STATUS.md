@@ -1,5 +1,44 @@
 # Current status
 
+## Latest checkpoint — 2026-10-08
+
+- Latest user instruction/photo changes L3: the loupe magnifies the current
+  evaluated composition, including FSTR, all visible layers/effects and alpha.
+  One immutable frame at corner press, no re-render per movement. A transparent
+  area shows checkerboard, not original-layer cells. Earlier exclusion/source
+  research is retained as history and no longer blocks this source decision.
+  Comp/Layer viewer scope is explicit in corner-loupe-plan.md.
+- Installed diagnostic Dev187 source c00da98 / BID EGFX-8b24b1f5aa244f790d1e83d5:
+  exact installed bytes/signature and AE25.6 loaded UUID
+  212A2C3E-5737-3C13-A6BF-4B5D42A1DE7C PASS. Straight receipt/lens ranges0..255;
+  matte-mode alert absent. User-reported original-cell lens, no hand flash and
+  no alert PASS in that fixture. Its upstream-only source does not implement
+  the latest evaluated-composition scope; it must be replaced by ordinary188.
+- Owned Surface fixture: TopRight640,0->592,48; other corners/layer transform
+  unchanged. Cua CmdZ restored640,0; existing TopLeft/Affected Lines keys and
+  interpolation preserved. One actual saved gesture and Undo PASS.
+-45s native guard cleanup PASS: AE absent, exact9 foreign components restored,
+  idle-cache key unchanged. Peak footprint below1.25GiB. Heavy scene/RAM Preview
+  NOT_RUN; original heavy hang attribution remains UNKNOWN.
+- Ordinary Dev188 uses the existing composition-item request, explicitly full
+  resolution/U8/ARGB/straight alpha. Only the owned copy is premultiplied for
+  checkerboard compositing. Includes cursor preservation and terminal warm-error
+  handling; no diagnostic logging. New bytes/build/install/native acceptance
+  pending, including background/alpha and repeated press/release/Undo.
+- Ordinary188 Rust134/strict Clippy/source17 PASS. Static scanner exit1 reviewed:
+  unchanged fixture false positive tests/test_target_ae_acceptance.py:54 is an
+  owned-window acceptance test, not a network auth route. No new finding.
+- Prior probe134/strict Clippy/source17 PASS; Windows packet Python20 PASS
+  locally. Current Windows MSVC/AE NOT_RUN; only Apple target installed. No new
+  GitHub source sent; previous CI is not proof for these changes. Demo OFF;
+  no release/main action or original-project modification.
+
+Evidence: outputs/loupe-upstream-dev187/native-surface/{loupe-image.jsonl,
+after-points.json,undo-points.json,undo-keys.json,preference-after.json};
+outputs/loupe-upstream187-*.log; outputs/loupe-windows-packet-oct08.log.
+
+Older dated notes below remain history; use this checkpoint for current holds.
+
 2026-10-08 upstream Dev186 native FAIL: exact installed/loaded source55ae84f,
 BID EGFX-5d90502ff77a1e03e35ec89e verified; AE25.6 rejects upstream input receipt
 with `BEE_CheckoutEffectInputFrame currently only supports straight matte mode`.
