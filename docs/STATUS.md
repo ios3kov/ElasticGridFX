@@ -2,6 +2,34 @@
 
 ## Latest checkpoint — 2026-10-08
 
+- Local loupe quality remediation uses bilinear premultiplied sampling of the
+  immutable full-resolution snapshot. Integer pixels/alpha/valid region covered
+  by regressions; default139 tests and strict Clippy PASS. No SDK request or
+  renderer changes. Diagnostic142 tests PASS; scanner retains only the reviewed mock auth URL
+  false positive. Dev192 ordinary/Dev191 census assigned. Native quality
+  comparison NOT_RUN; installed Dev190 remains
+  unchanged while manual Undo response is pending. No new publication.
+
+- Perspective Dev190 manual gesture: user confirms freeze/motion/no error, but
+  loupe quality FAIL (too degraded). Readback TopRight1213,498 with other
+  corners/position unchanged. Undo exact coordinates/position/mode PASS. Full1x1 frame request
+  already used; current nearest-neighbor3x sampling is a confirmed coarse
+  resampling path, not yet proven sole cause. Quality remediation required
+  before acceptance. Windows exact ac7ddb0 CI37779301373 PASS; Mac pending.
+
+- User authorizes current AE availability and publication.21 pending commits
+  pushed to feat/next-update tipac7ddb0ff8fc7134b398bcb6eba42730d3296b4c.
+  Windows workflow37779301373/macOS37779301359 IN_PROGRESS; earlier same-SHA
+  runs cancelled by concurrency, not compile failures. Windows packet20 and
+  phased mock safety PASS locally; native Windows still NOT_RUN.
+- Perspective Dev190 ownedPID66729 loaded exact UUID
+  AF4A5444-FEF8-35C6-9B5C-359C170B3239/BID EGFX-59eed7d3403c1f303c877944.
+  Saved copy1920x1080/32bpc/Full/Final at4.16, canonical/display mode4, controls
+  visible. Manual short gesture requested; readback/Undo and bounded3-frame
+  Preview pending. No Preview yet. Closure only user completion except unchanged
+  calibrated memory limits; temporary settings/component cleanup pending.
+  Evidence outputs/loupe-redraw-fix-oct08/native-perspective/checkpoint.json.
+
 - Dev190 Surface native-validation completed after user "закончил". Exact
   sourceee924c2/BID EGFX-59eed7d3403c1f303c877944 loaded; user confirms correct
   loupe, frozen image, smooth motion/no error. TopRight1242,543->1179,595, other

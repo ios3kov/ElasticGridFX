@@ -465,6 +465,24 @@ fn premultiply_straight(pixels:&mut [u8]) {
     }
 }
 
+// Interpolate the immutable full-resolution frame, never request another render.
+// Blend premultiplied channels so transparent boundaries cannot produce halos.
+fn smooth_sample(pixels:&[u8],width:usize,height:usize,region:ae::Rect,x:f32,y:f32)->Option<[u8;4]>{
+    if !x.is_finite()||!y.is_finite()||x < -1.0||y < -1.0||x>=width as f32||y>=height as f32{return None;}
+    let (left,top)=(x.floor() as i32,y.floor() as i32);
+    let (fx,fy)=(x-left as f32,y-top as f32);
+    let mut channels=[0.0_f32;4];let mut covered=false;
+    for (sx,sy,weight) in [(left,top,(1.0-fx)*(1.0-fy)),(left+1,top,fx*(1.0-fy)),
+        (left,top+1,(1.0-fx)*fy),(left+1,top+1,fx*fy)] {
+        if weight==0.0||sx<0||sy<0||sx>=width as i32||sy>=height as i32||
+            sx<region.left||sy<region.top||sx>=region.right||sy>=region.bottom{continue;}
+        let i=(sy as usize*width+sx as usize)*4;
+        let pixel=pixels.get(i..i+4)?;covered=true;
+        for c in 0..4{channels[c]+=f32::from(pixel[c])*weight;}
+    }
+    covered.then(||channels.map(|value|value.round().clamp(0.0,255.0) as u8))
+}
+
 fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::PointF32,id:Option<ae::aegp::PluginId>,bgra:bool,
     #[cfg(feature="loupe-upstream-probe")] coordinates:[(f32,f32);3],
 )->Result<Rc<Bitmap>,ae::Error>{
@@ -480,14 +498,13 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
         #[cfg(feature="loupe-image-probe")]let mut valid=0usize;
         #[cfg(feature="loupe-image-probe")]let (mut sample_min,mut sample_max)=(255u8,0u8);
         let pixels=f.raster.get_or_build(RasterKey::new(c,xp,yp,bgra),||raster(|dx,dy|{
-            let x=(c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0)).round() as i32;
-            let y=(c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1)).round() as i32;
-            if x<0||y<0||x>=width as i32||y>=height as i32||x<region.left||y<region.top||x>=region.right||y>=region.bottom{return None;}
-            let i=(y as usize*width+x as usize)*4;
+            let x=c.0+dx*(xp.0-c.0)+dy*(yp.0-c.0);
+            let y=c.1+dx*(xp.1-c.1)+dy*(yp.1-c.1);
+            let pixel=smooth_sample(source_pixels,width,height,region,x,y)?;
             #[cfg(feature="loupe-image-probe")]{valid+=1;
-                for value in &source_pixels[i+1..i+4]{sample_min=sample_min.min(*value);sample_max=sample_max.max(*value);}
+                for value in &pixel[1..]{sample_min=sample_min.min(*value);sample_max=sample_max.max(*value);}
             }
-            Some([source_pixels[i],source_pixels[i+1],source_pixels[i+2],source_pixels[i+3]])
+            Some(pixel)
         }));
         #[cfg(feature="loupe-image-probe")]
         if !IMAGE_RECORDED.replace(true){
@@ -500,6 +517,22 @@ fn frame_pixels(input:&ae::InData,event:&mut ae::EventExtra,center:ae::drawbot::
 }
 #[cfg(test)] mod tests{
     use super::*;
+    #[test]fn magnification_interpolates_fractional_positions_without_losing_exact_pixels(){
+        let pixels=[255,0,0,0,255,120,60,240,255,40,80,0,255,160,140,240];
+        let region=ae::Rect{left:0,top:0,right:2,bottom:2};
+        assert_eq!(smooth_sample(&pixels,2,2,region,0.,0.),Some([255,0,0,0]));
+        assert_eq!(smooth_sample(&pixels,2,2,region,1.,1.),Some([255,160,140,240]));
+        assert_eq!(smooth_sample(&pixels,2,2,region,0.5,0.5),Some([255,80,70,120]));
+        assert_eq!(smooth_sample(&pixels,2,2,region,0.25,0.),Some([255,30,15,60]));
+    }
+    #[test]fn magnification_preserves_transparency_and_clips_the_valid_region(){
+        let pixels=[255,200,100,50,0,0,0,0];let region=ae::Rect{left:0,top:0,right:2,bottom:1};
+        assert_eq!(smooth_sample(&pixels,2,1,region,0.5,0.),Some([128,100,50,25]));
+        assert_eq!(smooth_sample(&pixels,2,1,region,-0.5,0.),Some([128,100,50,25]));
+        assert_eq!(smooth_sample(&pixels,2,1,region,2.,0.),None);
+        assert_eq!(smooth_sample(&pixels,2,1,region,f32::NAN,0.),None);
+        assert_eq!(smooth_sample(&pixels,2,1,ae::Rect{left:1,..region},0.,0.),None);
+    }
     #[test]fn repeated_mapping_reuses_pixels_and_changed_mapping_releases_previous_bitmap(){
         let key=RasterKey::new((10.,20.),(11.,20.),(10.,21.),false);
         let mut cache=RasterCache::default();let first=cache.get_or_build(key,||raster(|_,_|Some([255,17,93,201])));

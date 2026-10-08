@@ -51,14 +51,14 @@ fn main() {
         else if std::env::var_os("CARGO_FEATURE_FROZEN_CORNER_PROBE").is_some() {181}
         else if std::env::var_os("CARGO_FEATURE_CORNER_HIT_PROBE").is_some() {171}
         else if std::env::var_os("CARGO_FEATURE_CORNER_UI_OWNERSHIP_PROBE").is_some() {170}
-        else if std::env::var_os("CARGO_FEATURE_RESOURCE_CENSUS_PROBE").is_some() {189}
+        else if std::env::var_os("CARGO_FEATURE_RESOURCE_CENSUS_PROBE").is_some() {191}
         else if std::env::var_os("CARGO_FEATURE_DEFERRED_CORNER_PROBE").is_some() {167}
         else if std::env::var_os("CARGO_FEATURE_INTERACTIVE_QUALITY_PROBE").is_some() {166}
         else if std::env::var_os("CARGO_FEATURE_LOUPE_SOURCE_DISABLED_PROBE").is_some() {165}
         else if std::env::var_os("CARGO_FEATURE_GESTURE_PROBE").is_some() {155}
         else if std::env::var_os("CARGO_FEATURE_PREVIEW_OVERLAY_PROBE").is_some() {154}
         else if std::env::var_os("CARGO_FEATURE_RENDER_DIAGNOSTICS").is_some() {153}
-        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {190} else {168};
+        else if std::env::var_os("CARGO_FEATURE_OWNED_CORNER_DRAG").is_some() {192} else {168};
     println!("cargo:rustc-env=FSTR_DEV_BUILD={development_build}");
     println!("cargo:rustc-check-cfg=cfg(fstr_lifecycle_probe)");
     println!("cargo:rustc-check-cfg=cfg(fstr_binding_probe)");

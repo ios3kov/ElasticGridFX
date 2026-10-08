@@ -315,3 +315,12 @@ exact moved TopRight and Undo baseline readbacks PASS.620s memory observation
 within calibrated caps, user-completion closure. Cleanup repaired and verified;
 original hang root cause UNKNOWN. Perspective/Windows/full Preview NOT_RUN.
 Private evidence outputs/loupe-redraw-fix-oct08/native-validation/acceptance.json.
+
+Perspective Dev190 quality feedback: user reports freeze/motion/no errors but
+the lens is too degraded. Full1x1 capture remains configured. The local
+remediation interpolates four premultiplied pixels of the immutable frame at
+fractional coordinates, preserving exact integer samples, transparency and
+rendered-region clipping. No extra frame requests or changes to final rendering.
+139 default tests and strict Clippy PASS. Native visual quality comparison
+NOT_RUN; nearest sampling is a confirmed coarse path, not proven sole cause.
+Installed Dev190 remains unchanged during the current manual Undo check.
