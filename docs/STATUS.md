@@ -2,6 +2,44 @@
 
 ## Latest checkpoint — 2026-10-08
 
+- Dev190 Surface native-validation completed after user "закончил". Exact
+  sourceee924c2/BID EGFX-59eed7d3403c1f303c877944 loaded; user confirms correct
+  loupe, frozen image, smooth motion/no error. TopRight1242,543->1179,595, other
+  corners/layer unchanged PASS; Undo exact original four points/position/mode
+  readback PASS. Observed620s: baseline984150640, peak1322824280, final1209676760
+  bytes; no growth/total cap. Closed on explicit USER_DONE, not timer/crash.
+  This bounded observation does not establish original hang cause or full RAM
+  Preview stability; RAM Preview/Perspective/Windows current candidate NOT_RUN.
+  Cleanup PASS after repair: controller restored nine components independently,
+  preference restoration initially refused stale copied BASE assertion. Failure
+  preserved, assertion corrected for exact owned folder; original preference
+  full hash and all unrelated bytes verified unchanged. Ordinary190 remains
+  installed; AE absent. Evidence native-validation/acceptance.json under
+  outputs/loupe-redraw-fix-oct08. No current push/main/release action.
+
+- Dev190 native-validation ownedPID57814 loaded canonical UUID
+  AF4A5444-FEF8-35C6-9B5C-359C170B3239 PASS; sourceee924c2/BID
+  EGFX-59eed7d3403c1f303c877944. Saved heavy copy opened1920x1080,32bpc,
+  Full/Final,Surface,time4.16; controls/grips visible. Manual one short upper-right
+  gesture requested; immediate readback then Undo, still PENDING. No Preview.
+  AE remains open until user completion, except explicit384MiB growth/1.5GiB
+  guard. Exact9 components isolated temporarily; actual idle-cache preference
+  temporarily OFF for bounded owned comparison; restoration pending. Original
+  project unchanged. Evidence outputs/loupe-redraw-fix-oct08/native-validation.
+
+- Ordinary Dev190/sourceee924c2491734674aa60065dea347e17ce172a9b / BID
+  EGFX-59eed7d3403c1f303c877944 installed after successful native installer.
+  Exact canonical files/metadata/executable modes and strict signature PASS;
+  diagnostic169 replaced with backup, no new AE launch. Default137 tests,
+  diagnostic140 tests, strict Clippy and host contracts17 PASS. Ordinary compiler
+  artifact has only default/native-plane/owned-corner-drag/corner-ownership.
+  Release build/archive/manifest/installer PASS; reviewed scanner exit1 unchanged
+  fixture false positive. Native loupe/freeze/Undo/memory comparison NOT_RUN;
+  original memory/hang cause UNKNOWN. No rate cap or shipping quality change.
+  New UiBitmap census represents cached owned bitmap lifetime, not one token per
+  DRAW; DrawImage remains callback-local. No Windows CI/push/merge/release.
+  Evidence outputs/loupe-redraw-fix-oct08/installed-verification.json.
+
 - Local redraw fix: held identical SDK16.16 targets return Idle (no invalidation
   or UPDATE_NOW); release preserves Commit/Unchanged and final coordinate. Each
   immutable Frame owns one bounded129x129 raster keyed by exact source mapping

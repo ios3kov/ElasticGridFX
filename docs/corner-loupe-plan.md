@@ -309,3 +309,9 @@ Acceptance: duplicate stationary events suppressed; moved and release/Undo
 correct; repeated DRAW raster reuse; changed basis/layout/frame invalidates;
 cache bounded and pixel-identical; default/diagnostic checks then exact-candidate
 native resource comparison. Original heavy memory/hang cause remains UNKNOWN.
+
+Dev190 scoped Surface validation: USER_REPORTED_PASS loupe/freeze/smooth motion;
+exact moved TopRight and Undo baseline readbacks PASS.620s memory observation
+within calibrated caps, user-completion closure. Cleanup repaired and verified;
+original hang root cause UNKNOWN. Perspective/Windows/full Preview NOT_RUN.
+Private evidence outputs/loupe-redraw-fix-oct08/native-validation/acceptance.json.
