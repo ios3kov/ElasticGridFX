@@ -2,6 +2,25 @@
 
 ## Latest checkpoint — 2026-10-08
 
+- Dev192/source7aa88e4 exact loaded PID74494/UUID
+  9BFB158B-2B4D-3938-BF37-65BB8E9CB500 in owned Perspective fixture. User
+  confirms loupe quality/freeze/gesture PASS and performed Undo before moved
+  readback. Exact original points/position/mode restored PASS; moved-state
+  readback NOT_RUN (subsequent after file is already undone, not moved evidence).
+  Work area limited to three frames; manual Preview Range confirmation/check
+  pending because native accessibility does not expose the controls reliably.
+  User completion closure only except calibrated memory cap. Cleanup pending
+  while owned AE open; original hang root cause UNKNOWN.
+
+- Dev192 installed exact BID EGFX-132c83b7732e83c576cb7f61/source7aa88e4;
+  canonical files/modes and strict ad-hoc signature PASS. Previous Perspective
+  Dev190 gesture/freeze and exact Undo PASS, but loupe quality FAIL by user.
+  User completed test; cleanup restored original idle-cache preference and nine
+  isolated components PASS. Windows/macOS CI for previous ac7ddb0 PASS; does not
+  cover newer7aa88e4. New owned Dev192 quality check starting; native acceptance
+  and RAM Preview still pending. AE closes only user completion except guard cap.
+  Evidence outputs/loupe-quality-smooth-oct08; no new publication.
+
 - Local loupe quality remediation uses bilinear premultiplied sampling of the
   immutable full-resolution snapshot. Integer pixels/alpha/valid region covered
   by regressions; default139 tests and strict Clippy PASS. No SDK request or
